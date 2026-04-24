@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-23T00:00:00Z",
+  "episodes": [
+    {
+      "case_id": "1",
+      "attribute": "website",
+      "place": {
+        "name": "Cafe Rio",
+        "city": "Santa Cruz",
+        "region": "CA"
+      },
+      "gold_value": "https://example.com",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"Cafe Rio\" official website",
+          "fetched_pages": [
+            {
+              "url": "https://example.com",
+              "title": "Cafe Rio",
+              "page_text": "Contact us for the official cafe rio website.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "website": "https://example.com"
+              },
+              "recency_days": 10,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "primary site"
+            },
+            {
+              "url": "https://yelp.com/biz/example",
+              "title": "Cafe Rio",
+              "page_text": "Reviews and visitor photos.",
+              "source_type": "aggregator",
+              "extracted_values": {
+                "website": "https://yelp.com/biz/example"
+              },
+              "recency_days": 400,
+              "zombie_score": 0.9,
+              "identity_change_score": 0.0,
+              "notes": "directory page"
+            }
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "Cafe Rio Santa Cruz CA",
+          "fetched_pages": [
+            {
+              "url": "https://yelp.com/biz/example",
+              "title": "Cafe Rio",
+              "page_text": "Reviews and visitor photos.",
+              "source_type": "aggregator",
+              "extracted_values": {
+                "website": "https://yelp.com/biz/example"
+              },
+              "recency_days": 400,
+              "zombie_score": 0.9,
+              "identity_change_score": 0.0,
+              "notes": "directory page"
+            }
+          ]
+        }
+      ],
+      "final_decision": {
+        "attribute": "website",
+        "decision": "https://example.com",
+        "confidence": 0.95,
+        "reason": "Official site match",
+        "abstained": false,
+        "selected_url": "https://example.com",
+        "selected_source_type": "official_site"
+      }
+    },
+    {
+      "case_id": "2",
+      "attribute": "phone",
+      "place": {
+        "name": "Cafe Rio",
+        "city": "Santa Cruz",
+        "region": "CA"
+      },
+      "gold_value": "8315551212",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"Cafe Rio\" phone",
+          "fetched_pages": [
+            {
+              "url": "https://example.com/contact",
+              "title": "Cafe Rio Contact",
+              "page_text": "Call us at (831) 555-1212.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "phone": "(831) 555-1212"
+              },
+              "recency_days": 7,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "contact page"
+            }
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "Cafe Rio Santa Cruz CA phone",
+          "fetched_pages": [
+            {
+              "url": "https://yelp.com/biz/example",
+              "title": "Cafe Rio",
+              "page_text": "Phone hidden behind a review wall.",
+              "source_type": "aggregator",
+              "extracted_values": {
+                "phone": "8315559999"
+              },
+              "recency_days": 400,
+              "zombie_score": 0.9,
+              "identity_change_score": 0.0,
+              "notes": "stale directory"
+            }
+          ]
+        }
+      ],
+      "final_decision": {
+        "attribute": "phone",
+        "decision": "8315551212",
+        "confidence": 0.91,
+        "reason": "Official contact page match",
+        "abstained": false,
+        "selected_url": "https://example.com/contact",
+        "selected_source_type": "official_site"
+      }
+    },
+    {
+      "case_id": "3",
+      "attribute": "address",
+      "place": {
+        "name": "Cafe Rio",
+        "city": "Santa Cruz",
+        "region": "CA"
+      },
+      "gold_value": "100 Main St Santa Cruz CA",
+      "search_attempts": [
+        {
+          "layer": "corroboration",
+          "query": "\"Cafe Rio\" \"100 Main St\" \"Santa Cruz\"",
+          "fetched_pages": [
+            {
+              "url": "https://maps.google.com/?q=Cafe+Rio",
+              "title": "Cafe Rio on Maps",
+              "page_text": "Map listing shows a nearby shopping center.",
+              "source_type": "google_places",
+              "extracted_values": {
+                "address": "102 Main St Santa Cruz CA"
+              },
+              "recency_days": 14,
+              "zombie_score": 0.1,
+              "identity_change_score": 0.0,
+              "notes": "corroboration page"
+            }
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "Cafe Rio Santa Cruz CA",
+          "fetched_pages": [
+            {
+              "url": "https://tripadvisor.com/example",
+              "title": "Cafe Rio",
+              "page_text": "Travel review listing with older address.",
+              "source_type": "aggregator",
+              "extracted_values": {
+                "address": "88 West Main St Santa Cruz CA"
+              },
+              "recency_days": 500,
+              "zombie_score": 0.95,
+              "identity_change_score": 0.0,
+              "notes": "stale directory"
+            }
+          ]
+        }
+      ],
+      "final_decision": {
+        "attribute": "address",
+        "decision": "",
+        "confidence": 0.2,
+        "reason": "Evidence conflicted; abstained.",
+        "abstained": true,
+        "selected_url": "",
+        "selected_source_type": ""
+      }
+    },
+    {
+      "case_id": "4",
+      "attribute": "category",
+      "place": {
+        "name": "Cafe Rio",
+        "city": "Santa Cruz",
+        "region": "CA"
+      },
+      "gold_value": "bakery",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"Cafe Rio\" services menu about",
+          "fetched_pages": [
+            {
+              "url": "https://example.com/menu",
+              "title": "Cafe Rio Menu",
+              "page_text": "House-made bread and pastries are featured.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "category": "bakery"
+              },
+              "recency_days": 12,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "official menu"
+            }
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "Cafe Rio Santa Cruz CA",
+          "fetched_pages": [
+            {
+              "url": "https://facebook.com/cafe-rio",
+              "title": "Cafe Rio",
+              "page_text": "Community cafe and lunch spot.",
+              "source_type": "social",
+              "extracted_values": {
+                "category": "cafe"
+              },
+              "recency_days": 300,
+              "zombie_score": 0.7,
+              "identity_change_score": 0.0,
+              "notes": "social profile"
+            }
+          ]
+        }
+      ],
+      "final_decision": {
+        "attribute": "category",
+        "decision": "cafe",
+        "confidence": 0.89,
+        "reason": "Selected a high-confidence but stale social profile.",
+        "abstained": false,
+        "selected_url": "https://facebook.com/cafe-rio",
+        "selected_source_type": "social"
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+[project]
+name = "places-attribute-conflation"
+version = "0.1.0"
+description = "Evidence-backed resolver scaffold for Overture Places attribute conflation."
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
