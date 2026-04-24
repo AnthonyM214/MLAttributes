@@ -2,6 +2,23 @@
 
 The active repo does not yet contain its own labeled 200-row golden set. Prior ProjectTerra repos do contain candidate golden data we can adapt.
 
+## Raw Pair Dataset In This Repo
+
+- `data/project_a_samples.parquet`
+
+Shape:
+
+- 2,000 pre-matched place pairs,
+- one place uses the raw field names,
+- the paired place uses `base_` prefixes,
+- fields include `names`, `categories`, `confidence`, `websites`, `socials`, `emails`, `phones`, `brand`, `addresses`, and their `base_*` counterparts.
+
+Use:
+
+- raw matched-pair source for future replay generation, labeling, and feature extraction.
+- not a golden truth set by itself. It contains paired records, not adjudicated attribute winners.
+- can now be exported into flat review CSVs with `python3 scripts/run_harness.py reviewset --limit 200`.
+
 ## Candidate Sources
 
 ### David / ResolvePOI JSON
@@ -72,4 +89,3 @@ Parquet support is intentionally not included yet because the active repo has no
 1. Build a Shreya-template adapter into the evaluator contract.
 2. Build a David/Resolve adapter that converts row-level labels into per-attribute labels where possible.
 3. Add optional Parquet support for `conflation-ml` only if reproducing that benchmark inside this repo is required.
-

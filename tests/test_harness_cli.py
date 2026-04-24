@@ -55,6 +55,47 @@ class HarnessCliTests(unittest.TestCase):
         self.assertIn(payload["mode"], {"replay", "offline", "live"})
         self.assertIn("results", payload)
 
+    def test_dashboard_command_writes_user_friendly_outputs(self):
+        completed = subprocess.run(
+            ["python3", "scripts/run_harness.py", "dashboard"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertIn("markdown", payload)
+        self.assertIn("html", payload)
+        self.assertTrue(Path(payload["markdown"]).exists())
+        self.assertTrue(Path(payload["html"]).exists())
+
+    def test_dataset_command_summarizes_project_a_parquet(self):
+        fixture = ROOT / "data" / "project_a_samples.parquet"
+        completed = subprocess.run(
+            ["python3", "scripts/run_harness.py", "dataset", "--input", str(fixture)],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertIn("summary", payload)
+        self.assertEqual(payload["summary"]["row_count"], 2000)
+
+    def test_reviewset_command_exports_labeling_csv(self):
+        fixture = ROOT / "data" / "project_a_samples.parquet"
+        completed = subprocess.run(
+            ["python3", "scripts/run_harness.py", "reviewset", "--input", str(fixture), "--limit", "5"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["rows"], 5)
+        self.assertIn("output_csv", payload)
+        self.assertTrue(Path(payload["output_csv"]).exists())
+
 
 if __name__ == "__main__":
     unittest.main()

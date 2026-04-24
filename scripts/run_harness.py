@@ -25,6 +25,14 @@ from places_attr_conflation.harness import (
     evaluate_harness_report,
     load_retrieval_episodes,
 )
+from places_attr_conflation.dashboard import write_dashboard
+from places_attr_conflation.dataset import (
+    export_project_a_review_rows,
+    find_project_a_parquet,
+    summarize_project_a,
+    write_dataset_summary,
+    write_review_csv,
+)
 
 
 DEFAULT_SMOKE_URLS = [
@@ -123,6 +131,18 @@ def main() -> int:
     smoke.add_argument("--timeout", type=float, default=5.0)
     smoke.add_argument("--replay-input", help="Replay JSON file to use when live fetches fail.")
 
+    dataset = subparsers.add_parser("dataset", help="Summarize the raw project_a matched-pair parquet with DuckDB.")
+    dataset.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
+
+    review = subparsers.add_parser("reviewset", help="Export a user-friendly CSV review set from project_a matched pairs.")
+    review.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
+    review.add_argument("--limit", type=int, default=200)
+    review.add_argument("--offset", type=int, default=0)
+
+    dashboard = subparsers.add_parser("dashboard", help="Render a compact benchmark dashboard from saved reports.")
+    dashboard.add_argument("--reports-root", default=str(ROOT / "reports"))
+    dashboard.add_argument("--output-dir", default=str(ROOT / "reports" / "dashboard"))
+
     both = subparsers.add_parser("all", help="Run baseline reproduction and replay evaluation together.")
     both.add_argument("--truth", required=True)
     both.add_argument("--results-dir", required=True)
@@ -161,6 +181,26 @@ def main() -> int:
     elif args.command == "smoke":
         urls = args.urls or DEFAULT_SMOKE_URLS
         report = _run_smoke(urls, args.timeout, args.replay_input)
+    elif args.command == "dataset":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        report = summarize_project_a(dataset_path)
+        write_dataset_summary(report, ROOT / "reports" / "data" / f"project_a_summary_{_timestamp()}.json")
+    elif args.command == "reviewset":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        rows = export_project_a_review_rows(dataset_path, limit=args.limit, offset=args.offset)
+        csv_path = write_review_csv(rows, ROOT / "reports" / "data" / f"project_a_reviewset_{_timestamp()}.csv")
+        report = {
+            "path": str(dataset_path),
+            "rows": len(rows),
+            "output_csv": str(csv_path),
+            "preview": rows[:3],
+        }
+    elif args.command == "dashboard":
+        report = write_dashboard(args.reports_root, args.output_dir)
     else:
         report = evaluate_harness_report(
             truth_path=args.truth,

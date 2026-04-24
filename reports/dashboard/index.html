@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>MLAttributes Benchmark Dashboard</title>
+<style>
+body { font-family: Georgia, 'Times New Roman', serif; margin: 0; background: #f4f1ea; color: #1f2421; }
+main { max-width: 1080px; margin: 0 auto; padding: 40px 24px 64px; }
+h1, h2, h3 { font-family: 'Trebuchet MS', 'Gill Sans', sans-serif; letter-spacing: 0; }
+h1 { font-size: 2.2rem; margin-bottom: 1rem; }
+h2 { margin-top: 2rem; border-top: 2px solid #c8bda8; padding-top: 1rem; }
+table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; background: #fffdf8; }
+th, td { padding: 10px 12px; border-bottom: 1px solid #d7cfbf; text-align: left; }
+th { background: #dfe7dd; }
+ul { padding-left: 1.25rem; }
+code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Benchmark Dashboard</h1>
+<h2>What Is Stopping Us</h2>
+<ul>
+<li>Retrieval proof is still small-sample: targeted authoritative found is 75.0% versus fallback 0.0% on 4 replay cases.</li>
+<li>The reranker is still optional because it has not beaten the heuristic on replay.</li>
+<li>Resolver improvement over the 200-row ResolvePOI baseline is not yet proven on a larger labeled evidence corpus.</li>
+</ul>
+<h2>Current Benchmarks</h2>
+<h3>Raw Matched-Pair Dataset</h3>
+<ul>
+<li>Path: /home/anthony/Overture/MLAttributes/data/project_a_samples.parquet</li>
+<li>Rows: 2000</li>
+<li>Distinct id: 2000</li>
+<li>Distinct base_id: 2000</li>
+<li>Column count: 22</li>
+<li>Websites present: 85.6%</li>
+<li>Base websites present: 99.9%</li>
+<li>Phones present: 94.5%</li>
+<li>Base phones present: 99.8%</li>
+</ul>
+<h3>ResolvePOI Baseline</h3>
+<table><tr><th>Attribute</th><th>Accuracy</th><th>Macro F1</th><th>HC Wrong</th><th>Abstention</th></tr><tr><td>---</td><td>---:</td><td>---:</td><td>---:</td><td>---:</td></tr><tr><td>website</td><td>36.0%</td><td>0.176</td><td>64.0%</td><td>0.0%</td></tr><tr><td>phone</td><td>61.5%</td><td>0.355</td><td>38.5%</td><td>0.0%</td></tr><tr><td>address</td><td>61.5%</td><td>0.258</td><td>38.5%</td><td>0.0%</td></tr><tr><td>category</td><td>50.0%</td><td>0.222</td><td>50.0%</td><td>0.0%</td></tr><tr><td>name</td><td>34.5%</td><td>0.300</td><td>65.5%</td><td>0.0%</td></tr></table>
+<h3>Retrieval Arms</h3>
+<table><tr><th>Arm</th><th>Auth Found</th><th>Useful Found</th><th>Citation Precision</th><th>Top-1 Authoritative</th><th>Avg Attempts</th></tr><tr><td>---</td><td>---:</td><td>---:</td><td>---:</td><td>---:</td><td>---:</td></tr><tr><td>targeted</td><td>75.0%</td><td>100.0%</td><td>75.0%</td><td>75.0%</td><td>1.000</td></tr><tr><td>fallback</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>1.000</td></tr><tr><td>all</td><td>75.0%</td><td>100.0%</td><td>75.0%</td><td>75.0%</td><td>2.000</td></tr></table>
+<h3>Reranker</h3>
+<ul>
+<li>Training examples: 9</li>
+<li>Positive labels: 3</li>
+<li>Negative labels: 6</li>
+<li>Heuristic top-1 authoritative: 75.0%</li>
+<li>Reranker top-1 authoritative: 75.0%</li>
+<li>Improved top-1 authoritative: no</li>
+</ul>
+<h3>Resolver Decisions</h3>
+<ul>
+<li>Accuracy: 50.0%</li>
+<li>Abstention rate: 25.0%</li>
+<li>High-confidence wrong rate: 25.0%</li>
+<li>Cases: 4</li>
+</ul>
+<h3>Live Smoke</h3>
+<ul>
+<li>Mode: replay</li>
+<li>Successful live checks: 0/1</li>
+</ul>
+<h2>Report Files</h2>
+<ul>
+<li>`baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json`</li>
+<li>`combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json`</li>
+<li>`compare`: `/home/anthony/Overture/MLAttributes/reports/harness/compare_20260424_043729.json`</li>
+<li>`dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260424_043729.json`</li>
+<li>`rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260424_043534.json`</li>
+<li>`smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260424_043534.json`</li>
+</ul>
+</main>
+</body>
+</html>

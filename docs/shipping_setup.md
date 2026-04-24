@@ -44,6 +44,34 @@ python3 scripts/run_harness.py replay --input tests/fixtures/retrieval_replay_sa
 python3 scripts/run_harness.py rerank --input tests/fixtures/retrieval_replay_sample.json
 ```
 
+### Raw dataset summary
+
+```bash
+python3 scripts/run_harness.py dataset
+```
+
+This summarizes `data/project_a_samples.parquet` with DuckDB and writes a JSON summary under `reports/data/`.
+
+### Review-set export
+
+```bash
+python3 scripts/run_harness.py reviewset --limit 200
+```
+
+This exports a flat CSV for labeling and review under `reports/data/`, with paired fields such as `name/base_name`, `website/base_website`, `phone/base_phone`, and disagreement flags.
+
+### User-friendly dashboard
+
+```bash
+python3 scripts/run_harness.py dashboard
+```
+
+This writes:
+
+- `reports/dashboard/index.md`
+- `reports/dashboard/index.html`
+- `reports/dashboard/latest.json`
+
 ### Combined baseline + replay report
 
 ```bash
