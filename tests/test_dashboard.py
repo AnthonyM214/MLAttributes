@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from places_attr_conflation.dashboard import build_dashboard_data, render_markdown, write_dashboard
+from places_attr_conflation.dashboard import build_dashboard_data, render_html, render_markdown, write_dashboard
 
 
 class DashboardTests(unittest.TestCase):
@@ -95,6 +95,18 @@ class DashboardTests(unittest.TestCase):
             self.assertTrue(Path(outputs["markdown"]).exists())
             self.assertTrue(Path(outputs["html"]).exists())
             self.assertTrue(Path(outputs["latest"]).exists())
+            html = Path(outputs["html"]).read_text(encoding="utf-8")
+            self.assertIn("Benchmark Viewer", html)
+            self.assertIn("data-view='baseline'", html)
+
+    def test_dashboard_html_renders_when_reports_are_missing(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            data = build_dashboard_data(Path(tmpdir) / "reports")
+
+            html = render_html(data)
+
+            self.assertIn("Benchmark Viewer", html)
+            self.assertIn("<td>missing</td>", html)
 
 
 if __name__ == "__main__":

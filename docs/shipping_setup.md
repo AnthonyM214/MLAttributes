@@ -64,6 +64,7 @@ This exports a flat CSV for labeling and review under `reports/data/`, with pair
 
 ```bash
 python3 scripts/run_harness.py dashboard
+python3 scripts/run_harness.py gui
 ```
 
 This writes:
@@ -71,6 +72,8 @@ This writes:
 - `reports/dashboard/index.md`
 - `reports/dashboard/index.html`
 - `reports/dashboard/latest.json`
+
+The `gui` command writes the same files, but is the intended entrypoint for the small local benchmark viewer.
 
 ### Combined baseline + replay report
 

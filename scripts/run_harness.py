@@ -143,6 +143,10 @@ def main() -> int:
     dashboard.add_argument("--reports-root", default=str(ROOT / "reports"))
     dashboard.add_argument("--output-dir", default=str(ROOT / "reports" / "dashboard"))
 
+    gui = subparsers.add_parser("gui", help="Build the interactive local benchmark viewer.")
+    gui.add_argument("--reports-root", default=str(ROOT / "reports"))
+    gui.add_argument("--output-dir", default=str(ROOT / "reports" / "dashboard"))
+
     both = subparsers.add_parser("all", help="Run baseline reproduction and replay evaluation together.")
     both.add_argument("--truth", required=True)
     both.add_argument("--results-dir", required=True)
@@ -200,6 +204,8 @@ def main() -> int:
             "preview": rows[:3],
         }
     elif args.command == "dashboard":
+        report = write_dashboard(args.reports_root, args.output_dir)
+    elif args.command == "gui":
         report = write_dashboard(args.reports_root, args.output_dir)
     else:
         report = evaluate_harness_report(

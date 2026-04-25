@@ -7,10 +7,12 @@ __all__ = [
     "manifest",
     "metrics",
     "normalization",
+    "openai_config",
     "reproduce",
     "retrieval",
     "replay",
     "resolver",
+    "signatures",
     "small_model",
     "harness",
 ]

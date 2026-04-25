@@ -69,6 +69,19 @@ class HarnessCliTests(unittest.TestCase):
         self.assertTrue(Path(payload["markdown"]).exists())
         self.assertTrue(Path(payload["html"]).exists())
 
+    def test_gui_command_writes_interactive_viewer_outputs(self):
+        completed = subprocess.run(
+            ["python3", "scripts/run_harness.py", "gui"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertTrue(Path(payload["html"]).exists())
+        html = Path(payload["html"]).read_text(encoding="utf-8")
+        self.assertIn("Benchmark Viewer", html)
+
     def test_dataset_command_summarizes_project_a_parquet(self):
         fixture = ROOT / "data" / "project_a_samples.parquet"
         completed = subprocess.run(

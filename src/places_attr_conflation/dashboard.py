@@ -19,6 +19,25 @@ class DashboardData:
     paths: dict[str, str]
 
 
+def _table_rows_without_separator(lines: list[str]) -> list[list[str]]:
+    rows: list[list[str]] = []
+    for line in lines:
+        if not line.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if all(set(cell) <= {"-", ":"} for cell in cells):
+            continue
+        rows.append(cells)
+    return rows
+
+
+def _safe_table_rows(lines: list[str], headers: list[str]) -> list[list[str]]:
+    rows = _table_rows_without_separator(lines)
+    if rows:
+        return rows
+    return [headers, ["missing"] + ["-" for _ in headers[1:]]]
+
+
 def _load_json(path: Path | None) -> dict[str, object] | None:
     if path is None or not path.exists():
         return None
@@ -253,64 +272,28 @@ def render_markdown(data: DashboardData) -> str:
 
 
 def render_html(data: DashboardData) -> str:
-    markdown = render_markdown(data)
-    paragraphs = []
-    in_list = False
-    in_table = False
-    table_rows: list[str] = []
-
-    def flush_table() -> None:
-        nonlocal in_table, table_rows
-        if not table_rows:
-            return
-        rows_html = []
-        body_rows = [row for row in table_rows if not set(row.replace("|", "").strip()) <= {"-", " "}]
-        for index, row in enumerate(body_rows):
-            cells = [cell.strip() for cell in row.strip("|").split("|")]
-            tag = "th" if index == 0 else "td"
-            rows_html.append("<tr>" + "".join(f"<{tag}>{html.escape(cell)}</{tag}>" for cell in cells) + "</tr>")
-        paragraphs.append("<table>" + "".join(rows_html) + "</table>")
-        table_rows = []
-        in_table = False
-
-    for raw_line in markdown.splitlines():
-        line = raw_line.rstrip()
-        if line.startswith("|"):
-            if in_list:
-                paragraphs.append("</ul>")
-                in_list = False
-            in_table = True
-            table_rows.append(line)
-            continue
-        if in_table:
-            flush_table()
-        if not line:
-            if in_list:
-                paragraphs.append("</ul>")
-                in_list = False
-            continue
-        if line.startswith("# "):
-            paragraphs.append(f"<h1>{html.escape(line[2:])}</h1>")
-        elif line.startswith("## "):
-            paragraphs.append(f"<h2>{html.escape(line[3:])}</h2>")
-        elif line.startswith("### "):
-            paragraphs.append(f"<h3>{html.escape(line[4:])}</h3>")
-        elif line.startswith("- "):
-            if not in_list:
-                paragraphs.append("<ul>")
-                in_list = True
-            paragraphs.append(f"<li>{html.escape(line[2:])}</li>")
-        else:
-            if in_list:
-                paragraphs.append("</ul>")
-                in_list = False
-            paragraphs.append(f"<p>{html.escape(line)}</p>")
-
-    if in_table:
-        flush_table()
-    if in_list:
-        paragraphs.append("</ul>")
-
+    baseline_rows = _safe_table_rows(
+        _baseline_table(data.baseline),
+        ["Attribute", "Accuracy", "Macro F1", "HC Wrong", "Abstention"],
+    )
+    compare_rows = _safe_table_rows(
+        _compare_table(data.compare),
+        ["Arm", "Auth Found", "Useful Found", "Citation Precision", "Top-1 Authoritative", "Avg Attempts"],
+    )
+    bundle = {
+        "dataset": _dataset_lines(data.dataset),
+        "stoppers": [
+            "Retrieval proof is still small-sample." if data.compare else "Retrieval comparison report missing.",
+            "The reranker is still optional because it has not beaten the heuristic on replay." if data.rerank else "Reranker report missing.",
+            "Resolver improvement over the 200-row ResolvePOI baseline is not yet proven on a larger labeled evidence corpus.",
+        ],
+        "baseline_rows": baseline_rows,
+        "compare_rows": compare_rows,
+        "rerank": _rerank_lines(data.rerank),
+        "decisions": _decision_lines(data.combined),
+        "smoke": _smoke_lines(data.smoke),
+        "paths": data.paths,
+    }
     return "\n".join(
         [
             "<!doctype html>",
@@ -320,21 +303,118 @@ def render_html(data: DashboardData) -> str:
             "<meta name='viewport' content='width=device-width, initial-scale=1'>",
             "<title>MLAttributes Benchmark Dashboard</title>",
             "<style>",
-            "body { font-family: Georgia, 'Times New Roman', serif; margin: 0; background: #f4f1ea; color: #1f2421; }",
-            "main { max-width: 1080px; margin: 0 auto; padding: 40px 24px 64px; }",
-            "h1, h2, h3 { font-family: 'Trebuchet MS', 'Gill Sans', sans-serif; letter-spacing: 0; }",
-            "h1 { font-size: 2.2rem; margin-bottom: 1rem; }",
-            "h2 { margin-top: 2rem; border-top: 2px solid #c8bda8; padding-top: 1rem; }",
-            "table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; background: #fffdf8; }",
-            "th, td { padding: 10px 12px; border-bottom: 1px solid #d7cfbf; text-align: left; }",
-            "th { background: #dfe7dd; }",
-            "ul { padding-left: 1.25rem; }",
+            ":root { --paper:#f4f1ea; --ink:#17201d; --muted:#5f685f; --accent:#1f5c4d; --accent-soft:#d8e8de; --panel:#fffdf8; --line:#d7cfbf; --warn:#8a3b1e; }",
+            "body { font-family: Georgia, 'Times New Roman', serif; margin: 0; background: linear-gradient(180deg, #ede7da 0%, var(--paper) 220px); color: var(--ink); }",
+            "main { max-width: 1180px; margin: 0 auto; padding: 36px 20px 72px; }",
+            "h1, h2, h3, button { font-family: 'Trebuchet MS', 'Gill Sans', sans-serif; letter-spacing: 0; }",
+            "h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }",
+            "p.lead { color: var(--muted); max-width: 70ch; }",
+            ".hero { display:grid; grid-template-columns: 1.7fr 1fr; gap: 16px; align-items:start; margin-bottom: 22px; }",
+            ".panel { background: var(--panel); border: 1px solid var(--line); padding: 16px; }",
+            ".cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 14px 0 20px; }",
+            ".card { background: var(--panel); border: 1px solid var(--line); padding: 14px; min-height: 92px; }",
+            ".card .label { color: var(--muted); font-size: 0.88rem; text-transform: uppercase; }",
+            ".card .value { font-size: 1.8rem; margin-top: 8px; color: var(--accent); }",
+            ".tabs { display:flex; flex-wrap:wrap; gap: 8px; margin: 8px 0 16px; }",
+            ".tab { border: 1px solid var(--line); background: #efe8d9; color: var(--ink); padding: 10px 14px; cursor: pointer; }",
+            ".tab.active { background: var(--accent); color: white; border-color: var(--accent); }",
+            ".view { display:none; }",
+            ".view.active { display:block; }",
+            "table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; background: var(--panel); }",
+            "th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }",
+            "th { background: var(--accent-soft); }",
+            "ul { padding-left: 1.2rem; }",
+            ".stopper { color: var(--warn); }",
+            ".path-list li { margin-bottom: 6px; word-break: break-all; }",
+            ".split { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }",
             "code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }",
+            "@media (max-width: 860px) { .hero, .split { grid-template-columns: 1fr; } h1 { font-size: 2rem; } }",
             "</style>",
             "</head>",
             "<body>",
             "<main>",
-            *paragraphs,
+            "<section class='hero'>",
+            "<div>",
+            "<h1>Benchmark Viewer</h1>",
+            "<p class='lead'>Repeatable, reproducible benchmark surface for Overture Places attribute conflation. This GUI reads the latest saved reports and keeps the workflow visible without opening raw JSON.</p>",
+            "</div>",
+            "<div class='panel'>",
+            "<strong>Workflow Cut</strong>",
+            "<ul>",
+            "<li>Baseline reproduction</li>",
+            "<li>Retrieval replay compare</li>",
+            "<li>Raw pair review export</li>",
+            "<li>Resolver and abstention evaluation</li>",
+            "</ul>",
+            "</div>",
+            "</section>",
+            "<section class='cards'>",
+            f"<div class='card'><div class='label'>Raw Pair Rows</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['dataset'] if line.startswith('Rows: ')), '-'))}</div></div>",
+            f"<div class='card'><div class='label'>Website Baseline</div><div class='value'>{html.escape(baseline_rows[1][1] if len(baseline_rows) > 1 else '-')}</div></div>",
+            f"<div class='card'><div class='label'>Targeted Auth Found</div><div class='value'>{html.escape(compare_rows[1][1] if len(compare_rows) > 1 else '-')}</div></div>",
+            f"<div class='card'><div class='label'>Resolver Abstention</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['decisions'] if line.startswith('Abstention rate: ')), '-'))}</div></div>",
+            "</section>",
+            "<section class='panel'>",
+            "<h2>What Is Stopping Us</h2>",
+            "<ul>",
+            *[f"<li class='stopper'>{html.escape(line)}</li>" for line in bundle["stoppers"]],
+            "</ul>",
+            "</section>",
+            "<section>",
+            "<div class='tabs'>",
+            "<button class='tab active' data-view='overview'>Overview</button>",
+            "<button class='tab' data-view='baseline'>Baseline</button>",
+            "<button class='tab' data-view='retrieval'>Retrieval</button>",
+            "<button class='tab' data-view='reports'>Reports</button>",
+            "</div>",
+            "<div id='overview' class='view active'>",
+            "<div class='split'>",
+            "<div class='panel'><h3>Raw Dataset</h3><ul>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["dataset"]],
+            "</ul></div>",
+            "<div class='panel'><h3>Reranker</h3><ul>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["rerank"]],
+            "</ul><h3>Live Smoke</h3><ul>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["smoke"]],
+            "</ul></div>",
+            "</div>",
+            "</div>",
+            "<div id='baseline' class='view'>",
+            "<div class='panel'><h3>ResolvePOI Baseline</h3>",
+            "<table><thead><tr>" + "".join(f"<th>{html.escape(cell)}</th>" for cell in baseline_rows[0]) + "</tr></thead><tbody>",
+            *[
+                "<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>"
+                for row in baseline_rows[1:]
+            ],
+            "</tbody></table>",
+            "</div></div>",
+            "<div id='retrieval' class='view'>",
+            "<div class='split'>",
+            "<div class='panel'><h3>Retrieval Arms</h3>",
+            "<table><thead><tr>" + "".join(f"<th>{html.escape(cell)}</th>" for cell in compare_rows[0]) + "</tr></thead><tbody>",
+            *[
+                "<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>"
+                for row in compare_rows[1:]
+            ],
+            "</tbody></table></div>",
+            "<div class='panel'><h3>Resolver Decisions</h3><ul>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["decisions"]],
+            "</ul></div>",
+            "</div></div>",
+            "<div id='reports' class='view'>",
+            "<div class='panel'><h3>Latest Report Files</h3><ul class='path-list'>",
+            *[f"<li><strong>{html.escape(name)}</strong>: <code>{html.escape(path)}</code></li>" for name, path in sorted(bundle["paths"].items())],
+            "</ul></div></div>",
+            "<script>",
+            "for (const button of document.querySelectorAll('.tab')) {",
+            "  button.addEventListener('click', () => {",
+            "    for (const tab of document.querySelectorAll('.tab')) tab.classList.remove('active');",
+            "    for (const view of document.querySelectorAll('.view')) view.classList.remove('active');",
+            "    button.classList.add('active');",
+            "    document.getElementById(button.dataset.view).classList.add('active');",
+            "  });",
+            "}",
+            "</script>",
             "</main>",
             "</body>",
             "</html>",
