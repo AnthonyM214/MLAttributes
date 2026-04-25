@@ -90,7 +90,7 @@ class GoldenTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            report = evaluate_project_a_golden(parquet, labels, baselines=["current", "base", "hybrid"])
+            report = evaluate_project_a_golden(parquet, labels, baselines=["current", "base", "hybrid", "agreement_only"])
 
         self.assertEqual(report["label_rows"], 2)
         self.assertEqual(report["baselines"]["current"]["metrics"]["phone"]["accuracy"], 1.0)
@@ -99,6 +99,8 @@ class GoldenTests(unittest.TestCase):
         self.assertGreaterEqual(report["baselines"]["hybrid"]["metrics"]["website"]["accuracy"], 0.5)
         self.assertEqual(report["baselines"]["current"]["conflict_metrics"]["website"]["total"], 2)
         self.assertLess(report["baselines"]["current"]["conflict_metrics"]["website"]["accuracy"], 1.0)
+        self.assertEqual(report["baselines"]["agreement_only"]["conflict_metrics"]["website"]["abstention_rate"], 1.0)
+        self.assertEqual(report["baselines"]["agreement_only"]["conflict_metrics"]["website"]["high_confidence_wrong_rate"], 0.0)
 
     def test_agreement_labels_seed_repeatable_same_truth(self):
         with tempfile.TemporaryDirectory() as tmpdir:

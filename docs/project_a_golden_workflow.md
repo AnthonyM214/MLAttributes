@@ -89,6 +89,7 @@ The evaluator compares these deterministic baselines:
 - `completeness`: choose current when present, otherwise base.
 - `confidence`: choose the side with higher place confidence, falling back when that side is empty.
 - `hybrid`: treat normalized agreement as correct, otherwise use availability and confidence.
+- `agreement_only`: choose normalized agreement or a single available side, otherwise abstain.
 
 ## Metrics
 

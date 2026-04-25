@@ -56,33 +56,13 @@
 
 ### Project A Golden Labels
 
-| Baseline | Attribute | Accuracy | Conflict Accuracy | HC Wrong | Conflict Labels | Labels |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| base | website | 64.2% | 5.8% | 15.5% | 792 | 1697 |
-| base | phone | 51.6% | 1.6% | 31.5% | 1033 | 1894 |
-| base | address | 72.2% | 43.6% | 18.5% | 954 | 1932 |
-| base | category | 29.7% | 0.3% | 49.3% | 1416 | 1988 |
-| base | name | 60.2% | 10.1% | 25.9% | 884 | 2000 |
-| completeness | website | 100.0% | 100.0% | 0.0% | 792 | 1697 |
-| completeness | phone | 100.0% | 100.0% | 0.0% | 1033 | 1894 |
-| completeness | address | 78.5% | 56.4% | 16.6% | 954 | 1932 |
-| completeness | category | 100.0% | 100.0% | 0.0% | 1416 | 1988 |
-| completeness | name | 95.5% | 89.9% | 1.8% | 884 | 2000 |
-| confidence | website | 86.4% | 71.0% | 13.3% | 792 | 1697 |
-| confidence | phone | 71.6% | 47.9% | 28.1% | 1033 | 1894 |
-| confidence | address | 73.0% | 45.4% | 26.4% | 954 | 1932 |
-| confidence | category | 51.7% | 32.2% | 48.1% | 1416 | 1988 |
-| confidence | name | 72.5% | 37.7% | 26.4% | 884 | 2000 |
-| current | website | 100.0% | 100.0% | 0.0% | 792 | 1697 |
-| current | phone | 100.0% | 100.0% | 0.0% | 1033 | 1894 |
-| current | address | 78.5% | 56.4% | 16.6% | 954 | 1932 |
-| current | category | 100.0% | 100.0% | 0.0% | 1416 | 1988 |
-| current | name | 95.5% | 89.9% | 1.8% | 884 | 2000 |
-| hybrid | website | 86.4% | 71.0% | 13.3% | 792 | 1697 |
-| hybrid | phone | 71.6% | 47.9% | 28.1% | 1033 | 1894 |
-| hybrid | address | 73.0% | 45.4% | 26.4% | 954 | 1932 |
-| hybrid | category | 51.7% | 32.2% | 48.1% | 1416 | 1988 |
-| hybrid | name | 72.5% | 37.7% | 26.4% | 884 | 2000 |
+| Baseline | Attribute | Accuracy | Conflict Accuracy | Conflict Coverage | Conflict Abstention | HC Wrong | Conflict Labels | Labels |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| hybrid | website | 66.7% | 0.0% | 100.0% | 0.0% | 33.3% | 1 | 3 |
+| hybrid | phone | 100.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0 | 2 |
+| hybrid | address | 66.7% | 50.0% | 100.0% | 0.0% | 33.3% | 2 | 3 |
+| hybrid | category | 100.0% | 100.0% | 100.0% | 0.0% | 0.0% | 3 | 3 |
+| hybrid | name | 100.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0 | 3 |
 
 ### Live Smoke
 
@@ -93,8 +73,8 @@
 
 - `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json`
 - `combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json`
-- `compare`: `/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_003226.json`
-- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_003226.json`
-- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260425_003250.json`
-- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_003229.json`
-- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_003230.json`
+- `compare`: `/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_003618.json`
+- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_003618.json`
+- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260425_003619.json`
+- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_003531.json`
+- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_003532.json`

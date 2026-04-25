@@ -14,7 +14,7 @@ from .resolver import NORMALIZERS
 
 
 PROJECT_A_ATTRIBUTES = ("website", "phone", "address", "category", "name")
-PROJECT_A_BASELINES = ("current", "base", "completeness", "confidence", "hybrid")
+PROJECT_A_BASELINES = ("current", "base", "completeness", "confidence", "hybrid", "agreement_only")
 ABSTAIN = "__ABSTAIN__"
 LABEL_FIELDNAMES = [
     "id",
@@ -184,6 +184,14 @@ def _select_prediction(attribute: str, pair: dict[str, Any], baseline: str) -> t
         if current_confidence >= base_confidence:
             return current_value or ABSTAIN, current_confidence
         return base_value or ABSTAIN, base_confidence
+    if baseline == "agreement_only":
+        if current_value and base_value and _normalize(attribute, current_value) == _normalize(attribute, base_value):
+            return current_value, 1.0
+        if current_value and not base_value:
+            return current_value, current_confidence
+        if base_value and not current_value:
+            return base_value, base_confidence
+        return ABSTAIN, 0.0
     raise ValueError(f"Unknown project_a baseline: {baseline}")
 
 

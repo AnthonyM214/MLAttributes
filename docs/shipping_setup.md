@@ -76,7 +76,7 @@ python3 scripts/run_harness.py golden \
   --labels tests/fixtures/project_a_labels_sample.csv
 ```
 
-This scores deterministic `current`, `base`, `completeness`, `confidence`, and `hybrid` pair baselines against reviewed labels. `agreement-labels` can create a silver sanity-check label set from normalized base/current agreement, and `import-james-golden` can reuse the prior ProjectTerra 2,000-row golden CSV when that repo is available locally. Reports include all-row and conflict-only metrics, are written under `reports/golden/`, and are surfaced in the dashboard.
+This scores deterministic `current`, `base`, `completeness`, `confidence`, `hybrid`, and `agreement_only` pair baselines against reviewed labels. `agreement-labels` can create a silver sanity-check label set from normalized base/current agreement, and `import-james-golden` can reuse the prior ProjectTerra 2,000-row golden CSV when that repo is available locally. Reports include all-row and conflict-only metrics, are written under `reports/golden/`, and are surfaced in the dashboard.
 
 ### User-friendly dashboard
 
