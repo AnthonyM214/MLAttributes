@@ -134,6 +134,30 @@ class HarnessCliTests(unittest.TestCase):
         self.assertIn("hybrid", payload["baselines"])
         self.assertIn("website", payload["baselines"]["hybrid"]["metrics"])
 
+    def test_conflictset_command_exports_attribute_conflict_queue(self):
+        fixture = ROOT / "data" / "project_a_samples.parquet"
+        labels = ROOT / "tests" / "fixtures" / "project_a_labels_sample.csv"
+        completed = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "conflictset",
+                "--input",
+                str(fixture),
+                "--labels",
+                str(labels),
+                "--baseline",
+                "hybrid",
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertGreater(payload["rows"], 0)
+        self.assertTrue(Path(payload["output_csv"]).exists())
+
     def test_agreement_labels_command_writes_silver_label_csv(self):
         fixture = ROOT / "data" / "project_a_samples.parquet"
         completed = subprocess.run(

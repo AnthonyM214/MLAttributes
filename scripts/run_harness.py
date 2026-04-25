@@ -36,8 +36,10 @@ from places_attr_conflation.dataset import (
 from places_attr_conflation.golden import (
     PROJECT_A_BASELINES,
     build_project_a_agreement_labels,
+    build_project_a_conflict_review_rows,
     build_project_a_labels_from_james_golden,
     evaluate_project_a_golden,
+    write_conflict_csv,
     write_label_csv,
 )
 
@@ -154,6 +156,12 @@ def main() -> int:
     golden.add_argument("--baseline", action="append", choices=PROJECT_A_BASELINES, help="Baseline to evaluate. May be repeated. Defaults to all.")
     golden.add_argument("--limit", type=int, help="Optional max project_a rows to scan before joining labels.")
 
+    conflictset = subparsers.add_parser("conflictset", help="Export labeled base/current conflicts for evidence review.")
+    conflictset.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
+    conflictset.add_argument("--labels", required=True, help="CSV with project_a golden label columns.")
+    conflictset.add_argument("--baseline", default="hybrid", choices=PROJECT_A_BASELINES)
+    conflictset.add_argument("--limit", type=int, help="Optional max project_a rows to scan before joining labels.")
+
     agreement = subparsers.add_parser("agreement-labels", help="Generate silver labels where project_a base/current values normalize to agreement.")
     agreement.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
     agreement.add_argument("--limit", type=int, default=200)
@@ -238,6 +246,20 @@ def main() -> int:
             baselines=args.baseline or PROJECT_A_BASELINES,
             limit=args.limit,
         )
+    elif args.command == "conflictset":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        rows = build_project_a_conflict_review_rows(dataset_path, args.labels, baseline=args.baseline, limit=args.limit)
+        csv_path = write_conflict_csv(rows, ROOT / "reports" / "golden" / f"project_a_conflictset_{_timestamp()}.csv")
+        report = {
+            "path": str(dataset_path),
+            "labels": str(args.labels),
+            "baseline": args.baseline,
+            "rows": len(rows),
+            "output_csv": str(csv_path),
+            "preview": rows[:3],
+        }
     elif args.command == "agreement-labels":
         dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
         if dataset_path is None:

@@ -80,6 +80,19 @@ python3 scripts/run_harness.py golden \
 
 This adapter maps James' `sample_idx` to the same row index in `project_a_samples.parquet`, extracts golden values, and records whether each value matches `current`, `base`, `same`, or an explicit truth value. The report includes both all labeled metrics and conflict-only metrics where `current` and `base` normalize differently.
 
+## Conflict Evidence Queue
+
+Export attribute-level conflict rows for evidence collection:
+
+```bash
+python3 scripts/run_harness.py conflictset \
+  --input data/project_a_samples.parquet \
+  --labels reports/golden/project_a_james_golden_labels_<timestamp>.csv \
+  --baseline hybrid
+```
+
+This writes `reports/golden/project_a_conflictset_*.csv` with `current_value`, `base_value`, `prediction`, `truth`, `correct`, and blank `evidence_url` / `review_notes` columns. These are the rows that need live evidence or reviewed citations before an evidence-backed resolver can claim lift.
+
 ## Baselines
 
 The evaluator compares these deterministic baselines:

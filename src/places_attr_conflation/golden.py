@@ -340,6 +340,68 @@ def build_project_a_evaluation_rows(
     return rows
 
 
+def build_project_a_conflict_review_rows(
+    parquet_path: str | Path,
+    labels_path: str | Path,
+    *,
+    baseline: str = "hybrid",
+    limit: int | None = None,
+) -> list[dict[str, object]]:
+    rows = build_project_a_evaluation_rows(parquet_path, labels_path, baseline, limit=limit)
+    conflicts: list[dict[str, object]] = []
+    for row in rows:
+        for attribute in PROJECT_A_ATTRIBUTES:
+            truth = str(row.get(f"{attribute}_truth") or "")
+            if not truth or not row.get(f"{attribute}_pair_differs"):
+                continue
+            prediction = str(row.get(f"{attribute}_prediction") or "")
+            conflicts.append(
+                {
+                    "id": row.get("id", ""),
+                    "base_id": row.get("base_id", ""),
+                    "attribute": attribute,
+                    "baseline": baseline,
+                    "truth": truth,
+                    "truth_source": row.get(f"{attribute}_truth_source", ""),
+                    "prediction": prediction,
+                    "confidence": row.get(f"{attribute}_confidence", 0.0),
+                    "correct": _normalize(attribute, prediction) == _normalize(attribute, truth),
+                    "current_value": row.get(f"{attribute}_current", ""),
+                    "base_value": row.get(f"{attribute}_base", ""),
+                    "needs_evidence": True,
+                    "evidence_url": "",
+                    "review_notes": "",
+                }
+            )
+    return conflicts
+
+
+def write_conflict_csv(rows: list[dict[str, object]], output: str | Path) -> Path:
+    out = Path(output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = [
+        "id",
+        "base_id",
+        "attribute",
+        "baseline",
+        "truth",
+        "truth_source",
+        "prediction",
+        "confidence",
+        "correct",
+        "current_value",
+        "base_value",
+        "needs_evidence",
+        "evidence_url",
+        "review_notes",
+    ]
+    with out.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    return out
+
+
 def evaluate_project_a_golden(
     parquet_path: str | Path,
     labels_path: str | Path,

@@ -7,10 +7,12 @@ import duckdb
 
 from places_attr_conflation.golden import (
     build_project_a_agreement_labels,
+    build_project_a_conflict_review_rows,
     build_project_a_evaluation_rows,
     build_project_a_labels_from_james_golden,
     evaluate_project_a_golden,
     load_label_rows,
+    write_conflict_csv,
     write_label_csv,
 )
 
@@ -101,6 +103,33 @@ class GoldenTests(unittest.TestCase):
         self.assertLess(report["baselines"]["current"]["conflict_metrics"]["website"]["accuracy"], 1.0)
         self.assertEqual(report["baselines"]["agreement_only"]["conflict_metrics"]["website"]["abstention_rate"], 1.0)
         self.assertEqual(report["baselines"]["agreement_only"]["conflict_metrics"]["website"]["high_confidence_wrong_rate"], 0.0)
+
+    def test_conflict_review_rows_export_attribute_level_queue(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            parquet = root / "project_a_samples.parquet"
+            labels = root / "labels.csv"
+            output = root / "conflicts.csv"
+            _write_project_a_parquet(parquet)
+            labels.write_text(
+                "\n".join(
+                    [
+                        "id,base_id,website_truth_choice,website_truth_value,phone_truth_choice,phone_truth_value,address_truth_choice,address_truth_value,category_truth_choice,category_truth_value,name_truth_choice,name_truth_value",
+                        "1,b1,current,,same,,same,,current,,same,",
+                        "2,b2,base,,same,,same,,same,,base,",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            rows = build_project_a_conflict_review_rows(parquet, labels, baseline="hybrid")
+            csv_path = write_conflict_csv(rows, output)
+
+            self.assertTrue(csv_path.exists())
+            self.assertGreaterEqual(len(rows), 1)
+            self.assertEqual(rows[0]["needs_evidence"], True)
+            self.assertIn("current_value", csv_path.read_text(encoding="utf-8"))
 
     def test_agreement_labels_seed_repeatable_same_truth(self):
         with tempfile.TemporaryDirectory() as tmpdir:
