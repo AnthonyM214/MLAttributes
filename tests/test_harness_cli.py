@@ -109,6 +109,55 @@ class HarnessCliTests(unittest.TestCase):
         self.assertIn("output_csv", payload)
         self.assertTrue(Path(payload["output_csv"]).exists())
 
+    def test_golden_command_scores_labeled_project_a_rows(self):
+        fixture = ROOT / "data" / "project_a_samples.parquet"
+        labels = ROOT / "tests" / "fixtures" / "project_a_labels_sample.csv"
+        completed = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "golden",
+                "--input",
+                str(fixture),
+                "--labels",
+                str(labels),
+                "--baseline",
+                "hybrid",
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["label_rows"], 3)
+        self.assertIn("hybrid", payload["baselines"])
+        self.assertIn("website", payload["baselines"]["hybrid"]["metrics"])
+
+    def test_agreement_labels_command_writes_silver_label_csv(self):
+        fixture = ROOT / "data" / "project_a_samples.parquet"
+        completed = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "agreement-labels",
+                "--input",
+                str(fixture),
+                "--limit",
+                "20",
+                "--min-attributes",
+                "2",
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["label_type"], "silver_agreement")
+        self.assertTrue(Path(payload["output_csv"]).exists())
+        self.assertGreater(payload["rows"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

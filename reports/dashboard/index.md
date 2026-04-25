@@ -54,6 +54,16 @@
 - High-confidence wrong rate: 25.0%
 - Cases: 4
 
+### Project A Golden Labels
+
+| Baseline | Attribute | Accuracy | Coverage | HC Wrong | Labels |
+| --- | --- | ---: | ---: | ---: | ---: |
+| hybrid | website | 66.7% | 100.0% | 33.3% | 3 |
+| hybrid | phone | 100.0% | 100.0% | 0.0% | 2 |
+| hybrid | address | 66.7% | 100.0% | 33.3% | 3 |
+| hybrid | category | 100.0% | 100.0% | 0.0% | 3 |
+| hybrid | name | 100.0% | 100.0% | 0.0% | 3 |
+
 ### Live Smoke
 
 - Mode: replay
@@ -63,7 +73,8 @@
 
 - `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json`
 - `combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json`
-- `compare`: `/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_001437.json`
-- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_001438.json`
-- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_001429.json`
-- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_001430.json`
+- `compare`: `/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_002306.json`
+- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_002255.json`
+- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260425_002256.json`
+- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_002256.json`
+- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_002257.json`

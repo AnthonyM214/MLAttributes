@@ -60,6 +60,20 @@ python3 scripts/run_harness.py reviewset --limit 200
 
 This exports a flat CSV for labeling and review under `reports/data/`, with paired fields such as `name/base_name`, `website/base_website`, `phone/base_phone`, and disagreement flags.
 
+### Project A golden-label evaluation
+
+```bash
+python3 scripts/run_harness.py agreement-labels \
+  --input data/project_a_samples.parquet \
+  --limit 200
+
+python3 scripts/run_harness.py golden \
+  --input data/project_a_samples.parquet \
+  --labels tests/fixtures/project_a_labels_sample.csv
+```
+
+This scores deterministic `current`, `base`, `completeness`, `confidence`, and `hybrid` pair baselines against reviewed labels. `agreement-labels` can create a silver sanity-check label set from normalized base/current agreement, but conflict-resolution claims still require reviewed labels. Reports are written under `reports/golden/` by default and surfaced in the dashboard.
+
 ### User-friendly dashboard
 
 ```bash

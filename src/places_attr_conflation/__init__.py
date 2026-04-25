@@ -4,6 +4,7 @@ __all__ = [
     "evidence",
     "dorking",
     "freshness",
+    "golden",
     "manifest",
     "metrics",
     "normalization",

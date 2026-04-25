@@ -16,6 +16,7 @@ class DashboardData:
     rerank: dict[str, object] | None
     combined: dict[str, object] | None
     smoke: dict[str, object] | None
+    golden: dict[str, object] | None
     paths: dict[str, str]
 
 
@@ -62,6 +63,7 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "rerank": _latest_json(harness, "rerank_*.json"),
         "combined": _latest_json(harness, "all_*.json"),
         "smoke": _latest_json(harness, "smoke_*.json"),
+        "golden": _latest_json(root / "golden", "project_a_golden_*.json") or _latest_json(harness, "golden_*.json"),
     }
     return {name: str(path) for name, path in selected.items() if path is not None}
 
@@ -75,6 +77,7 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         rerank=_load_json(Path(paths["rerank"])) if "rerank" in paths else None,
         combined=_load_json(Path(paths["combined"])) if "combined" in paths else None,
         smoke=_load_json(Path(paths["smoke"])) if "smoke" in paths else None,
+        golden=_load_json(Path(paths["golden"])) if "golden" in paths else None,
         paths=paths,
     )
 
@@ -212,6 +215,44 @@ def _smoke_lines(smoke: dict[str, object] | None) -> list[str]:
     return lines
 
 
+def _golden_table(golden: dict[str, object] | None) -> list[str]:
+    if not golden:
+        return ["No project_a golden report found."]
+    baselines = golden.get("baselines", {})
+    if not isinstance(baselines, dict):
+        return ["No project_a golden baseline metrics found."]
+    lines = [
+        "| Baseline | Attribute | Accuracy | Coverage | HC Wrong | Labels |",
+        "| --- | --- | ---: | ---: | ---: | ---: |",
+    ]
+    for baseline_name in sorted(baselines):
+        baseline = baselines.get(baseline_name, {})
+        if not isinstance(baseline, dict):
+            continue
+        metrics = baseline.get("metrics", {})
+        if not isinstance(metrics, dict):
+            continue
+        for attribute in ("website", "phone", "address", "category", "name"):
+            row = metrics.get(attribute, {})
+            if not isinstance(row, dict) or not row.get("total"):
+                continue
+            lines.append(
+                "| "
+                + " | ".join(
+                    [
+                        baseline_name,
+                        attribute,
+                        _pct(row.get("accuracy")),
+                        _pct(row.get("coverage")),
+                        _pct(row.get("high_confidence_wrong_rate")),
+                        _num(row.get("total")),
+                    ]
+                )
+                + " |"
+            )
+    return lines if len(lines) > 2 else ["No labeled project_a attributes found."]
+
+
 def render_markdown(data: DashboardData) -> str:
     lines = [
         "# Benchmark Dashboard",
@@ -257,6 +298,10 @@ def render_markdown(data: DashboardData) -> str:
             "",
             * [f"- {line}" for line in _decision_lines(data.combined)],
             "",
+            "### Project A Golden Labels",
+            "",
+            * _golden_table(data.golden),
+            "",
             "### Live Smoke",
             "",
             * [f"- {line}" for line in _smoke_lines(data.smoke)],
@@ -280,6 +325,10 @@ def render_html(data: DashboardData) -> str:
         _compare_table(data.compare),
         ["Arm", "Auth Found", "Useful Found", "Citation Precision", "Top-1 Authoritative", "Avg Attempts"],
     )
+    golden_rows = _safe_table_rows(
+        _golden_table(data.golden),
+        ["Baseline", "Attribute", "Accuracy", "Coverage", "HC Wrong", "Labels"],
+    )
     bundle = {
         "dataset": _dataset_lines(data.dataset),
         "stoppers": [
@@ -291,6 +340,7 @@ def render_html(data: DashboardData) -> str:
         "compare_rows": compare_rows,
         "rerank": _rerank_lines(data.rerank),
         "decisions": _decision_lines(data.combined),
+        "golden_rows": golden_rows,
         "smoke": _smoke_lines(data.smoke),
         "paths": data.paths,
     }
@@ -365,6 +415,7 @@ def render_html(data: DashboardData) -> str:
             "<button class='tab active' data-view='overview'>Overview</button>",
             "<button class='tab' data-view='baseline'>Baseline</button>",
             "<button class='tab' data-view='retrieval'>Retrieval</button>",
+            "<button class='tab' data-view='golden'>Golden</button>",
             "<button class='tab' data-view='reports'>Reports</button>",
             "</div>",
             "<div id='overview' class='view active'>",
@@ -401,6 +452,15 @@ def render_html(data: DashboardData) -> str:
             *[f"<li>{html.escape(line)}</li>" for line in bundle["decisions"]],
             "</ul></div>",
             "</div></div>",
+            "<div id='golden' class='view'>",
+            "<div class='panel'><h3>Project A Golden Labels</h3>",
+            "<table><thead><tr>" + "".join(f"<th>{html.escape(cell)}</th>" for cell in golden_rows[0]) + "</tr></thead><tbody>",
+            *[
+                "<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>"
+                for row in golden_rows[1:]
+            ],
+            "</tbody></table></div>",
+            "</div>",
             "<div id='reports' class='view'>",
             "<div class='panel'><h3>Latest Report Files</h3><ul class='path-list'>",
             *[f"<li><strong>{html.escape(name)}</strong>: <code>{html.escape(path)}</code></li>" for name, path in sorted(bundle["paths"].items())],

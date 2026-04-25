@@ -33,6 +33,12 @@ from places_attr_conflation.dataset import (
     write_dataset_summary,
     write_review_csv,
 )
+from places_attr_conflation.golden import (
+    PROJECT_A_BASELINES,
+    build_project_a_agreement_labels,
+    evaluate_project_a_golden,
+    write_label_csv,
+)
 
 
 DEFAULT_SMOKE_URLS = [
@@ -46,6 +52,8 @@ def _timestamp() -> str:
 
 
 def _default_output_path(command: str) -> Path:
+    if command == "golden":
+        return ROOT / "reports" / "golden" / f"project_a_golden_{_timestamp()}.json"
     return ROOT / "reports" / "harness" / f"{command}_{_timestamp()}.json"
 
 
@@ -139,6 +147,17 @@ def main() -> int:
     review.add_argument("--limit", type=int, default=200)
     review.add_argument("--offset", type=int, default=0)
 
+    golden = subparsers.add_parser("golden", help="Evaluate project_a pair baselines against a labeled review CSV.")
+    golden.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
+    golden.add_argument("--labels", required=True, help="CSV with <attribute>_truth_choice or <attribute>_truth_value columns.")
+    golden.add_argument("--baseline", action="append", choices=PROJECT_A_BASELINES, help="Baseline to evaluate. May be repeated. Defaults to all.")
+    golden.add_argument("--limit", type=int, help="Optional max project_a rows to scan before joining labels.")
+
+    agreement = subparsers.add_parser("agreement-labels", help="Generate silver labels where project_a base/current values normalize to agreement.")
+    agreement.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
+    agreement.add_argument("--limit", type=int, default=200)
+    agreement.add_argument("--min-attributes", type=int, default=1)
+
     dashboard = subparsers.add_parser("dashboard", help="Render a compact benchmark dashboard from saved reports.")
     dashboard.add_argument("--reports-root", default=str(ROOT / "reports"))
     dashboard.add_argument("--output-dir", default=str(ROOT / "reports" / "dashboard"))
@@ -201,6 +220,29 @@ def main() -> int:
             "path": str(dataset_path),
             "rows": len(rows),
             "output_csv": str(csv_path),
+            "preview": rows[:3],
+        }
+    elif args.command == "golden":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        report = evaluate_project_a_golden(
+            dataset_path,
+            args.labels,
+            baselines=args.baseline or PROJECT_A_BASELINES,
+            limit=args.limit,
+        )
+    elif args.command == "agreement-labels":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        rows = build_project_a_agreement_labels(dataset_path, limit=args.limit, min_attributes=args.min_attributes)
+        csv_path = write_label_csv(rows, ROOT / "reports" / "golden" / f"project_a_agreement_labels_{_timestamp()}.csv")
+        report = {
+            "path": str(dataset_path),
+            "rows": len(rows),
+            "output_csv": str(csv_path),
+            "label_type": "silver_agreement",
             "preview": rows[:3],
         }
     elif args.command == "dashboard":
