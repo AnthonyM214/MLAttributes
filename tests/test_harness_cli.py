@@ -158,6 +158,44 @@ class HarnessCliTests(unittest.TestCase):
         self.assertGreater(payload["rows"], 0)
         self.assertTrue(Path(payload["output_csv"]).exists())
 
+    def test_synthetic_evidence_commands_generate_and_evaluate(self):
+        conflicts = ROOT / "tests" / "fixtures" / "synthetic_conflicts_sample.csv"
+        generated = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "synth-evidence",
+                "--conflicts",
+                str(conflicts),
+                "--limit",
+                "6",
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(generated.stdout)
+        self.assertEqual(payload["case_count"], 6)
+        self.assertTrue(Path(payload["output_json"]).exists())
+
+        evaluated = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "evidence-eval",
+                "--input",
+                payload["output_json"],
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        report = json.loads(evaluated.stdout)
+        self.assertIn("resolver", report)
+        self.assertGreater(report["resolver"]["accuracy"], report["baseline"]["accuracy"])
+
     def test_agreement_labels_command_writes_silver_label_csv(self):
         fixture = ROOT / "data" / "project_a_samples.parquet"
         completed = subprocess.run(

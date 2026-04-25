@@ -17,6 +17,7 @@ class DashboardData:
     combined: dict[str, object] | None
     smoke: dict[str, object] | None
     golden: dict[str, object] | None
+    evidence: dict[str, object] | None
     paths: dict[str, str]
 
 
@@ -64,6 +65,7 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "combined": _latest_json(harness, "all_*.json"),
         "smoke": _latest_json(harness, "smoke_*.json"),
         "golden": _latest_json(root / "golden", "project_a_golden_*.json") or _latest_json(harness, "golden_*.json"),
+        "evidence": _latest_json(root / "evidence", "evidence-eval_*.json"),
     }
     return {name: str(path) for name, path in selected.items() if path is not None}
 
@@ -78,6 +80,7 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         combined=_load_json(Path(paths["combined"])) if "combined" in paths else None,
         smoke=_load_json(Path(paths["smoke"])) if "smoke" in paths else None,
         golden=_load_json(Path(paths["golden"])) if "golden" in paths else None,
+        evidence=_load_json(Path(paths["evidence"])) if "evidence" in paths else None,
         paths=paths,
     )
 
@@ -258,6 +261,25 @@ def _golden_table(golden: dict[str, object] | None) -> list[str]:
     return lines if len(lines) > 2 else ["No labeled project_a attributes found."]
 
 
+def _evidence_lines(evidence: dict[str, object] | None) -> list[str]:
+    if not evidence:
+        return ["No synthetic evidence evaluation report found."]
+    resolver = evidence.get("resolver", {})
+    baseline = evidence.get("baseline", {})
+    if not isinstance(resolver, dict) or not isinstance(baseline, dict):
+        return ["Synthetic evidence report is missing resolver or baseline metrics."]
+    return [
+        f"Mode: {evidence.get('mode', '-')}",
+        f"Cases: {_num(evidence.get('total'))}",
+        f"Resolver accuracy: {_pct(resolver.get('accuracy'))}",
+        f"Resolver coverage: {_pct(resolver.get('coverage'))}",
+        f"Resolver abstention: {_pct(resolver.get('abstention_rate'))}",
+        f"Resolver high-confidence wrong: {_pct(resolver.get('high_confidence_wrong_rate'))}",
+        f"Baseline accuracy: {_pct(baseline.get('accuracy'))}",
+        f"Warning: {evidence.get('warning', 'Synthetic evidence validates system behavior only.')}",
+    ]
+
+
 def render_markdown(data: DashboardData) -> str:
     lines = [
         "# Benchmark Dashboard",
@@ -307,6 +329,10 @@ def render_markdown(data: DashboardData) -> str:
             "",
             * _golden_table(data.golden),
             "",
+            "### Synthetic Evidence Validation",
+            "",
+            * [f"- {line}" for line in _evidence_lines(data.evidence)],
+            "",
             "### Live Smoke",
             "",
             * [f"- {line}" for line in _smoke_lines(data.smoke)],
@@ -346,6 +372,7 @@ def render_html(data: DashboardData) -> str:
         "rerank": _rerank_lines(data.rerank),
         "decisions": _decision_lines(data.combined),
         "golden_rows": golden_rows,
+        "evidence": _evidence_lines(data.evidence),
         "smoke": _smoke_lines(data.smoke),
         "paths": data.paths,
     }
@@ -421,6 +448,7 @@ def render_html(data: DashboardData) -> str:
             "<button class='tab' data-view='baseline'>Baseline</button>",
             "<button class='tab' data-view='retrieval'>Retrieval</button>",
             "<button class='tab' data-view='golden'>Golden</button>",
+            "<button class='tab' data-view='evidence'>Evidence</button>",
             "<button class='tab' data-view='reports'>Reports</button>",
             "</div>",
             "<div id='overview' class='view active'>",
@@ -465,6 +493,11 @@ def render_html(data: DashboardData) -> str:
                 for row in golden_rows[1:]
             ],
             "</tbody></table></div>",
+            "</div>",
+            "<div id='evidence' class='view'>",
+            "<div class='panel'><h3>Synthetic Evidence Validation</h3><ul>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["evidence"]],
+            "</ul></div>",
             "</div>",
             "<div id='reports' class='view'>",
             "<div class='panel'><h3>Latest Report Files</h3><ul class='path-list'>",

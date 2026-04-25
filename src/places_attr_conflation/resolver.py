@@ -28,6 +28,7 @@ def resolve_attribute(
     candidates: list[str],
     evidence: list[EvidenceItem],
     min_confidence: float = 0.55,
+    min_support_score: float = 0.55,
 ) -> AttributeDecision:
     normalizer = NORMALIZERS.get(attribute, lambda value: (value or "").strip().lower())
     candidate_by_norm = {normalizer(candidate): candidate for candidate in candidates if candidate}
@@ -54,6 +55,16 @@ def resolve_attribute(
     confidence = best_score / total_score if total_score else 0.0
     margin = best_score - second_score
 
+    if best_score < min_support_score:
+        return AttributeDecision(
+            attribute,
+            "",
+            confidence,
+            "Best evidence support is below the minimum authority threshold; abstaining.",
+            supporting[best_value],
+            abstained=True,
+        )
+
     if confidence < min_confidence or margin <= 0:
         return AttributeDecision(
             attribute,
@@ -71,4 +82,3 @@ def resolve_attribute(
         f"Selected value supported by {len(supporting[best_value])} evidence item(s).",
         supporting[best_value],
     )
-

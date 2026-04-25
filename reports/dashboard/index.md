@@ -64,6 +64,17 @@
 | hybrid | category | 100.0% | 100.0% | 100.0% | 0.0% | 0.0% | 3 | 3 |
 | hybrid | name | 100.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0 | 3 |
 
+### Synthetic Evidence Validation
+
+- Mode: synthetic_authoritative_evidence
+- Cases: 6
+- Resolver accuracy: 100.0%
+- Resolver coverage: 50.0%
+- Resolver abstention: 50.0%
+- Resolver high-confidence wrong: 0.0%
+- Baseline accuracy: 0.0%
+- Warning: Synthetic evidence validates system behavior only; it is not live evidence.
+
 ### Live Smoke
 
 - Mode: replay
@@ -73,8 +84,9 @@
 
 - `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json`
 - `combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json`
-- `compare`: `/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_003900.json`
-- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_003902.json`
-- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260425_003903.json`
-- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_003838.json`
-- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_003839.json`
+- `compare`: `/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_005926.json`
+- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_005928.json`
+- `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260425_005848.json`
+- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260425_005929.json`
+- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_005846.json`
+- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_005847.json`

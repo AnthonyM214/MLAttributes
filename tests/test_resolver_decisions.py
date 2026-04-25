@@ -20,7 +20,12 @@ class ResolverDecisionTests(unittest.TestCase):
         decision = resolve_attribute("website", ["example.com"], evidence)
         self.assertTrue(decision.abstained)
 
+    def test_resolver_abstains_on_low_authority_only_match(self):
+        evidence = [EvidenceItem("aggregator", "https://directory.example/biz", "category", "restaurant")]
+        decision = resolve_attribute("category", ["restaurant", "bakery"], evidence)
+        self.assertTrue(decision.abstained)
+        self.assertIn("minimum authority", decision.reason)
+
 
 if __name__ == "__main__":
     unittest.main()
-

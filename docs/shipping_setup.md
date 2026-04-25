@@ -83,6 +83,19 @@ python3 scripts/run_harness.py conflictset \
 
 This scores deterministic `current`, `base`, `completeness`, `confidence`, `hybrid`, and `agreement_only` pair baselines against reviewed labels. `agreement-labels` can create a silver sanity-check label set from normalized base/current agreement, and `import-james-golden` can reuse the prior ProjectTerra 2,000-row golden CSV when that repo is available locally. Reports include all-row and conflict-only metrics, are written under `reports/golden/`, and are surfaced in the dashboard.
 
+### Synthetic evidence validation
+
+```bash
+python3 scripts/run_harness.py synth-evidence \
+  --conflicts reports/golden/project_a_conflictset_<timestamp>.csv \
+  --limit 200
+
+python3 scripts/run_harness.py evidence-eval \
+  --input reports/evidence/synthetic_evidence_<timestamp>.json
+```
+
+This validates resolver behavior against controlled authoritative, decoy, tied, missing, and canonical-truth edge cases. Synthetic evidence is for pipeline validation only; live or reviewed evidence is required for real-world improvement claims.
+
 ### User-friendly dashboard
 
 ```bash

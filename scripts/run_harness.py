@@ -42,6 +42,13 @@ from places_attr_conflation.golden import (
     write_conflict_csv,
     write_label_csv,
 )
+from places_attr_conflation.synthetic_evidence import (
+    evaluate_synthetic_evidence,
+    generate_synthetic_evidence_cases,
+    load_conflict_rows,
+    load_synthetic_evidence,
+    write_synthetic_evidence,
+)
 
 
 DEFAULT_SMOKE_URLS = [
@@ -57,6 +64,8 @@ def _timestamp() -> str:
 def _default_output_path(command: str) -> Path:
     if command == "golden":
         return ROOT / "reports" / "golden" / f"project_a_golden_{_timestamp()}.json"
+    if command in {"synth-evidence", "evidence-eval"}:
+        return ROOT / "reports" / "evidence" / f"{command}_{_timestamp()}.json"
     return ROOT / "reports" / "harness" / f"{command}_{_timestamp()}.json"
 
 
@@ -162,6 +171,16 @@ def main() -> int:
     conflictset.add_argument("--baseline", default="hybrid", choices=PROJECT_A_BASELINES)
     conflictset.add_argument("--limit", type=int, help="Optional max project_a rows to scan before joining labels.")
 
+    synth = subparsers.add_parser("synth-evidence", help="Generate synthetic authoritative evidence from conflict rows.")
+    synth.add_argument("--conflicts", required=True, help="CSV produced by the conflictset command.")
+    synth.add_argument("--limit", type=int, default=200)
+    synth.add_argument("--no-edges", action="store_true", help="Use only truth-with-decoy cases instead of rotating edge cases.")
+
+    evidence_eval = subparsers.add_parser("evidence-eval", help="Evaluate resolver behavior on synthetic evidence JSON.")
+    evidence_eval.add_argument("--input", required=True, help="Synthetic evidence JSON from synth-evidence.")
+    evidence_eval.add_argument("--min-confidence", type=float, default=0.55)
+    evidence_eval.add_argument("--min-support-score", type=float, default=0.55)
+
     agreement = subparsers.add_parser("agreement-labels", help="Generate silver labels where project_a base/current values normalize to agreement.")
     agreement.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
     agreement.add_argument("--limit", type=int, default=200)
@@ -260,6 +279,26 @@ def main() -> int:
             "output_csv": str(csv_path),
             "preview": rows[:3],
         }
+    elif args.command == "synth-evidence":
+        payload = generate_synthetic_evidence_cases(
+            load_conflict_rows(args.conflicts),
+            limit=args.limit,
+            include_edges=not args.no_edges,
+        )
+        evidence_path = write_synthetic_evidence(payload, ROOT / "reports" / "evidence" / f"synthetic_evidence_{_timestamp()}.json")
+        report = {
+            "mode": payload["mode"],
+            "warning": payload["warning"],
+            "case_count": payload["case_count"],
+            "output_json": str(evidence_path),
+            "preview": payload["cases"][:3],
+        }
+    elif args.command == "evidence-eval":
+        report = evaluate_synthetic_evidence(
+            load_synthetic_evidence(args.input),
+            min_confidence=args.min_confidence,
+            min_support_score=args.min_support_score,
+        )
     elif args.command == "agreement-labels":
         dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
         if dataset_path is None:

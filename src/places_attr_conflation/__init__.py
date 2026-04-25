@@ -15,5 +15,6 @@ __all__ = [
     "resolver",
     "signatures",
     "small_model",
+    "synthetic_evidence",
     "harness",
 ]

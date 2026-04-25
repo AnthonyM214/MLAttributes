@@ -1,0 +1,7 @@
+id,base_id,attribute,baseline,truth,truth_source,prediction,confidence,correct,current_value,base_value,needs_evidence,evidence_url,review_notes
+place-1,base-1,phone,hybrid,8315551212,current,8315559999,0.96,false,+18315551212,+18315559999,true,,
+place-2,base-2,website,hybrid,https://example.com,current,https://stale.example.com,0.93,false,http://example.com/,http://stale.example.com/,true,,
+place-3,base-3,address,hybrid,100 Main Street,base,100 Main St Ste 2,0.91,false,100 Main St Ste 2,100 Main Street,true,,
+place-4,base-4,category,hybrid,bakery,current,restaurant,0.88,false,bakery,restaurant,true,,
+place-5,base-5,name,hybrid,Cafe Rio,current,Cafe Ria,0.86,false,Cafe Rio,Cafe Ria,true,,
+place-6,base-6,phone,hybrid,4085550000,explicit,4085559999,0.84,false,4085551111,4085552222,true,,
