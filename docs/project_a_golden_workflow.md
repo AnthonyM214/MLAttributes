@@ -60,6 +60,26 @@ This writes `reports/golden/project_a_agreement_labels_*.csv`.
 
 These rows are useful for smoke-testing normalization, CLI wiring, and dashboard reporting. They are not enough to prove conflict-resolution improvement because they mostly cover attributes where both sides already agree.
 
+## Prior ProjectTerra Golden Import
+
+If the prior ProjectTerra repos are present locally, import James' 2,000-row golden CSV into this repo's label schema:
+
+```bash
+python3 scripts/run_harness.py import-james-golden \
+  --input data/project_a_samples.parquet \
+  --james-csv /home/anthony/projectterra_repos/James-Places-Attribute-Conflation/output_data/golden_dataset.csv
+```
+
+Then evaluate it:
+
+```bash
+python3 scripts/run_harness.py golden \
+  --input data/project_a_samples.parquet \
+  --labels reports/golden/project_a_james_golden_labels_<timestamp>.csv
+```
+
+This adapter maps James' `sample_idx` to the same row index in `project_a_samples.parquet`, extracts golden values, and records whether each value matches `current`, `base`, `same`, or an explicit truth value. The report includes both all labeled metrics and conflict-only metrics where `current` and `base` normalize differently.
+
 ## Baselines
 
 The evaluator compares these deterministic baselines:
@@ -79,5 +99,6 @@ Metrics are normalized per attribute and include:
 - accuracy,
 - abstention rate,
 - high-confidence wrong rate.
+- conflict-only accuracy and label count.
 
 This creates the first project-owned benchmark surface. It does not prove evidence-backed improvement until enough labels exist and the resolver is scored against the same rows.

@@ -125,23 +125,43 @@ code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }
 </div></div>
 <div id='golden' class='view'>
 <div class='panel'><h3>Project A Golden Labels</h3>
-<table><thead><tr><th>Baseline</th><th>Attribute</th><th>Accuracy</th><th>Coverage</th><th>HC Wrong</th><th>Labels</th></tr></thead><tbody>
-<tr><td>hybrid</td><td>website</td><td>66.7%</td><td>100.0%</td><td>33.3%</td><td>3</td></tr>
-<tr><td>hybrid</td><td>phone</td><td>100.0%</td><td>100.0%</td><td>0.0%</td><td>2</td></tr>
-<tr><td>hybrid</td><td>address</td><td>66.7%</td><td>100.0%</td><td>33.3%</td><td>3</td></tr>
-<tr><td>hybrid</td><td>category</td><td>100.0%</td><td>100.0%</td><td>0.0%</td><td>3</td></tr>
-<tr><td>hybrid</td><td>name</td><td>100.0%</td><td>100.0%</td><td>0.0%</td><td>3</td></tr>
+<table><thead><tr><th>Baseline</th><th>Attribute</th><th>Accuracy</th><th>Conflict Accuracy</th><th>HC Wrong</th><th>Conflict Labels</th><th>Labels</th></tr></thead><tbody>
+<tr><td>base</td><td>website</td><td>64.2%</td><td>5.8%</td><td>15.5%</td><td>792</td><td>1697</td></tr>
+<tr><td>base</td><td>phone</td><td>51.6%</td><td>1.6%</td><td>31.5%</td><td>1033</td><td>1894</td></tr>
+<tr><td>base</td><td>address</td><td>72.2%</td><td>43.6%</td><td>18.5%</td><td>954</td><td>1932</td></tr>
+<tr><td>base</td><td>category</td><td>29.7%</td><td>0.3%</td><td>49.3%</td><td>1416</td><td>1988</td></tr>
+<tr><td>base</td><td>name</td><td>60.2%</td><td>10.1%</td><td>25.9%</td><td>884</td><td>2000</td></tr>
+<tr><td>completeness</td><td>website</td><td>100.0%</td><td>100.0%</td><td>0.0%</td><td>792</td><td>1697</td></tr>
+<tr><td>completeness</td><td>phone</td><td>100.0%</td><td>100.0%</td><td>0.0%</td><td>1033</td><td>1894</td></tr>
+<tr><td>completeness</td><td>address</td><td>78.5%</td><td>56.4%</td><td>16.6%</td><td>954</td><td>1932</td></tr>
+<tr><td>completeness</td><td>category</td><td>100.0%</td><td>100.0%</td><td>0.0%</td><td>1416</td><td>1988</td></tr>
+<tr><td>completeness</td><td>name</td><td>95.5%</td><td>89.9%</td><td>1.8%</td><td>884</td><td>2000</td></tr>
+<tr><td>confidence</td><td>website</td><td>86.4%</td><td>71.0%</td><td>13.3%</td><td>792</td><td>1697</td></tr>
+<tr><td>confidence</td><td>phone</td><td>71.6%</td><td>47.9%</td><td>28.1%</td><td>1033</td><td>1894</td></tr>
+<tr><td>confidence</td><td>address</td><td>73.0%</td><td>45.4%</td><td>26.4%</td><td>954</td><td>1932</td></tr>
+<tr><td>confidence</td><td>category</td><td>51.7%</td><td>32.2%</td><td>48.1%</td><td>1416</td><td>1988</td></tr>
+<tr><td>confidence</td><td>name</td><td>72.5%</td><td>37.7%</td><td>26.4%</td><td>884</td><td>2000</td></tr>
+<tr><td>current</td><td>website</td><td>100.0%</td><td>100.0%</td><td>0.0%</td><td>792</td><td>1697</td></tr>
+<tr><td>current</td><td>phone</td><td>100.0%</td><td>100.0%</td><td>0.0%</td><td>1033</td><td>1894</td></tr>
+<tr><td>current</td><td>address</td><td>78.5%</td><td>56.4%</td><td>16.6%</td><td>954</td><td>1932</td></tr>
+<tr><td>current</td><td>category</td><td>100.0%</td><td>100.0%</td><td>0.0%</td><td>1416</td><td>1988</td></tr>
+<tr><td>current</td><td>name</td><td>95.5%</td><td>89.9%</td><td>1.8%</td><td>884</td><td>2000</td></tr>
+<tr><td>hybrid</td><td>website</td><td>86.4%</td><td>71.0%</td><td>13.3%</td><td>792</td><td>1697</td></tr>
+<tr><td>hybrid</td><td>phone</td><td>71.6%</td><td>47.9%</td><td>28.1%</td><td>1033</td><td>1894</td></tr>
+<tr><td>hybrid</td><td>address</td><td>73.0%</td><td>45.4%</td><td>26.4%</td><td>954</td><td>1932</td></tr>
+<tr><td>hybrid</td><td>category</td><td>51.7%</td><td>32.2%</td><td>48.1%</td><td>1416</td><td>1988</td></tr>
+<tr><td>hybrid</td><td>name</td><td>72.5%</td><td>37.7%</td><td>26.4%</td><td>884</td><td>2000</td></tr>
 </tbody></table></div>
 </div>
 <div id='reports' class='view'>
 <div class='panel'><h3>Latest Report Files</h3><ul class='path-list'>
 <li><strong>baseline</strong>: <code>/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json</code></li>
 <li><strong>combined</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json</code></li>
-<li><strong>compare</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_002306.json</code></li>
-<li><strong>dataset</strong>: <code>/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_002255.json</code></li>
-<li><strong>golden</strong>: <code>/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260425_002256.json</code></li>
-<li><strong>rerank</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_002256.json</code></li>
-<li><strong>smoke</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_002257.json</code></li>
+<li><strong>compare</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_003226.json</code></li>
+<li><strong>dataset</strong>: <code>/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_003226.json</code></li>
+<li><strong>golden</strong>: <code>/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260425_003250.json</code></li>
+<li><strong>rerank</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_003229.json</code></li>
+<li><strong>smoke</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_003230.json</code></li>
 </ul></div></div>
 <script>
 for (const button of document.querySelectorAll('.tab')) {

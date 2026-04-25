@@ -222,18 +222,20 @@ def _golden_table(golden: dict[str, object] | None) -> list[str]:
     if not isinstance(baselines, dict):
         return ["No project_a golden baseline metrics found."]
     lines = [
-        "| Baseline | Attribute | Accuracy | Coverage | HC Wrong | Labels |",
-        "| --- | --- | ---: | ---: | ---: | ---: |",
+        "| Baseline | Attribute | Accuracy | Conflict Accuracy | HC Wrong | Conflict Labels | Labels |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for baseline_name in sorted(baselines):
         baseline = baselines.get(baseline_name, {})
         if not isinstance(baseline, dict):
             continue
         metrics = baseline.get("metrics", {})
+        conflict_metrics = baseline.get("conflict_metrics", {})
         if not isinstance(metrics, dict):
             continue
         for attribute in ("website", "phone", "address", "category", "name"):
             row = metrics.get(attribute, {})
+            conflict_row = conflict_metrics.get(attribute, {}) if isinstance(conflict_metrics, dict) else {}
             if not isinstance(row, dict) or not row.get("total"):
                 continue
             lines.append(
@@ -243,8 +245,9 @@ def _golden_table(golden: dict[str, object] | None) -> list[str]:
                         baseline_name,
                         attribute,
                         _pct(row.get("accuracy")),
-                        _pct(row.get("coverage")),
+                        _pct(conflict_row.get("accuracy") if isinstance(conflict_row, dict) else None),
                         _pct(row.get("high_confidence_wrong_rate")),
+                        _num(conflict_row.get("total") if isinstance(conflict_row, dict) else None),
                         _num(row.get("total")),
                     ]
                 )

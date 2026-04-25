@@ -158,6 +158,29 @@ class HarnessCliTests(unittest.TestCase):
         self.assertTrue(Path(payload["output_csv"]).exists())
         self.assertGreater(payload["rows"], 0)
 
+    def test_import_james_golden_command_writes_prior_label_csv(self):
+        fixture = ROOT / "data" / "project_a_samples.parquet"
+        james = ROOT / "tests" / "fixtures" / "james_golden_sample.csv"
+        completed = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "import-james-golden",
+                "--input",
+                str(fixture),
+                "--james-csv",
+                str(james),
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["label_type"], "prior_projectterra_golden")
+        self.assertEqual(payload["rows"], 2)
+        self.assertTrue(Path(payload["output_csv"]).exists())
+
 
 if __name__ == "__main__":
     unittest.main()

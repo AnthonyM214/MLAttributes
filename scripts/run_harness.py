@@ -36,6 +36,7 @@ from places_attr_conflation.dataset import (
 from places_attr_conflation.golden import (
     PROJECT_A_BASELINES,
     build_project_a_agreement_labels,
+    build_project_a_labels_from_james_golden,
     evaluate_project_a_golden,
     write_label_csv,
 )
@@ -158,6 +159,11 @@ def main() -> int:
     agreement.add_argument("--limit", type=int, default=200)
     agreement.add_argument("--min-attributes", type=int, default=1)
 
+    james = subparsers.add_parser("import-james-golden", help="Convert James ProjectTerra golden CSV into project_a label schema.")
+    james.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
+    james.add_argument("--james-csv", default="/home/anthony/projectterra_repos/James-Places-Attribute-Conflation/output_data/golden_dataset.csv")
+    james.add_argument("--limit", type=int)
+
     dashboard = subparsers.add_parser("dashboard", help="Render a compact benchmark dashboard from saved reports.")
     dashboard.add_argument("--reports-root", default=str(ROOT / "reports"))
     dashboard.add_argument("--output-dir", default=str(ROOT / "reports" / "dashboard"))
@@ -243,6 +249,20 @@ def main() -> int:
             "rows": len(rows),
             "output_csv": str(csv_path),
             "label_type": "silver_agreement",
+            "preview": rows[:3],
+        }
+    elif args.command == "import-james-golden":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        rows = build_project_a_labels_from_james_golden(dataset_path, args.james_csv, limit=args.limit)
+        csv_path = write_label_csv(rows, ROOT / "reports" / "golden" / f"project_a_james_golden_labels_{_timestamp()}.csv")
+        report = {
+            "path": str(dataset_path),
+            "source_csv": str(args.james_csv),
+            "rows": len(rows),
+            "output_csv": str(csv_path),
+            "label_type": "prior_projectterra_golden",
             "preview": rows[:3],
         }
     elif args.command == "dashboard":

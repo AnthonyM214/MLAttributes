@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import ast
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -79,6 +80,55 @@ def _as_float(value: Any, default: float = 0.0) -> float:
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def _parse_structured_value(value: Any) -> Any:
+    if value in (None, ""):
+        return None
+    if not isinstance(value, str):
+        return value
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        try:
+            return ast.literal_eval(value)
+        except (SyntaxError, ValueError):
+            return value
+
+
+def _extract_james_value(attribute: str, row: dict[str, str]) -> str:
+    source_column = {
+        "name": "names",
+        "category": "categories",
+        "website": "websites",
+        "phone": "phones",
+        "address": "addresses",
+    }[attribute]
+    parsed = _parse_structured_value(row.get(source_column))
+    if attribute in {"name", "category"}:
+        if isinstance(parsed, dict):
+            primary = parsed.get("primary")
+            return str(primary) if primary else ""
+        return str(parsed) if parsed else ""
+    if attribute in {"website", "phone"}:
+        if isinstance(parsed, list):
+            for item in parsed:
+                if item:
+                    return str(item)
+            return ""
+        return str(parsed) if parsed else ""
+    if attribute == "address":
+        if isinstance(parsed, list):
+            for item in parsed:
+                if isinstance(item, dict):
+                    freeform = item.get("freeform")
+                    if freeform:
+                        return str(freeform)
+                elif item:
+                    return str(item)
+            return ""
+        return str(parsed) if parsed else ""
+    return ""
 
 
 def _label_key(row: dict[str, str]) -> str:
@@ -164,6 +214,50 @@ def build_project_a_agreement_labels(
     return labels
 
 
+def build_project_a_labels_from_james_golden(
+    parquet_path: str | Path,
+    james_csv_path: str | Path,
+    *,
+    limit: int | None = None,
+) -> list[dict[str, str]]:
+    pairs = export_project_a_review_rows(parquet_path, limit=limit or 1_000_000)
+    labels: list[dict[str, str]] = []
+    with Path(james_csv_path).open(newline="", encoding="utf-8", errors="replace") as handle:
+        for source in csv.DictReader(handle):
+            try:
+                sample_idx = int(source.get("sample_idx", ""))
+            except ValueError:
+                continue
+            if sample_idx < 0 or sample_idx >= len(pairs):
+                continue
+            pair = pairs[sample_idx]
+            row = {field: "" for field in LABEL_FIELDNAMES}
+            row["id"] = str(pair.get("id") or "")
+            row["base_id"] = str(pair.get("base_id") or "")
+            row["label_status"] = "prior_projectterra_golden"
+            row["notes"] = "Imported from James-Places-Attribute-Conflation/output_data/golden_dataset.csv by sample_idx."
+            for attribute in PROJECT_A_ATTRIBUTES:
+                golden_value = _extract_james_value(attribute, source)
+                if not golden_value:
+                    continue
+                current_value = str(pair.get(attribute) or "")
+                base_value = str(pair.get(f"base_{attribute}") or "")
+                golden_norm = _normalize(attribute, golden_value)
+                current_match = bool(golden_norm) and golden_norm == _normalize(attribute, current_value)
+                base_match = bool(golden_norm) and golden_norm == _normalize(attribute, base_value)
+                if current_match and base_match:
+                    row[f"{attribute}_truth_choice"] = "same"
+                elif current_match:
+                    row[f"{attribute}_truth_choice"] = "current"
+                elif base_match:
+                    row[f"{attribute}_truth_choice"] = "base"
+                else:
+                    row[f"{attribute}_truth_value"] = golden_value
+                row[f"{attribute}_label_source"] = "james_golden_dataset"
+            labels.append(row)
+    return labels
+
+
 def _score_attribute(rows: Iterable[dict[str, object]], attribute: str, high_confidence_threshold: float) -> GoldenAttributeMetrics:
     total = covered = correct = abstained = high_confidence_wrong = 0
     for row in rows:
@@ -222,10 +316,15 @@ def build_project_a_evaluation_rows(
         for attribute in PROJECT_A_ATTRIBUTES:
             truth, truth_source = _truth_value(attribute, label, pair)
             prediction, confidence = _select_prediction(attribute, pair, baseline)
+            current_value = str(pair.get(attribute) or "")
+            base_value = str(pair.get(f"base_{attribute}") or "")
             output[f"{attribute}_truth"] = truth
             output[f"{attribute}_truth_source"] = truth_source
             output[f"{attribute}_prediction"] = prediction
             output[f"{attribute}_confidence"] = confidence
+            output[f"{attribute}_current"] = current_value
+            output[f"{attribute}_base"] = base_value
+            output[f"{attribute}_pair_differs"] = _normalize(attribute, current_value) != _normalize(attribute, base_value)
             if truth:
                 has_truth = True
         if has_truth:
@@ -251,9 +350,20 @@ def evaluate_project_a_golden(
             attribute: asdict(_score_attribute(rows, attribute, high_confidence_threshold))
             for attribute in PROJECT_A_ATTRIBUTES
         }
+        conflict_metrics = {
+            attribute: asdict(
+                _score_attribute(
+                    [row for row in rows if row.get(f"{attribute}_pair_differs")],
+                    attribute,
+                    high_confidence_threshold,
+                )
+            )
+            for attribute in PROJECT_A_ATTRIBUTES
+        }
         baseline_reports[baseline] = {
             "rows": len(rows),
             "metrics": metrics,
+            "conflict_metrics": conflict_metrics,
         }
     return {
         "path": str(parquet_path),

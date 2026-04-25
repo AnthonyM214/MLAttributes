@@ -67,12 +67,16 @@ python3 scripts/run_harness.py agreement-labels \
   --input data/project_a_samples.parquet \
   --limit 200
 
+python3 scripts/run_harness.py import-james-golden \
+  --input data/project_a_samples.parquet \
+  --james-csv /home/anthony/projectterra_repos/James-Places-Attribute-Conflation/output_data/golden_dataset.csv
+
 python3 scripts/run_harness.py golden \
   --input data/project_a_samples.parquet \
   --labels tests/fixtures/project_a_labels_sample.csv
 ```
 
-This scores deterministic `current`, `base`, `completeness`, `confidence`, and `hybrid` pair baselines against reviewed labels. `agreement-labels` can create a silver sanity-check label set from normalized base/current agreement, but conflict-resolution claims still require reviewed labels. Reports are written under `reports/golden/` by default and surfaced in the dashboard.
+This scores deterministic `current`, `base`, `completeness`, `confidence`, and `hybrid` pair baselines against reviewed labels. `agreement-labels` can create a silver sanity-check label set from normalized base/current agreement, and `import-james-golden` can reuse the prior ProjectTerra 2,000-row golden CSV when that repo is available locally. Reports include all-row and conflict-only metrics, are written under `reports/golden/`, and are surfaced in the dashboard.
 
 ### User-friendly dashboard
 

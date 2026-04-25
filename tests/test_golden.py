@@ -8,6 +8,7 @@ import duckdb
 from places_attr_conflation.golden import (
     build_project_a_agreement_labels,
     build_project_a_evaluation_rows,
+    build_project_a_labels_from_james_golden,
     evaluate_project_a_golden,
     load_label_rows,
     write_label_csv,
@@ -96,6 +97,8 @@ class GoldenTests(unittest.TestCase):
         self.assertEqual(report["baselines"]["base"]["metrics"]["phone"]["accuracy"], 1.0)
         self.assertLess(report["baselines"]["current"]["metrics"]["website"]["accuracy"], 1.0)
         self.assertGreaterEqual(report["baselines"]["hybrid"]["metrics"]["website"]["accuracy"], 0.5)
+        self.assertEqual(report["baselines"]["current"]["conflict_metrics"]["website"]["total"], 2)
+        self.assertLess(report["baselines"]["current"]["conflict_metrics"]["website"]["accuracy"], 1.0)
 
     def test_agreement_labels_seed_repeatable_same_truth(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -111,6 +114,35 @@ class GoldenTests(unittest.TestCase):
         self.assertGreaterEqual(len(rows), 1)
         self.assertEqual(rows[0]["phone_truth_choice"], "same")
         self.assertEqual(report["baselines"]["hybrid"]["metrics"]["phone"]["accuracy"], 1.0)
+
+    def test_james_golden_import_maps_values_to_choices(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            parquet = root / "project_a_samples.parquet"
+            james = root / "james.csv"
+            _write_project_a_parquet(parquet)
+            james.write_text(
+                "\n".join(
+                    [
+                        "sample_idx,names,addresses,categories,websites,phones,emails,socials,brand",
+                        """0,"{'primary':'Cafe'}","[{'freeform':'1 Main St'}]","{'primary':'bakery'}","['https://example.com']","['+18315551212']",,,"{'names':{}}\"""",
+                        """1,"{'primary':'Shop Base'}","[{'freeform':'2 Main St'}]","{'primary':'retail'}","['https://base.example.com']","['4085550000']",,,"{'names':{}}\"""",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            rows = build_project_a_labels_from_james_golden(parquet, james)
+            labels = root / "labels.csv"
+            write_label_csv(rows, labels)
+            report = evaluate_project_a_golden(parquet, labels, baselines=["hybrid"])
+
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["website_truth_choice"], "current")
+        self.assertEqual(rows[0]["phone_truth_choice"], "same")
+        self.assertEqual(rows[1]["name_truth_choice"], "base")
+        self.assertEqual(report["baselines"]["hybrid"]["metrics"]["website"]["total"], 2)
 
     def test_build_evaluation_rows_keeps_truth_source_for_audit(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -129,8 +161,9 @@ class GoldenTests(unittest.TestCase):
             rows = build_project_a_evaluation_rows(parquet, labels, "current")
 
             self.assertEqual(len(load_label_rows(labels)), 1)
-            self.assertEqual(rows[0]["website_truth_source"], "explicit")
-            self.assertEqual(rows[0]["website_prediction"], "https://example.com")
+        self.assertEqual(rows[0]["website_truth_source"], "explicit")
+        self.assertEqual(rows[0]["website_prediction"], "https://example.com")
+        self.assertTrue(rows[0]["website_pair_differs"])
 
 
 if __name__ == "__main__":
