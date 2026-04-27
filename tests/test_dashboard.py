@@ -12,9 +12,16 @@ class DashboardTests(unittest.TestCase):
             root = Path(tmpdir) / "reports"
             harness = root / "harness"
             baseline = root / "baseline_metrics"
+            data_dir = root / "data"
             harness.mkdir(parents=True)
             baseline.mkdir(parents=True)
+            data_dir.mkdir(parents=True)
 
+            (data_dir / "project_a_reviewset_20260424_010000.csv").write_text(
+                "id,base_id,website,base_website,website_differs,phone,base_phone,phone_differs\n"
+                "row-1,base-1,https://current.example,https://base.example,true,555-1111,555-2222,true\n",
+                encoding="utf-8",
+            )
             (baseline / "resolvepoi_hybrid_20260424_010000.json").write_text(
                 json.dumps(
                     {
@@ -89,14 +96,22 @@ class DashboardTests(unittest.TestCase):
             markdown = render_markdown(data)
             outputs = write_dashboard(root, root / "dashboard")
 
+            self.assertIn("Truth Validation Workflow", markdown)
             self.assertIn("What Is Stopping Us", markdown)
             self.assertIn("ResolvePOI Baseline", markdown)
             self.assertIn("Retrieval Arms", markdown)
+            self.assertEqual(len(data.review_rows), 1)
             self.assertTrue(Path(outputs["markdown"]).exists())
             self.assertTrue(Path(outputs["html"]).exists())
             self.assertTrue(Path(outputs["latest"]).exists())
             html = Path(outputs["html"]).read_text(encoding="utf-8")
-            self.assertIn("Benchmark Viewer", html)
+            self.assertIn("MLAttributes Dashboard", html)
+            self.assertIn("Truth Validation", html)
+            self.assertIn("data-view='truth'", html)
+            self.assertIn("base/current values", html)
+            self.assertIn("not_enough_evidence", html)
+            self.assertIn("project_a_truth_labels_", html)
+            self.assertIn("reviewer disagreements", html)
             self.assertIn("data-view='baseline'", html)
 
     def test_dashboard_html_renders_when_reports_are_missing(self):
@@ -105,7 +120,8 @@ class DashboardTests(unittest.TestCase):
 
             html = render_html(data)
 
-            self.assertIn("Benchmark Viewer", html)
+            self.assertIn("MLAttributes Dashboard", html)
+            self.assertIn("No embedded reviewset found", html)
             self.assertIn("<td>missing</td>", html)
 
 
