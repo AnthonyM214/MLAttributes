@@ -34,6 +34,31 @@ class HarnessCliTests(unittest.TestCase):
         payload = json.loads(completed.stdout)
         self.assertIn("available", payload)
 
+    def test_dork_audit_command_scores_operator_quality(self):
+        fixture = ROOT / "data" / "project_a_samples.parquet"
+        completed = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "dork-audit",
+                "--input",
+                str(fixture),
+                "--limit",
+                "3",
+                "--attribute",
+                "website",
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["rows"], 3)
+        self.assertEqual(payload["totals"]["plans"], 3)
+        self.assertGreater(payload["summary"]["operator_coverage"], 0.7)
+        self.assertGreater(payload["summary"]["authority_coverage"], 0.7)
+
     def test_smoke_command_uses_replay_fallback_when_live_fails(self):
         fixture = ROOT / "tests" / "fixtures" / "retrieval_replay_sample.json"
         completed = subprocess.run(

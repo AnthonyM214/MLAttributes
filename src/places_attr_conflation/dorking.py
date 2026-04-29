@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from urllib.parse import urlparse
 
 
@@ -20,6 +20,23 @@ AGGREGATOR_DOMAINS = {
 GOVERNMENT_SUFFIXES = (".gov", ".ca.gov", ".nyc.gov")
 GOOGLE_PLACES_DOMAINS = {"google.com", "maps.google.com"}
 OSM_DOMAINS = {"openstreetmap.org", "osm.org"}
+BUSINESS_REGISTRY_DOMAINS = {
+    "bbb.org",
+    "opencorporates.com",
+    "bizapedia.com",
+    "dnb.com",
+    "corporationwiki.com",
+}
+EXCLUDED_AGGREGATOR_SITES = (
+    "yelp.com",
+    "tripadvisor.com",
+    "facebook.com",
+    "instagram.com",
+    "doordash.com",
+    "ubereats.com",
+    "grubhub.com",
+)
+SEARCH_OPERATORS = ("site:", "-site:", "intitle:", "inurl:", "OR", '"')
 
 
 @dataclass(frozen=True)
@@ -43,6 +60,24 @@ class MultiLayerDorkPlan:
     layers: list[DorkLayer]
 
 
+@dataclass(frozen=True)
+class DorkPlanAudit:
+    attribute: str
+    total_queries: int
+    operator_queries: int
+    quoted_anchor_queries: int
+    site_restricted_queries: int
+    exclusion_queries: int
+    fallback_queries: int
+    authority_queries: int
+    operator_coverage: float
+    quoted_anchor_coverage: float
+    site_restricted_coverage: float
+    exclusion_coverage: float
+    authority_coverage: float
+    fallback_share: float
+
+
 def quoted(value: str | None) -> str:
     value = (value or "").strip()
     return f'"{value}"' if value else ""
@@ -60,32 +95,41 @@ def targeted_queries(place: dict[str, str], attribute: str) -> list[str]:
     phone = quoted(place.get("phone"))
     website = place.get("website", "")
     domain = urlparse(website if "://" in website else f"https://{website}").netloc if website else ""
-    exclusions = "-site:yelp.com -site:tripadvisor.com -site:facebook.com -site:instagram.com"
+    exclusions = " ".join(f"-site:{domain}" for domain in EXCLUDED_AGGREGATOR_SITES)
 
     if attribute == "website":
         queries = [
             f"{name} {city} official website {exclusions}",
             f"{name} {address} {city} {exclusions}",
-            f"inurl:locations {name} {city}",
+            f"intitle:{name} {city} contact OR locations {exclusions}",
+            f"inurl:locations {name} {city} contact",
+            f"site:.gov {name} {city} business license OR registry",
+            f"site:bbb.org {name} {city}",
         ]
     elif attribute == "phone":
         queries = [
             f"{phone} {name}",
             f"{name} {city} phone {exclusions}",
+            f"{name} {city} contact OR hours {exclusions}",
+            f"site:.gov {name} {city} license OR registry",
         ]
         if domain:
-            queries.append(f"site:{domain} {phone}")
+            queries.extend([f"site:{domain} {phone}", f"site:{domain} contact OR locations OR hours"])
     elif attribute == "address":
         queries = [
             f"{name} {address}",
             f"{name} {city} address {exclusions}",
+            f"{address} {city} {region} {exclusions}",
+            f"site:.gov {name} {city} address OR permit OR license",
         ]
         if domain:
-            queries.append(f"site:{domain} {address}")
+            queries.extend([f"site:{domain} {address}", f"site:{domain} directions OR locations"])
     elif attribute == "category":
         queries = [
             f"{name} {city} services menu about {exclusions}",
             f"{name} {city} {region} category",
+            f"{name} {city} schema.org LocalBusiness OR Organization {exclusions}",
+            f"site:openstreetmap.org {name} {city}",
         ]
         if domain:
             queries.append(f"site:{domain} about OR services OR menu")
@@ -93,6 +137,13 @@ def targeted_queries(place: dict[str, str], attribute: str) -> list[str]:
         queries = [
             f"{address} {city} business name",
             f"{phone} {address}",
+            f"{name} {address} {city} {exclusions}",
+            f"{name} {city} official OR contact {exclusions}",
+            f"site:.gov {address} {city} business OR license",
+            f"site:opencorporates.com {name} {region}",
+            f"site:bbb.org {name} {city}",
+            f"site:google.com/maps {name} {address}",
+            f"site:openstreetmap.org {address} {city}",
         ]
     else:
         queries = [loose_query(place)]
@@ -129,6 +180,7 @@ def build_multi_layer_plan(place: dict[str, str], attribute: str) -> MultiLayerD
                 f"{name} {address} {city}",
                 f"{phone} {name}" if phone else "",
                 f"site:google.com/maps {name} {city}",
+                f"site:openstreetmap.org {name} {city}",
             ]
         )
     elif attribute == "category":
@@ -137,6 +189,7 @@ def build_multi_layer_plan(place: dict[str, str], attribute: str) -> MultiLayerD
                 f"{name} {city} services OR menu OR about",
                 f"site:{domain} schema.org LocalBusiness" if domain else "",
                 f"site:openstreetmap.org {name} {city}",
+                f"site:google.com/maps {name} {city} category",
             ]
         )
     else:
@@ -191,6 +244,8 @@ def classify_source(url: str) -> str:
     domain = parsed.netloc.lower().removeprefix("www.")
     if any(domain.endswith(suffix) for suffix in GOVERNMENT_SUFFIXES):
         return "government"
+    if any(domain == registry or domain.endswith(f".{registry}") for registry in BUSINESS_REGISTRY_DOMAINS):
+        return "business_registry"
     if domain in GOOGLE_PLACES_DOMAINS or domain.endswith(".google.com"):
         path = parsed.path.lower()
         if "/maps" in path or "/place" in path or "/search" in path:
@@ -202,6 +257,108 @@ def classify_source(url: str) -> str:
     if domain:
         return "official_site"
     return "unknown"
+
+
+def _has_operator(query: str) -> bool:
+    return any(operator in query for operator in SEARCH_OPERATORS)
+
+
+def _has_quoted_anchor(query: str) -> bool:
+    return query.count('"') >= 2
+
+
+def _has_authority_surface(query: str) -> bool:
+    lowered = query.lower()
+    return any(
+        token in lowered
+        for token in (
+            "official",
+            "site:",
+            "contact",
+            "locations",
+            "directions",
+            "schema.org",
+            "license",
+            "registry",
+            "permit",
+        )
+    )
+
+
+def audit_multi_layer_plan(plan: MultiLayerDorkPlan) -> DorkPlanAudit:
+    layer_queries = [(layer.name, query) for layer in plan.layers for query in layer.queries]
+    total = len(layer_queries)
+    if total == 0:
+        return DorkPlanAudit(
+            attribute=plan.attribute,
+            total_queries=0,
+            operator_queries=0,
+            quoted_anchor_queries=0,
+            site_restricted_queries=0,
+            exclusion_queries=0,
+            fallback_queries=0,
+            authority_queries=0,
+            operator_coverage=0.0,
+            quoted_anchor_coverage=0.0,
+            site_restricted_coverage=0.0,
+            exclusion_coverage=0.0,
+            authority_coverage=0.0,
+            fallback_share=0.0,
+        )
+
+    operator_queries = sum(1 for _, query in layer_queries if _has_operator(query))
+    quoted_anchor_queries = sum(1 for _, query in layer_queries if _has_quoted_anchor(query))
+    site_restricted_queries = sum(1 for _, query in layer_queries if "site:" in query)
+    exclusion_queries = sum(1 for _, query in layer_queries if "-site:" in query)
+    fallback_queries = sum(1 for layer, _ in layer_queries if layer == "fallback")
+    authority_queries = sum(1 for _, query in layer_queries if _has_authority_surface(query))
+    return DorkPlanAudit(
+        attribute=plan.attribute,
+        total_queries=total,
+        operator_queries=operator_queries,
+        quoted_anchor_queries=quoted_anchor_queries,
+        site_restricted_queries=site_restricted_queries,
+        exclusion_queries=exclusion_queries,
+        fallback_queries=fallback_queries,
+        authority_queries=authority_queries,
+        operator_coverage=operator_queries / total,
+        quoted_anchor_coverage=quoted_anchor_queries / total,
+        site_restricted_coverage=site_restricted_queries / total,
+        exclusion_coverage=exclusion_queries / total,
+        authority_coverage=authority_queries / total,
+        fallback_share=fallback_queries / total,
+    )
+
+
+def audit_dorking_plans(places: list[dict[str, str]], attributes: list[str]) -> dict[str, object]:
+    audits: list[DorkPlanAudit] = []
+    for place in places:
+        for attribute in attributes:
+            audits.append(audit_multi_layer_plan(build_multi_layer_plan(place, attribute)))
+    totals = {
+        "plans": len(audits),
+        "queries": sum(audit.total_queries for audit in audits),
+        "operator_queries": sum(audit.operator_queries for audit in audits),
+        "quoted_anchor_queries": sum(audit.quoted_anchor_queries for audit in audits),
+        "site_restricted_queries": sum(audit.site_restricted_queries for audit in audits),
+        "exclusion_queries": sum(audit.exclusion_queries for audit in audits),
+        "fallback_queries": sum(audit.fallback_queries for audit in audits),
+        "authority_queries": sum(audit.authority_queries for audit in audits),
+    }
+    query_count = max(1, int(totals["queries"]))
+    summary = {
+        "operator_coverage": totals["operator_queries"] / query_count,
+        "quoted_anchor_coverage": totals["quoted_anchor_queries"] / query_count,
+        "site_restricted_coverage": totals["site_restricted_queries"] / query_count,
+        "exclusion_coverage": totals["exclusion_queries"] / query_count,
+        "authority_coverage": totals["authority_queries"] / query_count,
+        "fallback_share": totals["fallback_queries"] / query_count,
+    }
+    return {
+        "summary": summary,
+        "totals": totals,
+        "plans": [asdict(audit) for audit in audits],
+    }
 
 
 def rank_source(url: str, page_text: str = "", query: str = "") -> float:

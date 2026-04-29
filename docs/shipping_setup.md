@@ -37,6 +37,16 @@ python3 scripts/run_harness.py compare --input tests/fixtures/retrieval_replay_s
 python3 scripts/run_harness.py record --input tests/fixtures/retrieval_replay_sample.json
 ```
 
+### Dork operator audit
+
+```bash
+python3 scripts/run_harness.py dork-audit \
+  --input data/project_a_samples.parquet \
+  --limit 25
+```
+
+This scores generated search plans before live retrieval. The audit reports operator coverage, quoted-anchor coverage, `site:` coverage, aggregator-exclusion coverage, authority-query coverage, and fallback share. Use it as a deterministic gate before claiming that dorking changes are more targeted.
+
 ### Replay evaluation and reranking
 
 ```bash

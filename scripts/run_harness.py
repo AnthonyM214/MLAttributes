@@ -33,6 +33,7 @@ from places_attr_conflation.dataset import (
     write_dataset_summary,
     write_review_csv,
 )
+from places_attr_conflation.dorking import audit_dorking_plans
 from places_attr_conflation.golden import (
     PROJECT_A_BASELINES,
     build_project_a_agreement_labels,
@@ -143,6 +144,11 @@ def main() -> int:
     compare = subparsers.add_parser("compare", help="Compare retrieval arms from one replay file.")
     compare.add_argument("--input", required=True, help="Retrieval replay JSON file.")
 
+    dork_audit = subparsers.add_parser("dork-audit", help="Audit search-operator quality for generated dorking plans.")
+    dork_audit.add_argument("--input", help="Optional project_a parquet path. Defaults to data/project_a_samples.parquet when present.")
+    dork_audit.add_argument("--limit", type=int, default=25)
+    dork_audit.add_argument("--attribute", action="append", choices=["website", "phone", "address", "category", "name"])
+
     rerank = subparsers.add_parser("rerank", help="Train the optional tiny reranker from replay labels.")
     rerank.add_argument("--input", required=True, help="Retrieval replay JSON file.")
 
@@ -231,6 +237,25 @@ def main() -> int:
     elif args.command == "compare":
         episodes = load_retrieval_episodes(args.input)
         report = compare_arms(episodes)
+    elif args.command == "dork-audit":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        rows = export_project_a_review_rows(dataset_path, limit=args.limit)
+        places = [
+            {
+                "name": str(row.get("name") or row.get("base_name") or ""),
+                "city": "",
+                "region": "",
+                "address": str(row.get("address") or row.get("base_address") or ""),
+                "phone": str(row.get("phone") or row.get("base_phone") or ""),
+                "website": str(row.get("website") or row.get("base_website") or ""),
+            }
+            for row in rows
+        ]
+        report = audit_dorking_plans(places, args.attribute or ["website", "phone", "address", "category", "name"])
+        report["path"] = str(dataset_path)
+        report["rows"] = len(rows)
     elif args.command == "rerank":
         episodes = load_retrieval_episodes(args.input)
         report = compare_reranker_on_replay(episodes)
