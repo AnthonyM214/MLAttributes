@@ -58,6 +58,49 @@ class HarnessCliTests(unittest.TestCase):
         self.assertEqual(payload["totals"]["plans"], 3)
         self.assertGreater(payload["summary"]["operator_coverage"], 0.7)
         self.assertGreater(payload["summary"]["authority_coverage"], 0.7)
+        self.assertTrue(payload["gate"]["passed"])
+
+    def test_gated_retrieval_command_runs_audit_then_replay_then_ranker_export(self):
+        fixture = ROOT / "data" / "project_a_samples.parquet"
+        replay = ROOT / "tests" / "fixtures" / "retrieval_replay_sample.json"
+        completed = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "gated-retrieval",
+                "--audit-input",
+                str(fixture),
+                "--audit-limit",
+                "3",
+                "--attribute",
+                "website",
+                "--replay-input",
+                str(replay),
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertTrue(payload["audit_gate"]["passed"])
+        self.assertIn("retrieval", payload)
+        self.assertTrue(payload["retrieval_gate"]["passed"])
+        self.assertTrue(Path(payload["ranker_dataset"]["output_csv"]).exists())
+
+    def test_ranker_dataset_command_exports_candidate_csv(self):
+        replay = ROOT / "tests" / "fixtures" / "retrieval_replay_sample.json"
+        completed = subprocess.run(
+            ["python3", "scripts/run_harness.py", "ranker-dataset", "--input", str(replay), "--arm", "all"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertGreater(payload["rows"], 0)
+        self.assertGreater(payload["positive_rows"], 0)
+        self.assertTrue(Path(payload["output_csv"]).exists())
 
     def test_smoke_command_uses_replay_fallback_when_live_fails(self):
         fixture = ROOT / "tests" / "fixtures" / "retrieval_replay_sample.json"

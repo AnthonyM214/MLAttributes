@@ -3,12 +3,15 @@ import unittest
 from pathlib import Path
 
 from places_attr_conflation.harness import (
+    build_ranker_dataset_rows,
     compare_arms,
     compare_reranker_on_replay,
     dump_retrieval_episodes,
+    evaluate_dork_audit_gate,
     evaluate_final_decisions,
     evaluate_harness_report,
     evaluate_retrieval_episodes,
+    evaluate_retrieval_quality_gate,
     load_retrieval_episodes,
 )
 from places_attr_conflation.replay import FetchedPage, FinalDecision, ReplayEpisode, SearchAttempt
@@ -145,6 +148,33 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("replay", report)
         self.assertIn("retrieval", report)
         self.assertGreater(report["replay"]["selected"]["authoritative_found_rate"], 0.0)
+
+    def test_dork_audit_gate_blocks_weak_operator_plans(self):
+        weak = {
+            "summary": {
+                "operator_coverage": 0.1,
+                "quoted_anchor_coverage": 0.1,
+                "site_restricted_coverage": 0.0,
+                "authority_coverage": 0.1,
+                "fallback_share": 0.9,
+            }
+        }
+        report = evaluate_dork_audit_gate(weak)
+        self.assertFalse(report["passed"])
+        self.assertFalse(report["checks"]["site_restricted_coverage"])
+
+    def test_retrieval_quality_gate_compares_targeted_to_fallback(self):
+        retrieval = compare_arms([self._episode()])
+        decisions = evaluate_final_decisions([self._episode()])
+        report = evaluate_retrieval_quality_gate(retrieval, decisions)
+        self.assertTrue(report["passed"])
+        self.assertTrue(report["checks"]["citation_precision_not_worse"])
+
+    def test_ranker_dataset_rows_label_supporting_gold(self):
+        rows = build_ranker_dataset_rows([self._episode()], arm="all")
+        self.assertGreater(len(rows), 0)
+        self.assertGreater(sum(row["is_supporting_gold"] for row in rows), 0)
+        self.assertIn("source_url", rows[0])
 
 
 if __name__ == "__main__":

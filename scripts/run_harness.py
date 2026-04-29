@@ -19,11 +19,17 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from places_attr_conflation.harness import (
+    DorkAuditThresholds,
+    build_ranker_dataset_rows,
     compare_arms,
     compare_reranker_on_replay,
     dump_retrieval_episodes,
+    evaluate_dork_audit_gate,
+    evaluate_final_decisions,
     evaluate_harness_report,
+    evaluate_retrieval_quality_gate,
     load_retrieval_episodes,
+    write_ranker_dataset_csv,
 )
 from places_attr_conflation.dashboard import write_dashboard
 from places_attr_conflation.dataset import (
@@ -75,6 +81,39 @@ def _write_report(report: dict[str, object], output: str | None, command: str) -
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
     return out
+
+
+def _project_a_places(dataset_path: Path, limit: int) -> list[dict[str, str]]:
+    rows = export_project_a_review_rows(dataset_path, limit=limit)
+    return [
+        {
+            "name": str(row.get("name") or row.get("base_name") or ""),
+            "city": "",
+            "region": "",
+            "address": str(row.get("address") or row.get("base_address") or ""),
+            "phone": str(row.get("phone") or row.get("base_phone") or ""),
+            "website": str(row.get("website") or row.get("base_website") or ""),
+        }
+        for row in rows
+    ]
+
+
+def _audit_thresholds(args: argparse.Namespace) -> DorkAuditThresholds:
+    return DorkAuditThresholds(
+        min_operator_coverage=args.min_operator_coverage,
+        min_quoted_anchor_coverage=args.min_quoted_anchor_coverage,
+        min_site_restricted_coverage=args.min_site_restricted_coverage,
+        min_authority_coverage=args.min_authority_coverage,
+        max_fallback_share=args.max_fallback_share,
+    )
+
+
+def _add_audit_threshold_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--min-operator-coverage", type=float, default=0.75)
+    parser.add_argument("--min-quoted-anchor-coverage", type=float, default=0.70)
+    parser.add_argument("--min-site-restricted-coverage", type=float, default=0.35)
+    parser.add_argument("--min-authority-coverage", type=float, default=0.60)
+    parser.add_argument("--max-fallback-share", type=float, default=0.12)
 
 
 def _fetch_smoke_url(url: str, timeout: float) -> dict[str, object]:
@@ -148,6 +187,23 @@ def main() -> int:
     dork_audit.add_argument("--input", help="Optional project_a parquet path. Defaults to data/project_a_samples.parquet when present.")
     dork_audit.add_argument("--limit", type=int, default=25)
     dork_audit.add_argument("--attribute", action="append", choices=["website", "phone", "address", "category", "name"])
+    _add_audit_threshold_args(dork_audit)
+
+    gated = subparsers.add_parser("gated-retrieval", help="Run dork-audit first, then replay retrieval only if the audit passes.")
+    gated.add_argument("--audit-input", help="Optional project_a parquet path. Defaults to data/project_a_samples.parquet when present.")
+    gated.add_argument("--audit-limit", type=int, default=25)
+    gated.add_argument("--attribute", action="append", choices=["website", "phone", "address", "category", "name"])
+    gated.add_argument("--replay-input", required=True, help="Retrieval replay JSON file to evaluate after audit passes.")
+    gated.add_argument("--ranker-output", help="Optional CSV output for ranker candidate rows.")
+    gated.add_argument("--threshold", type=float, default=0.75)
+    gated.add_argument("--max-high-confidence-wrong-rate", type=float, default=0.25)
+    _add_audit_threshold_args(gated)
+
+    ranker_dataset = subparsers.add_parser("ranker-dataset", help="Export candidate evidence rows from replay for precision/recall ranker training.")
+    ranker_dataset.add_argument("--input", required=True, help="Retrieval replay JSON file.")
+    ranker_dataset.add_argument("--arm", default="targeted", choices=["targeted", "fallback", "all"])
+    ranker_dataset.add_argument("--threshold", type=float, default=0.75)
+    ranker_dataset.add_argument("--csv-output", help="Optional CSV output path.")
 
     rerank = subparsers.add_parser("rerank", help="Train the optional tiny reranker from replay labels.")
     rerank.add_argument("--input", required=True, help="Retrieval replay JSON file.")
@@ -241,21 +297,63 @@ def main() -> int:
         dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
         if dataset_path is None:
             raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
-        rows = export_project_a_review_rows(dataset_path, limit=args.limit)
-        places = [
-            {
-                "name": str(row.get("name") or row.get("base_name") or ""),
-                "city": "",
-                "region": "",
-                "address": str(row.get("address") or row.get("base_address") or ""),
-                "phone": str(row.get("phone") or row.get("base_phone") or ""),
-                "website": str(row.get("website") or row.get("base_website") or ""),
-            }
-            for row in rows
-        ]
+        places = _project_a_places(dataset_path, args.limit)
         report = audit_dorking_plans(places, args.attribute or ["website", "phone", "address", "category", "name"])
         report["path"] = str(dataset_path)
-        report["rows"] = len(rows)
+        report["rows"] = len(places)
+        report["gate"] = evaluate_dork_audit_gate(report, _audit_thresholds(args))
+    elif args.command == "gated-retrieval":
+        dataset_path = Path(args.audit_input) if args.audit_input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --audit-input.")
+        places = _project_a_places(dataset_path, args.audit_limit)
+        audit = audit_dorking_plans(
+            places,
+            args.attribute or ["website", "phone", "address", "category", "name"],
+        )
+        audit["path"] = str(dataset_path)
+        audit["rows"] = len(places)
+        audit_gate = evaluate_dork_audit_gate(audit, _audit_thresholds(args))
+        report = {"audit": audit, "audit_gate": audit_gate, "replay_input": str(args.replay_input)}
+        if audit_gate["passed"]:
+            episodes = load_retrieval_episodes(args.replay_input)
+            retrieval = compare_arms(episodes)
+            decisions = evaluate_final_decisions(episodes)
+            retrieval_gate = evaluate_retrieval_quality_gate(
+                retrieval,
+                decisions if decisions["total"] else None,
+                max_high_confidence_wrong_rate=args.max_high_confidence_wrong_rate,
+            )
+            ranker_rows = build_ranker_dataset_rows(episodes, arm="targeted", threshold=args.threshold)
+            csv_path = Path(args.ranker_output) if args.ranker_output else ROOT / "reports" / "ranker" / f"ranker_candidates_{_timestamp()}.csv"
+            write_ranker_dataset_csv(ranker_rows, csv_path)
+            report.update(
+                {
+                    "retrieval": retrieval,
+                    "decisions": decisions,
+                    "retrieval_gate": retrieval_gate,
+                    "ranker_dataset": {
+                        "rows": len(ranker_rows),
+                        "positive_rows": sum(int(row["is_supporting_gold"]) for row in ranker_rows),
+                        "output_csv": str(csv_path),
+                    },
+                }
+            )
+        else:
+            report["skipped"] = "Replay retrieval skipped because dork-audit gate did not pass."
+    elif args.command == "ranker-dataset":
+        episodes = load_retrieval_episodes(args.input)
+        rows = build_ranker_dataset_rows(episodes, arm=args.arm, threshold=args.threshold)
+        csv_path = Path(args.csv_output) if args.csv_output else ROOT / "reports" / "ranker" / f"ranker_candidates_{_timestamp()}.csv"
+        write_ranker_dataset_csv(rows, csv_path)
+        report = {
+            "input": str(args.input),
+            "arm": args.arm,
+            "rows": len(rows),
+            "positive_rows": sum(int(row["is_supporting_gold"]) for row in rows),
+            "selected_correct_rows": sum(int(row["selected_correct"]) for row in rows),
+            "output_csv": str(csv_path),
+        }
     elif args.command == "rerank":
         episodes = load_retrieval_episodes(args.input)
         report = compare_reranker_on_replay(episodes)

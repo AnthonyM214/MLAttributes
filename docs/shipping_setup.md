@@ -47,6 +47,21 @@ python3 scripts/run_harness.py dork-audit \
 
 This scores generated search plans before live retrieval. The audit reports operator coverage, quoted-anchor coverage, `site:` coverage, aggregator-exclusion coverage, authority-query coverage, and fallback share. Use it as a deterministic gate before claiming that dorking changes are more targeted.
 
+### Gated retrieval and ranker export
+
+```bash
+python3 scripts/run_harness.py gated-retrieval \
+  --audit-input data/project_a_samples.parquet \
+  --audit-limit 25 \
+  --replay-input tests/fixtures/retrieval_replay_sample.json
+
+python3 scripts/run_harness.py ranker-dataset \
+  --input tests/fixtures/retrieval_replay_sample.json \
+  --arm targeted
+```
+
+`gated-retrieval` runs `dork-audit` first and skips replay evaluation if the operator-quality gate fails. When the gate passes, it compares targeted, fallback, and all-layer retrieval, reports citation precision/recall/F1, top-1 authoritative rate, abstention, and high-confidence wrong rate, then writes candidate evidence rows under `reports/ranker/` for precision/recall ranker training.
+
 ### Replay evaluation and reranking
 
 ```bash

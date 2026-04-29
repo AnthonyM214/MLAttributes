@@ -12,6 +12,7 @@ re-run later from saved JSON without live network access.
 
 from __future__ import annotations
 
+import csv
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
@@ -39,6 +40,8 @@ class RetrievalArmMetrics:
     authoritative_found_rate: float
     useful_found_rate: float
     citation_precision: float
+    citation_recall: float
+    citation_f1: float
     top1_authoritative_rate: float
     average_search_attempts: float
     useful_attempts_per_case: float
@@ -54,6 +57,15 @@ class DecisionMetrics:
     accuracy: float
     high_confidence_wrong: int
     high_confidence_wrong_rate: float
+
+
+@dataclass(frozen=True)
+class DorkAuditThresholds:
+    min_operator_coverage: float = 0.75
+    min_quoted_anchor_coverage: float = 0.70
+    min_site_restricted_coverage: float = 0.35
+    min_authority_coverage: float = 0.60
+    max_fallback_share: float = 0.12
 
 
 def _normalize_value(attribute: str, value: str | None) -> str:
@@ -131,6 +143,8 @@ def evaluate_retrieval_episodes(
                 authoritative_found_rate=0.0,
                 useful_found_rate=0.0,
                 citation_precision=0.0,
+                citation_recall=0.0,
+                citation_f1=0.0,
                 top1_authoritative_rate=0.0,
                 average_search_attempts=0.0,
                 useful_attempts_per_case=0.0,
@@ -178,12 +192,20 @@ def evaluate_retrieval_episodes(
             citation_hits += 1 if selected_matches else 0
             top1_authoritative += 1 if selected_matches else 0
 
+    citation_precision = citation_hits / total
+    citation_recall = authoritative_found / total
+    citation_f1 = 0.0
+    if citation_precision + citation_recall:
+        citation_f1 = 2 * citation_precision * citation_recall / (citation_precision + citation_recall)
+
     metrics = RetrievalArmMetrics(
         arm=arm,
         total=total,
-        authoritative_found_rate=authoritative_found / total,
+        authoritative_found_rate=citation_recall,
         useful_found_rate=useful_found / total,
-        citation_precision=citation_hits / total,
+        citation_precision=citation_precision,
+        citation_recall=citation_recall,
+        citation_f1=citation_f1,
         top1_authoritative_rate=top1_authoritative / total,
         average_search_attempts=total_attempts / total,
         useful_attempts_per_case=useful_attempts / total,
@@ -329,6 +351,117 @@ def compare_arms(episodes: Iterable[ReplayEpisode], model: TinyLinearModel | Non
         "fallback": evaluate_retrieval_episodes(episodes, arm="fallback", model=model),
         "all": evaluate_retrieval_episodes(episodes, arm="all", model=model),
     }
+
+
+def evaluate_dork_audit_gate(
+    audit_report: dict[str, object],
+    thresholds: DorkAuditThresholds | None = None,
+) -> dict[str, object]:
+    thresholds = thresholds or DorkAuditThresholds()
+    summary = audit_report.get("summary", {}) if isinstance(audit_report, dict) else {}
+    checks = {
+        "operator_coverage": float(summary.get("operator_coverage", 0.0)) >= thresholds.min_operator_coverage,
+        "quoted_anchor_coverage": float(summary.get("quoted_anchor_coverage", 0.0)) >= thresholds.min_quoted_anchor_coverage,
+        "site_restricted_coverage": float(summary.get("site_restricted_coverage", 0.0)) >= thresholds.min_site_restricted_coverage,
+        "authority_coverage": float(summary.get("authority_coverage", 0.0)) >= thresholds.min_authority_coverage,
+        "fallback_share": float(summary.get("fallback_share", 1.0)) <= thresholds.max_fallback_share,
+    }
+    return {
+        "passed": all(checks.values()),
+        "checks": checks,
+        "thresholds": asdict(thresholds),
+        "summary": dict(summary),
+    }
+
+
+def evaluate_retrieval_quality_gate(
+    retrieval_report: dict[str, object],
+    decision_report: dict[str, object] | None = None,
+    *,
+    max_high_confidence_wrong_rate: float = 0.25,
+) -> dict[str, object]:
+    targeted = retrieval_report.get("targeted", {}) if isinstance(retrieval_report, dict) else {}
+    fallback = retrieval_report.get("fallback", {}) if isinstance(retrieval_report, dict) else {}
+    decisions = decision_report or {}
+    checks = {
+        "citation_precision_not_worse": float(targeted.get("citation_precision", 0.0)) >= float(fallback.get("citation_precision", 0.0)),
+        "top1_authoritative_not_worse": float(targeted.get("top1_authoritative_rate", 0.0)) >= float(fallback.get("top1_authoritative_rate", 0.0)),
+        "authoritative_found_not_worse": float(targeted.get("authoritative_found_rate", 0.0)) >= float(fallback.get("authoritative_found_rate", 0.0)),
+        "useful_found_not_worse": float(targeted.get("useful_found_rate", 0.0)) >= float(fallback.get("useful_found_rate", 0.0)),
+        "high_confidence_wrong_within_threshold": float(decisions.get("high_confidence_wrong_rate", 0.0)) <= max_high_confidence_wrong_rate if decisions else True,
+    }
+    return {
+        "passed": all(checks.values()),
+        "checks": checks,
+        "thresholds": {"max_high_confidence_wrong_rate": max_high_confidence_wrong_rate},
+        "targeted": targeted,
+        "fallback": fallback,
+        "decisions": decisions,
+    }
+
+
+def build_ranker_dataset_rows(
+    episodes: Iterable[ReplayEpisode],
+    *,
+    arm: str = "targeted",
+    threshold: float = 0.75,
+    model: TinyLinearModel | None = None,
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for episode in episodes:
+        selected_page: FetchedPage | None = None
+        selected_score = 0.0
+        scored_pages: list[tuple[SearchAttempt, FetchedPage, float, bool]] = []
+        for attempt in _arm_attempts(episode, arm):
+            for page in attempt.fetched_pages:
+                score = score_search_result(_result_from_page(page, attempt.layer), query=attempt.query, model=model)
+                matches_gold = _page_matches_gold(page, episode.attribute, episode.gold_value)
+                scored_pages.append((attempt, page, score, matches_gold))
+                if score > selected_score:
+                    selected_page = page
+                    selected_score = score
+
+        for attempt, page, score, matches_gold in scored_pages:
+            candidate_value = _page_value(page, episode.attribute)
+            is_selected = selected_page is page
+            rows.append(
+                {
+                    "case_id": episode.case_id,
+                    "attribute": episode.attribute,
+                    "place_name": episode.place.get("name", ""),
+                    "city": episode.place.get("city", ""),
+                    "region": episode.place.get("region", ""),
+                    "gold_value": episode.gold_value,
+                    "candidate_value": candidate_value,
+                    "matched_gold": int(matches_gold),
+                    "is_supporting_gold": int(matches_gold and score >= threshold),
+                    "is_selected": int(is_selected),
+                    "selected_correct": int(is_selected and matches_gold and score >= threshold),
+                    "source_url": page.url,
+                    "source_type": page.source_type,
+                    "layer": attempt.layer,
+                    "query": attempt.query,
+                    "score": round(score, 6),
+                    "recency_days": "" if page.recency_days is None else page.recency_days,
+                    "zombie_score": page.zombie_score,
+                    "identity_change_score": page.identity_change_score,
+                    "notes": page.notes,
+                }
+            )
+    return rows
+
+
+def write_ranker_dataset_csv(rows: list[dict[str, object]], output: str | Path) -> Path:
+    out = Path(output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if not rows:
+        out.write_text("", encoding="utf-8")
+        return out
+    with out.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+    return out
 
 
 def evaluate_resolver_manifest_rows(rows: list[dict[str, str]], attributes: Iterable[str]) -> dict[str, object]:
