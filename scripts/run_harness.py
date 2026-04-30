@@ -52,9 +52,12 @@ from places_attr_conflation.golden import (
     write_label_csv,
 )
 from places_attr_conflation.overture_context import (
+    build_overture_context_replay,
     connect_overture_duckdb,
+    dump_overture_context_replay,
     evaluate_overture_context,
     fetch_overture_context,
+    load_overture_context_replay,
     write_overture_context_decisions,
 )
 from places_attr_conflation.synthetic_evidence import (
@@ -171,6 +174,47 @@ def _run_smoke(urls: list[str], timeout: float, replay_input: str | None) -> dic
     }
 
 
+def _overture_context_rows(args: argparse.Namespace, dataset_path: Path, attributes: list[str]) -> list[dict[str, object]]:
+    rows = build_project_a_evaluation_rows(dataset_path, args.labels, args.baseline)
+    if not getattr(args, "all_labeled", False):
+        rows = [
+            row
+            for row in rows
+            if any(row.get(f"{attribute}_truth") and row.get(f"{attribute}_pair_differs") for attribute in attributes)
+        ]
+    return rows[: max(0, args.limit)]
+
+
+def _fetch_context_for_rows(
+    rows: list[dict[str, object]],
+    *,
+    bbox_margin: float,
+) -> tuple[dict[str, dict[str, list[dict[str, object]]]], list[dict[str, str]]]:
+    con = connect_overture_duckdb()
+    context_by_id: dict[str, dict[str, list[dict[str, object]]]] = {}
+    fetch_errors: list[dict[str, str]] = []
+    cached_by_source_id: dict[str, dict[str, list[dict[str, object]]]] = {}
+    for row in rows:
+        case_id = str(row.get("id") or "")
+        merged_context = {"places": [], "addresses": []}
+        for source_id in [case_id, str(row.get("base_id") or "")]:
+            if not source_id:
+                continue
+            if source_id in cached_by_source_id:
+                context = cached_by_source_id[source_id]
+            else:
+                try:
+                    context = fetch_overture_context(con, source_id, bbox_margin=bbox_margin)
+                except Exception as exc:  # pragma: no cover - live network path
+                    fetch_errors.append({"id": source_id, "case_id": case_id, "error": str(exc)})
+                    continue
+                cached_by_source_id[source_id] = context
+            merged_context["places"].extend(context["places"])
+            merged_context["addresses"].extend(context["addresses"])
+        context_by_id[case_id] = merged_context
+    return context_by_id, fetch_errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run reproducible baseline, replay, reranker, and smoke benchmarks.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -261,6 +305,20 @@ def main() -> int:
     overture_context.add_argument("--live", action="store_true", help="Fetch official Overture context from cloud GeoParquet.")
     overture_context.add_argument("--all-labeled", action="store_true", help="Evaluate all labeled rows, not just conflict rows.")
     overture_context.add_argument("--csv-output", help="Optional CSV output for per-attribute decisions.")
+
+    overture_record = subparsers.add_parser("overture-context-record", help="Fetch and cache official Overture context for labeled conflict rows.")
+    overture_record.add_argument("--input", help="Optional project_a parquet path. Defaults to data/project_a_samples.parquet when present.")
+    overture_record.add_argument("--labels", required=True, help="CSV with project_a golden label columns.")
+    overture_record.add_argument("--baseline", default="hybrid", choices=PROJECT_A_BASELINES)
+    overture_record.add_argument("--limit", type=int, default=25)
+    overture_record.add_argument("--attribute", action="append", choices=["website", "phone", "address", "category", "name"])
+    overture_record.add_argument("--bbox-margin", type=float, default=0.01)
+    overture_record.add_argument("--all-labeled", action="store_true")
+    overture_record.add_argument("--replay-output", help="Optional JSON output path for cached Overture context.")
+
+    overture_replay = subparsers.add_parser("overture-context-replay", help="Evaluate cached Overture context offline.")
+    overture_replay.add_argument("--input", required=True, help="JSON produced by overture-context-record.")
+    overture_replay.add_argument("--csv-output", help="Optional CSV output for per-attribute decisions.")
 
     agreement = subparsers.add_parser("agreement-labels", help="Generate silver labels where project_a base/current values normalize to agreement.")
     agreement.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
@@ -450,33 +508,10 @@ def main() -> int:
         if dataset_path is None:
             raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
         attributes = args.attribute or ["website", "phone", "address", "category", "name"]
-        rows = build_project_a_evaluation_rows(dataset_path, args.labels, args.baseline)
-        if not args.all_labeled:
-            rows = [
-                row
-                for row in rows
-                if any(row.get(f"{attribute}_truth") and row.get(f"{attribute}_pair_differs") for attribute in attributes)
-            ]
-        rows = rows[: max(0, args.limit)]
+        rows = _overture_context_rows(args, dataset_path, attributes)
         if not args.live:
             raise SystemExit("Pass --live to fetch official Overture context. Unit tests cover deterministic scoring without network.")
-        con = connect_overture_duckdb()
-        context_by_id = {}
-        fetch_errors = []
-        for row in rows:
-            case_id = str(row.get("id") or "")
-            merged_context = {"places": [], "addresses": []}
-            for source_id in [case_id, str(row.get("base_id") or "")]:
-                if not source_id:
-                    continue
-                try:
-                    context = fetch_overture_context(con, source_id, bbox_margin=args.bbox_margin)
-                except Exception as exc:  # pragma: no cover - live network path
-                    fetch_errors.append({"id": source_id, "case_id": case_id, "error": str(exc)})
-                    continue
-                merged_context["places"].extend(context["places"])
-                merged_context["addresses"].extend(context["addresses"])
-            context_by_id[case_id] = merged_context
+        context_by_id, fetch_errors = _fetch_context_for_rows(rows, bbox_margin=args.bbox_margin)
         report = evaluate_overture_context(
             rows,
             context_by_id,
@@ -492,6 +527,56 @@ def main() -> int:
                 "rows": len(rows),
                 "context_cases": len(context_by_id),
                 "fetch_errors": fetch_errors,
+                "output_csv": str(csv_path),
+            }
+        )
+    elif args.command == "overture-context-record":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        attributes = args.attribute or ["website", "phone", "address", "category", "name"]
+        rows = _overture_context_rows(args, dataset_path, attributes)
+        context_by_id, fetch_errors = _fetch_context_for_rows(rows, bbox_margin=args.bbox_margin)
+        replay_payload = build_overture_context_replay(
+            rows,
+            context_by_id,
+            dataset_path=dataset_path,
+            labels_path=args.labels,
+            baseline=args.baseline,
+            attributes=attributes,
+            fetch_errors=fetch_errors,
+        )
+        replay_path = Path(args.replay_output) if args.replay_output else ROOT / "reports" / "overture_context" / f"overture_context_replay_{_timestamp()}.json"
+        dump_overture_context_replay(replay_payload, replay_path)
+        eval_report = evaluate_overture_context(rows, context_by_id, attributes=attributes, conflicts_only=not args.all_labeled)
+        report = {
+            **eval_report,
+            "path": str(dataset_path),
+            "labels": str(args.labels),
+            "rows": len(rows),
+            "context_cases": len(context_by_id),
+            "fetch_errors": fetch_errors,
+            "replay_output": str(replay_path),
+        }
+    elif args.command == "overture-context-replay":
+        replay_payload = load_overture_context_replay(args.input)
+        attributes = replay_payload.get("attributes") or ["website", "phone", "address", "category", "name"]
+        rows = replay_payload["rows"]
+        context_by_id = replay_payload["context_by_id"]
+        report = evaluate_overture_context(
+            rows,
+            context_by_id,
+            attributes=attributes,
+            conflicts_only=True,
+        )
+        csv_path = Path(args.csv_output) if args.csv_output else ROOT / "reports" / "overture_context" / f"overture_context_decisions_{_timestamp()}.csv"
+        write_overture_context_decisions(report["decisions"], csv_path)
+        report.update(
+            {
+                "input": str(args.input),
+                "rows": len(rows),
+                "context_cases": len(context_by_id),
+                "fetch_errors": replay_payload.get("fetch_errors", []),
                 "output_csv": str(csv_path),
             }
         )

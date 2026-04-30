@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -23,8 +24,8 @@ class OvertureContextDecision:
     decision: str
     predicted_value: str
     confidence: float
-    current_support: int
-    base_support: int
+    current_support: float
+    base_support: float
     abstained: bool
     reason: str
 
@@ -77,15 +78,46 @@ def _address_point_value(row: dict[str, Any]) -> str:
     return " ".join(str(part) for part in parts if part not in (None, ""))
 
 
-def _supports_candidate(attribute: str, context_value: str, candidate_norm: str) -> bool:
+def _address_tokens(value: str) -> set[str]:
+    normalized = _normalize("address", value)
+    stopwords = {"st", "street", "rd", "road", "ave", "avenue", "dr", "drive", "ln", "lane", "the"}
+    return {token for token in re.findall(r"[a-z0-9]+", normalized) if token not in stopwords}
+
+
+def _address_support_score(context_value: str, candidate_norm: str) -> float:
+    normalized = _normalize("address", context_value)
+    if not normalized or not candidate_norm:
+        return 0.0
+    if not re.search(r"\d", normalized) or not re.search(r"\d", candidate_norm):
+        return 0.0
+    if normalized == candidate_norm:
+        return 1.0
+    if candidate_norm in normalized or normalized in candidate_norm:
+        return 0.9
+    context_tokens = _address_tokens(normalized)
+    candidate_tokens = _address_tokens(candidate_norm)
+    if not context_tokens or not candidate_tokens:
+        return 0.0
+    shared = context_tokens & candidate_tokens
+    if not shared:
+        return 0.0
+    numbers_context = set(re.findall(r"\d+", normalized))
+    numbers_candidate = set(re.findall(r"\d+", candidate_norm))
+    if numbers_context and numbers_candidate and not (numbers_context & numbers_candidate):
+        return 0.0
+    overlap = len(shared) / max(len(context_tokens), len(candidate_tokens))
+    return overlap if overlap >= 0.5 else 0.0
+
+
+def _support_score(attribute: str, context_value: str, candidate_norm: str) -> float:
     normalized = _normalize(attribute, context_value)
     if not normalized or not candidate_norm:
-        return False
-    if attribute == "address" and (not re.search(r"\d", normalized) or not re.search(r"\d", candidate_norm)):
-        return False
+        return 0.0
+    if attribute == "address":
+        return _address_support_score(context_value, candidate_norm)
     if normalized == candidate_norm:
-        return True
-    return attribute == "address" and (candidate_norm in normalized or normalized in candidate_norm)
+        return 1.0
+    return 0.0
 
 
 def score_overture_context_decision(
@@ -109,22 +141,18 @@ def score_overture_context_decision(
             reason="Current and base already normalize to the same value.",
         )
 
-    current_support = 0
-    base_support = 0
+    current_support = 0.0
+    base_support = 0.0
     for place in places:
         value = _context_value(attribute, place)
-        if _supports_candidate(attribute, value, current_norm):
-            current_support += 1
-        if _supports_candidate(attribute, value, base_norm):
-            base_support += 1
+        current_support += _support_score(attribute, value, current_norm)
+        base_support += _support_score(attribute, value, base_norm)
 
     if attribute == "address":
         for address in addresses:
             value = _address_point_value(address)
-            if _supports_candidate(attribute, value, current_norm):
-                current_support += 1
-            if _supports_candidate(attribute, value, base_norm):
-                base_support += 1
+            current_support += _support_score(attribute, value, current_norm)
+            base_support += _support_score(attribute, value, base_norm)
 
     total_support = current_support + base_support
     if not total_support:
@@ -295,6 +323,45 @@ def write_overture_context_decisions(rows: list[dict[str, Any]], output: str | P
         writer.writeheader()
         writer.writerows(rows)
     return out
+
+
+def dump_overture_context_replay(payload: dict[str, Any], output: str | Path) -> Path:
+    out = Path(output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str), encoding="utf-8")
+    return out
+
+
+def load_overture_context_replay(path: str | Path) -> dict[str, Any]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("Overture context replay must be a JSON object.")
+    if not isinstance(payload.get("rows"), list) or not isinstance(payload.get("context_by_id"), dict):
+        raise ValueError("Overture context replay requires rows and context_by_id.")
+    return payload
+
+
+def build_overture_context_replay(
+    rows: list[dict[str, Any]],
+    context_by_id: dict[str, dict[str, list[dict[str, Any]]]],
+    *,
+    dataset_path: str | Path,
+    labels_path: str | Path,
+    baseline: str,
+    attributes: Iterable[str],
+    fetch_errors: list[dict[str, str]] | None = None,
+) -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "mode": "overture_context_replay",
+        "dataset_path": str(dataset_path),
+        "labels_path": str(labels_path),
+        "baseline": baseline,
+        "attributes": list(attributes),
+        "rows": rows,
+        "context_by_id": context_by_id,
+        "fetch_errors": fetch_errors or [],
+    }
 
 
 def connect_overture_duckdb() -> duckdb.DuckDBPyConnection:

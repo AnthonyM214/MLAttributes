@@ -134,9 +134,18 @@ python3 scripts/run_harness.py overture-context \
   --baseline hybrid \
   --limit 12 \
   --live
+
+python3 scripts/run_harness.py overture-context-record \
+  --input data/project_a_samples.parquet \
+  --labels reports/golden/project_a_david_finalized_labels_<timestamp>.csv \
+  --baseline hybrid \
+  --limit 25
+
+python3 scripts/run_harness.py overture-context-replay \
+  --input reports/overture_context/overture_context_replay_<timestamp>.json
 ```
 
-This decodes Project A Overture/H3-style IDs into local bounding boxes, pulls official Overture `places/place` and `addresses/address` GeoParquet rows through DuckDB, and compares nearby context against current/base candidate values on labeled conflict rows. Use this as a live smoke benchmark for Overture-provided corroboration. Current live smoke results show high precision when context covers a row, but low coverage; cache fetched context into replay files before scaling the run.
+This decodes Project A Overture/H3-style IDs into local bounding boxes, pulls official Overture `places/place` and `addresses/address` GeoParquet rows through DuckDB, and compares nearby context against current/base candidate values on labeled conflict rows. Use `overture-context-record` to pay the live query cost once, then use `overture-context-replay` for deterministic offline evaluation. Current live smoke results show high precision when context covers a row, but low coverage; the next measurable work is raising address/category coverage without giving up the high-confidence-wrong reduction.
 
 ### User-friendly dashboard
 

@@ -1,7 +1,12 @@
 import unittest
+import tempfile
+from pathlib import Path
 
 from places_attr_conflation.overture_context import (
+    build_overture_context_replay,
+    dump_overture_context_replay,
     evaluate_overture_context,
+    load_overture_context_replay,
     score_overture_context_decision,
 )
 
@@ -54,6 +59,18 @@ class OvertureContextTests(unittest.TestCase):
         self.assertTrue(decision.abstained)
         self.assertEqual(decision.base_support, 0)
 
+    def test_address_token_overlap_supports_abbreviated_street_variants(self):
+        decision = score_overture_context_decision(
+            "address",
+            "550 71 Ave SE",
+            "170, 550 71 St SE",
+            [],
+            [{"number": "550", "street": "71 Avenue SE", "postcode": "T2H"}],
+        )
+
+        self.assertEqual(decision.decision, "current")
+        self.assertGreater(decision.confidence, 0.5)
+
     def test_context_evaluation_reports_conflict_metrics(self):
         rows = [
             {
@@ -75,6 +92,26 @@ class OvertureContextTests(unittest.TestCase):
         self.assertEqual(report["metrics"]["correct"], 1)
         self.assertEqual(report["baseline_metrics"]["correct"], 0)
         self.assertEqual(report["by_attribute"]["phone"]["precision"], 1.0)
+
+    def test_overture_context_replay_round_trips_rows_and_context(self):
+        rows = [{"id": "case-1", "base_id": "base-1", "address_truth": "1 Main St"}]
+        context = {"case-1": {"places": [], "addresses": [{"number": "1", "street": "Main St"}]}}
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "replay.json"
+            payload = build_overture_context_replay(
+                rows,
+                context,
+                dataset_path="data/project_a_samples.parquet",
+                labels_path="labels.csv",
+                baseline="hybrid",
+                attributes=["address"],
+            )
+            dump_overture_context_replay(payload, path)
+            loaded = load_overture_context_replay(path)
+
+        self.assertEqual(loaded["rows"], rows)
+        self.assertEqual(loaded["context_by_id"], context)
 
 
 if __name__ == "__main__":
