@@ -137,8 +137,12 @@ class OvertureContextTests(unittest.TestCase):
         audit = evaluate_overture_gap_dorks(report)
 
         self.assertGreater(len(rows), 0)
+        self.assertEqual(rows[0]["preferred_sources"], "official_site,government,business_registry")
+        self.assertEqual(rows[0]["layer"], "official")
         self.assertEqual(rows[0]["priority"], "baseline_wrong")
         self.assertGreater(audit["gap_cases"], 0)
+        self.assertEqual(audit["gap_cases_by_attribute"]["address"], 1)
+        self.assertEqual(audit["priority_counts"]["baseline_wrong"], 1)
         self.assertGreater(audit["audit"]["totals"]["queries"], 0)
 
 

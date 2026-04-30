@@ -425,7 +425,10 @@ def _place_from_decision(decision: dict[str, Any]) -> dict[str, str]:
     truth = str(decision.get("truth") or "")
     candidate = current or base or truth
     return {
-        "name": current if attribute == "name" else "",
+        # Use the strongest available anchor for query generation even when the
+        # target attribute is not the business name. This keeps the dork queue
+        # from degenerating into blank or nearly blank search templates.
+        "name": candidate,
         "city": "",
         "region": "",
         "address": candidate if attribute == "address" else "",
@@ -479,12 +482,17 @@ def build_overture_gap_dork_rows(
 def evaluate_overture_gap_dorks(overture_report: dict[str, Any]) -> dict[str, Any]:
     decisions = [row for row in overture_report.get("decisions", []) if isinstance(row, dict)]
     places_by_attribute: dict[str, list[dict[str, str]]] = {}
+    priority_counts: dict[str, int] = {"baseline_wrong": 0, "overture_abstained": 0}
     for decision in decisions:
         attribute = str(decision.get("attribute", ""))
         if attribute not in PROJECT_A_ATTRIBUTES:
             continue
-        if not decision.get("abstained") and decision.get("baseline_correct"):
+        is_abstained = bool(decision.get("abstained"))
+        baseline_wrong = not bool(decision.get("baseline_correct"))
+        if not ((is_abstained) or baseline_wrong):
             continue
+        priority = "baseline_wrong" if baseline_wrong else "overture_abstained"
+        priority_counts[priority] = priority_counts.get(priority, 0) + 1
         places_by_attribute.setdefault(attribute, []).append(_place_from_decision(decision))
     attributes = sorted(places_by_attribute)
     places = [place for attribute in attributes for place in places_by_attribute[attribute]]
@@ -495,6 +503,8 @@ def evaluate_overture_gap_dorks(overture_report: dict[str, Any]) -> dict[str, An
     }
     return {
         "gap_cases": len(places),
+        "gap_cases_by_attribute": {attribute: len(places_by_attribute[attribute]) for attribute in attributes},
+        "priority_counts": priority_counts,
         "attributes": attributes,
         "audit": audit,
     }
