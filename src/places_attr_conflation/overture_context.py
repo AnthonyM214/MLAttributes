@@ -11,6 +11,7 @@ from typing import Any, Iterable
 
 import duckdb
 
+from .dorking import audit_dorking_plans, build_multi_layer_plan
 from .golden import PROJECT_A_ATTRIBUTES, _normalize
 
 
@@ -82,6 +83,31 @@ def _address_tokens(value: str) -> set[str]:
     normalized = _normalize("address", value)
     stopwords = {"st", "street", "rd", "road", "ave", "avenue", "dr", "drive", "ln", "lane", "the"}
     return {token for token in re.findall(r"[a-z0-9]+", normalized) if token not in stopwords}
+
+
+def _has_number(value: str) -> bool:
+    return bool(re.search(r"\d", value or ""))
+
+
+def _has_numeric_range(value: str) -> bool:
+    return bool(re.search(r"\b\d+\s*[-/]\s*\d+\b", value or ""))
+
+
+def _baseline_is_high_risk(decision: dict[str, Any]) -> bool:
+    attribute = str(decision.get("attribute", ""))
+    baseline = str(decision.get("baseline_prediction") or "")
+    current = str(decision.get("current_value") or "")
+    base = str(decision.get("base_value") or "")
+    if not baseline:
+        return True
+    if attribute != "address":
+        return False
+    other = base if _normalize("address", baseline) == _normalize("address", current) else current
+    if not _has_number(baseline) and _has_number(other):
+        return True
+    if _has_numeric_range(baseline) and not _has_numeric_range(other):
+        return True
+    return False
 
 
 def _address_support_score(context_value: str, candidate_norm: str) -> float:
@@ -277,6 +303,31 @@ def evaluate_overture_context(
         attribute: _score_rows([row for row in decisions if row["attribute"] == attribute], high_confidence_threshold)
         for attribute in attributes
     }
+    gated_decisions: list[dict[str, Any]] = []
+    for row in decisions:
+        if not row["abstained"]:
+            gated_decisions.append({**row, "gated_source": "overture_context"})
+            continue
+        if _baseline_is_high_risk(row):
+            gated_decisions.append({**row, "gated_source": "abstain"})
+            continue
+        baseline_prediction = str(row.get("baseline_prediction") or "")
+        gated_decisions.append(
+            {
+                **row,
+                "decision": "baseline",
+                "predicted_value": baseline_prediction,
+                "confidence": row.get("baseline_confidence", 0.0),
+                "abstained": not bool(baseline_prediction),
+                "correct": bool(row.get("baseline_correct")),
+                "reason": "Accepted baseline after Overture abstention because candidate was not structurally high-risk.",
+                "gated_source": "baseline_safe_fallback",
+            }
+        )
+    gated_by_attribute = {
+        attribute: _score_rows([row for row in gated_decisions if row["attribute"] == attribute], high_confidence_threshold)
+        for attribute in attributes
+    }
     baseline_rows = [
         {
             "correct": row["baseline_correct"],
@@ -305,10 +356,13 @@ def evaluate_overture_context(
         "conflicts_only": conflicts_only,
         "total": len(decisions),
         "metrics": _score_rows(decisions, high_confidence_threshold),
+        "gated_metrics": _score_rows(gated_decisions, high_confidence_threshold),
         "baseline_metrics": _score_rows(baseline_rows, high_confidence_threshold),
         "by_attribute": by_attribute,
+        "gated_by_attribute": gated_by_attribute,
         "baseline_by_attribute": baseline_by_attribute,
         "decisions": decisions,
+        "gated_decisions": gated_decisions,
     }
 
 
@@ -362,6 +416,101 @@ def build_overture_context_replay(
         "context_by_id": context_by_id,
         "fetch_errors": fetch_errors or [],
     }
+
+
+def _place_from_decision(decision: dict[str, Any]) -> dict[str, str]:
+    attribute = str(decision.get("attribute", ""))
+    current = str(decision.get("current_value") or "")
+    base = str(decision.get("base_value") or "")
+    truth = str(decision.get("truth") or "")
+    candidate = current or base or truth
+    return {
+        "name": current if attribute == "name" else "",
+        "city": "",
+        "region": "",
+        "address": candidate if attribute == "address" else "",
+        "phone": candidate if attribute == "phone" else "",
+        "website": candidate if attribute == "website" else "",
+    }
+
+
+def build_overture_gap_dork_rows(
+    overture_report: dict[str, Any],
+    *,
+    include_baseline_wrong: bool = True,
+    include_abstained: bool = True,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for decision in overture_report.get("decisions", []):
+        if not isinstance(decision, dict):
+            continue
+        is_abstained = bool(decision.get("abstained"))
+        baseline_wrong = not bool(decision.get("baseline_correct"))
+        if not ((include_abstained and is_abstained) or (include_baseline_wrong and baseline_wrong)):
+            continue
+        attribute = str(decision.get("attribute", ""))
+        if attribute not in PROJECT_A_ATTRIBUTES:
+            continue
+        place = _place_from_decision(decision)
+        plan = build_multi_layer_plan(place, attribute)
+        priority = "baseline_wrong" if baseline_wrong else "overture_abstained"
+        for layer in plan.layers:
+            for query in layer.queries:
+                rows.append(
+                    {
+                        "id": decision.get("id", ""),
+                        "base_id": decision.get("base_id", ""),
+                        "attribute": attribute,
+                        "priority": priority,
+                        "truth": decision.get("truth", ""),
+                        "current_value": decision.get("current_value", ""),
+                        "base_value": decision.get("base_value", ""),
+                        "baseline_prediction": decision.get("baseline_prediction", ""),
+                        "baseline_correct": decision.get("baseline_correct", ""),
+                        "overture_abstained": is_abstained,
+                        "layer": layer.name,
+                        "query": query,
+                        "preferred_sources": ",".join(layer.preferred_sources),
+                    }
+                )
+    return rows
+
+
+def evaluate_overture_gap_dorks(overture_report: dict[str, Any]) -> dict[str, Any]:
+    decisions = [row for row in overture_report.get("decisions", []) if isinstance(row, dict)]
+    places_by_attribute: dict[str, list[dict[str, str]]] = {}
+    for decision in decisions:
+        attribute = str(decision.get("attribute", ""))
+        if attribute not in PROJECT_A_ATTRIBUTES:
+            continue
+        if not decision.get("abstained") and decision.get("baseline_correct"):
+            continue
+        places_by_attribute.setdefault(attribute, []).append(_place_from_decision(decision))
+    attributes = sorted(places_by_attribute)
+    places = [place for attribute in attributes for place in places_by_attribute[attribute]]
+    audit = audit_dorking_plans(places, attributes) if places and attributes else {
+        "summary": {},
+        "totals": {"plans": 0, "queries": 0},
+        "plans": [],
+    }
+    return {
+        "gap_cases": len(places),
+        "attributes": attributes,
+        "audit": audit,
+    }
+
+
+def write_overture_gap_dork_csv(rows: list[dict[str, Any]], output: str | Path) -> Path:
+    out = Path(output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if not rows:
+        out.write_text("", encoding="utf-8")
+        return out
+    with out.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+    return out
 
 
 def connect_overture_duckdb() -> duckdb.DuckDBPyConnection:

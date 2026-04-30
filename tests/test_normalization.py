@@ -19,6 +19,9 @@ class NormalizationTests(unittest.TestCase):
     def test_address_collapses_common_suffixes(self):
         self.assertEqual(normalize_address("100 Main Street, Suite 2, California"), "100 main st ste 2 ca")
 
+    def test_address_collapses_spaced_acronyms(self):
+        self.assertEqual(normalize_address("2 Z.A. de Cromel"), "2 za de cromel")
+
     def test_social_or_aggregator_detection(self):
         self.assertTrue(is_social_or_aggregator("https://www.yelp.com/biz/example"))
         self.assertFalse(is_social_or_aggregator("https://example.com"))
@@ -26,4 +29,3 @@ class NormalizationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

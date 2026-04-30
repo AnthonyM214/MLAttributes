@@ -53,11 +53,14 @@ from places_attr_conflation.golden import (
 )
 from places_attr_conflation.overture_context import (
     build_overture_context_replay,
+    build_overture_gap_dork_rows,
     connect_overture_duckdb,
     dump_overture_context_replay,
+    evaluate_overture_gap_dorks,
     evaluate_overture_context,
     fetch_overture_context,
     load_overture_context_replay,
+    write_overture_gap_dork_csv,
     write_overture_context_decisions,
 )
 from places_attr_conflation.synthetic_evidence import (
@@ -320,6 +323,10 @@ def main() -> int:
     overture_replay.add_argument("--input", required=True, help="JSON produced by overture-context-record.")
     overture_replay.add_argument("--csv-output", help="Optional CSV output for per-attribute decisions.")
 
+    overture_gap_dorks = subparsers.add_parser("overture-gap-dorks", help="Export targeted dork queue for Overture abstentions and high-risk baseline decisions.")
+    overture_gap_dorks.add_argument("--input", required=True, help="JSON produced by overture-context-record.")
+    overture_gap_dorks.add_argument("--csv-output", help="Optional CSV output for targeted dork queries.")
+
     agreement = subparsers.add_parser("agreement-labels", help="Generate silver labels where project_a base/current values normalize to agreement.")
     agreement.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
     agreement.add_argument("--limit", type=int, default=200)
@@ -580,6 +587,26 @@ def main() -> int:
                 "output_csv": str(csv_path),
             }
         )
+    elif args.command == "overture-gap-dorks":
+        replay_payload = load_overture_context_replay(args.input)
+        attributes = replay_payload.get("attributes") or ["website", "phone", "address", "category", "name"]
+        eval_report = evaluate_overture_context(
+            replay_payload["rows"],
+            replay_payload["context_by_id"],
+            attributes=attributes,
+            conflicts_only=True,
+        )
+        rows = build_overture_gap_dork_rows(eval_report)
+        csv_path = Path(args.csv_output) if args.csv_output else ROOT / "reports" / "overture_context" / f"overture_gap_dorks_{_timestamp()}.csv"
+        write_overture_gap_dork_csv(rows, csv_path)
+        report = {
+            "input": str(args.input),
+            "rows": len(rows),
+            "output_csv": str(csv_path),
+            "gap_dork_audit": evaluate_overture_gap_dorks(eval_report),
+            "gated_metrics": eval_report["gated_metrics"],
+            "baseline_metrics": eval_report["baseline_metrics"],
+        }
     elif args.command == "agreement-labels":
         dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
         if dataset_path is None:

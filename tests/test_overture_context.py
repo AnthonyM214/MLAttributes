@@ -4,7 +4,9 @@ from pathlib import Path
 
 from places_attr_conflation.overture_context import (
     build_overture_context_replay,
+    build_overture_gap_dork_rows,
     dump_overture_context_replay,
+    evaluate_overture_gap_dorks,
     evaluate_overture_context,
     load_overture_context_replay,
     score_overture_context_decision,
@@ -91,6 +93,7 @@ class OvertureContextTests(unittest.TestCase):
         self.assertEqual(report["total"], 1)
         self.assertEqual(report["metrics"]["correct"], 1)
         self.assertEqual(report["baseline_metrics"]["correct"], 0)
+        self.assertEqual(report["gated_metrics"]["correct"], 1)
         self.assertEqual(report["by_attribute"]["phone"]["precision"], 1.0)
 
     def test_overture_context_replay_round_trips_rows_and_context(self):
@@ -112,6 +115,31 @@ class OvertureContextTests(unittest.TestCase):
 
         self.assertEqual(loaded["rows"], rows)
         self.assertEqual(loaded["context_by_id"], context)
+
+    def test_gap_dork_rows_target_abstained_or_baseline_wrong_cases(self):
+        report = {
+            "decisions": [
+                {
+                    "id": "case-1",
+                    "base_id": "base-1",
+                    "attribute": "address",
+                    "truth": "1 Main St",
+                    "current_value": "1 Main St",
+                    "base_value": "The Triangle",
+                    "baseline_prediction": "The Triangle",
+                    "baseline_correct": False,
+                    "abstained": True,
+                }
+            ]
+        }
+
+        rows = build_overture_gap_dork_rows(report)
+        audit = evaluate_overture_gap_dorks(report)
+
+        self.assertGreater(len(rows), 0)
+        self.assertEqual(rows[0]["priority"], "baseline_wrong")
+        self.assertGreater(audit["gap_cases"], 0)
+        self.assertGreater(audit["audit"]["totals"]["queries"], 0)
 
 
 if __name__ == "__main__":

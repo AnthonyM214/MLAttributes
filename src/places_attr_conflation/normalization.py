@@ -78,6 +78,7 @@ def normalize_address(value: str | None) -> str:
     for pattern, replacement in replacements.items():
         value = re.sub(pattern, replacement, value)
     value = re.sub(r"[^a-z0-9]+", " ", value)
+    value = re.sub(r"\b([a-z])\s+([a-z])\b", r"\1\2", value)
     return re.sub(r"\s+", " ", value).strip()
 
 
@@ -86,4 +87,3 @@ def normalize_category(value: str | None) -> str:
         return ""
     value = value.lower().replace("_", " ").replace("-", " ")
     return re.sub(r"\s+", " ", value).strip()
-
