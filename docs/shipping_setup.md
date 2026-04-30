@@ -96,6 +96,10 @@ python3 scripts/run_harness.py import-james-golden \
   --input data/project_a_samples.parquet \
   --james-csv /home/anthony/projectterra_repos/James-Places-Attribute-Conflation/output_data/golden_dataset.csv
 
+python3 scripts/run_harness.py import-david-labels \
+  --david-csv /home/anthony/projectterra_repos/david-places-attributes-conflation-v2/data/labeling/finalized/final_labels.csv \
+  --split-name finalized
+
 python3 scripts/run_harness.py golden \
   --input data/project_a_samples.parquet \
   --labels tests/fixtures/project_a_labels_sample.csv
@@ -106,7 +110,7 @@ python3 scripts/run_harness.py conflictset \
   --baseline hybrid
 ```
 
-This scores deterministic `current`, `base`, `completeness`, `confidence`, `hybrid`, and `agreement_only` pair baselines against reviewed labels. `agreement-labels` can create a silver sanity-check label set from normalized base/current agreement, and `import-james-golden` can reuse the prior ProjectTerra 2,000-row golden CSV when that repo is available locally. Reports include all-row and conflict-only metrics, are written under `reports/golden/`, and are surfaced in the dashboard.
+This scores deterministic `current`, `base`, `completeness`, `confidence`, `hybrid`, and `agreement_only` pair baselines against reviewed labels. `agreement-labels` can create a silver sanity-check label set from normalized base/current agreement, `import-james-golden` can reuse the prior ProjectTerra 2,000-row golden CSV when that repo is available locally, and `import-david-labels` converts David's finalized/split attribute-level labels into this repo's standard label schema. Reports include all-row and conflict-only metrics, are written under `reports/golden/`, and are surfaced in the dashboard.
 
 ### Synthetic evidence validation
 
@@ -120,6 +124,19 @@ python3 scripts/run_harness.py evidence-eval \
 ```
 
 This validates resolver behavior against controlled authoritative, decoy, tied, missing, and canonical-truth edge cases. Synthetic evidence is for pipeline validation only; live or reviewed evidence is required for real-world improvement claims.
+
+### Official Overture context smoke benchmark
+
+```bash
+python3 scripts/run_harness.py overture-context \
+  --input data/project_a_samples.parquet \
+  --labels reports/golden/project_a_david_finalized_labels_<timestamp>.csv \
+  --baseline hybrid \
+  --limit 12 \
+  --live
+```
+
+This decodes Project A Overture/H3-style IDs into local bounding boxes, pulls official Overture `places/place` and `addresses/address` GeoParquet rows through DuckDB, and compares nearby context against current/base candidate values on labeled conflict rows. Use this as a live smoke benchmark for Overture-provided corroboration. Current live smoke results show high precision when context covers a row, but low coverage; cache fetched context into replay files before scaling the run.
 
 ### User-friendly dashboard
 

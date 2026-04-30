@@ -42,6 +42,9 @@ class GoldenAttributeMetrics:
     correct: int
     abstained: int
     accuracy: float
+    precision: float
+    recall: float
+    f1: float
     coverage: float
     abstention_rate: float
     high_confidence_wrong: int
@@ -266,6 +269,85 @@ def build_project_a_labels_from_james_golden(
     return labels
 
 
+def _david_attribute(raw: str) -> str:
+    normalized = (raw or "").strip().lower()
+    if normalized in {"web", "website", "websites"}:
+        return "website"
+    if normalized in {"phone", "phones"}:
+        return "phone"
+    if normalized in {"address", "addresses"}:
+        return "address"
+    if normalized in {"category", "categories"}:
+        return "category"
+    if normalized in {"name", "names"}:
+        return "name"
+    return normalized
+
+
+def _david_choice(row: dict[str, str]) -> str:
+    decision = (row.get("final_decision") or "").strip().lower()
+    if decision == "left":
+        return "current"
+    if decision == "right":
+        return "base"
+    if decision == "both":
+        return "same"
+    return ""
+
+
+def build_project_a_labels_from_david_finalized(
+    david_csv_path: str | Path,
+    *,
+    split_name: str = "finalized",
+) -> list[dict[str, str]]:
+    rows_by_pair: dict[tuple[str, str], dict[str, str]] = {}
+    skipped = 0
+    with Path(david_csv_path).open(newline="", encoding="utf-8", errors="replace") as handle:
+        for source in csv.DictReader(handle):
+            attribute = _david_attribute(source.get("attribute", ""))
+            if attribute not in PROJECT_A_ATTRIBUTES:
+                skipped += 1
+                continue
+            choice = _david_choice(source)
+            if not choice:
+                skipped += 1
+                continue
+            pair_id = str(source.get("pair_id") or "")
+            base_id = str(source.get("base_id") or "")
+            if not pair_id and not base_id:
+                skipped += 1
+                continue
+            key = (pair_id, base_id)
+            row = rows_by_pair.get(key)
+            if row is None:
+                row = {field: "" for field in LABEL_FIELDNAMES}
+                row["id"] = pair_id
+                row["base_id"] = base_id
+                row["label_status"] = f"david_{split_name}"
+                row["notes"] = f"Imported from david finalized labels split={split_name}."
+                rows_by_pair[key] = row
+            row[f"{attribute}_truth_choice"] = choice
+            row[f"{attribute}_label_source"] = "david_final_labels"
+            details = [
+                f"split={split_name}",
+                f"task_id={source.get('task_id', '')}",
+                f"decision={source.get('final_decision', '')}",
+                f"reason={source.get('final_reason_code', '')}",
+                f"class={source.get('conflict_class', '')}",
+            ]
+            existing_notes = row["notes"]
+            note = "; ".join(part for part in details if part and not part.endswith("="))
+            row["notes"] = f"{existing_notes} {attribute}: {note}".strip()
+
+    labels = list(rows_by_pair.values())
+    for row in labels:
+        empty_count = sum(1 for attribute in PROJECT_A_ATTRIBUTES if not row.get(f"{attribute}_truth_choice") and not row.get(f"{attribute}_truth_value"))
+        if skipped:
+            row["notes"] = f"{row['notes']} skipped_rows={skipped}."
+        row["notes"] = f"{row['notes']} labeled_attributes={len(PROJECT_A_ATTRIBUTES) - empty_count}."
+    return labels
+
+
 def _score_attribute(rows: Iterable[dict[str, object]], attribute: str, high_confidence_threshold: float) -> GoldenAttributeMetrics:
     total = covered = correct = abstained = high_confidence_wrong = 0
     for row in rows:
@@ -284,13 +366,22 @@ def _score_attribute(rows: Iterable[dict[str, object]], attribute: str, high_con
         elif confidence >= high_confidence_threshold:
             high_confidence_wrong += 1
 
+    precision = correct / covered if covered else 0.0
+    recall = correct / total if total else 0.0
+    f1 = 0.0
+    if precision + recall:
+        f1 = 2 * precision * recall / (precision + recall)
+
     return GoldenAttributeMetrics(
         attribute=attribute,
         total=total,
         covered=covered,
         correct=correct,
         abstained=abstained,
-        accuracy=correct / covered if covered else 0.0,
+        accuracy=precision,
+        precision=precision,
+        recall=recall,
+        f1=f1,
         coverage=covered / total if total else 0.0,
         abstention_rate=abstained / total if total else 0.0,
         high_confidence_wrong=high_confidence_wrong,

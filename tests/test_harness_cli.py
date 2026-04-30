@@ -311,6 +311,29 @@ class HarnessCliTests(unittest.TestCase):
         self.assertEqual(payload["rows"], 2)
         self.assertTrue(Path(payload["output_csv"]).exists())
 
+    def test_import_david_labels_command_writes_attribute_level_label_csv(self):
+        david = ROOT / "tests" / "fixtures" / "david_final_labels_sample.csv"
+        completed = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "import-david-labels",
+                "--david-csv",
+                str(david),
+                "--split-name",
+                "fixture",
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["label_type"], "david_attribute_level_labels")
+        self.assertEqual(payload["rows"], 2)
+        self.assertEqual(payload["attribute_counts"]["website"], 2)
+        self.assertTrue(Path(payload["output_csv"]).exists())
+
 
 if __name__ == "__main__":
     unittest.main()

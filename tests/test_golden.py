@@ -9,6 +9,7 @@ from places_attr_conflation.golden import (
     build_project_a_agreement_labels,
     build_project_a_conflict_review_rows,
     build_project_a_evaluation_rows,
+    build_project_a_labels_from_david_finalized,
     build_project_a_labels_from_james_golden,
     evaluate_project_a_golden,
     load_label_rows,
@@ -174,6 +175,31 @@ class GoldenTests(unittest.TestCase):
         self.assertEqual(rows[0]["phone_truth_choice"], "same")
         self.assertEqual(rows[1]["name_truth_choice"], "base")
         self.assertEqual(report["baselines"]["hybrid"]["metrics"]["website"]["total"], 2)
+
+    def test_david_final_labels_import_attribute_level_choices(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            parquet = root / "project_a_samples.parquet"
+            labels = root / "labels.csv"
+            _write_project_a_parquet(parquet)
+            david = Path(__file__).resolve().parent / "fixtures" / "david_final_labels_sample.csv"
+
+            rows = build_project_a_labels_from_david_finalized(david, split_name="fixture")
+            write_label_csv(rows, labels)
+            report = evaluate_project_a_golden(parquet, labels, baselines=["hybrid", "agreement_only"])
+
+        self.assertEqual(len(rows), 2)
+        by_id = {row["id"]: row for row in rows}
+        self.assertEqual(by_id["1"]["website_truth_choice"], "current")
+        self.assertEqual(by_id["1"]["phone_truth_choice"], "same")
+        self.assertEqual(by_id["2"]["website_truth_choice"], "base")
+        self.assertEqual(by_id["2"]["name_truth_choice"], "base")
+        self.assertEqual(by_id["2"]["category_truth_choice"], "same")
+        self.assertEqual(by_id["2"]["address_truth_choice"], "")
+        self.assertEqual(report["baselines"]["hybrid"]["metrics"]["website"]["total"], 2)
+        self.assertIn("precision", report["baselines"]["hybrid"]["metrics"]["website"])
+        self.assertIn("recall", report["baselines"]["hybrid"]["metrics"]["website"])
+        self.assertIn("f1", report["baselines"]["hybrid"]["metrics"]["website"])
 
     def test_build_evaluation_rows_keeps_truth_source_for_audit(self):
         with tempfile.TemporaryDirectory() as tmpdir:

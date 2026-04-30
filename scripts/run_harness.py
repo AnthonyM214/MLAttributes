@@ -44,10 +44,18 @@ from places_attr_conflation.golden import (
     PROJECT_A_BASELINES,
     build_project_a_agreement_labels,
     build_project_a_conflict_review_rows,
+    build_project_a_evaluation_rows,
+    build_project_a_labels_from_david_finalized,
     build_project_a_labels_from_james_golden,
     evaluate_project_a_golden,
     write_conflict_csv,
     write_label_csv,
+)
+from places_attr_conflation.overture_context import (
+    connect_overture_duckdb,
+    evaluate_overture_context,
+    fetch_overture_context,
+    write_overture_context_decisions,
 )
 from places_attr_conflation.synthetic_evidence import (
     evaluate_synthetic_evidence,
@@ -65,7 +73,7 @@ DEFAULT_SMOKE_URLS = [
 
 
 def _timestamp() -> str:
-    return datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+    return datetime.now(UTC).strftime("%Y%m%d_%H%M%S_%f")
 
 
 def _default_output_path(command: str) -> Path:
@@ -243,6 +251,17 @@ def main() -> int:
     evidence_eval.add_argument("--min-confidence", type=float, default=0.55)
     evidence_eval.add_argument("--min-support-score", type=float, default=0.55)
 
+    overture_context = subparsers.add_parser("overture-context", help="Evaluate candidate choices against official nearby Overture Places/Addresses context.")
+    overture_context.add_argument("--input", help="Optional project_a parquet path. Defaults to data/project_a_samples.parquet when present.")
+    overture_context.add_argument("--labels", required=True, help="CSV with project_a golden label columns.")
+    overture_context.add_argument("--baseline", default="hybrid", choices=PROJECT_A_BASELINES)
+    overture_context.add_argument("--limit", type=int, default=10, help="Max labeled rows to evaluate.")
+    overture_context.add_argument("--attribute", action="append", choices=["website", "phone", "address", "category", "name"])
+    overture_context.add_argument("--bbox-margin", type=float, default=0.01)
+    overture_context.add_argument("--live", action="store_true", help="Fetch official Overture context from cloud GeoParquet.")
+    overture_context.add_argument("--all-labeled", action="store_true", help="Evaluate all labeled rows, not just conflict rows.")
+    overture_context.add_argument("--csv-output", help="Optional CSV output for per-attribute decisions.")
+
     agreement = subparsers.add_parser("agreement-labels", help="Generate silver labels where project_a base/current values normalize to agreement.")
     agreement.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
     agreement.add_argument("--limit", type=int, default=200)
@@ -252,6 +271,10 @@ def main() -> int:
     james.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
     james.add_argument("--james-csv", default="/home/anthony/projectterra_repos/James-Places-Attribute-Conflation/output_data/golden_dataset.csv")
     james.add_argument("--limit", type=int)
+
+    david = subparsers.add_parser("import-david-labels", help="Convert David attribute-level finalized labels into project_a label schema.")
+    david.add_argument("--david-csv", default="/home/anthony/projectterra_repos/david-places-attributes-conflation-v2/data/labeling/finalized/final_labels.csv")
+    david.add_argument("--split-name", default="finalized")
 
     dashboard = subparsers.add_parser("dashboard", help="Render a compact benchmark dashboard from saved reports.")
     dashboard.add_argument("--reports-root", default=str(ROOT / "reports"))
@@ -422,6 +445,56 @@ def main() -> int:
             min_confidence=args.min_confidence,
             min_support_score=args.min_support_score,
         )
+    elif args.command == "overture-context":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        attributes = args.attribute or ["website", "phone", "address", "category", "name"]
+        rows = build_project_a_evaluation_rows(dataset_path, args.labels, args.baseline)
+        if not args.all_labeled:
+            rows = [
+                row
+                for row in rows
+                if any(row.get(f"{attribute}_truth") and row.get(f"{attribute}_pair_differs") for attribute in attributes)
+            ]
+        rows = rows[: max(0, args.limit)]
+        if not args.live:
+            raise SystemExit("Pass --live to fetch official Overture context. Unit tests cover deterministic scoring without network.")
+        con = connect_overture_duckdb()
+        context_by_id = {}
+        fetch_errors = []
+        for row in rows:
+            case_id = str(row.get("id") or "")
+            merged_context = {"places": [], "addresses": []}
+            for source_id in [case_id, str(row.get("base_id") or "")]:
+                if not source_id:
+                    continue
+                try:
+                    context = fetch_overture_context(con, source_id, bbox_margin=args.bbox_margin)
+                except Exception as exc:  # pragma: no cover - live network path
+                    fetch_errors.append({"id": source_id, "case_id": case_id, "error": str(exc)})
+                    continue
+                merged_context["places"].extend(context["places"])
+                merged_context["addresses"].extend(context["addresses"])
+            context_by_id[case_id] = merged_context
+        report = evaluate_overture_context(
+            rows,
+            context_by_id,
+            attributes=attributes,
+            conflicts_only=not args.all_labeled,
+        )
+        csv_path = Path(args.csv_output) if args.csv_output else ROOT / "reports" / "overture_context" / f"overture_context_decisions_{_timestamp()}.csv"
+        write_overture_context_decisions(report["decisions"], csv_path)
+        report.update(
+            {
+                "path": str(dataset_path),
+                "labels": str(args.labels),
+                "rows": len(rows),
+                "context_cases": len(context_by_id),
+                "fetch_errors": fetch_errors,
+                "output_csv": str(csv_path),
+            }
+        )
     elif args.command == "agreement-labels":
         dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
         if dataset_path is None:
@@ -447,6 +520,22 @@ def main() -> int:
             "rows": len(rows),
             "output_csv": str(csv_path),
             "label_type": "prior_projectterra_golden",
+            "preview": rows[:3],
+        }
+    elif args.command == "import-david-labels":
+        rows = build_project_a_labels_from_david_finalized(args.david_csv, split_name=args.split_name)
+        csv_path = write_label_csv(rows, ROOT / "reports" / "golden" / f"project_a_david_{args.split_name}_labels_{_timestamp()}.csv")
+        attribute_counts = {
+            attribute: sum(1 for row in rows if row.get(f"{attribute}_truth_choice") or row.get(f"{attribute}_truth_value"))
+            for attribute in ["website", "phone", "address", "category", "name"]
+        }
+        report = {
+            "source_csv": str(args.david_csv),
+            "rows": len(rows),
+            "output_csv": str(csv_path),
+            "label_type": "david_attribute_level_labels",
+            "split_name": args.split_name,
+            "attribute_counts": attribute_counts,
             "preview": rows[:3],
         }
     elif args.command == "dashboard":
