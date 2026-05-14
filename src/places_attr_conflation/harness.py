@@ -13,21 +13,26 @@ re-run later from saved JSON without live network access.
 from __future__ import annotations
 
 import csv
+from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
 
 from .evaluation import evaluate_rows
+from .manifest import EvidenceItem
+from .dorking import website_domain_from_url
 from .replay import FetchedPage, ReplayEpisode, SearchAttempt, dump_replay_corpus, load_replay_corpus
 from .reproduce import reproduce_resolvepoi_baseline
 from .retrieval import SearchResult, score_search_result
-from .resolver import NORMALIZERS
+from .resolver import NORMALIZERS, resolve_attribute
 from .small_model import TinyLinearModel, TrainingExample, build_feature_vector, train_tiny_model
 
 
 TARGETED_LAYERS = ("official", "corroboration", "freshness")
 FALLBACK_LAYER = "fallback"
 HIGH_CONFIDENCE_THRESHOLD = 0.75
+AUTHORITATIVE_SOURCE_TYPES = {"official_site", "government", "business_registry"}
+NON_CITATION_SOURCE_TYPES = {"aggregator", "social"}
 
 # Backward-compatible aliases for older tests and callers.
 RetrievalEpisode = ReplayEpisode
@@ -66,6 +71,25 @@ class DorkAuditThresholds:
     min_site_restricted_coverage: float = 0.35
     min_authority_coverage: float = 0.60
     max_fallback_share: float = 0.12
+
+
+@dataclass(frozen=True)
+class WebsiteAuthorityMetrics:
+    total: int
+    official_pages_found: int
+    official_pages_found_rate: float
+    same_domain_query_covered: int
+    same_domain_query_coverage_rate: float
+    selected_official: int
+    selected_official_rate: float
+    false_official: int
+    false_official_rate: float
+    authoritative_found_rate: float
+    citation_precision_proxy: float
+    top1_authoritative_rate: float
+    delta_vs_fallback_authoritative: float
+    delta_vs_fallback_citation_precision_proxy: float
+    source_type_distribution: dict[str, int]
 
 
 def _normalize_value(attribute: str, value: str | None) -> str:
@@ -125,6 +149,104 @@ def dump_retrieval_episodes(episodes: Iterable[ReplayEpisode], path: str | Path)
 
 def load_retrieval_episodes(path: str | Path) -> list[ReplayEpisode]:
     return load_replay_corpus(path)
+
+
+def _dedupe_pages_by_url(pages: Iterable[FetchedPage]) -> list[FetchedPage]:
+    by_url: dict[str, FetchedPage] = {}
+    for page in pages:
+        key = page.url.strip()
+        if not key:
+            continue
+        existing = by_url.get(key)
+        if existing is None or len(page.page_text) > len(existing.page_text):
+            by_url[key] = page
+    return [by_url[url] for url in sorted(by_url)]
+
+
+def _merge_episode_group(episodes: list[ReplayEpisode]) -> ReplayEpisode:
+    first = sorted(episodes, key=lambda episode: episode.to_dict().get("case_id", ""))[0]
+    attempts_by_key: dict[tuple[str, str], list[FetchedPage]] = defaultdict(list)
+    for episode in episodes:
+        for attempt in episode.search_attempts:
+            attempts_by_key[(attempt.layer, attempt.query)].extend(attempt.fetched_pages)
+    attempts = [
+        SearchAttempt(layer=layer, query=query, fetched_pages=_dedupe_pages_by_url(pages))
+        for (layer, query), pages in sorted(attempts_by_key.items(), key=lambda item: item[0])
+    ]
+    final_decision = next((episode.final_decision for episode in episodes if episode.final_decision is not None), None)
+    return ReplayEpisode(
+        case_id=first.case_id,
+        attribute=first.attribute,
+        place=first.place,
+        gold_value=first.gold_value,
+        search_attempts=attempts,
+        final_decision=final_decision,
+    )
+
+
+def merge_replay_corpora(input_dir: str | Path, output: str | Path) -> dict[str, object]:
+    """Merge downloaded collector replay files into one deterministic corpus."""
+    root = Path(input_dir)
+    files = sorted(path for path in root.glob("*.json") if path.is_file())
+    report = merge_replay_files(files, output)
+    report["input_dir"] = str(root)
+    return report
+
+
+def merge_replay_files(files: Iterable[str | Path], output: str | Path) -> dict[str, object]:
+    """Merge explicit replay corpus files into one deterministic corpus."""
+    replay_files = sorted(Path(path) for path in files)
+    grouped: dict[tuple[str, str], list[ReplayEpisode]] = defaultdict(list)
+    input_episode_count = 0
+    for path in replay_files:
+        episodes = load_replay_corpus(path)
+        input_episode_count += len(episodes)
+        # Round-trip through the dataclasses to normalize accepted legacy schemas.
+        for episode in episodes:
+            grouped[(episode.case_id, episode.attribute)].append(ReplayEpisode.from_dict(episode.to_dict()))
+
+    merged = [_merge_episode_group(group) for _, group in sorted(grouped.items(), key=lambda item: item[0])]
+    dump_replay_corpus(merged, output)
+    # Validate the just-written stable schema.
+    validated = load_replay_corpus(output)
+    return {
+        "output": str(Path(output)),
+        "input_files": len(replay_files),
+        "input_file_paths": [str(path) for path in replay_files],
+        "input_episodes": input_episode_count,
+        "merged_episodes": len(validated),
+        "deduped_episodes": input_episode_count - len(validated),
+        "merged_attempts": sum(len(episode.search_attempts) for episode in validated),
+        "merged_pages": sum(len(attempt.fetched_pages) for episode in validated for attempt in episode.search_attempts),
+    }
+
+
+def replay_stats(episodes: Iterable[ReplayEpisode]) -> dict[str, object]:
+    episodes = list(episodes)
+    pages = [page for episode in episodes for attempt in episode.search_attempts for page in attempt.fetched_pages]
+    pages_by_source = Counter(page.source_type for page in pages)
+    by_attribute: dict[str, dict[str, int]] = defaultdict(lambda: {"pages": 0, "pages_with_extracted_value": 0})
+    for episode in episodes:
+        for attempt in episode.search_attempts:
+            for page in attempt.fetched_pages:
+                by_attribute[episode.attribute]["pages"] += 1
+                if page.extracted_values.get(episode.attribute):
+                    by_attribute[episode.attribute]["pages_with_extracted_value"] += 1
+    extracted_rates = {
+        attribute: (counts["pages_with_extracted_value"] / counts["pages"] if counts["pages"] else 0.0)
+        for attribute, counts in sorted(by_attribute.items())
+    }
+    authoritative_pages = sum(1 for page in pages if page.source_type in AUTHORITATIVE_SOURCE_TYPES)
+    return {
+        "episodes_total": len(episodes),
+        "episodes_by_attribute": dict(sorted(Counter(episode.attribute for episode in episodes).items())),
+        "attempts_total": sum(len(episode.search_attempts) for episode in episodes),
+        "pages_total": len(pages),
+        "pages_by_source_type": dict(sorted(pages_by_source.items())),
+        "authoritative_pages": authoritative_pages,
+        "authoritative_pages_rate": authoritative_pages / len(pages) if pages else 0.0,
+        "pages_with_extracted_value_rate": extracted_rates,
+    }
 
 
 def evaluate_retrieval_episodes(
@@ -214,6 +336,44 @@ def evaluate_retrieval_episodes(
     return asdict(metrics)
 
 
+def evaluate_retrieval_proof(episodes: Iterable[ReplayEpisode]) -> dict[str, object]:
+    """Compare targeted and fallback with source-type citation precision proxies."""
+    episodes = list(episodes)
+    compare = compare_arms(episodes)
+    for arm in ("targeted", "fallback", "all"):
+        arm_attempts = [attempt for episode in episodes for attempt in _arm_attempts(episode, arm)]
+        authoritative_attempts = [
+            idx
+            for idx, attempt in enumerate(arm_attempts)
+            if any(page.source_type in AUTHORITATIVE_SOURCE_TYPES for page in attempt.fetched_pages)
+        ]
+        selected_pages: list[FetchedPage] = []
+        for attempt in arm_attempts:
+            selected, _ = _attempt_select(attempt, query=attempt.query)
+            if selected is not None:
+                selected_pages.append(selected)
+        source_precision_hits = sum(1 for page in selected_pages if page.source_type not in NON_CITATION_SOURCE_TYPES)
+        compare[arm]["avg_attempts_per_authoritative"] = (
+            len(arm_attempts) / len(authoritative_attempts) if authoritative_attempts else 0.0
+        )
+        compare[arm]["citation_precision_proxy"] = (
+            source_precision_hits / len(selected_pages) if selected_pages else 0.0
+        )
+    targeted = compare["targeted"]
+    fallback = compare["fallback"]
+    return {
+        "targeted": targeted,
+        "fallback": fallback,
+        "all": compare["all"],
+        "deltas": {
+            "authoritative_found_rate": float(targeted["authoritative_found_rate"]) - float(fallback["authoritative_found_rate"]),
+            "citation_precision_proxy": float(targeted["citation_precision_proxy"]) - float(fallback["citation_precision_proxy"]),
+            "avg_attempts_per_authoritative": float(targeted["avg_attempts_per_authoritative"])
+            - float(fallback["avg_attempts_per_authoritative"]),
+        },
+    }
+
+
 def evaluate_final_decisions(
     episodes: Iterable[ReplayEpisode],
     high_confidence_threshold: float = HIGH_CONFIDENCE_THRESHOLD,
@@ -262,6 +422,206 @@ def evaluate_final_decisions(
         high_confidence_wrong_rate=high_confidence_wrong / total,
     )
     return asdict(metrics)
+
+
+def _episode_evidence(episode: ReplayEpisode) -> list[EvidenceItem]:
+    evidence: list[EvidenceItem] = []
+    for attempt in episode.search_attempts:
+        for page in attempt.fetched_pages:
+            extracted = page.extracted_values.get(episode.attribute, "")
+            if not extracted and episode.attribute == "website" and page.source_type == "official_site":
+                extracted = page.url
+            evidence.append(
+                EvidenceItem(
+                    source_type=page.source_type,
+                    url=page.url,
+                    attribute=episode.attribute,
+                    extracted_value=extracted,
+                    query=attempt.query,
+                    recency_days=page.recency_days,
+                    zombie_score=page.zombie_score,
+                    identity_change_score=page.identity_change_score,
+                    notes=page.notes,
+                )
+            )
+    return evidence
+
+
+def _candidate_values(episode: ReplayEpisode) -> list[str]:
+    values = [
+        episode.gold_value,
+        episode.place.get("current_value", ""),
+        episode.place.get("base_value", ""),
+        episode.place.get(episode.attribute, ""),
+    ]
+    for attempt in episode.search_attempts:
+        for page in attempt.fetched_pages:
+            value = page.extracted_values.get(episode.attribute, "")
+            if not value and episode.attribute == "website" and page.source_type == "official_site":
+                value = page.url
+            values.append(value)
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        normalized = _normalize_value(episode.attribute, value)
+        if value and normalized not in seen:
+            seen.add(normalized)
+            output.append(value)
+    return output
+
+
+def _best_selected_page(
+    episode: ReplayEpisode,
+    arm: str = "targeted",
+    model: TinyLinearModel | None = None,
+) -> tuple[FetchedPage | None, float]:
+    selected: FetchedPage | None = None
+    selected_score = 0.0
+    for attempt in _arm_attempts(episode, arm):
+        best, score = _attempt_select(attempt, query=attempt.query, model=model)
+        if best is not None and score > selected_score:
+            selected = best
+            selected_score = score
+    return selected, selected_score
+
+
+def _episode_has_same_domain_query(episode: ReplayEpisode) -> bool:
+    candidate_urls = [
+        episode.gold_value,
+        episode.place.get("website", ""),
+        episode.place.get("current_value", ""),
+        episode.place.get("base_value", ""),
+    ]
+    domains = {website_domain_from_url(url) for url in candidate_urls if url}
+    domains.discard("")
+    if not domains:
+        return False
+    for attempt in episode.search_attempts:
+        query = attempt.query.lower()
+        if any(f"site:{domain}" in query for domain in domains):
+            return True
+    return False
+
+
+def evaluate_website_authority_replay(
+    episodes: Iterable[ReplayEpisode],
+    *,
+    arm: str = "targeted",
+    model: TinyLinearModel | None = None,
+    threshold: float = 0.75,
+) -> dict[str, object]:
+    episodes = [episode for episode in episodes if episode.attribute == "website"]
+    compare = compare_arms(episodes, model=model)
+    arm_report = compare.get(arm, {}) if isinstance(compare, dict) else {}
+    fallback_report = compare.get("fallback", {}) if isinstance(compare, dict) else {}
+
+    official_pages_found = 0
+    same_domain_query_covered = 0
+    selected_official = 0
+    false_official = 0
+    source_type_distribution: dict[str, int] = {}
+
+    for episode in episodes:
+        pages = [page for attempt in episode.search_attempts for page in attempt.fetched_pages]
+        for page in pages:
+            source_type_distribution[page.source_type] = source_type_distribution.get(page.source_type, 0) + 1
+        if any(page.source_type in AUTHORITATIVE_SOURCE_TYPES for page in pages):
+            official_pages_found += 1
+        if _episode_has_same_domain_query(episode):
+            same_domain_query_covered += 1
+        selected, selected_score = _best_selected_page(episode, arm=arm, model=model)
+        if selected is not None and selected_score >= threshold and selected.source_type in AUTHORITATIVE_SOURCE_TYPES:
+            selected_official += 1
+            if not _page_matches_gold(selected, episode.attribute, episode.gold_value):
+                false_official += 1
+
+    total = len(episodes)
+    return asdict(
+        WebsiteAuthorityMetrics(
+            total=total,
+            official_pages_found=official_pages_found,
+            official_pages_found_rate=official_pages_found / total if total else 0.0,
+            same_domain_query_covered=same_domain_query_covered,
+            same_domain_query_coverage_rate=same_domain_query_covered / total if total else 0.0,
+            selected_official=selected_official,
+            selected_official_rate=selected_official / total if total else 0.0,
+            false_official=false_official,
+            false_official_rate=false_official / total if total else 0.0,
+            authoritative_found_rate=float(arm_report.get("authoritative_found_rate", 0.0)),
+            citation_precision_proxy=float(arm_report.get("citation_precision_proxy", 0.0)),
+            top1_authoritative_rate=float(arm_report.get("top1_authoritative_rate", 0.0)),
+            delta_vs_fallback_authoritative=float(arm_report.get("authoritative_found_rate", 0.0))
+            - float(fallback_report.get("authoritative_found_rate", 0.0)),
+            delta_vs_fallback_citation_precision_proxy=float(arm_report.get("citation_precision_proxy", 0.0))
+            - float(fallback_report.get("citation_precision_proxy", 0.0)),
+            source_type_distribution=dict(sorted(source_type_distribution.items())),
+        )
+    )
+
+
+def evaluate_resolver_on_replay(
+    episodes: Iterable[ReplayEpisode],
+    high_confidence_threshold: float = HIGH_CONFIDENCE_THRESHOLD,
+) -> dict[str, object]:
+    episodes = list(episodes)
+    rows: list[dict[str, object]] = []
+    by_attribute: dict[str, dict[str, int]] = defaultdict(
+        lambda: {"total": 0, "gold_total": 0, "correct": 0, "abstained": 0, "high_confidence_wrong": 0}
+    )
+    for episode in episodes:
+        decision = resolve_attribute(episode.attribute, _candidate_values(episode), _episode_evidence(episode))
+        has_gold = bool(_normalize_value(episode.attribute, episode.gold_value))
+        predicted = _normalize_value(episode.attribute, decision.decision)
+        gold = _normalize_value(episode.attribute, episode.gold_value)
+        correct = has_gold and bool(predicted) and predicted == gold and not decision.abstained
+        high_conf_wrong = has_gold and not correct and not decision.abstained and decision.confidence >= high_confidence_threshold
+        row = {
+            "case_id": episode.case_id,
+            "attribute": episode.attribute,
+            "gold_value": episode.gold_value,
+            "decision": decision.decision,
+            "confidence": decision.confidence,
+            "abstained": decision.abstained,
+            "has_gold": has_gold,
+            "correct": correct,
+            "high_confidence_wrong": high_conf_wrong,
+            "reason": decision.reason,
+        }
+        rows.append(row)
+        stats = by_attribute[episode.attribute]
+        stats["total"] += 1
+        stats["gold_total"] += int(has_gold)
+        stats["correct"] += int(correct)
+        stats["abstained"] += int(decision.abstained)
+        stats["high_confidence_wrong"] += int(high_conf_wrong)
+
+    per_attribute: dict[str, dict[str, object]] = {}
+    total_gold = sum(stats["gold_total"] for stats in by_attribute.values())
+    total_correct = sum(stats["correct"] for stats in by_attribute.values())
+    total_abstained = sum(stats["abstained"] for stats in by_attribute.values())
+    total_hc_wrong = sum(stats["high_confidence_wrong"] for stats in by_attribute.values())
+    for attribute, stats in sorted(by_attribute.items()):
+        gold_total = stats["gold_total"]
+        correct = stats["correct"]
+        abstained = stats["abstained"]
+        hc_wrong = stats["high_confidence_wrong"]
+        per_attribute[attribute] = {
+            **stats,
+            "accuracy": correct / gold_total if gold_total else 0.0,
+            "f1_proxy": correct / gold_total if gold_total else 0.0,
+            "abstention_rate": abstained / stats["total"] if stats["total"] else 0.0,
+            "high_confidence_wrong_rate": hc_wrong / gold_total if gold_total else 0.0,
+        }
+    return {
+        "episodes_total": len(episodes),
+        "gold_episodes_total": total_gold,
+        "accuracy": total_correct / total_gold if total_gold else 0.0,
+        "f1_proxy": total_correct / total_gold if total_gold else 0.0,
+        "abstention_rate": total_abstained / len(episodes) if episodes else 0.0,
+        "high_confidence_wrong_rate": total_hc_wrong / total_gold if total_gold else 0.0,
+        "per_attribute": per_attribute,
+        "decisions": rows,
+    }
 
 
 def build_reranker_training_examples(episodes: Iterable[ReplayEpisode]) -> list[TrainingExample]:

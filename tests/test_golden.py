@@ -93,13 +93,14 @@ class GoldenTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            report = evaluate_project_a_golden(parquet, labels, baselines=["current", "base", "hybrid", "agreement_only"])
+            report = evaluate_project_a_golden(parquet, labels, baselines=["current", "base", "hybrid", "smart_hybrid", "agreement_only"])
 
         self.assertEqual(report["label_rows"], 2)
         self.assertEqual(report["baselines"]["current"]["metrics"]["phone"]["accuracy"], 1.0)
         self.assertEqual(report["baselines"]["base"]["metrics"]["phone"]["accuracy"], 1.0)
         self.assertLess(report["baselines"]["current"]["metrics"]["website"]["accuracy"], 1.0)
         self.assertGreaterEqual(report["baselines"]["hybrid"]["metrics"]["website"]["accuracy"], 0.5)
+        self.assertGreaterEqual(report["baselines"]["smart_hybrid"]["metrics"]["website"]["accuracy"], 0.5)
         self.assertEqual(report["baselines"]["current"]["conflict_metrics"]["website"]["total"], 2)
         self.assertLess(report["baselines"]["current"]["conflict_metrics"]["website"]["accuracy"], 1.0)
         self.assertEqual(report["baselines"]["agreement_only"]["conflict_metrics"]["website"]["abstention_rate"], 1.0)
@@ -221,6 +222,30 @@ class GoldenTests(unittest.TestCase):
         self.assertEqual(rows[0]["website_truth_source"], "explicit")
         self.assertEqual(rows[0]["website_prediction"], "https://example.com")
         self.assertTrue(rows[0]["website_pair_differs"])
+
+    def test_smart_hybrid_prefers_official_website_and_name_over_higher_confidence_base(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            parquet = root / "project_a_samples.parquet"
+            labels = root / "labels.csv"
+            _write_project_a_parquet(parquet)
+            labels.write_text(
+                "\n".join(
+                    [
+                        "id,base_id,website_truth_choice,website_truth_value,name_truth_choice,name_truth_value",
+                        "2,b2,current,,current,",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            report = evaluate_project_a_golden(parquet, labels, baselines=["hybrid", "smart_hybrid"])
+
+        self.assertEqual(report["baselines"]["hybrid"]["metrics"]["website"]["accuracy"], 0.0)
+        self.assertEqual(report["baselines"]["smart_hybrid"]["metrics"]["website"]["accuracy"], 1.0)
+        self.assertEqual(report["baselines"]["hybrid"]["metrics"]["name"]["accuracy"], 0.0)
+        self.assertEqual(report["baselines"]["smart_hybrid"]["metrics"]["name"]["accuracy"], 1.0)
 
 
 if __name__ == "__main__":

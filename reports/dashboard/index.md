@@ -2,9 +2,18 @@
 
 ## What Is Stopping Us
 
-- Retrieval proof is still small-sample: targeted authoritative found is 75.0% versus fallback 0.0% on 4 replay cases.
+- Retrieval proof is still small-sample: targeted authoritative found is 100.0% versus fallback 0.0% on 1 replay cases.
 - The reranker is still optional because it has not beaten the heuristic on replay.
 - Resolver improvement over the 200-row ResolvePOI baseline is not yet proven on a larger labeled evidence corpus.
+
+## At a Glance
+
+- Verdict: Targeted search is ahead of loose search on replay.
+- Authoritative found: 100.0% vs 0.0% (100.0 pts)
+- Citation precision: 100.0% vs 0.0%
+- Top-1 authoritative: 100.0% vs 0.0%
+- Average attempts: 1.000
+- Conflict dork queue: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_20260514_083943_510840.csv`
 
 ## Current Benchmarks
 
@@ -34,9 +43,38 @@
 
 | Arm | Auth Found | Useful Found | Citation Precision | Top-1 Authoritative | Avg Attempts |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| targeted | 75.0% | 100.0% | 75.0% | 75.0% | 1.000 |
-| fallback | 0.0% | 0.0% | 0.0% | 0.0% | 1.000 |
-| all | 75.0% | 100.0% | 75.0% | 75.0% | 2.000 |
+| targeted | 100.0% | 100.0% | 100.0% | 100.0% | 1.000 |
+| fallback | 0.0% | 0.0% | 0.0% | 0.0% | 0.000 |
+| all | 100.0% | 100.0% | 100.0% | 100.0% | 1.000 |
+
+### Website Authority
+
+- Website episodes: 1
+- Official pages found: 100.0%
+- Same-domain queries: 0.0%
+- Selected official: 100.0%
+- False official rate: 0.0%
+- Targeted authoritative found: 100.0%
+
+### Replay Coverage
+
+- Episodes: 1
+- Attempts: 1
+- Pages: 1
+- Authoritative pages rate: 100.0%
+- Last merged replay: /home/anthony/Overture/MLAttributes/reports/replay/merged_20260514_084120_942466.json
+
+### Batch Progress
+
+| Batch | Cases | Cases With Pages | Pages |
+| 1 | 250 | 9 | 16 |
+| 2 | 250 | 1 | 2 |
+| 3 | 250 | 1 | 2 |
+| 4 | 250 | 0 | 0 |
+| 5 | 250 | 1 | 6 |
+| 6 | 250 | 1 | 6 |
+| 7 | 250 | 1 | 2 |
+| 8 | 65 | 0 | 0 |
 
 ### Reranker
 
@@ -84,9 +122,14 @@
 
 - `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json`
 - `combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json`
-- `compare`: `/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_005926.json`
-- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_005928.json`
-- `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260425_005848.json`
-- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260425_005929.json`
-- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_005846.json`
-- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_005847.json`
+- `compare`: `/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_20260514_084120_949081.json`
+- `conflict_dorks`: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_20260514_083943_510840.csv`
+- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260514_084012_408657.json`
+- `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260514_083918_232943.json`
+- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260514_084057_653676.json`
+- `merged_replay`: `/home/anthony/Overture/MLAttributes/reports/replay/merged_20260514_084120_942466.json`
+- `replay_stats`: `/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260514_084120_948291.json`
+- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260514_083907_548991.json`
+- `resolver_replay`: `/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_20260514_084120_949809.json`
+- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260514_083914_747630.json`
+- `website_authority`: `/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_20260514_083919_876463.json`

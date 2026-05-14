@@ -10,6 +10,8 @@ from places_attr_conflation.harness import (
     evaluate_dork_audit_gate,
     evaluate_final_decisions,
     evaluate_harness_report,
+    evaluate_resolver_on_replay,
+    evaluate_website_authority_replay,
     evaluate_retrieval_episodes,
     evaluate_retrieval_quality_gate,
     load_retrieval_episodes,
@@ -149,6 +151,18 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("retrieval", report)
         self.assertGreater(report["replay"]["selected"]["authoritative_found_rate"], 0.0)
 
+    def test_website_authority_report_tracks_same_domain_and_false_official_rates(self):
+        episode = self._episode()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "replay.json"
+            dump_retrieval_episodes([episode], path)
+            report = evaluate_website_authority_replay(load_retrieval_episodes(path))
+        self.assertEqual(report["total"], 1)
+        self.assertEqual(report["official_pages_found_rate"], 1.0)
+        self.assertEqual(report["selected_official_rate"], 1.0)
+        self.assertEqual(report["false_official_rate"], 0.0)
+        self.assertEqual(report["authoritative_found_rate"], 1.0)
+
     def test_dork_audit_gate_blocks_weak_operator_plans(self):
         weak = {
             "summary": {
@@ -175,6 +189,48 @@ class HarnessTests(unittest.TestCase):
         self.assertGreater(len(rows), 0)
         self.assertGreater(sum(row["is_supporting_gold"] for row in rows), 0)
         self.assertIn("source_url", rows[0])
+
+    def test_resolver_replay_ignores_blank_nonofficial_website_urls(self):
+        episode = ReplayEpisode(
+            case_id="blank-registry",
+            attribute="website",
+            place={"current_value": "https://old.example", "base_value": "https://example.com/contact"},
+            gold_value="https://example.com/contact",
+            search_attempts=[
+                SearchAttempt(
+                    layer="official",
+                    query="example official website",
+                    fetched_pages=[
+                        FetchedPage(
+                            url="https://example.com/contact",
+                            title="Example contact",
+                            page_text="Official contact page",
+                            source_type="official_site",
+                            extracted_values={"website": "https://example.com/contact"},
+                        )
+                    ],
+                ),
+                SearchAttempt(
+                    layer="fallback",
+                    query="example business registry",
+                    fetched_pages=[
+                        FetchedPage(
+                            url="https://find-and-update.company-information.service.gov.uk/company/00000000",
+                            title="Example Ltd",
+                            page_text="Registry page without a website field",
+                            source_type="government",
+                            extracted_values={},
+                        )
+                    ],
+                ),
+            ],
+        )
+
+        report = evaluate_resolver_on_replay([episode])
+
+        self.assertEqual(report["accuracy"], 1.0)
+        self.assertEqual(report["abstention_rate"], 0.0)
+        self.assertEqual(report["high_confidence_wrong_rate"], 0.0)
 
 
 if __name__ == "__main__":

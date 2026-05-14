@@ -22,6 +22,30 @@ NORMALIZERS = {
     "category": normalize_category,
 }
 
+ATTRIBUTE_MIN_SUPPORT = {
+    "website": 0.65,
+    "category": 0.65,
+    "name": 0.60,
+    "phone": 0.55,
+    "address": 0.55,
+}
+
+ATTRIBUTE_MIN_CONFIDENCE = {
+    "website": 0.58,
+    "category": 0.60,
+    "name": 0.58,
+    "phone": 0.55,
+    "address": 0.55,
+}
+
+ATTRIBUTE_MIN_MARGIN = {
+    "website": 0.08,
+    "category": 0.08,
+    "name": 0.06,
+    "phone": 0.05,
+    "address": 0.05,
+}
+
 
 def resolve_attribute(
     attribute: str,
@@ -54,8 +78,12 @@ def resolve_attribute(
     total_score = sum(scores.values())
     confidence = best_score / total_score if total_score else 0.0
     margin = best_score - second_score
+    support_floor = max(min_support_score, ATTRIBUTE_MIN_SUPPORT.get(attribute, min_support_score))
+    confidence_floor = max(min_confidence, ATTRIBUTE_MIN_CONFIDENCE.get(attribute, min_confidence))
+    margin_floor = ATTRIBUTE_MIN_MARGIN.get(attribute, 0.0)
+    best_item_score = max((item.score() for item in supporting[best_value]), default=0.0)
 
-    if best_score < min_support_score:
+    if best_item_score < support_floor:
         return AttributeDecision(
             attribute,
             "",
@@ -65,7 +93,7 @@ def resolve_attribute(
             abstained=True,
         )
 
-    if confidence < min_confidence or margin <= 0:
+    if confidence < confidence_floor or margin <= margin_floor:
         return AttributeDecision(
             attribute,
             "",

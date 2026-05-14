@@ -53,8 +53,21 @@ code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }
 <section class='cards'>
 <div class='card'><div class='label'>Raw Pair Rows</div><div class='value'>2000</div></div>
 <div class='card'><div class='label'>Website Baseline</div><div class='value'>36.0%</div></div>
-<div class='card'><div class='label'>Targeted Auth Found</div><div class='value'>75.0%</div></div>
+<div class='card'><div class='label'>Targeted Auth Found</div><div class='value'>100.0%</div></div>
+<div class='card'><div class='label'>Website Official Coverage</div><div class='value'>100.0%</div></div>
+<div class='card'><div class='label'>False Official</div><div class='value'>0.0%</div></div>
+<div class='card'><div class='label'>Replay Episodes</div><div class='value'>1</div></div>
 <div class='card'><div class='label'>Resolver Abstention</div><div class='value'>25.0%</div></div>
+</section>
+<section class='panel'>
+<h2>At a Glance</h2>
+<p><strong>Targeted search is ahead of loose search on replay.</strong></p>
+<ul>
+<li>Authoritative found: 100.0% vs 0.0% (100.0 pts)</li>
+<li>Citation precision: 100.0% vs 0.0%</li>
+<li>Top-1 authoritative: 100.0% vs 0.0%</li>
+<li>Average attempts: 1.000</li>
+</ul>
 </section>
 <section class='panel'>
 <h2>What Is Stopping Us</h2>
@@ -69,6 +82,7 @@ code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }
 <button class='tab active' data-view='overview'>Overview</button>
 <button class='tab' data-view='baseline'>Baseline</button>
 <button class='tab' data-view='retrieval'>Retrieval</button>
+<button class='tab' data-view='progress'>Batch Progress</button>
 <button class='tab' data-view='golden'>Golden</button>
 <button class='tab' data-view='evidence'>Evidence</button>
 <button class='tab' data-view='reports'>Reports</button>
@@ -85,6 +99,14 @@ code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }
 <li>Base websites present: 99.9%</li>
 <li>Phones present: 94.5%</li>
 <li>Base phones present: 99.8%</li>
+</ul></div>
+<div class='panel'><h3>Website Authority</h3><ul>
+<li>Website episodes: 1</li>
+<li>Official pages found: 100.0%</li>
+<li>Same-domain queries: 0.0%</li>
+<li>Selected official: 100.0%</li>
+<li>False official rate: 0.0%</li>
+<li>Targeted authoritative found: 100.0%</li>
 </ul></div>
 <div class='panel'><h3>Reranker</h3><ul>
 <li>Training examples: 9</li>
@@ -113,9 +135,9 @@ code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }
 <div class='split'>
 <div class='panel'><h3>Retrieval Arms</h3>
 <table><thead><tr><th>Arm</th><th>Auth Found</th><th>Useful Found</th><th>Citation Precision</th><th>Top-1 Authoritative</th><th>Avg Attempts</th></tr></thead><tbody>
-<tr><td>targeted</td><td>75.0%</td><td>100.0%</td><td>75.0%</td><td>75.0%</td><td>1.000</td></tr>
-<tr><td>fallback</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>1.000</td></tr>
-<tr><td>all</td><td>75.0%</td><td>100.0%</td><td>75.0%</td><td>75.0%</td><td>2.000</td></tr>
+<tr><td>targeted</td><td>100.0%</td><td>100.0%</td><td>100.0%</td><td>100.0%</td><td>1.000</td></tr>
+<tr><td>fallback</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.000</td></tr>
+<tr><td>all</td><td>100.0%</td><td>100.0%</td><td>100.0%</td><td>100.0%</td><td>1.000</td></tr>
 </tbody></table></div>
 <div class='panel'><h3>Resolver Decisions</h3><ul>
 <li>Accuracy: 50.0%</li>
@@ -123,6 +145,27 @@ code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }
 <li>High-confidence wrong rate: 25.0%</li>
 <li>Cases: 4</li>
 </ul></div>
+</div></div>
+<div id='progress' class='view'>
+<div class='split'>
+<div class='panel'><h3>Replay Coverage</h3><ul>
+<li>Episodes: 1</li>
+<li>Attempts: 1</li>
+<li>Pages: 1</li>
+<li>Authoritative pages rate: 100.0%</li>
+<li>Last merged replay: /home/anthony/Overture/MLAttributes/reports/replay/merged_20260514_084120_942466.json</li>
+</ul></div>
+<div class='panel'><h3>Batch Progress</h3>
+<table><thead><tr><th>Batch</th><th>Cases</th><th>Cases With Pages</th><th>Pages</th></tr></thead><tbody>
+<tr><td>1</td><td>250</td><td>9</td><td>16</td></tr>
+<tr><td>2</td><td>250</td><td>1</td><td>2</td></tr>
+<tr><td>3</td><td>250</td><td>1</td><td>2</td></tr>
+<tr><td>4</td><td>250</td><td>0</td><td>0</td></tr>
+<tr><td>5</td><td>250</td><td>1</td><td>6</td></tr>
+<tr><td>6</td><td>250</td><td>1</td><td>6</td></tr>
+<tr><td>7</td><td>250</td><td>1</td><td>2</td></tr>
+<tr><td>8</td><td>65</td><td>0</td><td>0</td></tr>
+</tbody></table></div>
 </div></div>
 <div id='golden' class='view'>
 <div class='panel'><h3>Project A Golden Labels</h3>
@@ -150,12 +193,17 @@ code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }
 <div class='panel'><h3>Latest Report Files</h3><ul class='path-list'>
 <li><strong>baseline</strong>: <code>/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json</code></li>
 <li><strong>combined</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json</code></li>
-<li><strong>compare</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/compare_20260425_005926.json</code></li>
-<li><strong>dataset</strong>: <code>/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260425_005928.json</code></li>
-<li><strong>evidence</strong>: <code>/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260425_005848.json</code></li>
-<li><strong>golden</strong>: <code>/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260425_005929.json</code></li>
-<li><strong>rerank</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260425_005846.json</code></li>
-<li><strong>smoke</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260425_005847.json</code></li>
+<li><strong>compare</strong>: <code>/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_20260514_084120_949081.json</code></li>
+<li><strong>conflict_dorks</strong>: <code>/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_20260514_083943_510840.csv</code></li>
+<li><strong>dataset</strong>: <code>/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260514_084012_408657.json</code></li>
+<li><strong>evidence</strong>: <code>/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260514_083918_232943.json</code></li>
+<li><strong>golden</strong>: <code>/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260514_084057_653676.json</code></li>
+<li><strong>merged_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/replay/merged_20260514_084120_942466.json</code></li>
+<li><strong>replay_stats</strong>: <code>/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260514_084120_948291.json</code></li>
+<li><strong>rerank</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260514_083907_548991.json</code></li>
+<li><strong>resolver_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_20260514_084120_949809.json</code></li>
+<li><strong>smoke</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260514_083914_747630.json</code></li>
+<li><strong>website_authority</strong>: <code>/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_20260514_083919_876463.json</code></li>
 </ul></div></div>
 <script>
 for (const button of document.querySelectorAll('.tab')) {

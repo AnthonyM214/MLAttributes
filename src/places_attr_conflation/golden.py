@@ -5,16 +5,18 @@ from __future__ import annotations
 import csv
 import ast
 import json
+import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
 from .dataset import export_project_a_review_rows
 from .resolver import NORMALIZERS
+from .normalization import is_social_or_aggregator, website_domain
 
 
 PROJECT_A_ATTRIBUTES = ("website", "phone", "address", "category", "name")
-PROJECT_A_BASELINES = ("current", "base", "completeness", "confidence", "hybrid", "agreement_only")
+PROJECT_A_BASELINES = ("current", "base", "completeness", "confidence", "hybrid", "smart_hybrid", "agreement_only")
 ABSTAIN = "__ABSTAIN__"
 LABEL_FIELDNAMES = [
     "id",
@@ -83,6 +85,88 @@ def _as_float(value: Any, default: float = 0.0) -> float:
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def _name_tokens(value: str) -> set[str]:
+    normalized = _normalize("name", value)
+    if not normalized:
+        return set()
+    return {token for token in normalized.split() if token and token not in {"the", "and", "at", "of"}}
+
+
+def _domain_tokens(value: str) -> set[str]:
+    domain = website_domain(value)
+    if not domain:
+        return set()
+    host = domain.split(".", 1)[0]
+    return {token for token in re.split(r"[^a-z0-9]+", host) if token and token not in {"www"}}
+
+
+def _website_quality_score(name: str, website: str) -> float:
+    if not website:
+        return -1.0
+    score = 0.0
+    normalized = _normalize("website", website)
+    domain = website_domain(website)
+    if normalized == domain:
+        score += 0.2
+    if not is_social_or_aggregator(website):
+        score += 1.0
+    name_overlap = _name_tokens(name) & _domain_tokens(website)
+    if name_overlap:
+        score += 0.6 + (0.1 * min(len(name_overlap), 3))
+    if normalized.count("/") > 1:
+        score -= 0.15
+    return score
+
+
+def _name_quality_score(name: str, website: str) -> float:
+    if not name:
+        return -1.0
+    tokens = _name_tokens(name)
+    score = 0.0
+    if tokens:
+        score += min(len(tokens), 4) * 0.15
+    overlap = tokens & _domain_tokens(website)
+    if overlap:
+        score += 0.7 + (0.1 * min(len(overlap), 2))
+    if any(char.isdigit() for char in name):
+        score -= 0.1
+    return score
+
+
+def _smart_attribute_choice(
+    attribute: str,
+    current_value: str,
+    base_value: str,
+    current_confidence: float,
+    base_confidence: float,
+    *,
+    pair: dict[str, Any],
+) -> tuple[str, float]:
+    if attribute == "website":
+        current_score = _website_quality_score(str(pair.get("name") or ""), current_value)
+        base_score = _website_quality_score(str(pair.get("base_name") or ""), base_value)
+        if current_score > base_score:
+            return current_value or ABSTAIN, max(current_confidence, 0.8 if current_value else 0.0)
+        if base_score > current_score:
+            return base_value or ABSTAIN, max(base_confidence, 0.8 if base_value else 0.0)
+        if current_value:
+            return current_value, current_confidence
+        return base_value or ABSTAIN, base_confidence
+    if attribute == "name":
+        current_score = _name_quality_score(current_value, str(pair.get("website") or ""))
+        base_score = _name_quality_score(base_value, str(pair.get("base_website") or ""))
+        if current_score > base_score:
+            return current_value or ABSTAIN, max(current_confidence, 0.75 if current_value else 0.0)
+        if base_score > current_score:
+            return base_value or ABSTAIN, max(base_confidence, 0.75 if base_value else 0.0)
+        if current_value:
+            return current_value, current_confidence
+        return base_value or ABSTAIN, base_confidence
+    if current_confidence >= base_confidence:
+        return current_value or ABSTAIN, current_confidence
+    return base_value or ABSTAIN, base_confidence
 
 
 def _parse_structured_value(value: Any) -> Any:
@@ -187,6 +271,21 @@ def _select_prediction(attribute: str, pair: dict[str, Any], baseline: str) -> t
         if current_confidence >= base_confidence:
             return current_value or ABSTAIN, current_confidence
         return base_value or ABSTAIN, base_confidence
+    if baseline == "smart_hybrid":
+        if current_value and base_value and _normalize(attribute, current_value) == _normalize(attribute, base_value):
+            return current_value, 1.0
+        if current_value and not base_value:
+            return current_value, current_confidence
+        if base_value and not current_value:
+            return base_value, base_confidence
+        return _smart_attribute_choice(
+            attribute,
+            current_value,
+            base_value,
+            current_confidence,
+            base_confidence,
+            pair=pair,
+        )
     if baseline == "agreement_only":
         if current_value and base_value and _normalize(attribute, current_value) == _normalize(attribute, base_value):
             return current_value, 1.0

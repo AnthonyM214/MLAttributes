@@ -216,6 +216,9 @@ def evaluate_synthetic_evidence(
                 query=str(item.get("query", "")),
                 observed_at=str(item.get("observed_at", "")),
                 source_rank=_as_float(item.get("source_rank"), None) if item.get("source_rank") is not None else None,
+                recency_days=_as_float(item.get("recency_days"), None) if item.get("recency_days") is not None else None,
+                zombie_score=_as_float(item.get("zombie_score"), 0.0),
+                identity_change_score=_as_float(item.get("identity_change_score"), 0.0),
                 notes=str(item.get("notes", "")),
             )
             for item in case.get("evidence", [])

@@ -27,8 +27,14 @@ from places_attr_conflation.harness import (
     evaluate_dork_audit_gate,
     evaluate_final_decisions,
     evaluate_harness_report,
+    evaluate_resolver_on_replay,
+    evaluate_website_authority_replay,
+    evaluate_retrieval_proof,
     evaluate_retrieval_quality_gate,
     load_retrieval_episodes,
+    merge_replay_corpora,
+    merge_replay_files,
+    replay_stats,
     write_ranker_dataset_csv,
 )
 from places_attr_conflation.dashboard import write_dashboard
@@ -40,6 +46,16 @@ from places_attr_conflation.dataset import (
     write_review_csv,
 )
 from places_attr_conflation.dorking import audit_dorking_plans
+from places_attr_conflation.conflict_dorks import (
+    build_evidence_workplan_batches,
+    build_public_evidence_workplan_subset,
+    build_conflict_dork_rows,
+    load_conflict_csv,
+    split_conflict_dork_csv_by_case,
+    write_conflict_dork_csv,
+)
+from places_attr_conflation.collector import write_seed_replay_from_batch
+from places_attr_conflation.collector_static import write_static_collector_html
 from places_attr_conflation.golden import (
     PROJECT_A_BASELINES,
     build_project_a_agreement_labels,
@@ -87,6 +103,20 @@ def _default_output_path(command: str) -> Path:
         return ROOT / "reports" / "golden" / f"project_a_golden_{_timestamp()}.json"
     if command in {"synth-evidence", "evidence-eval"}:
         return ROOT / "reports" / "evidence" / f"{command}_{_timestamp()}.json"
+    if command == "replay-merge-report":
+        return ROOT / "reports" / "replay" / f"merge_report_{_timestamp()}.json"
+    if command == "replay-stats":
+        return ROOT / "reports" / "replay_stats" / f"replay_stats_{_timestamp()}.json"
+    if command == "compare":
+        return ROOT / "reports" / "retrieval_compare" / f"compare_{_timestamp()}.json"
+    if command == "website-authority":
+        return ROOT / "reports" / "website_authority" / f"website_authority_{_timestamp()}.json"
+    if command == "resolver-on-replay":
+        return ROOT / "reports" / "resolver_replay" / f"resolver_on_replay_{_timestamp()}.json"
+    if command == "replay-seed":
+        return ROOT / "reports" / "harness" / f"replay-seed_{_timestamp()}.json"
+    if command == "replay-batch":
+        return ROOT / "reports" / "harness" / f"replay-batch_{_timestamp()}.json"
     return ROOT / "reports" / "harness" / f"{command}_{_timestamp()}.json"
 
 
@@ -110,6 +140,29 @@ def _project_a_places(dataset_path: Path, limit: int) -> list[dict[str, str]]:
         }
         for row in rows
     ]
+
+
+def _replay_pages_count(path: Path) -> int:
+    try:
+        episodes = load_retrieval_episodes(path)
+    except Exception:
+        return 0
+    return sum(len(attempt.fetched_pages) for episode in episodes for attempt in episode.search_attempts)
+
+
+def _discover_replay_inputs(root: Path, *, include_empty: bool) -> list[Path]:
+    candidates: list[Path] = []
+    for path in sorted(root.rglob("*.json")):
+        name = path.name
+        # Prefer canonical batch directories; avoid merging copied combined artifacts or reruns.
+        if "evidence_batch_" in str(path.parent) and "evidence_combined_" not in str(path.parent) and name.startswith("replay_seed_evidence_batch_") and name.endswith(".json"):
+            candidates.append(path)
+    selected: list[Path] = []
+    for path in candidates:
+        pages = _replay_pages_count(path)
+        if pages or include_empty:
+            selected.append(path)
+    return selected
 
 
 def _audit_thresholds(args: argparse.Namespace) -> DorkAuditThresholds:
@@ -238,6 +291,21 @@ def main() -> int:
     compare = subparsers.add_parser("compare", help="Compare retrieval arms from one replay file.")
     compare.add_argument("--input", required=True, help="Retrieval replay JSON file.")
 
+    replay_merge = subparsers.add_parser("replay-merge", help="Merge downloaded collector replay JSON files.")
+    replay_merge.add_argument("--input-dir", required=True, help="Directory containing downloaded replay JSON files.")
+    replay_merge.add_argument("--output", help="Merged replay JSON path. Defaults under reports/replay/.")
+
+    replay_stats_cmd = subparsers.add_parser("replay-stats", help="Summarize replay coverage and source distribution.")
+    replay_stats_cmd.add_argument("--input", required=True, help="Merged replay JSON file.")
+
+    resolver_replay = subparsers.add_parser("resolver-on-replay", help="Evaluate evidence-backed resolver over replay pages.")
+    resolver_replay.add_argument("--input", required=True, help="Merged replay JSON file.")
+
+    website_authority = subparsers.add_parser("website-authority", help="Evaluate website authority discovery and false-official behavior.")
+    website_authority.add_argument("--input", required=True, help="Merged replay JSON file.")
+    website_authority.add_argument("--arm", default="targeted", choices=["targeted", "fallback", "all"])
+    website_authority.add_argument("--threshold", type=float, default=0.75)
+
     dork_audit = subparsers.add_parser("dork-audit", help="Audit search-operator quality for generated dorking plans.")
     dork_audit.add_argument("--input", help="Optional project_a parquet path. Defaults to data/project_a_samples.parquet when present.")
     dork_audit.add_argument("--limit", type=int, default=25)
@@ -287,6 +355,50 @@ def main() -> int:
     conflictset.add_argument("--labels", required=True, help="CSV with project_a golden label columns.")
     conflictset.add_argument("--baseline", default="hybrid", choices=PROJECT_A_BASELINES)
     conflictset.add_argument("--limit", type=int, help="Optional max project_a rows to scan before joining labels.")
+
+    conflict_dorks = subparsers.add_parser("conflict-dorks", help="Export layered dork queries for conflict rows (no fetching).")
+    conflict_dorks.add_argument("--conflicts", required=True, help="CSV produced by the conflictset command.")
+    conflict_dorks.add_argument("--max-queries", type=int, default=8, help="Max queries per conflict row.")
+    conflict_dorks.add_argument("--csv-output", help="Optional CSV output path.")
+
+    conflict_batches = subparsers.add_parser("conflict-dorks-batch", help="Split a conflict dork CSV into case-grouped batches.")
+    conflict_batches.add_argument("--input", required=True, help="CSV produced by conflict-dorks.")
+    conflict_batches.add_argument("--output-dir", required=True, help="Output directory for batch CSVs + manifest.json.")
+    conflict_batches.add_argument("--cases-per-batch", type=int, default=250)
+
+    collect = subparsers.add_parser("collect", help="Write a self-contained HTML collector for one batch CSV (no server).")
+    collect.add_argument("--batch", required=True, help="One batch CSV under reports/ranker/..._batches/")
+    collect.add_argument("--html-output", help="Optional output path for the collector HTML.")
+
+    workplan = subparsers.add_parser("evidence-workplan", help="Create small evidence-collection queues from conflict dork batches.")
+    workplan.add_argument("--batch-dir", required=True, help="Directory containing conflict dork batch_*.csv files.")
+    workplan.add_argument("--output-dir", help="Output directory for workplan CSVs + evidence templates + manifest.json.")
+    workplan.add_argument("--replay-dir", help="Replay-collected directory used to exclude already-evidenced episodes.")
+    workplan.add_argument("--batches", type=int, default=25, help="Number of workplan batches to create.")
+    workplan.add_argument("--cases-per-batch", type=int, default=25, help="Max case-attributes per workplan batch.")
+    workplan.add_argument("--attribute", action="append", choices=["website", "name", "category"], help="Attribute to include. May be repeated.")
+
+    public_workplan = subparsers.add_parser(
+        "public-evidence-workplan",
+        help="Re-rank an existing workplan by public Overture signal and keep the strongest batches.",
+    )
+    public_workplan.add_argument("--workplan-dir", required=True, help="Directory containing a workplan manifest.json and batch CSVs.")
+    public_workplan.add_argument("--gap-report", required=True, help="JSON produced by overture-gap-dorks.")
+    public_workplan.add_argument("--output-dir", help="Output directory for the public subset workplan.")
+    public_workplan.add_argument("--top-k", type=int, default=25, help="Number of batches to keep.")
+
+    replay_seed = subparsers.add_parser("replay-seed", help="Seed schema-valid replay JSON directly from one conflict dork batch.")
+    replay_seed.add_argument("--batch", required=True, help="One batch CSV under reports/ranker/..._batches/")
+    replay_seed.add_argument("--evidence", help="Optional CSV/JSON with URL, source_type, snippet/page_text, and extracted_value columns.")
+    replay_seed.add_argument("--replay-output", help="Optional replay corpus JSON output path.")
+
+    replay_batch = subparsers.add_parser("replay-batch", help="Seed, merge, and evaluate one evidence batch in one command.")
+    replay_batch.add_argument("--batch", required=True, help="Batch CSV containing the dork queries for this evidence batch.")
+    replay_batch.add_argument("--evidence", help="Evidence CSV/JSON with public page URLs/snippets/extracted_value.")
+    replay_batch.add_argument("--seed-output", help="Optional output path for the seeded replay JSON.")
+    replay_batch.add_argument("--merged-output", help="Optional output path for the merged replay JSON.")
+    replay_batch.add_argument("--merge-replay-dir", default=str(ROOT / "reports" / "replay_collected"), help="Directory to discover existing replay JSON inputs.")
+    replay_batch.add_argument("--include-empty", action="store_true", help="Also merge replay JSON inputs with 0 pages.")
 
     synth = subparsers.add_parser("synth-evidence", help="Generate synthetic authoritative evidence from conflict rows.")
     synth.add_argument("--conflicts", required=True, help="CSV produced by the conflictset command.")
@@ -357,7 +469,7 @@ def main() -> int:
     both.add_argument("--input", required=True, help="Retrieval replay JSON file.")
     both.add_argument("--arm", default="targeted", choices=["targeted", "fallback", "all"])
 
-    parser.add_argument("--output", help="Optional JSON output path.")
+    parser.add_argument("--output", help="Optional JSON report output path.")
     args = parser.parse_args()
 
     if args.command == "baseline":
@@ -380,7 +492,36 @@ def main() -> int:
         )
     elif args.command == "compare":
         episodes = load_retrieval_episodes(args.input)
-        report = compare_arms(episodes)
+        report = evaluate_retrieval_proof(episodes)
+        report["input"] = str(args.input)
+    elif args.command == "replay-merge":
+        merged_output = Path(args.output) if args.output else ROOT / "reports" / "replay" / f"merged_{_timestamp()}.json"
+        report = merge_replay_corpora(args.input_dir, merged_output)
+        report_path = _write_report(report, None, "replay-merge-report")
+        print(f"saved report to {report_path}")
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0
+    elif args.command == "replay-stats":
+        episodes = load_retrieval_episodes(args.input)
+        report = replay_stats(episodes)
+        report["input"] = str(args.input)
+        lines = [
+            f"Replay coverage for {args.input}",
+            f"Episodes: {report['episodes_total']}",
+            f"Attempts: {report['attempts_total']}",
+            f"Pages: {report['pages_total']}",
+            f"Authoritative pages: {report['authoritative_pages']} ({float(report['authoritative_pages_rate']) * 100:.1f}%)",
+        ]
+        report["summary"] = "\n".join(lines)
+    elif args.command == "resolver-on-replay":
+        episodes = load_retrieval_episodes(args.input)
+        report = evaluate_resolver_on_replay(episodes)
+        report["input"] = str(args.input)
+    elif args.command == "website-authority":
+        episodes = load_retrieval_episodes(args.input)
+        report = evaluate_website_authority_replay(episodes, arm=args.arm, threshold=args.threshold)
+        report["input"] = str(args.input)
+        report["selected_arm"] = args.arm
     elif args.command == "dork-audit":
         dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
         if dataset_path is None:
@@ -489,6 +630,115 @@ def main() -> int:
             "rows": len(rows),
             "output_csv": str(csv_path),
             "preview": rows[:3],
+        }
+    elif args.command == "conflict-dorks":
+        conflict_rows = load_conflict_csv(args.conflicts)
+        rows = build_conflict_dork_rows(conflict_rows, max_queries_per_case=args.max_queries)
+        csv_path = Path(args.csv_output) if args.csv_output else ROOT / "reports" / "ranker" / f"conflict_dorks_{_timestamp()}.csv"
+        write_conflict_dork_csv(rows, csv_path)
+        report = {
+            "conflicts": str(args.conflicts),
+            "rows": len(rows),
+            "output_csv": str(csv_path),
+            "preview": rows[:5],
+        }
+    elif args.command == "conflict-dorks-batch":
+        report = split_conflict_dork_csv_by_case(
+            args.input,
+            args.output_dir,
+            cases_per_batch=args.cases_per_batch,
+        )
+    elif args.command == "collect":
+        html_path = (
+            Path(args.html_output)
+            if args.html_output
+            else ROOT / "reports" / "replay_collected" / f"collector_{_timestamp()}.html"
+        )
+        out = write_static_collector_html(args.batch, html_path)
+        report = {
+            "batch": str(args.batch),
+            "collector_html": str(out),
+            "note": "Open the HTML in your browser, paste evidence, then download replay JSON from the page.",
+        }
+    elif args.command == "replay-seed":
+        replay_path = (
+            Path(args.replay_output)
+            if args.replay_output
+            else ROOT / "reports" / "replay_collected" / f"replay_seed_{_timestamp()}.json"
+        )
+        report = write_seed_replay_from_batch(args.batch, replay_path, evidence_path=args.evidence)
+        report["note"] = (
+            "Seed replay preserves cases and query attempts. If pages is 0, this unblocks schema/merge/coverage tracking "
+            "but does not prove authoritative retrieval."
+        )
+    elif args.command == "evidence-workplan":
+        out_dir = (
+            Path(args.output_dir)
+            if args.output_dir
+            else ROOT / "reports" / "replay_collected" / f"evidence_workplan_{_timestamp()}"
+        )
+        report = build_evidence_workplan_batches(
+            args.batch_dir,
+            out_dir,
+            replay_dir=args.replay_dir or str(ROOT / "reports" / "replay_collected"),
+            attributes=args.attribute or ["website", "name", "category"],
+            batch_count=args.batches,
+            cases_per_batch=args.cases_per_batch,
+        )
+    elif args.command == "public-evidence-workplan":
+        out_dir = (
+            Path(args.output_dir)
+            if args.output_dir
+            else ROOT / "reports" / "replay_collected" / f"public_evidence_workplan_{_timestamp()}"
+        )
+        report = build_public_evidence_workplan_subset(
+            args.workplan_dir,
+            out_dir,
+            gap_report_path=args.gap_report,
+            top_k=args.top_k,
+        )
+    elif args.command == "replay-batch":
+        seed_path = (
+            Path(args.seed_output)
+            if args.seed_output
+            else ROOT / "reports" / "replay_collected" / f"replay_seed_evidence_batch_{_timestamp()}.json"
+        )
+        seed_report = write_seed_replay_from_batch(args.batch, seed_path, evidence_path=args.evidence)
+
+        merge_root = Path(args.merge_replay_dir)
+        merge_inputs = _discover_replay_inputs(merge_root, include_empty=bool(args.include_empty))
+        if seed_path not in merge_inputs:
+            merge_inputs.append(seed_path)
+
+        merged_path = (
+            Path(args.merged_output)
+            if args.merged_output
+            else ROOT / "reports" / "replay" / f"merged_{_timestamp()}.json"
+        )
+        merge_report = merge_replay_files(merge_inputs, merged_path)
+        episodes = load_retrieval_episodes(merged_path)
+        stats_report = replay_stats(episodes)
+        stats_report["input"] = str(merged_path)
+        compare_report = evaluate_retrieval_proof(episodes)
+        compare_report["input"] = str(merged_path)
+        resolver_report = evaluate_resolver_on_replay(episodes)
+        resolver_report["input"] = str(merged_path)
+
+        stats_path = _write_report(stats_report, None, "replay-stats")
+        compare_path = _write_report(compare_report, None, "compare")
+        resolver_path = _write_report(resolver_report, None, "resolver-on-replay")
+        dashboard_outputs = write_dashboard(ROOT / "reports", ROOT / "reports" / "dashboard")
+
+        report = {
+            "batch": str(args.batch),
+            "evidence": "" if not args.evidence else str(args.evidence),
+            "seed": seed_report,
+            "merge": merge_report,
+            "merged_replay": str(merged_path),
+            "replay_stats_report": str(stats_path),
+            "compare_report": str(compare_path),
+            "resolver_report": str(resolver_path),
+            "dashboard": dashboard_outputs,
         }
     elif args.command == "synth-evidence":
         payload = generate_synthetic_evidence_cases(

@@ -37,6 +37,10 @@ def score_search_result(
         score += 0.05
     elif result.layer == "corroboration":
         score += 0.02
+    elif result.layer == "freshness":
+        score += 0.03
+    elif result.layer == "fallback":
+        score -= 0.02
     if model is not None:
         model_score = model.score(build_feature_vector(result, query=query, page_text=text))
         score = (score * 0.4) + (model_score * 0.6)

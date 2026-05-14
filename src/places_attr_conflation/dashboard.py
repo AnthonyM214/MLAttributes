@@ -13,12 +13,14 @@ class DashboardData:
     dataset: dict[str, object] | None
     baseline: dict[str, object] | None
     compare: dict[str, object] | None
+    website_authority: dict[str, object] | None
     rerank: dict[str, object] | None
     combined: dict[str, object] | None
     smoke: dict[str, object] | None
     golden: dict[str, object] | None
     evidence: dict[str, object] | None
     paths: dict[str, str]
+    batch_progress_rows: list[list[str]]
 
 
 def _table_rows_without_separator(lines: list[str]) -> list[list[str]]:
@@ -57,15 +59,21 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
     root = Path(reports_root)
     harness = root / "harness"
     baseline = root / "baseline_metrics"
+    ranker = root / "ranker"
     selected = {
         "dataset": _latest_json(root / "data", "project_a_summary*.json"),
         "baseline": _latest_json(baseline, "resolvepoi_*.json"),
-        "compare": _latest_json(harness, "compare_*.json"),
+        "compare": _latest_json(root / "retrieval_compare", "compare_*.json") or _latest_json(harness, "compare_*.json"),
+        "website_authority": _latest_json(root / "website_authority", "website_authority_*.json"),
+        "replay_stats": _latest_json(root / "replay_stats", "replay_stats_*.json"),
+        "merged_replay": _latest_json(root / "replay", "merged_*.json"),
+        "resolver_replay": _latest_json(root / "resolver_replay", "resolver_on_replay_*.json"),
         "rerank": _latest_json(harness, "rerank_*.json"),
         "combined": _latest_json(harness, "all_*.json"),
         "smoke": _latest_json(harness, "smoke_*.json"),
         "golden": _latest_json(root / "golden", "project_a_golden_*.json") or _latest_json(harness, "golden_*.json"),
         "evidence": _latest_json(root / "evidence", "evidence-eval_*.json"),
+        "conflict_dorks": _latest_json(ranker, "conflict_dorks_*.csv"),
     }
     return {name: str(path) for name, path in selected.items() if path is not None}
 
@@ -76,12 +84,14 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         dataset=_load_json(Path(paths["dataset"])) if "dataset" in paths else None,
         baseline=_load_json(Path(paths["baseline"])) if "baseline" in paths else None,
         compare=_load_json(Path(paths["compare"])) if "compare" in paths else None,
+        website_authority=_load_json(Path(paths["website_authority"])) if "website_authority" in paths else None,
         rerank=_load_json(Path(paths["rerank"])) if "rerank" in paths else None,
         combined=_load_json(Path(paths["combined"])) if "combined" in paths else None,
         smoke=_load_json(Path(paths["smoke"])) if "smoke" in paths else None,
         golden=_load_json(Path(paths["golden"])) if "golden" in paths else None,
         evidence=_load_json(Path(paths["evidence"])) if "evidence" in paths else None,
         paths=paths,
+        batch_progress_rows=_batch_progress_rows(reports_root),
     )
 
 
@@ -97,6 +107,58 @@ def _num(value: object) -> str:
     if isinstance(value, float):
         return f"{value:.3f}"
     return "-"
+
+
+def _pct_points(value: object) -> str:
+    if isinstance(value, (int, float)):
+        return f"{float(value) * 100:.1f} pts"
+    return "-"
+
+
+def _compare_verdict(compare: dict[str, object] | None) -> str:
+    if not compare:
+        return "Retrieval verdict unavailable."
+    targeted = compare.get("targeted", {})
+    fallback = compare.get("fallback", {})
+    if not isinstance(targeted, dict) or not isinstance(fallback, dict):
+        return "Retrieval report is incomplete."
+    if (
+        float(targeted.get("authoritative_found_rate", 0.0)) > float(fallback.get("authoritative_found_rate", 0.0))
+        and float(targeted.get("citation_precision", 0.0)) >= float(fallback.get("citation_precision", 0.0))
+    ):
+        return "Targeted search is ahead of loose search on replay."
+    if float(targeted.get("authoritative_found_rate", 0.0)) < float(fallback.get("authoritative_found_rate", 0.0)):
+        return "Targeted search is behind loose search on replay."
+    return "Retrieval is mixed; keep collecting replay labels."
+
+
+def _compare_highlights(compare: dict[str, object] | None) -> list[str]:
+    if not compare:
+        return ["No retrieval comparison report found."]
+    targeted = compare.get("targeted", {})
+    fallback = compare.get("fallback", {})
+    if not isinstance(targeted, dict) or not isinstance(fallback, dict):
+        return ["Retrieval comparison report is incomplete."]
+    auth_delta = float(targeted.get("authoritative_found_rate", 0.0)) - float(fallback.get("authoritative_found_rate", 0.0))
+    return [
+        f"Authoritative found: {_pct(targeted.get('authoritative_found_rate'))} vs {_pct(fallback.get('authoritative_found_rate'))} ({_pct_points(auth_delta)})",
+        f"Citation precision: {_pct(targeted.get('citation_precision'))} vs {_pct(fallback.get('citation_precision'))}",
+        f"Top-1 authoritative: {_pct(targeted.get('top1_authoritative_rate'))} vs {_pct(fallback.get('top1_authoritative_rate'))}",
+        f"Average attempts: {_num(targeted.get('average_search_attempts'))}",
+    ]
+
+
+def _website_authority_lines(website_authority: dict[str, object] | None) -> list[str]:
+    if not website_authority:
+        return ["No website authority report found."]
+    return [
+        f"Website episodes: {_num(website_authority.get('total'))}",
+        f"Official pages found: {_pct(website_authority.get('official_pages_found_rate'))}",
+        f"Same-domain queries: {_pct(website_authority.get('same_domain_query_coverage_rate'))}",
+        f"Selected official: {_pct(website_authority.get('selected_official_rate'))}",
+        f"False official rate: {_pct(website_authority.get('false_official_rate'))}",
+        f"Targeted authoritative found: {_pct(website_authority.get('authoritative_found_rate'))}",
+    ]
 
 
 def _baseline_table(baseline: dict[str, object] | None) -> list[str]:
@@ -206,6 +268,70 @@ def _decision_lines(combined: dict[str, object] | None) -> list[str]:
     ]
 
 
+def _replay_stats_lines(paths: dict[str, str]) -> list[str]:
+    stats = _load_json(Path(paths["replay_stats"])) if "replay_stats" in paths else None
+    if not stats:
+        return ["No replay stats report found."]
+    return [
+        f"Episodes: {_num(stats.get('episodes_total'))}",
+        f"Attempts: {_num(stats.get('attempts_total'))}",
+        f"Pages: {_num(stats.get('pages_total'))}",
+        f"Authoritative pages rate: {_pct(stats.get('authoritative_pages_rate'))}",
+        f"Last merged replay: {paths.get('merged_replay', '-')}",
+    ]
+
+
+def _batch_progress_rows(reports_root: str | Path) -> list[list[str]]:
+    root = Path(reports_root)
+    manifests = sorted((root / "ranker").glob("conflict_dorks_*_batches/manifest.json"))
+    if not manifests:
+        return [["Batch", "Cases", "Cases With Pages", "Pages"], ["missing", "-", "-", "-"]]
+    manifest_path = max(manifests, key=lambda path: path.stat().st_mtime)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    evidence_cases: dict[str, set[tuple[str, str]]] = {}
+    for replay_path in sorted((root / "replay_collected").rglob("*.json")):
+        try:
+            payload = json.loads(replay_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        for episode in payload.get("episodes", []) if isinstance(payload, dict) else []:
+            if not isinstance(episode, dict):
+                continue
+            pages = sum(len(attempt.get("fetched_pages", [])) for attempt in episode.get("search_attempts", []) if isinstance(attempt, dict))
+            if pages:
+                case_id = str(episode.get("case_id", ""))
+                attribute = str(episode.get("attribute", ""))
+                case_pages = evidence_cases.setdefault(case_id, set())
+                for attempt in episode.get("search_attempts", []):
+                    if not isinstance(attempt, dict):
+                        continue
+                    for page in attempt.get("fetched_pages", []):
+                        if isinstance(page, dict) and page.get("url"):
+                            case_pages.add((attribute, str(page["url"])))
+    rows = [["Batch", "Cases", "Cases With Pages", "Pages"]]
+    batch_entries = manifest.get("batches", [])
+    if isinstance(batch_entries, int):
+        batch_entries = manifest.get("files", [])
+    for batch in batch_entries if isinstance(batch_entries, list) else []:
+        if not isinstance(batch, dict):
+            continue
+        batch_path = Path(str(batch.get("path", "")))
+        if not batch_path.is_absolute():
+            batch_path = root.parent / batch_path
+        case_ids: set[str] = set()
+        if batch_path.exists():
+            import csv
+
+            with batch_path.open(newline="", encoding="utf-8") as handle:
+                for row in csv.DictReader(handle):
+                    if row.get("id"):
+                        case_ids.add(str(row["id"]))
+        cases_with_pages = sum(1 for case_id in case_ids if evidence_cases.get(case_id))
+        pages = sum(len(evidence_cases.get(case_id, set())) for case_id in case_ids)
+        rows.append([str(batch.get("batch", "")), str(batch.get("cases", len(case_ids))), str(cases_with_pages), str(pages)])
+    return rows
+
+
 def _smoke_lines(smoke: dict[str, object] | None) -> list[str]:
     if not smoke:
         return ["No smoke report found."]
@@ -281,6 +407,7 @@ def _evidence_lines(evidence: dict[str, object] | None) -> list[str]:
 
 
 def render_markdown(data: DashboardData) -> str:
+    verdict = _compare_verdict(data.compare)
     lines = [
         "# Benchmark Dashboard",
         "",
@@ -303,6 +430,12 @@ def render_markdown(data: DashboardData) -> str:
     lines.extend(
         [
             "",
+            "## At a Glance",
+            "",
+            f"- Verdict: {verdict}",
+            *[f"- {line}" for line in _compare_highlights(data.compare)],
+            f"- Conflict dork queue: `{data.paths.get('conflict_dorks', 'missing')}`",
+            "",
             "## Current Benchmarks",
             "",
             "### Raw Matched-Pair Dataset",
@@ -316,6 +449,21 @@ def render_markdown(data: DashboardData) -> str:
             "### Retrieval Arms",
             "",
             * _compare_table(data.compare),
+            "",
+            "### Website Authority",
+            "",
+            * [f"- {line}" for line in _website_authority_lines(data.website_authority)],
+            "",
+            "### Replay Coverage",
+            "",
+            * [f"- {line}" for line in _replay_stats_lines(data.paths)],
+            "",
+            "### Batch Progress",
+            "",
+            *[
+                "| " + " | ".join(row) + " |" if idx == 0 else "| " + " | ".join(row) + " |"
+                for idx, row in enumerate(data.batch_progress_rows)
+            ],
             "",
             "### Reranker",
             "",
@@ -348,6 +496,7 @@ def render_markdown(data: DashboardData) -> str:
 
 
 def render_html(data: DashboardData) -> str:
+    verdict = _compare_verdict(data.compare)
     baseline_rows = _safe_table_rows(
         _baseline_table(data.baseline),
         ["Attribute", "Accuracy", "Macro F1", "HC Wrong", "Abstention"],
@@ -361,6 +510,9 @@ def render_html(data: DashboardData) -> str:
         ["Baseline", "Attribute", "Accuracy", "Coverage", "HC Wrong", "Labels"],
     )
     bundle = {
+        "verdict": verdict,
+        "compare_highlights": _compare_highlights(data.compare),
+        "website_authority": _website_authority_lines(data.website_authority),
         "dataset": _dataset_lines(data.dataset),
         "stoppers": [
             "Retrieval proof is still small-sample." if data.compare else "Retrieval comparison report missing.",
@@ -369,6 +521,8 @@ def render_html(data: DashboardData) -> str:
         ],
         "baseline_rows": baseline_rows,
         "compare_rows": compare_rows,
+        "replay_stats": _replay_stats_lines(data.paths),
+        "batch_progress_rows": data.batch_progress_rows,
         "rerank": _rerank_lines(data.rerank),
         "decisions": _decision_lines(data.combined),
         "golden_rows": golden_rows,
@@ -434,7 +588,17 @@ def render_html(data: DashboardData) -> str:
             f"<div class='card'><div class='label'>Raw Pair Rows</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['dataset'] if line.startswith('Rows: ')), '-'))}</div></div>",
             f"<div class='card'><div class='label'>Website Baseline</div><div class='value'>{html.escape(baseline_rows[1][1] if len(baseline_rows) > 1 else '-')}</div></div>",
             f"<div class='card'><div class='label'>Targeted Auth Found</div><div class='value'>{html.escape(compare_rows[1][1] if len(compare_rows) > 1 else '-')}</div></div>",
+            f"<div class='card'><div class='label'>Website Official Coverage</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['website_authority'] if line.startswith('Official pages found: ')), '-'))}</div></div>",
+            f"<div class='card'><div class='label'>False Official</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['website_authority'] if line.startswith('False official rate: ')), '-'))}</div></div>",
+            f"<div class='card'><div class='label'>Replay Episodes</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['replay_stats'] if line.startswith('Episodes: ')), '-'))}</div></div>",
             f"<div class='card'><div class='label'>Resolver Abstention</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['decisions'] if line.startswith('Abstention rate: ')), '-'))}</div></div>",
+            "</section>",
+            "<section class='panel'>",
+            "<h2>At a Glance</h2>",
+            f"<p><strong>{html.escape(bundle['verdict'])}</strong></p>",
+            "<ul>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["compare_highlights"]],
+            "</ul>",
             "</section>",
             "<section class='panel'>",
             "<h2>What Is Stopping Us</h2>",
@@ -447,6 +611,7 @@ def render_html(data: DashboardData) -> str:
             "<button class='tab active' data-view='overview'>Overview</button>",
             "<button class='tab' data-view='baseline'>Baseline</button>",
             "<button class='tab' data-view='retrieval'>Retrieval</button>",
+            "<button class='tab' data-view='progress'>Batch Progress</button>",
             "<button class='tab' data-view='golden'>Golden</button>",
             "<button class='tab' data-view='evidence'>Evidence</button>",
             "<button class='tab' data-view='reports'>Reports</button>",
@@ -455,6 +620,9 @@ def render_html(data: DashboardData) -> str:
             "<div class='split'>",
             "<div class='panel'><h3>Raw Dataset</h3><ul>",
             *[f"<li>{html.escape(line)}</li>" for line in bundle["dataset"]],
+            "</ul></div>",
+            "<div class='panel'><h3>Website Authority</h3><ul>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["website_authority"]],
             "</ul></div>",
             "<div class='panel'><h3>Reranker</h3><ul>",
             *[f"<li>{html.escape(line)}</li>" for line in bundle["rerank"]],
@@ -484,6 +652,19 @@ def render_html(data: DashboardData) -> str:
             "<div class='panel'><h3>Resolver Decisions</h3><ul>",
             *[f"<li>{html.escape(line)}</li>" for line in bundle["decisions"]],
             "</ul></div>",
+            "</div></div>",
+            "<div id='progress' class='view'>",
+            "<div class='split'>",
+            "<div class='panel'><h3>Replay Coverage</h3><ul>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["replay_stats"]],
+            "</ul></div>",
+            "<div class='panel'><h3>Batch Progress</h3>",
+            "<table><thead><tr>" + "".join(f"<th>{html.escape(cell)}</th>" for cell in bundle["batch_progress_rows"][0]) + "</tr></thead><tbody>",
+            *[
+                "<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>"
+                for row in bundle["batch_progress_rows"][1:]
+            ],
+            "</tbody></table></div>",
             "</div></div>",
             "<div id='golden' class='view'>",
             "<div class='panel'><h3>Project A Golden Labels</h3>",

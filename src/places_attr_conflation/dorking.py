@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from urllib.parse import urlparse
 
+from .normalization import website_domain
+
 
 AGGREGATOR_DOMAINS = {
     "yelp.com",
@@ -37,6 +39,40 @@ EXCLUDED_AGGREGATOR_SITES = (
     "grubhub.com",
 )
 SEARCH_OPERATORS = ("site:", "-site:", "intitle:", "inurl:", "OR", '"')
+CONTACT_HINTS = ("contact", "about", "locations", "location", "store locator", "store-locator", "directions")
+CATEGORY_HINTS = ("services", "menu", "about", "schema.org", "ld+json")
+FRESH_HINTS = ("current", "updated", "open now", "now open", "hours", "verified", "today", "latest")
+WEBSITE_PATH_HINTS = {
+    "contact": 0.05,
+    "about": 0.04,
+    "locations": 0.04,
+    "location": 0.03,
+    "store-locator": 0.05,
+    "store locator": 0.05,
+    "hours": 0.03,
+    "menu": 0.03,
+    "services": 0.03,
+    "directions": 0.03,
+    "home": 0.02,
+}
+STALE_HINTS = (
+    "permanently closed",
+    "temporarily closed",
+    "moved",
+    "former",
+    "formerly",
+    "old location",
+    "under new ownership",
+    "duplicate listing",
+    "claimed listing",
+    "directory",
+    "listing",
+    "reviews",
+    "review",
+    "aggregate",
+    "outdated",
+    "stale",
+)
 
 
 @dataclass(frozen=True)
@@ -83,6 +119,20 @@ def quoted(value: str | None) -> str:
     return f'"{value}"' if value else ""
 
 
+def _known_domain(website: str | None) -> str:
+    return website_domain(website)
+
+
+def _site_query(domain: str, *parts: str) -> str:
+    terms = " ".join(part for part in parts if part).strip()
+    return f"site:{domain} {terms}".strip()
+
+
+def website_domain_from_url(url: str) -> str:
+    parsed = urlparse(url if "://" in url else f"https://{url}")
+    return parsed.netloc.lower().removeprefix("www.")
+
+
 def loose_query(place: dict[str, str]) -> str:
     return " ".join(filter(None, [place.get("name", ""), place.get("city", ""), place.get("region", "")])).strip()
 
@@ -94,7 +144,7 @@ def targeted_queries(place: dict[str, str], attribute: str) -> list[str]:
     address = quoted(place.get("address"))
     phone = quoted(place.get("phone"))
     website = place.get("website", "")
-    domain = urlparse(website if "://" in website else f"https://{website}").netloc if website else ""
+    domain = _known_domain(website)
     exclusions = " ".join(f"-site:{domain}" for domain in EXCLUDED_AGGREGATOR_SITES)
 
     if attribute == "website":
@@ -106,15 +156,31 @@ def targeted_queries(place: dict[str, str], attribute: str) -> list[str]:
             f"site:.gov {name} {city} business license OR registry",
             f"site:bbb.org {name} {city}",
         ]
+        if domain:
+            queries.extend(
+                [
+                    _site_query(domain, "contact OR about OR locations OR store-locator"),
+                    _site_query(domain, "schema.org OR ld+json"),
+                    _site_query(domain, phone) if phone else "",
+                ]
+            )
     elif attribute == "phone":
         queries = [
-            f"{phone} {name}",
+            f"{phone} {name} official contact",
             f"{name} {city} phone {exclusions}",
             f"{name} {city} contact OR hours {exclusions}",
             f"site:.gov {name} {city} license OR registry",
+            f"site:google.com/maps {name} {city} phone",
+            f"site:openstreetmap.org {name} {city} phone",
         ]
         if domain:
-            queries.extend([f"site:{domain} {phone}", f"site:{domain} contact OR locations OR hours"])
+            queries.extend(
+                [
+                    _site_query(domain, phone),
+                    _site_query(domain, "contact OR locations OR hours OR tel"),
+                    _site_query(domain, "schema.org OR ld+json"),
+                ]
+            )
     elif attribute == "address":
         queries = [
             f"{name} {address}",
@@ -123,7 +189,13 @@ def targeted_queries(place: dict[str, str], attribute: str) -> list[str]:
             f"site:.gov {name} {city} address OR permit OR license",
         ]
         if domain:
-            queries.extend([f"site:{domain} {address}", f"site:{domain} directions OR locations"])
+            queries.extend(
+                [
+                    _site_query(domain, address),
+                    _site_query(domain, "directions OR locations OR contact"),
+                    _site_query(domain, "schema.org OR ld+json"),
+                ]
+            )
     elif attribute == "category":
         queries = [
             f"{name} {city} services menu about {exclusions}",
@@ -132,7 +204,13 @@ def targeted_queries(place: dict[str, str], attribute: str) -> list[str]:
             f"site:openstreetmap.org {name} {city}",
         ]
         if domain:
-            queries.append(f"site:{domain} about OR services OR menu")
+            queries.extend(
+                [
+                    _site_query(domain, "about OR services OR menu"),
+                    _site_query(domain, "schema.org LocalBusiness OR Organization"),
+                    _site_query(domain, "contact OR locations"),
+                ]
+            )
     elif attribute == "name":
         queries = [
             f"{address} {city} business name",
@@ -145,6 +223,14 @@ def targeted_queries(place: dict[str, str], attribute: str) -> list[str]:
             f"site:google.com/maps {name} {address}",
             f"site:openstreetmap.org {address} {city}",
         ]
+        if domain:
+            queries.extend(
+                [
+                    _site_query(domain, "about OR contact OR locations"),
+                    _site_query(domain, "schema.org LocalBusiness OR Organization"),
+                    _site_query(domain, name),
+                ]
+            )
     else:
         queries = [loose_query(place)]
     return [query.strip() for query in queries if query.strip()]
@@ -164,7 +250,7 @@ def build_multi_layer_plan(place: dict[str, str], attribute: str) -> MultiLayerD
     address = quoted(place.get("address"))
     phone = quoted(place.get("phone"))
     website = place.get("website", "")
-    domain = urlparse(website if "://" in website else f"https://{website}").netloc if website else ""
+    domain = _known_domain(website)
 
     official_layers = DorkLayer(
         name="official",
@@ -181,6 +267,7 @@ def build_multi_layer_plan(place: dict[str, str], attribute: str) -> MultiLayerD
                 f"{phone} {name}" if phone else "",
                 f"site:google.com/maps {name} {city}",
                 f"site:openstreetmap.org {name} {city}",
+                _site_query(domain, "contact OR about OR locations") if domain else "",
             ]
         )
     elif attribute == "category":
@@ -190,10 +277,18 @@ def build_multi_layer_plan(place: dict[str, str], attribute: str) -> MultiLayerD
                 f"site:{domain} schema.org LocalBusiness" if domain else "",
                 f"site:openstreetmap.org {name} {city}",
                 f"site:google.com/maps {name} {city} category",
+                _site_query(domain, "services OR menu OR about") if domain else "",
             ]
         )
     else:
-        corroboration_queries.extend([f"{name} {city}", f"{address} {city}", f"site:google.com/maps {name}"])
+        corroboration_queries.extend(
+            [
+                f"{name} {city}",
+                f"{address} {city}",
+                f"site:google.com/maps {name}",
+                _site_query(domain, "about OR contact OR locations") if domain else "",
+            ]
+        )
 
     corroboration_layer = DorkLayer(
         name="corroboration",
@@ -208,6 +303,7 @@ def build_multi_layer_plan(place: dict[str, str], attribute: str) -> MultiLayerD
                 f"{name} {city} open now hours contact",
                 f"{name} {city} updated contact hours",
                 f"{name} {city} current address phone",
+                f"{name} {city} moved OR permanently closed OR formerly",
             ]
         )
     elif attribute == "category":
@@ -216,10 +312,11 @@ def build_multi_layer_plan(place: dict[str, str], attribute: str) -> MultiLayerD
                 f"{name} {city} current menu services hours",
                 f"{name} {city} updated about services",
                 f"site:{domain} hours menu updated" if domain else "",
+                f"{name} {city} new menu OR current services OR latest",
             ]
         )
     else:
-        freshness_queries.extend([f"{name} {city} updated", f"{name} {city} current"])
+        freshness_queries.extend([f"{name} {city} updated", f"{name} {city} current", f"{name} {city} former OR formerly OR moved"])
 
     freshness_layer = DorkLayer(
         name="freshness",
@@ -368,8 +465,11 @@ def rank_source(url: str, page_text: str = "", query: str = "") -> float:
     government evidence, then use page-level attribute evidence to break ties.
     """
     source_type = classify_source(url)
+    parsed = urlparse(url if "://" in url else f"https://{url}")
+    domain = parsed.netloc.lower().removeprefix("www.")
+    path = parsed.path.lower()
     base = {
-        "official_site": 1.0,
+        "official_site": 0.78,
         "government": 0.96,
         "business_registry": 0.9,
         "google_places": 0.82,
@@ -380,17 +480,31 @@ def rank_source(url: str, page_text: str = "", query: str = "") -> float:
     }.get(source_type, 0.2)
 
     text = (page_text or "").lower()
+    query_text = (query or "").lower()
     bonus = 0.0
-    if any(token in text for token in ("contact", "about", "locations", "store locator", "directions")):
+    if source_type == "official_site" and domain:
+        bonus += 0.03
+    if source_type == "official_site" and path in {"", "/", "/index.html", "/index.htm"}:
+        bonus += 0.02
+    if any(token in text for token in CONTACT_HINTS) or any(token in path for token in CONTACT_HINTS):
         bonus += 0.03
     if any(token in text for token in ("phone", "tel", "address", "hours", "menu", "services")):
         bonus += 0.03
+    for token, token_bonus in WEBSITE_PATH_HINTS.items():
+        if token in path:
+            bonus += token_bonus
     if "schema.org" in text or "ld+json" in text:
         bonus += 0.04
-    if any(token in text for token in ("current", "updated", "open now", "last updated", "copyright")):
+    if any(token in text for token in FRESH_HINTS) or any(token in path for token in ("current", "updated", "hours")):
         bonus += 0.02
+    if "site:" in query_text and domain and domain in query_text:
+        bonus += 0.06
     if any(token in text for token in ("reviews", "review", "directory", "listing", "aggregate")):
-        bonus -= 0.03
+        bonus -= 0.04
+    if any(token in text for token in STALE_HINTS):
+        bonus -= 0.08
+    if "official" in query_text and source_type == "official_site":
+        bonus += 0.04
     if query and query.lower() in text:
         bonus += 0.02
 

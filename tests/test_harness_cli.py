@@ -1,5 +1,6 @@
 import json
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -88,6 +89,28 @@ class HarnessCliTests(unittest.TestCase):
         self.assertTrue(payload["retrieval_gate"]["passed"])
         self.assertTrue(Path(payload["ranker_dataset"]["output_csv"]).exists())
 
+    def test_website_authority_command_reports_false_official_rates(self):
+        fixture = ROOT / "tests" / "fixtures" / "retrieval_replay_sample.json"
+        completed = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "website-authority",
+                "--input",
+                str(fixture),
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["official_pages_found_rate"], 1.0)
+        self.assertEqual(payload["selected_official_rate"], 1.0)
+        self.assertEqual(payload["false_official_rate"], 0.0)
+        self.assertIn("authoritative_found_rate", payload)
+
     def test_ranker_dataset_command_exports_candidate_csv(self):
         replay = ROOT / "tests" / "fixtures" / "retrieval_replay_sample.json"
         completed = subprocess.run(
@@ -149,6 +172,162 @@ class HarnessCliTests(unittest.TestCase):
         self.assertTrue(Path(payload["html"]).exists())
         html = Path(payload["html"]).read_text(encoding="utf-8")
         self.assertIn("Benchmark Viewer", html)
+
+    def test_evidence_workplan_command_writes_batches_and_templates(self):
+        batch_dir = ROOT / "reports" / "ranker" / "conflict_dorks_20260512_032836_536355_batches"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = Path(tmpdir) / "workplan"
+            completed = subprocess.run(
+                [
+                    "python3",
+                    "scripts/run_harness.py",
+                    "evidence-workplan",
+                    "--batch-dir",
+                    str(batch_dir),
+                    "--output-dir",
+                    str(out),
+                    "--batches",
+                    "2",
+                    "--cases-per-batch",
+                    "3",
+                ],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            payload = json.loads(completed.stdout)
+            self.assertEqual(payload["batches"], 2)
+            self.assertIn(payload["ranking_strategy"], {"heuristic", "model_prioritized", "model_prioritized_by_attribute"})
+            self.assertTrue((out / "manifest.json").exists())
+            self.assertTrue((out / "batch_001.csv").exists())
+            self.assertTrue((out / "evidence_template_001.csv").exists())
+
+    def test_public_evidence_workplan_command_prefers_public_overture_signal(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            workplan = root / "workplan"
+            out = root / "public_workplan"
+            workplan.mkdir()
+
+            for idx, attribute in enumerate(["name", "category", "website"], start=1):
+                batch_path = workplan / f"batch_{idx:03d}.csv"
+                template_path = workplan / f"evidence_template_{idx:03d}.csv"
+                batch_path.write_text(
+                    "id,base_id,attribute,truth,truth_source,prediction,baseline,correct,needs_evidence,current_value,base_value,preferred_sources,layer,query,priority\n"
+                    f"case-{idx},base-{idx},{attribute},truth,manual,pred,hybrid,False,True,current,base,official_site,official,\"{attribute} query\",baseline_wrong\n",
+                    encoding="utf-8",
+                )
+                template_path.write_text("", encoding="utf-8")
+            (workplan / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "files": [
+                            {
+                                "batch": idx,
+                                "case_attributes": 1,
+                                "rows": 1,
+                                "priority_score_min": float(idx),
+                                "priority_score_max": float(idx),
+                                "priority_score_mean": float(idx),
+                                "path": str(workplan / f"batch_{idx:03d}.csv"),
+                                "evidence_template": str(workplan / f"evidence_template_{idx:03d}.csv"),
+                            }
+                            for idx in range(1, 4)
+                        ],
+                        "selected_case_attributes": 3,
+                        "selected_rows": 3,
+                    },
+                    indent=2,
+                    sort_keys=True,
+                ),
+                encoding="utf-8",
+            )
+            gap_report = root / "gap.json"
+            gap_report.write_text(
+                json.dumps(
+                    {
+                        "gap_dork_audit": {
+                            "audit": {
+                                "plans": [
+                                    {"attribute": "website", "authority_coverage": 0.95},
+                                    {"attribute": "category", "authority_coverage": 0.5},
+                                    {"attribute": "name", "authority_coverage": 0.1},
+                                ]
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            completed = subprocess.run(
+                [
+                    "python3",
+                    "scripts/run_harness.py",
+                    "public-evidence-workplan",
+                    "--workplan-dir",
+                    str(workplan),
+                    "--gap-report",
+                    str(gap_report),
+                    "--output-dir",
+                    str(out),
+                    "--top-k",
+                    "3",
+                ],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            payload = json.loads(completed.stdout)
+            self.assertEqual(payload["ranking_strategy"], "public_overture_signal")
+            self.assertGreater(payload["attribute_weights"]["website"], payload["attribute_weights"]["category"])
+            self.assertGreater(payload["attribute_weights"]["category"], payload["attribute_weights"]["name"])
+            self.assertTrue((out / "manifest.json").exists())
+            self.assertTrue((out / "batch_001.csv").exists())
+            self.assertEqual(payload["top_batches"][0]["attribute_counts"]["website"], 1)
+
+    def test_replay_batch_command_runs_end_to_end(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            batch = tmp / "batch.csv"
+            batch.write_text(
+                "id,base_id,attribute,truth,truth_source,prediction,baseline,correct,needs_evidence,current_value,base_value,preferred_sources,layer,query,priority\n"
+                "case-1,base-1,website,https://official.example,base,https://old.example,hybrid,False,True,https://old.example,https://official.example,official_site,official,\"z query\",baseline_wrong\n",
+                encoding="utf-8",
+            )
+            evidence = tmp / "evidence.csv"
+            evidence.write_text(
+                "case_id,attribute,layer,query,url,title,page_text,source_type,extracted_value,notes\n"
+                "case-1,website,official,z query,https://official.example,Official,Official website,official_site,https://official.example,ok\n",
+                encoding="utf-8",
+            )
+            merge_dir = tmp / "replay_collected"
+            merge_dir.mkdir()
+            completed = subprocess.run(
+                [
+                    "python3",
+                    "scripts/run_harness.py",
+                    "replay-batch",
+                    "--batch",
+                    str(batch),
+                    "--evidence",
+                    str(evidence),
+                    "--merge-replay-dir",
+                    str(merge_dir),
+                ],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            payload = json.loads(completed.stdout)
+            self.assertTrue(Path(payload["merged_replay"]).exists())
+            self.assertTrue(Path(payload["replay_stats_report"]).exists())
+            self.assertTrue(Path(payload["compare_report"]).exists())
+            self.assertTrue(Path(payload["resolver_report"]).exists())
+            self.assertEqual(payload["merge"]["input_files"], 1)
 
     def test_dataset_command_summarizes_project_a_parquet(self):
         fixture = ROOT / "data" / "project_a_samples.parquet"

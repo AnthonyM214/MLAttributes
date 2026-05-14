@@ -34,10 +34,32 @@ class DorkingTests(unittest.TestCase):
         self.assertGreaterEqual(len(plan.targeted), 2)
         self.assertIn("official_site", plan.preferred_sources)
 
+    def test_targeted_queries_include_same_domain_verification_for_known_websites(self):
+        place = {
+            "name": "Cafe Rio",
+            "city": "Santa Cruz",
+            "region": "CA",
+            "address": "100 Main St",
+            "phone": "8315551212",
+            "website": "https://caferio.example",
+        }
+        queries = targeted_queries(place, "website")
+        self.assertTrue(any("site:caferio.example" in query for query in queries))
+        self.assertTrue(any("schema.org" in query for query in queries))
+
     def test_rank_source_prefers_official_and_page_metadata(self):
         official = rank_source("https://example.com/contact", "Contact us phone address schema.org")
         agg = rank_source("https://yelp.com/biz/example", "Contact us")
         self.assertGreater(official, agg)
+
+    def test_rank_source_penalizes_stale_and_moved_pages(self):
+        fresh = rank_source("https://example.com/contact", "Official contact page schema.org updated hours", query='"Cafe Rio" contact')
+        stale = rank_source(
+            "https://yelp.com/biz/example",
+            "Reviews, permanently closed, moved, former location, directory listing",
+            query='"Cafe Rio" contact',
+        )
+        self.assertGreater(fresh, stale)
 
     def test_multi_layer_plan_has_escalation_layers(self):
         plan = build_multi_layer_plan({"name": "Cafe Rio", "city": "Santa Cruz", "region": "CA", "phone": "8315551212"}, "phone")
@@ -86,6 +108,7 @@ class DorkingTests(unittest.TestCase):
         )
         self.assertEqual(report["totals"]["plans"], 2)
         self.assertGreater(report["summary"]["operator_coverage"], 0.7)
+        self.assertGreater(report["summary"]["authority_coverage"], 0.6)
 
 
 if __name__ == "__main__":
