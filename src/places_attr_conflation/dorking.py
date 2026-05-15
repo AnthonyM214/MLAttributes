@@ -324,9 +324,10 @@ def build_multi_layer_plan(place: dict[str, str], attribute: str) -> MultiLayerD
         preferred_sources=["official_site", "google_places", "osm"],
     )
 
+    fallback_anchor = loose_query(place) or domain or website or address or phone
     fallback_layer = DorkLayer(
         name="fallback",
-        queries=[loose_query(place)],
+        queries=[fallback_anchor],
         preferred_sources=["google_places", "osm", "social", "aggregator"],
     )
 

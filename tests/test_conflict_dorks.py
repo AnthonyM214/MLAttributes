@@ -4,7 +4,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from places_attr_conflation.conflict_dorks import build_evidence_workplan_batches, build_public_evidence_workplan_subset
+from places_attr_conflation.conflict_dorks import (
+    build_conflict_dork_rows,
+    build_evidence_workplan_batches,
+    build_public_evidence_workplan_subset,
+)
 from places_attr_conflation.replay import FetchedPage, ReplayEpisode, SearchAttempt, dump_replay_corpus
 
 
@@ -38,6 +42,30 @@ class ConflictDorkTests(unittest.TestCase):
             payload = json.loads(completed.stdout)
             self.assertGreater(payload["rows"], 0)
             self.assertTrue(Path(payload["output_csv"]).exists())
+
+    def test_conflict_dorks_keep_fallback_when_query_cap_is_low(self):
+        rows = build_conflict_dork_rows(
+            [
+                {
+                    "id": "case-1",
+                    "base_id": "base-1",
+                    "attribute": "website",
+                    "truth": "https://good.example",
+                    "truth_source": "manual",
+                    "prediction": "https://bad.example",
+                    "baseline": "hybrid",
+                    "correct": "false",
+                    "needs_evidence": "true",
+                    "current_value": "https://bad.example",
+                    "base_value": "https://good.example",
+                }
+            ],
+            max_queries_per_case=3,
+        )
+
+        self.assertEqual(len(rows), 3)
+        self.assertIn("fallback", {row["layer"] for row in rows})
+        self.assertEqual(rows[-1]["layer"], "fallback")
 
     def test_evidence_workplan_prioritizes_cases_from_existing_replay_labels(self):
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -73,6 +73,27 @@ def _priority(row: dict[str, str]) -> str:
     return "low"
 
 
+def _selected_plan_queries(plan: object, max_queries_per_case: int) -> list[tuple[str, str]]:
+    """Return a capped, stable query list that still keeps a fallback baseline."""
+
+    entries: list[tuple[str, str]] = []
+    for layer in getattr(plan, "layers", []):
+        layer_name = str(getattr(layer, "name", ""))
+        for query in getattr(layer, "queries", []):
+            normalized_query = str(query).strip()
+            if normalized_query:
+                entries.append((layer_name, normalized_query))
+
+    if max_queries_per_case <= 0 or len(entries) <= max_queries_per_case:
+        return entries
+
+    fallback_entries = [entry for entry in entries if entry[0] == "fallback"]
+    non_fallback_entries = [entry for entry in entries if entry[0] != "fallback"]
+    if fallback_entries:
+        return non_fallback_entries[: max(0, max_queries_per_case - 1)] + fallback_entries[:1]
+    return non_fallback_entries[:max_queries_per_case]
+
+
 def build_conflict_dork_rows(
     conflict_rows: Iterable[dict[str, str]],
     *,
@@ -118,44 +139,36 @@ def build_conflict_dork_rows(
         current_value = str(row.get("current_value") or "")
         base_value = str(row.get("base_value") or "")
 
-        emitted = 0
-        for layer in plan.layers:
-            for query in layer.queries:
-                if not query.strip():
-                    continue
-                output.append(
-                    asdict(
-                        ConflictDorkRow(
-                            id=case_id,
-                            base_id=base_id,
-                            attribute=attribute,
-                            truth=truth,
-                            truth_source=truth_source,
-                            prediction=prediction,
-                            baseline=baseline,
-                            correct=correct,
-                            needs_evidence=needs_evidence,
-                            current_value=current_value,
-                            base_value=base_value,
-                            preferred_sources=preferred_sources,
-                            layer=layer.name,
-                            query=query,
-                            priority=priority,
-                        )
+        selected_queries = _selected_plan_queries(plan, max_queries_per_case)
+        for layer, query in selected_queries:
+            output.append(
+                asdict(
+                    ConflictDorkRow(
+                        id=case_id,
+                        base_id=base_id,
+                        attribute=attribute,
+                        truth=truth,
+                        truth_source=truth_source,
+                        prediction=prediction,
+                        baseline=baseline,
+                        correct=correct,
+                        needs_evidence=needs_evidence,
+                        current_value=current_value,
+                        base_value=base_value,
+                        preferred_sources=preferred_sources,
+                        layer=layer,
+                        query=query,
+                        priority=priority,
                     )
                 )
-                emitted += 1
-                if emitted >= max_queries_per_case:
-                    break
-            if emitted >= max_queries_per_case:
-                break
+            )
 
         # When attribute field is missing or unparsable, skip quietly.
         # Also skip degenerate rows where candidates normalize equal (not a true conflict).
         if attribute and _normalize(attribute, current_value) == _normalize(attribute, base_value):
             # Keep only if baseline was wrong; otherwise it's not a useful evidence target.
             if correct:
-                output = output[:-emitted]
+                output = output[: -len(selected_queries)] if selected_queries else output
 
     return output
 

@@ -13,6 +13,7 @@ re-run later from saved JSON without live network access.
 from __future__ import annotations
 
 import csv
+import hashlib
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -28,7 +29,7 @@ from .resolver import NORMALIZERS, resolve_attribute
 from .small_model import TinyLinearModel, TrainingExample, build_feature_vector, train_tiny_model
 
 
-TARGETED_LAYERS = ("official", "corroboration", "freshness")
+TARGETED_LAYERS = ("official", "government", "business_registry", "registry", "corroboration", "freshness")
 FALLBACK_LAYER = "fallback"
 HIGH_CONFIDENCE_THRESHOLD = 0.75
 AUTHORITATIVE_SOURCE_TYPES = {"official_site", "government", "business_registry"}
@@ -511,9 +512,9 @@ def evaluate_website_authority_replay(
     threshold: float = 0.75,
 ) -> dict[str, object]:
     episodes = [episode for episode in episodes if episode.attribute == "website"]
-    compare = compare_arms(episodes, model=model)
-    arm_report = compare.get(arm, {}) if isinstance(compare, dict) else {}
-    fallback_report = compare.get("fallback", {}) if isinstance(compare, dict) else {}
+    proof = evaluate_retrieval_proof(episodes)
+    arm_report = proof.get(arm, {}) if isinstance(proof, dict) else {}
+    fallback_report = proof.get("fallback", {}) if isinstance(proof, dict) else {}
 
     official_pages_found = 0
     same_domain_query_covered = 0
@@ -641,33 +642,94 @@ def build_reranker_training_examples(episodes: Iterable[ReplayEpisode]) -> list[
     return examples
 
 
+def _split_reranker_episodes(
+    episodes: list[ReplayEpisode],
+    holdout_fraction: float,
+) -> tuple[list[ReplayEpisode], list[ReplayEpisode]]:
+    if len(episodes) < 2:
+        return episodes, []
+
+    fraction = min(0.9, max(0.05, float(holdout_fraction)))
+    holdout_count = max(1, int(round(len(episodes) * fraction)))
+    holdout_count = min(len(episodes) - 1, holdout_count)
+
+    def key(episode: ReplayEpisode) -> tuple[str, str, str]:
+        raw = f"{episode.case_id}\0{episode.attribute}".encode("utf-8")
+        return hashlib.sha1(raw).hexdigest(), str(episode.case_id), str(episode.attribute)
+
+    ordered = sorted(episodes, key=key)
+    holdout = ordered[:holdout_count]
+    train = ordered[holdout_count:]
+    return train, holdout
+
+
 def compare_reranker_on_replay(
     episodes: Iterable[ReplayEpisode],
     epochs: int = 30,
     learning_rate: float = 0.1,
     l2: float = 0.001,
+    holdout_fraction: float = 0.25,
 ) -> dict[str, object]:
     episodes = list(episodes)
-    examples = build_reranker_training_examples(episodes)
+    train_episodes, evaluation_episodes = _split_reranker_episodes(episodes, holdout_fraction)
+    if not evaluation_episodes:
+        return {
+            "available": False,
+            "reason": "Need at least 2 replay episodes for held-out reranker evaluation.",
+            "training_episodes": len(train_episodes),
+            "evaluation_episodes": 0,
+            "training_examples": len(build_reranker_training_examples(train_episodes)),
+            "evaluation_examples": 0,
+            "evaluation_protocol": "case_id_holdout",
+        }
+
+    examples = build_reranker_training_examples(train_episodes)
+    evaluation_examples = build_reranker_training_examples(evaluation_episodes)
     positives = sum(example.label for example in examples)
     negatives = len(examples) - positives
     if positives == 0 or negatives == 0:
         return {
             "available": False,
             "reason": "Need both positive and negative replay labels to train the tiny reranker.",
+            "training_episodes": len(train_episodes),
+            "evaluation_episodes": len(evaluation_episodes),
             "training_examples": len(examples),
+            "evaluation_examples": len(evaluation_examples),
             "positive_examples": positives,
             "negative_examples": negatives,
+            "evaluation_positive_examples": sum(example.label for example in evaluation_examples),
+            "evaluation_negative_examples": len(evaluation_examples) - sum(example.label for example in evaluation_examples),
+            "evaluation_protocol": "case_id_holdout",
+        }
+    if not evaluation_examples:
+        return {
+            "available": False,
+            "reason": "Held-out replay episodes contain no fetched pages to evaluate.",
+            "training_episodes": len(train_episodes),
+            "evaluation_episodes": len(evaluation_episodes),
+            "training_examples": len(examples),
+            "evaluation_examples": 0,
+            "positive_examples": positives,
+            "negative_examples": negatives,
+            "evaluation_protocol": "case_id_holdout",
         }
 
     model = train_tiny_model(examples, epochs=epochs, learning_rate=learning_rate, l2=l2)
-    heuristic = evaluate_retrieval_episodes(episodes, arm="all", model=None)
-    reranked = evaluate_retrieval_episodes(episodes, arm="all", model=model)
+    heuristic = evaluate_retrieval_episodes(evaluation_episodes, arm="all", model=None)
+    reranked = evaluate_retrieval_episodes(evaluation_episodes, arm="all", model=model)
+    evaluation_positives = sum(example.label for example in evaluation_examples)
     return {
         "available": True,
+        "training_episodes": len(train_episodes),
+        "evaluation_episodes": len(evaluation_episodes),
         "training_examples": len(examples),
+        "evaluation_examples": len(evaluation_examples),
         "positive_examples": positives,
         "negative_examples": negatives,
+        "evaluation_positive_examples": evaluation_positives,
+        "evaluation_negative_examples": len(evaluation_examples) - evaluation_positives,
+        "holdout_fraction": holdout_fraction,
+        "evaluation_protocol": "case_id_holdout",
         "heuristic": heuristic,
         "reranker": reranked,
         "improved_top1_authoritative_rate": reranked["top1_authoritative_rate"] > heuristic["top1_authoritative_rate"],

@@ -247,6 +247,56 @@ class GoldenTests(unittest.TestCase):
         self.assertEqual(report["baselines"]["hybrid"]["metrics"]["name"]["accuracy"], 0.0)
         self.assertEqual(report["baselines"]["smart_hybrid"]["metrics"]["name"]["accuracy"], 1.0)
 
+    def test_website_authority_hybrid_overrides_root_when_current_is_place_specific(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            parquet = root / "project_a_samples.parquet"
+            labels = root / "labels.csv"
+            duckdb.query(
+                f"""
+                COPY (
+                  SELECT
+                    'w1' AS id,
+                    'bw1' AS base_id,
+                    '[{{}}]' AS sources,
+                    '{{"primary":"Brand Santa Cruz"}}' AS names,
+                    '{{"primary":"retail"}}' AS categories,
+                    0.6 AS confidence,
+                    '["https://brand.example/stores/ca/santa-cruz"]' AS websites,
+                    NULL AS socials,
+                    NULL AS emails,
+                    '["+18315551212"]' AS phones,
+                    NULL AS brand,
+                    '[{{"freeform":"1 Main St"}}]' AS addresses,
+                    '[{{}}]' AS base_sources,
+                    '{{"primary":"Brand"}}' AS base_names,
+                    '{{"primary":"retail"}}' AS base_categories,
+                    0.95 AS base_confidence,
+                    '["https://brand.example"]' AS base_websites,
+                    NULL AS base_socials,
+                    NULL AS base_emails,
+                    '["8315551212"]' AS base_phones,
+                    NULL AS base_brand,
+                    '[{{"freeform":"1 Main St"}}]' AS base_addresses
+                ) TO '{parquet.as_posix()}' (FORMAT PARQUET)
+                """
+            )
+            labels.write_text(
+                "\n".join(
+                    [
+                        "id,base_id,website_truth_choice,website_truth_value",
+                        "w1,bw1,current,",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            report = evaluate_project_a_golden(parquet, labels, baselines=["hybrid", "website_authority_hybrid"])
+
+        self.assertEqual(report["baselines"]["hybrid"]["metrics"]["website"]["accuracy"], 0.0)
+        self.assertEqual(report["baselines"]["website_authority_hybrid"]["metrics"]["website"]["accuracy"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

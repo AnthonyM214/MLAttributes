@@ -24,6 +24,7 @@ class NormalizationTests(unittest.TestCase):
 
     def test_social_or_aggregator_detection(self):
         self.assertTrue(is_social_or_aggregator("https://www.yelp.com/biz/example"))
+        self.assertTrue(is_social_or_aggregator("https://bit.ly/example-place"))
         self.assertFalse(is_social_or_aggregator("https://example.com"))
 
 

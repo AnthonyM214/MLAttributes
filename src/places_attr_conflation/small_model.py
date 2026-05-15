@@ -16,6 +16,8 @@ from math import exp
 from typing import Iterable, Mapping
 from urllib.parse import urlparse
 
+from .dorking import classify_source
+
 
 def _sigmoid(value: float) -> float:
     if value >= 0:
@@ -27,26 +29,6 @@ def _sigmoid(value: float) -> float:
 
 def _normalize_text(value: str | None) -> str:
     return (value or "").lower().strip()
-
-
-def _classify_source(url: str) -> str:
-    parsed = urlparse(url if "://" in url else f"https://{url}")
-    domain = parsed.netloc.lower().removeprefix("www.")
-    path = parsed.path.lower()
-
-    if any(domain.endswith(suffix) for suffix in (".gov", ".ca.gov", ".nyc.gov")):
-        return "government"
-    if domain in {"google.com", "maps.google.com"} and ("/maps" in path or "/place" in path or "/search" in path):
-        return "google_places"
-    if domain in {"openstreetmap.org", "osm.org"} or domain.endswith(".openstreetmap.org"):
-        return "osm"
-    if any(domain == agg or domain.endswith(f".{agg}") for agg in {"yelp.com", "tripadvisor.com", "foursquare.com", "doordash.com", "ubereats.com", "grubhub.com"}):
-        return "aggregator"
-    if domain in {"facebook.com", "instagram.com"} or domain.endswith(".facebook.com") or domain.endswith(".instagram.com"):
-        return "social"
-    if domain:
-        return "official_site"
-    return "unknown"
 
 
 def _bucket_recency(recency_days: float | None) -> dict[str, float]:
@@ -145,7 +127,7 @@ def build_feature_vector(result: object, query: str = "", page_text: str = "") -
     identity_change_score = float(getattr(result, "identity_change_score", 0.0) or 0.0)
 
     text = " ".join(part for part in [title, snippet, page_text] if part).lower()
-    source_type = _classify_source(url)
+    source_type = classify_source(url)
     parsed = urlparse(url if "://" in url else f"https://{url}")
     domain = parsed.netloc.lower().removeprefix("www.")
     path = parsed.path.lower()

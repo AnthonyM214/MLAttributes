@@ -16,6 +16,12 @@ _SOCIAL_OR_AGGREGATOR_DOMAINS = {
     "grubhub.com",
     "opentable.com",
     "foursquare.com",
+    "bit.ly",
+    "goo.gl",
+    "lnkd.in",
+    "ow.ly",
+    "t.co",
+    "tinyurl.com",
 }
 
 

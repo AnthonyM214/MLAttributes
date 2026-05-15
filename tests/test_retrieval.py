@@ -57,6 +57,13 @@ class RetrievalTests(unittest.TestCase):
         self.assertEqual(features["text:official"], 1.0)
         self.assertEqual(features["text:stale"], 0.0)
 
+    def test_feature_vector_uses_shared_registry_source_classifier(self):
+        result = SearchResult("https://www.bbb.org/us/ca/santa-cruz/profile/example", "BBB profile", "Business registry", layer="business_registry")
+        features = build_feature_vector(result, query='site:bbb.org "Cafe Rio"', page_text="BBB business profile")
+        self.assertEqual(features["source:business_registry"], 1.0)
+        self.assertEqual(features["url:registry"], 1.0)
+        self.assertEqual(features["url:official_site"], 0.0)
+
     def test_tiny_model_training_learns_simple_authority_signal(self):
         examples = [
             TrainingExample(build_feature_vector(SearchResult("https://example.com/contact", "Cafe Rio", "Contact us phone address", layer="official", recency_days=7)), 1),

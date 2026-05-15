@@ -16,7 +16,7 @@ from .normalization import is_social_or_aggregator, website_domain
 
 
 PROJECT_A_ATTRIBUTES = ("website", "phone", "address", "category", "name")
-PROJECT_A_BASELINES = ("current", "base", "completeness", "confidence", "hybrid", "smart_hybrid", "agreement_only")
+PROJECT_A_BASELINES = ("current", "base", "completeness", "confidence", "hybrid", "smart_hybrid", "website_authority_hybrid", "agreement_only")
 ABSTAIN = "__ABSTAIN__"
 LABEL_FIELDNAMES = [
     "id",
@@ -118,6 +118,81 @@ def _website_quality_score(name: str, website: str) -> float:
     if normalized.count("/") > 1:
         score -= 0.15
     return score
+
+
+_WEBSITE_PLACE_PATH_TOKENS = {
+    "branch",
+    "branches",
+    "clinic",
+    "dealer",
+    "dealers",
+    "location",
+    "locations",
+    "locator",
+    "office",
+    "offices",
+    "restaurant",
+    "restaurants",
+    "store",
+    "stores",
+    "near-me",
+}
+
+
+def _website_path(value: str) -> str:
+    normalized = _normalize("website", value)
+    if "/" not in normalized:
+        return ""
+    return normalized.split("/", 1)[1].strip("/")
+
+
+def _website_locality_score(value: str) -> float:
+    path = _website_path(value)
+    if not path or path in {"home", "home.html", "index.html", "index.htm"}:
+        return 0.0
+    score = 1.0
+    if any(token in path for token in _WEBSITE_PLACE_PATH_TOKENS):
+        score += 2.0
+    if len([part for part in path.split("/") if part]) >= 2:
+        score += 1.0
+    return score
+
+
+def _confidence_attribute_choice(
+    current_value: str,
+    base_value: str,
+    current_confidence: float,
+    base_confidence: float,
+) -> tuple[str, float]:
+    if current_confidence >= base_confidence:
+        return current_value or ABSTAIN, current_confidence if current_value else base_confidence
+    return base_value or ABSTAIN, base_confidence if base_value else current_confidence
+
+
+def _website_authority_hybrid_choice(
+    current_value: str,
+    base_value: str,
+    current_confidence: float,
+    base_confidence: float,
+) -> tuple[str, float]:
+    if current_value and base_value and _normalize("website", current_value) == _normalize("website", base_value):
+        return current_value, 1.0
+    if current_value and not base_value:
+        return current_value, current_confidence
+    if base_value and not current_value:
+        return base_value, base_confidence
+
+    selected, confidence = _confidence_attribute_choice(current_value, base_value, current_confidence, base_confidence)
+    if _normalize("website", selected) != _normalize("website", base_value):
+        return selected, confidence
+
+    current_locality = _website_locality_score(current_value)
+    base_locality = _website_locality_score(base_value)
+    base_is_weak = is_social_or_aggregator(base_value)
+    current_is_authority_candidate = bool(current_value) and not is_social_or_aggregator(current_value)
+    if current_is_authority_candidate and (base_is_weak or (current_locality >= 3.0 and base_locality <= 1.0)):
+        return current_value, max(current_confidence, 0.8)
+    return selected, confidence
 
 
 def _name_quality_score(name: str, website: str) -> float:
@@ -286,6 +361,16 @@ def _select_prediction(attribute: str, pair: dict[str, Any], baseline: str) -> t
             base_confidence,
             pair=pair,
         )
+    if baseline == "website_authority_hybrid":
+        if attribute == "website":
+            return _website_authority_hybrid_choice(current_value, base_value, current_confidence, base_confidence)
+        if current_value and base_value and _normalize(attribute, current_value) == _normalize(attribute, base_value):
+            return current_value, 1.0
+        if current_value and not base_value:
+            return current_value, current_confidence
+        if base_value and not current_value:
+            return base_value, base_confidence
+        return _confidence_attribute_choice(current_value, base_value, current_confidence, base_confidence)
     if baseline == "agreement_only":
         if current_value and base_value and _normalize(attribute, current_value) == _normalize(attribute, base_value):
             return current_value, 1.0

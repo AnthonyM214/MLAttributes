@@ -20,23 +20,23 @@ from places_attr_conflation.replay import FetchedPage, FinalDecision, ReplayEpis
 
 
 class HarnessTests(unittest.TestCase):
-    def _episode(self) -> ReplayEpisode:
+    def _episode(self, case_id: str = "1", official_url: str = "https://example.com") -> ReplayEpisode:
         return ReplayEpisode(
-            case_id="1",
+            case_id=case_id,
             attribute="website",
             place={"name": "Cafe Rio", "city": "Santa Cruz", "region": "CA"},
-            gold_value="https://example.com",
+            gold_value=official_url,
             search_attempts=[
                 SearchAttempt(
                     layer="official",
                     query='"Cafe Rio" official website',
                     fetched_pages=[
                         FetchedPage(
-                            url="https://example.com",
+                            url=official_url,
                             title="Cafe Rio",
                             page_text="Contact us",
                             source_type="official_site",
-                            extracted_values={"website": "https://example.com"},
+                            extracted_values={"website": official_url},
                             recency_days=10,
                         ),
                         FetchedPage(
@@ -68,10 +68,10 @@ class HarnessTests(unittest.TestCase):
             ],
             final_decision=FinalDecision(
                 attribute="website",
-                decision="https://example.com",
+                decision=official_url,
                 confidence=0.9,
                 reason="official site",
-                selected_url="https://example.com",
+                selected_url=official_url,
                 selected_source_type="official_site",
             ),
         )
@@ -122,6 +122,34 @@ class HarnessTests(unittest.TestCase):
         self.assertGreater(targeted["authoritative_found_rate"], fallback["authoritative_found_rate"])
         self.assertGreater(targeted["top1_authoritative_rate"], fallback["top1_authoritative_rate"])
 
+    def test_targeted_arm_includes_authority_registry_layers(self):
+        episode = ReplayEpisode(
+            case_id="gov-website",
+            attribute="website",
+            place={},
+            gold_value="https://city.gov/business/example",
+            search_attempts=[
+                SearchAttempt(
+                    layer="government",
+                    query="site:.gov example business registry",
+                    fetched_pages=[
+                        FetchedPage(
+                            url="https://city.gov/business/example",
+                            title="Example business registry",
+                            page_text="Official city registry page",
+                            source_type="government",
+                            extracted_values={"website": "https://city.gov/business/example"},
+                        )
+                    ],
+                )
+            ],
+        )
+
+        targeted = evaluate_retrieval_episodes([episode], arm="targeted")
+
+        self.assertEqual(targeted["authoritative_found_rate"], 1.0)
+        self.assertEqual(targeted["top1_authoritative_rate"], 1.0)
+
     def test_compare_arms_returns_all_modes(self):
         episode = self._episode()
         report = compare_arms([episode])
@@ -137,9 +165,20 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(report["accuracy"], 1.0)
 
     def test_reranker_can_train_on_replay_labels(self):
-        report = compare_reranker_on_replay([self._episode()])
+        report = compare_reranker_on_replay(
+            [
+                self._episode("1", "https://one.example.com"),
+                self._episode("2", "https://two.example.com"),
+                self._episode("3", "https://three.example.com"),
+                self._episode("4", "https://four.example.com"),
+            ],
+            holdout_fraction=0.25,
+        )
         self.assertIn("available", report)
         self.assertTrue(report["available"])
+        self.assertEqual(report["evaluation_protocol"], "case_id_holdout")
+        self.assertGreater(report["training_episodes"], 0)
+        self.assertGreater(report["evaluation_episodes"], 0)
 
     def test_harness_report_bundles_baseline_and_replay(self):
         episode = self._episode()
@@ -162,6 +201,7 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(report["selected_official_rate"], 1.0)
         self.assertEqual(report["false_official_rate"], 0.0)
         self.assertEqual(report["authoritative_found_rate"], 1.0)
+        self.assertEqual(report["citation_precision_proxy"], 1.0)
 
     def test_dork_audit_gate_blocks_weak_operator_plans(self):
         weak = {

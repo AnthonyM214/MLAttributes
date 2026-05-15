@@ -330,6 +330,7 @@ def main() -> int:
 
     rerank = subparsers.add_parser("rerank", help="Train the optional tiny reranker from replay labels.")
     rerank.add_argument("--input", required=True, help="Retrieval replay JSON file.")
+    rerank.add_argument("--holdout-fraction", type=float, default=0.25, help="Case-level holdout fraction for reranker evaluation.")
 
     smoke = subparsers.add_parser("smoke", help="Run a small live retrieval smoke check with replay fallback.")
     smoke.add_argument("--url", action="append", dest="urls", help="Allowlisted URL to fetch. May be repeated.")
@@ -585,7 +586,7 @@ def main() -> int:
         }
     elif args.command == "rerank":
         episodes = load_retrieval_episodes(args.input)
-        report = compare_reranker_on_replay(episodes)
+        report = compare_reranker_on_replay(episodes, holdout_fraction=args.holdout_fraction)
     elif args.command == "smoke":
         urls = args.urls or DEFAULT_SMOKE_URLS
         report = _run_smoke(urls, args.timeout, args.replay_input)
