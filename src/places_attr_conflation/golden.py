@@ -53,6 +53,12 @@ class GoldenAttributeMetrics:
     high_confidence_wrong_rate: float
 
 
+@dataclass(frozen=True)
+class WebsitePolicyConfig:
+    current_tie_break_min_confidence: float
+    current_tie_break_max_margin: float
+
+
 def load_label_rows(path: str | Path) -> list[dict[str, str]]:
     with Path(path).open(newline="", encoding="utf-8") as handle:
         return list(csv.DictReader(handle))
@@ -137,6 +143,8 @@ _WEBSITE_PLACE_PATH_TOKENS = {
     "stores",
     "near-me",
 }
+_WEBSITE_CURRENT_TIE_BREAK_MIN_CONFIDENCE = 0.90
+_WEBSITE_CURRENT_TIE_BREAK_MAX_MARGIN = 0.10
 
 
 def _website_path(value: str) -> str:
@@ -169,11 +177,12 @@ def _confidence_attribute_choice(
     return base_value or ABSTAIN, base_confidence if base_value else current_confidence
 
 
-def _website_authority_hybrid_choice(
+def _website_authority_hybrid_choice_with_config(
     current_value: str,
     base_value: str,
     current_confidence: float,
     base_confidence: float,
+    config: WebsitePolicyConfig,
 ) -> tuple[str, float]:
     if current_value and base_value and _normalize("website", current_value) == _normalize("website", base_value):
         return current_value, 1.0
@@ -182,6 +191,14 @@ def _website_authority_hybrid_choice(
     if base_value and not current_value:
         return base_value, base_confidence
 
+    current_is_authority_candidate = bool(current_value) and not is_social_or_aggregator(current_value)
+    if (
+        current_is_authority_candidate
+        and current_confidence >= config.current_tie_break_min_confidence
+        and (base_confidence - current_confidence) <= config.current_tie_break_max_margin
+    ):
+        return current_value, max(current_confidence, 0.9)
+
     selected, confidence = _confidence_attribute_choice(current_value, base_value, current_confidence, base_confidence)
     if _normalize("website", selected) != _normalize("website", base_value):
         return selected, confidence
@@ -189,10 +206,27 @@ def _website_authority_hybrid_choice(
     current_locality = _website_locality_score(current_value)
     base_locality = _website_locality_score(base_value)
     base_is_weak = is_social_or_aggregator(base_value)
-    current_is_authority_candidate = bool(current_value) and not is_social_or_aggregator(current_value)
     if current_is_authority_candidate and (base_is_weak or (current_locality >= 3.0 and base_locality <= 1.0)):
         return current_value, max(current_confidence, 0.8)
     return selected, confidence
+
+
+def _website_authority_hybrid_choice(
+    current_value: str,
+    base_value: str,
+    current_confidence: float,
+    base_confidence: float,
+) -> tuple[str, float]:
+    return _website_authority_hybrid_choice_with_config(
+        current_value,
+        base_value,
+        current_confidence,
+        base_confidence,
+        WebsitePolicyConfig(
+            current_tie_break_min_confidence=_WEBSITE_CURRENT_TIE_BREAK_MIN_CONFIDENCE,
+            current_tie_break_max_margin=_WEBSITE_CURRENT_TIE_BREAK_MAX_MARGIN,
+        ),
+    )
 
 
 def _name_quality_score(name: str, website: str) -> float:
@@ -613,6 +647,142 @@ def build_project_a_evaluation_rows(
         if has_truth:
             rows.append(output)
     return rows
+
+
+def _build_website_policy_rows(
+    parquet_path: str | Path,
+    labels_path: str | Path,
+    config: WebsitePolicyConfig,
+    *,
+    limit: int | None = None,
+) -> list[dict[str, object]]:
+    labels = load_label_rows(labels_path)
+    pairs = export_project_a_review_rows(parquet_path, limit=limit or 1_000_000)
+    pair_by_id = {str(pair.get("id") or ""): pair for pair in pairs}
+    pair_by_base_id = {str(pair.get("base_id") or ""): pair for pair in pairs}
+
+    rows: list[dict[str, object]] = []
+    for label in labels:
+        pair = pair_by_id.get(_label_key(label)) or pair_by_base_id.get(_label_key(label))
+        if pair is None:
+            continue
+        truth, truth_source = _truth_value("website", label, pair)
+        if not truth:
+            continue
+        current_value = str(pair.get("website") or "")
+        base_value = str(pair.get("base_website") or "")
+        prediction, confidence = _website_authority_hybrid_choice_with_config(
+            current_value,
+            base_value,
+            _as_float(pair.get("confidence"), 0.0),
+            _as_float(pair.get("base_confidence"), 0.0),
+            config,
+        )
+        rows.append(
+            {
+                "id": pair.get("id", ""),
+                "base_id": pair.get("base_id", ""),
+                "baseline": "website_calibrated_authority",
+                "website_truth": truth,
+                "website_truth_source": truth_source,
+                "website_prediction": prediction,
+                "website_confidence": confidence,
+                "website_current": current_value,
+                "website_base": base_value,
+                "website_pair_differs": _normalize("website", current_value) != _normalize("website", base_value),
+            }
+        )
+    return rows
+
+
+def _website_calibration_score(metrics: GoldenAttributeMetrics, conflict_metrics: GoldenAttributeMetrics) -> tuple[float, float, float, float, float]:
+    return (
+        -conflict_metrics.high_confidence_wrong_rate,
+        -metrics.high_confidence_wrong_rate,
+        conflict_metrics.accuracy,
+        metrics.accuracy,
+        -metrics.abstention_rate,
+    )
+
+
+def evaluate_website_policy_calibration(
+    parquet_path: str | Path,
+    tuning_labels_path: str | Path,
+    holdout_labels_path: str | Path,
+    *,
+    limit: int | None = None,
+    min_confidence_grid: Iterable[float] | None = None,
+    max_margin_grid: Iterable[float] | None = None,
+    high_confidence_threshold: float = 0.8,
+) -> dict[str, object]:
+    """Tune website policy thresholds on one label set and report only on a separate holdout."""
+
+    min_confidence_values = list(min_confidence_grid or (0.90, 0.925, 0.95, 0.975, 0.99))
+    max_margin_values = list(max_margin_grid or (0.025, 0.05, 0.075, 0.10, 0.15))
+    tuning_path = str(tuning_labels_path)
+    holdout_path = str(holdout_labels_path)
+    if Path(tuning_path).resolve() == Path(holdout_path).resolve():
+        raise ValueError("tuning_labels_path and holdout_labels_path must be different files.")
+
+    candidates: list[dict[str, object]] = []
+    best_candidate: dict[str, object] | None = None
+    best_score: tuple[float, float, float, float, float] | None = None
+    best_tiebreak: tuple[float, float] | None = None
+    best_config: WebsitePolicyConfig | None = None
+    for min_confidence in min_confidence_values:
+        for max_margin in max_margin_values:
+            config = WebsitePolicyConfig(float(min_confidence), float(max_margin))
+            rows = _build_website_policy_rows(parquet_path, tuning_labels_path, config, limit=limit)
+            metrics = _score_attribute(rows, "website", high_confidence_threshold)
+            conflict_metrics = _score_attribute(
+                [row for row in rows if row.get("website_pair_differs")],
+                "website",
+                high_confidence_threshold,
+            )
+            candidate = {
+                "config": asdict(config),
+                "metrics": asdict(metrics),
+                "conflict_metrics": asdict(conflict_metrics),
+            }
+            candidates.append(candidate)
+            score = _website_calibration_score(metrics, conflict_metrics)
+            stable_tiebreak = (-config.current_tie_break_min_confidence, -config.current_tie_break_max_margin)
+            if best_score is None or best_tiebreak is None or (score, stable_tiebreak) > (best_score, best_tiebreak):
+                best_candidate = candidate
+                best_score = score
+                best_tiebreak = stable_tiebreak
+                best_config = config
+
+    assert best_candidate is not None and best_config is not None
+    holdout_rows = _build_website_policy_rows(parquet_path, holdout_labels_path, best_config, limit=limit)
+    holdout_metrics = _score_attribute(holdout_rows, "website", high_confidence_threshold)
+    holdout_conflict_metrics = _score_attribute(
+        [row for row in holdout_rows if row.get("website_pair_differs")],
+        "website",
+        high_confidence_threshold,
+    )
+    baseline_holdout = evaluate_project_a_golden(
+        parquet_path,
+        holdout_labels_path,
+        baselines=("current", "hybrid", "smart_hybrid", "website_authority_hybrid"),
+        limit=limit,
+        high_confidence_threshold=high_confidence_threshold,
+    )
+    return {
+        "evaluation_protocol": "separate_tuning_and_holdout_labels",
+        "path": str(parquet_path),
+        "tuning_labels": tuning_path,
+        "holdout_labels": holdout_path,
+        "high_confidence_threshold": high_confidence_threshold,
+        "selected_policy": best_candidate,
+        "candidate_count": len(candidates),
+        "candidates": candidates,
+        "holdout": {
+            "metrics": asdict(holdout_metrics),
+            "conflict_metrics": asdict(holdout_conflict_metrics),
+        },
+        "holdout_baselines": baseline_holdout["baselines"],
+    }
 
 
 def build_project_a_conflict_review_rows(

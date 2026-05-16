@@ -1,5 +1,6 @@
 import unittest
 
+from places_attr_conflation.dorking import classify_source
 from places_attr_conflation.retrieval import SearchResult, rank_search_results, score_search_result, select_authoritative_result
 from places_attr_conflation.small_model import TinyLinearModel, TrainingExample, build_feature_vector, train_tiny_model
 
@@ -63,6 +64,17 @@ class RetrievalTests(unittest.TestCase):
         self.assertEqual(features["source:business_registry"], 1.0)
         self.assertEqual(features["url:registry"], 1.0)
         self.assertEqual(features["url:official_site"], 0.0)
+
+    def test_source_classifier_demotes_marketplace_and_booking_domains(self):
+        self.assertEqual(classify_source("https://www.homeaway.com/vacation-rental/p3768034"), "aggregator")
+        self.assertEqual(classify_source("https://www.discogs.com/seller/example/profile"), "aggregator")
+        self.assertEqual(classify_source("https://book.octotable.com/otb/form/index.xhtml"), "aggregator")
+        self.assertEqual(classify_source("https://linktr.ee/example"), "aggregator")
+        self.assertEqual(classify_source("https://taplink.cc/example"), "aggregator")
+        self.assertEqual(classify_source("https://findadealer.example.yext-cdn.com/location"), "aggregator")
+        self.assertEqual(classify_source("https://example.site-solocal.com/"), "aggregator")
+        self.assertEqual(classify_source("https://example.jimdosite.com/"), "aggregator")
+        self.assertEqual(classify_source("https://www.justgiving.com/fundraising/example"), "aggregator")
 
     def test_tiny_model_training_learns_simple_authority_signal(self):
         examples = [

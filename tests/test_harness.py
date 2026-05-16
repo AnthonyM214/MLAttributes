@@ -10,6 +10,7 @@ from places_attr_conflation.harness import (
     evaluate_dork_audit_gate,
     evaluate_final_decisions,
     evaluate_harness_report,
+    evaluate_product_release_gate,
     evaluate_resolver_on_replay,
     evaluate_website_authority_replay,
     evaluate_retrieval_episodes,
@@ -271,6 +272,84 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(report["accuracy"], 1.0)
         self.assertEqual(report["abstention_rate"], 0.0)
         self.assertEqual(report["high_confidence_wrong_rate"], 0.0)
+
+    def test_product_release_gate_requires_holdout_and_replay_evidence(self):
+        calibration = {
+            "evaluation_protocol": "separate_tuning_and_holdout_labels",
+            "tuning_labels": "reports/golden/tuning.csv",
+            "holdout_labels": "reports/golden/holdout.csv",
+            "holdout": {
+                "metrics": {
+                    "accuracy": 0.99,
+                    "high_confidence_wrong_rate": 0.0,
+                    "abstention_rate": 0.01,
+                }
+            },
+        }
+        replay_stats = {"input": "merged.json", "episodes_total": 200, "pages_total": 150, "authoritative_pages_rate": 0.6}
+        compare = {"input": "merged.json", "deltas": {"authoritative_found_rate": 0.05}}
+        resolver = {"input": "merged.json", "accuracy": 0.9, "abstention_rate": 0.1, "high_confidence_wrong_rate": 0.0}
+        website_authority = {"input": "merged.json", "official_pages_found_rate": 0.2, "false_official_rate": 0.0}
+
+        report = evaluate_product_release_gate(
+            calibration_report=calibration,
+            replay_stats_report=replay_stats,
+            compare_report=compare,
+            resolver_report=resolver,
+            website_authority_report=website_authority,
+        )
+
+        self.assertTrue(report["passed"])
+        self.assertTrue(report["checks"]["separate_tuning_and_holdout"])
+        self.assertTrue(report["checks"]["website_false_official_rate"])
+
+    def test_product_release_gate_blocks_false_official_rate(self):
+        calibration = {
+            "evaluation_protocol": "separate_tuning_and_holdout_labels",
+            "tuning_labels": "reports/golden/tuning.csv",
+            "holdout_labels": "reports/golden/holdout.csv",
+            "holdout": {
+                "metrics": {
+                    "accuracy": 0.99,
+                    "high_confidence_wrong_rate": 0.0,
+                    "abstention_rate": 0.01,
+                }
+            },
+        }
+        report = evaluate_product_release_gate(
+            calibration_report=calibration,
+            replay_stats_report={"pages_total": 150, "authoritative_pages_rate": 0.6},
+            compare_report={"deltas": {"authoritative_found_rate": 0.05}},
+            resolver_report={"high_confidence_wrong_rate": 0.0},
+            website_authority_report={"official_pages_found_rate": 0.2, "false_official_rate": 0.5},
+        )
+
+        self.assertFalse(report["passed"])
+        self.assertFalse(report["checks"]["website_false_official_rate"])
+
+    def test_product_release_gate_blocks_sparse_replay(self):
+        calibration = {
+            "evaluation_protocol": "separate_tuning_and_holdout_labels",
+            "tuning_labels": "reports/golden/tuning.csv",
+            "holdout_labels": "reports/golden/holdout.csv",
+            "holdout": {
+                "metrics": {
+                    "accuracy": 1.0,
+                    "high_confidence_wrong_rate": 0.0,
+                    "abstention_rate": 0.0,
+                }
+            },
+        }
+        report = evaluate_product_release_gate(
+            calibration_report=calibration,
+            replay_stats_report={"pages_total": 25, "authoritative_pages_rate": 0.6},
+            compare_report={"deltas": {"authoritative_found_rate": 0.05}},
+            resolver_report={"high_confidence_wrong_rate": 0.0},
+            website_authority_report={"official_pages_found_rate": 0.2},
+        )
+
+        self.assertFalse(report["passed"])
+        self.assertFalse(report["checks"]["replay_pages"])
 
 
 if __name__ == "__main__":

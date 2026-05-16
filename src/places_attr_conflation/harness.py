@@ -75,6 +75,19 @@ class DorkAuditThresholds:
 
 
 @dataclass(frozen=True)
+class ProductReleaseThresholds:
+    min_holdout_website_accuracy: float = 0.98
+    max_holdout_high_confidence_wrong_rate: float = 0.02
+    max_holdout_abstention_rate: float = 0.15
+    min_replay_pages: int = 100
+    min_authoritative_pages_rate: float = 0.50
+    min_targeted_authoritative_delta: float = 0.0
+    min_website_official_found_rate: float = 0.05
+    max_website_false_official_rate: float = 0.02
+    max_resolver_high_confidence_wrong_rate: float = 0.02
+
+
+@dataclass(frozen=True)
 class WebsiteAuthorityMetrics:
     total: int
     official_pages_found: int
@@ -819,6 +832,71 @@ def evaluate_retrieval_quality_gate(
         "targeted": targeted,
         "fallback": fallback,
         "decisions": decisions,
+    }
+
+
+def evaluate_product_release_gate(
+    *,
+    calibration_report: dict[str, object],
+    replay_stats_report: dict[str, object],
+    compare_report: dict[str, object],
+    resolver_report: dict[str, object],
+    website_authority_report: dict[str, object],
+    thresholds: ProductReleaseThresholds | None = None,
+) -> dict[str, object]:
+    """Gate product-readiness claims on held-out labels and non-sparse replay evidence."""
+
+    thresholds = thresholds or ProductReleaseThresholds()
+    holdout = calibration_report.get("holdout", {}) if isinstance(calibration_report, dict) else {}
+    holdout_metrics = holdout.get("metrics", {}) if isinstance(holdout, dict) else {}
+    protocol = calibration_report.get("evaluation_protocol", "") if isinstance(calibration_report, dict) else ""
+    tuning_labels = calibration_report.get("tuning_labels", "") if isinstance(calibration_report, dict) else ""
+    holdout_labels = calibration_report.get("holdout_labels", "") if isinstance(calibration_report, dict) else ""
+    compare_deltas = compare_report.get("deltas", {}) if isinstance(compare_report, dict) else {}
+
+    checks = {
+        "separate_tuning_and_holdout": bool(protocol == "separate_tuning_and_holdout_labels" and tuning_labels and holdout_labels and tuning_labels != holdout_labels),
+        "holdout_website_accuracy": float(holdout_metrics.get("accuracy", 0.0)) >= thresholds.min_holdout_website_accuracy,
+        "holdout_high_confidence_wrong_rate": float(holdout_metrics.get("high_confidence_wrong_rate", 1.0)) <= thresholds.max_holdout_high_confidence_wrong_rate,
+        "holdout_abstention_rate": float(holdout_metrics.get("abstention_rate", 1.0)) <= thresholds.max_holdout_abstention_rate,
+        "replay_pages": int(replay_stats_report.get("pages_total", 0)) >= thresholds.min_replay_pages,
+        "authoritative_pages_rate": float(replay_stats_report.get("authoritative_pages_rate", 0.0)) >= thresholds.min_authoritative_pages_rate,
+        "targeted_authoritative_delta": float(compare_deltas.get("authoritative_found_rate", 0.0)) > thresholds.min_targeted_authoritative_delta,
+        "website_official_found_rate": float(website_authority_report.get("official_pages_found_rate", 0.0)) >= thresholds.min_website_official_found_rate,
+        "website_false_official_rate": float(website_authority_report.get("false_official_rate", 1.0)) <= thresholds.max_website_false_official_rate,
+        "resolver_high_confidence_wrong_rate": float(resolver_report.get("high_confidence_wrong_rate", 1.0)) <= thresholds.max_resolver_high_confidence_wrong_rate,
+    }
+    return {
+        "passed": all(checks.values()),
+        "checks": checks,
+        "thresholds": asdict(thresholds),
+        "inputs": {
+            "calibration_protocol": protocol,
+            "tuning_labels": tuning_labels,
+            "holdout_labels": holdout_labels,
+            "replay_input": replay_stats_report.get("input", ""),
+            "compare_input": compare_report.get("input", ""),
+            "resolver_input": resolver_report.get("input", ""),
+            "website_authority_input": website_authority_report.get("input", ""),
+        },
+        "metrics": {
+            "holdout_website": holdout_metrics,
+            "replay": {
+                "episodes_total": replay_stats_report.get("episodes_total", 0),
+                "pages_total": replay_stats_report.get("pages_total", 0),
+                "authoritative_pages_rate": replay_stats_report.get("authoritative_pages_rate", 0.0),
+            },
+            "retrieval_deltas": compare_deltas,
+            "website_authority": {
+                "official_pages_found_rate": website_authority_report.get("official_pages_found_rate", 0.0),
+                "false_official_rate": website_authority_report.get("false_official_rate", 0.0),
+            },
+            "resolver": {
+                "accuracy": resolver_report.get("accuracy", 0.0),
+                "abstention_rate": resolver_report.get("abstention_rate", 0.0),
+                "high_confidence_wrong_rate": resolver_report.get("high_confidence_wrong_rate", 1.0),
+            },
+        },
     }
 
 

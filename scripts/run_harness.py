@@ -20,6 +20,7 @@ if str(SRC) not in sys.path:
 
 from places_attr_conflation.harness import (
     DorkAuditThresholds,
+    ProductReleaseThresholds,
     build_ranker_dataset_rows,
     compare_arms,
     compare_reranker_on_replay,
@@ -31,6 +32,7 @@ from places_attr_conflation.harness import (
     evaluate_website_authority_replay,
     evaluate_retrieval_proof,
     evaluate_retrieval_quality_gate,
+    evaluate_product_release_gate,
     load_retrieval_episodes,
     merge_replay_corpora,
     merge_replay_files,
@@ -64,6 +66,7 @@ from places_attr_conflation.golden import (
     build_project_a_labels_from_david_finalized,
     build_project_a_labels_from_james_golden,
     evaluate_project_a_golden,
+    evaluate_website_policy_calibration,
     write_conflict_csv,
     write_label_csv,
 )
@@ -101,6 +104,10 @@ def _timestamp() -> str:
 def _default_output_path(command: str) -> Path:
     if command == "golden":
         return ROOT / "reports" / "golden" / f"project_a_golden_{_timestamp()}.json"
+    if command == "website-policy-calibrate":
+        return ROOT / "reports" / "golden" / f"website_policy_calibration_{_timestamp()}.json"
+    if command == "release-gate":
+        return ROOT / "reports" / "release" / f"release_gate_{_timestamp()}.json"
     if command in {"synth-evidence", "evidence-eval"}:
         return ROOT / "reports" / "evidence" / f"{command}_{_timestamp()}.json"
     if command == "replay-merge-report":
@@ -350,6 +357,31 @@ def main() -> int:
     golden.add_argument("--labels", required=True, help="CSV with <attribute>_truth_choice or <attribute>_truth_value columns.")
     golden.add_argument("--baseline", action="append", choices=PROJECT_A_BASELINES, help="Baseline to evaluate. May be repeated. Defaults to all.")
     golden.add_argument("--limit", type=int, help="Optional max project_a rows to scan before joining labels.")
+
+    website_policy = subparsers.add_parser(
+        "website-policy-calibrate",
+        help="Tune website policy thresholds on one label CSV and report only against a separate holdout CSV.",
+    )
+    website_policy.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
+    website_policy.add_argument("--tuning-labels", required=True, help="CSV used only to select policy thresholds.")
+    website_policy.add_argument("--holdout-labels", required=True, help="Separate CSV used for reporting product metrics.")
+    website_policy.add_argument("--limit", type=int, help="Optional max project_a rows to scan before joining labels.")
+
+    release_gate = subparsers.add_parser("release-gate", help="Validate held-out website policy and replay evidence before product claims.")
+    release_gate.add_argument("--calibration", required=True, help="JSON from website-policy-calibrate.")
+    release_gate.add_argument("--replay-stats", required=True, help="JSON from replay-stats.")
+    release_gate.add_argument("--compare", required=True, help="JSON from compare.")
+    release_gate.add_argument("--resolver", required=True, help="JSON from resolver-on-replay.")
+    release_gate.add_argument("--website-authority", required=True, help="JSON from website-authority.")
+    release_gate.add_argument("--min-holdout-website-accuracy", type=float, default=0.98)
+    release_gate.add_argument("--max-holdout-high-confidence-wrong-rate", type=float, default=0.02)
+    release_gate.add_argument("--max-holdout-abstention-rate", type=float, default=0.15)
+    release_gate.add_argument("--min-replay-pages", type=int, default=100)
+    release_gate.add_argument("--min-authoritative-pages-rate", type=float, default=0.50)
+    release_gate.add_argument("--min-targeted-authoritative-delta", type=float, default=0.0)
+    release_gate.add_argument("--min-website-official-found-rate", type=float, default=0.05)
+    release_gate.add_argument("--max-website-false-official-rate", type=float, default=0.02)
+    release_gate.add_argument("--max-resolver-high-confidence-wrong-rate", type=float, default=0.02)
 
     conflictset = subparsers.add_parser("conflictset", help="Export labeled base/current conflicts for evidence review.")
     conflictset.add_argument("--input", help="Optional parquet path. Defaults to data/project_a_samples.parquet when present.")
@@ -617,6 +649,36 @@ def main() -> int:
             args.labels,
             baselines=args.baseline or PROJECT_A_BASELINES,
             limit=args.limit,
+        )
+    elif args.command == "website-policy-calibrate":
+        dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)
+        if dataset_path is None:
+            raise SystemExit("No project_a parquet found. Put it under data/project_a_samples.parquet or pass --input.")
+        report = evaluate_website_policy_calibration(
+            dataset_path,
+            args.tuning_labels,
+            args.holdout_labels,
+            limit=args.limit,
+        )
+    elif args.command == "release-gate":
+        thresholds = ProductReleaseThresholds(
+            min_holdout_website_accuracy=args.min_holdout_website_accuracy,
+            max_holdout_high_confidence_wrong_rate=args.max_holdout_high_confidence_wrong_rate,
+            max_holdout_abstention_rate=args.max_holdout_abstention_rate,
+            min_replay_pages=args.min_replay_pages,
+            min_authoritative_pages_rate=args.min_authoritative_pages_rate,
+            min_targeted_authoritative_delta=args.min_targeted_authoritative_delta,
+            min_website_official_found_rate=args.min_website_official_found_rate,
+            max_website_false_official_rate=args.max_website_false_official_rate,
+            max_resolver_high_confidence_wrong_rate=args.max_resolver_high_confidence_wrong_rate,
+        )
+        report = evaluate_product_release_gate(
+            calibration_report=json.loads(Path(args.calibration).read_text(encoding="utf-8")),
+            replay_stats_report=json.loads(Path(args.replay_stats).read_text(encoding="utf-8")),
+            compare_report=json.loads(Path(args.compare).read_text(encoding="utf-8")),
+            resolver_report=json.loads(Path(args.resolver).read_text(encoding="utf-8")),
+            website_authority_report=json.loads(Path(args.website_authority).read_text(encoding="utf-8")),
+            thresholds=thresholds,
         )
     elif args.command == "conflictset":
         dataset_path = Path(args.input) if args.input else find_project_a_parquet(ROOT)

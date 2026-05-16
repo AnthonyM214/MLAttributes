@@ -12,6 +12,7 @@ from places_attr_conflation.golden import (
     build_project_a_labels_from_david_finalized,
     build_project_a_labels_from_james_golden,
     evaluate_project_a_golden,
+    evaluate_website_policy_calibration,
     load_label_rows,
     write_conflict_csv,
     write_label_csv,
@@ -296,6 +297,160 @@ class GoldenTests(unittest.TestCase):
 
         self.assertEqual(report["baselines"]["hybrid"]["metrics"]["website"]["accuracy"], 0.0)
         self.assertEqual(report["baselines"]["website_authority_hybrid"]["metrics"]["website"]["accuracy"], 1.0)
+
+    def test_website_authority_hybrid_uses_high_confidence_current_tie_break(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            parquet = root / "project_a_samples.parquet"
+            labels = root / "labels.csv"
+            duckdb.query(
+                f"""
+                COPY (
+                  SELECT
+                    'w2' AS id,
+                    'bw2' AS base_id,
+                    '[{{}}]' AS sources,
+                    '{{"primary":"Comune di Ponderano"}}' AS names,
+                    '{{"primary":"public_service_and_government"}}' AS categories,
+                    0.9645127118644068 AS confidence,
+                    '["http://www.comunediponderano.it/"]' AS websites,
+                    NULL AS socials,
+                    NULL AS emails,
+                    '["+39015541224"]' AS phones,
+                    NULL AS brand,
+                    '[{{"freeform":"Via Edmondo De Amicis, 7"}}]' AS addresses,
+                    '[{{}}]' AS base_sources,
+                    '{{"primary":"Comune Di Ponderano"}}' AS base_names,
+                    '{{"primary":"Community and Government > Town Hall"}}' AS base_categories,
+                    1.0 AS base_confidence,
+                    '["http://www.comune.ponderano.bi.it"]' AS base_websites,
+                    NULL AS base_socials,
+                    NULL AS base_emails,
+                    '["391 554 1224"]' AS base_phones,
+                    NULL AS base_brand,
+                    '[{{"freeform":"Via Edmondo de Amicis 7"}}]' AS base_addresses
+                ) TO '{parquet.as_posix()}' (FORMAT PARQUET)
+                """
+            )
+            labels.write_text(
+                "\n".join(
+                    [
+                        "id,base_id,website_truth_choice,website_truth_value",
+                        "w2,bw2,current,",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            report = evaluate_project_a_golden(parquet, labels, baselines=["hybrid", "website_authority_hybrid"])
+
+        self.assertEqual(report["baselines"]["hybrid"]["metrics"]["website"]["accuracy"], 0.0)
+        self.assertEqual(report["baselines"]["website_authority_hybrid"]["metrics"]["website"]["accuracy"], 1.0)
+
+    def test_website_authority_hybrid_does_not_override_low_confidence_current(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            parquet = root / "project_a_samples.parquet"
+            labels = root / "labels.csv"
+            duckdb.query(
+                f"""
+                COPY (
+                  SELECT
+                    'w3' AS id,
+                    'bw3' AS base_id,
+                    '[{{}}]' AS sources,
+                    '{{"primary":"Brand"}}' AS names,
+                    '{{"primary":"retail"}}' AS categories,
+                    0.89 AS confidence,
+                    '["https://brand-new.example"]' AS websites,
+                    NULL AS socials,
+                    NULL AS emails,
+                    '["+18315551212"]' AS phones,
+                    NULL AS brand,
+                    '[{{"freeform":"1 Main St"}}]' AS addresses,
+                    '[{{}}]' AS base_sources,
+                    '{{"primary":"Brand"}}' AS base_names,
+                    '{{"primary":"retail"}}' AS base_categories,
+                    0.99 AS base_confidence,
+                    '["https://brand.example"]' AS base_websites,
+                    NULL AS base_socials,
+                    NULL AS base_emails,
+                    '["8315551212"]' AS base_phones,
+                    NULL AS base_brand,
+                    '[{{"freeform":"1 Main St"}}]' AS base_addresses
+                ) TO '{parquet.as_posix()}' (FORMAT PARQUET)
+                """
+            )
+            labels.write_text(
+                "\n".join(
+                    [
+                        "id,base_id,website_truth_choice,website_truth_value",
+                        "w3,bw3,base,",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            report = evaluate_project_a_golden(parquet, labels, baselines=["website_authority_hybrid"])
+
+        self.assertEqual(report["baselines"]["website_authority_hybrid"]["metrics"]["website"]["accuracy"], 1.0)
+
+    def test_website_policy_calibration_uses_separate_holdout_labels(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            parquet = root / "project_a_samples.parquet"
+            tuning = root / "tuning.csv"
+            holdout = root / "holdout.csv"
+            _write_project_a_parquet(parquet)
+            tuning.write_text(
+                "\n".join(
+                    [
+                        "id,base_id,website_truth_choice,website_truth_value",
+                        "1,b1,current,",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            holdout.write_text(
+                "\n".join(
+                    [
+                        "id,base_id,website_truth_choice,website_truth_value",
+                        "2,b2,base,",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            report = evaluate_website_policy_calibration(parquet, tuning, holdout)
+
+        self.assertEqual(report["evaluation_protocol"], "separate_tuning_and_holdout_labels")
+        self.assertNotEqual(report["tuning_labels"], report["holdout_labels"])
+        self.assertIn("selected_policy", report)
+        self.assertEqual(report["holdout"]["metrics"]["total"], 1)
+
+    def test_website_policy_calibration_rejects_same_tuning_and_holdout_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            parquet = root / "project_a_samples.parquet"
+            labels = root / "labels.csv"
+            _write_project_a_parquet(parquet)
+            labels.write_text(
+                "\n".join(
+                    [
+                        "id,base_id,website_truth_choice,website_truth_value",
+                        "1,b1,current,",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                evaluate_website_policy_calibration(parquet, labels, labels)
 
 
 if __name__ == "__main__":
