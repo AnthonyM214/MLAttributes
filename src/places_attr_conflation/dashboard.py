@@ -154,6 +154,9 @@ def _website_authority_lines(website_authority: dict[str, object] | None) -> lis
     return [
         f"Website episodes: {_num(website_authority.get('total'))}",
         f"Official pages found: {_pct(website_authority.get('official_pages_found_rate'))}",
+        f"Place-relevant official pages: {_pct(website_authority.get('place_relevant_official_found_rate'))}",
+        f"Generic official homepages: {_pct(website_authority.get('generic_official_homepage_found_rate'))}",
+        f"Finder/locator pages: {_pct(website_authority.get('finder_or_locator_found_rate'))}",
         f"Same-domain queries: {_pct(website_authority.get('same_domain_query_coverage_rate'))}",
         f"Selected official: {_pct(website_authority.get('selected_official_rate'))}",
         f"False official rate: {_pct(website_authority.get('false_official_rate'))}",

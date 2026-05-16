@@ -13,7 +13,7 @@
 - Citation precision: 100.0% vs 0.0%
 - Top-1 authoritative: 100.0% vs 0.0%
 - Average attempts: 1.000
-- Conflict dork queue: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_20260516_032314_646735.csv`
+- Conflict dork queue: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_20260516_034400_342448.csv`
 
 ## Current Benchmarks
 
@@ -51,6 +51,9 @@
 
 - Website episodes: 792
 - Official pages found: 35.0%
+- Place-relevant official pages: 19.8%
+- Generic official homepages: 8.2%
+- Finder/locator pages: 9.8%
 - Same-domain queries: 36.1%
 - Selected official: 35.0%
 - False official rate: 0.0%
@@ -62,7 +65,7 @@
 - Attempts: 1
 - Pages: 1
 - Authoritative pages rate: 100.0%
-- Last merged replay: /home/anthony/Overture/MLAttributes/reports/replay/merged_20260516_032329_231233.json
+- Last merged replay: /home/anthony/Overture/MLAttributes/reports/replay/merged_20260516_034415_154476.json
 
 ### Batch Progress
 
@@ -115,14 +118,14 @@
 
 - `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json`
 - `combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json`
-- `compare`: `/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_20260516_032329_233012.json`
-- `conflict_dorks`: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_20260516_032314_646735.csv`
-- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260516_032319_434516.json`
-- `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260516_030534_553969.json`
-- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260516_032326_134641.json`
-- `merged_replay`: `/home/anthony/Overture/MLAttributes/reports/replay/merged_20260516_032329_231233.json`
-- `replay_stats`: `/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260516_032329_232808.json`
-- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260516_030533_135725.json`
-- `resolver_replay`: `/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_20260516_032329_233195.json`
-- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260516_030534_056590.json`
-- `website_authority`: `/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_20260516_032235_587698.json`
+- `compare`: `/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_20260516_034415_156110.json`
+- `conflict_dorks`: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_20260516_034400_342448.csv`
+- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260516_034405_359429.json`
+- `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260516_034417_784123.json`
+- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260516_034412_121706.json`
+- `merged_replay`: `/home/anthony/Overture/MLAttributes/reports/replay/merged_20260516_034415_154476.json`
+- `replay_stats`: `/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260516_034415_155921.json`
+- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260516_034416_149873.json`
+- `resolver_replay`: `/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_20260516_034415_156291.json`
+- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260516_034417_232189.json`
+- `website_authority`: `/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_20260516_034456_881328.json`

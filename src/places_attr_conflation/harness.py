@@ -17,6 +17,7 @@ import hashlib
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 from typing import Iterable
 
 from .evaluation import evaluate_rows
@@ -79,7 +80,7 @@ class ProductReleaseThresholds:
     min_holdout_website_accuracy: float = 0.98
     max_holdout_high_confidence_wrong_rate: float = 0.02
     max_holdout_abstention_rate: float = 0.15
-    min_replay_pages: int = 100
+    min_replay_pages: int = 300
     min_authoritative_pages_rate: float = 0.50
     min_targeted_authoritative_delta: float = 0.0
     min_website_official_found_rate: float = 0.05
@@ -92,6 +93,12 @@ class WebsiteAuthorityMetrics:
     total: int
     official_pages_found: int
     official_pages_found_rate: float
+    place_relevant_official_found: int
+    place_relevant_official_found_rate: float
+    generic_official_homepage_found: int
+    generic_official_homepage_found_rate: float
+    finder_or_locator_found: int
+    finder_or_locator_found_rate: float
     same_domain_query_covered: int
     same_domain_query_coverage_rate: float
     selected_official: int
@@ -517,6 +524,29 @@ def _episode_has_same_domain_query(episode: ReplayEpisode) -> bool:
     return False
 
 
+def _website_page_relevance(page: FetchedPage) -> str:
+    parsed = urlparse(page.url if "://" in page.url else f"https://{page.url}")
+    path = parsed.path.lower()
+    text = f"{page.title} {page.page_text}".lower()
+    authoritative = page.source_type in AUTHORITATIVE_SOURCE_TYPES
+
+    if not authoritative:
+        return "non_place_or_third_party"
+    if any(token in path for token in ("privacy", "terms", "careers", "jobs", "press", "blog", "news", "sitemap")):
+        return "non_place_path"
+    if any(token in path for token in ("store-locator", "storelocator", "locator", "locations", "location")):
+        return "finder_or_locator"
+    if path in {"", "/", "/index.html", "/index.htm"}:
+        if any(token in text for token in ("address", "phone", "hours", "menu", "location", "locations", "contact", "find us", "visit us", "directions")):
+            return "place_page"
+        return "generic_official_homepage"
+    if any(token in path for token in ("contact", "about", "location", "locations", "branch", "branches", "store", "stores", "outlet", "outlets", "directions")):
+        return "place_page"
+    if any(token in text for token in ("address", "phone", "hours", "menu", "location", "locations", "contact", "find us", "visit us", "directions")):
+        return "place_page"
+    return "unknown_place_relevance"
+
+
 def evaluate_website_authority_replay(
     episodes: Iterable[ReplayEpisode],
     *,
@@ -530,6 +560,9 @@ def evaluate_website_authority_replay(
     fallback_report = proof.get("fallback", {}) if isinstance(proof, dict) else {}
 
     official_pages_found = 0
+    place_relevant_official_found = 0
+    generic_official_homepage_found = 0
+    finder_or_locator_found = 0
     same_domain_query_covered = 0
     selected_official = 0
     false_official = 0
@@ -537,10 +570,18 @@ def evaluate_website_authority_replay(
 
     for episode in episodes:
         pages = [page for attempt in episode.search_attempts for page in attempt.fetched_pages]
+        page_relevance_counts: Counter[str] = Counter()
         for page in pages:
             source_type_distribution[page.source_type] = source_type_distribution.get(page.source_type, 0) + 1
+            page_relevance_counts[_website_page_relevance(page)] += 1
         if any(page.source_type in AUTHORITATIVE_SOURCE_TYPES for page in pages):
             official_pages_found += 1
+        if any(bucket in {"place_page", "finder_or_locator"} for bucket in page_relevance_counts):
+            place_relevant_official_found += 1
+        if page_relevance_counts.get("generic_official_homepage", 0):
+            generic_official_homepage_found += 1
+        if page_relevance_counts.get("finder_or_locator", 0):
+            finder_or_locator_found += 1
         if _episode_has_same_domain_query(episode):
             same_domain_query_covered += 1
         selected, selected_score = _best_selected_page(episode, arm=arm, model=model)
@@ -555,6 +596,12 @@ def evaluate_website_authority_replay(
             total=total,
             official_pages_found=official_pages_found,
             official_pages_found_rate=official_pages_found / total if total else 0.0,
+            place_relevant_official_found=place_relevant_official_found,
+            place_relevant_official_found_rate=place_relevant_official_found / total if total else 0.0,
+            generic_official_homepage_found=generic_official_homepage_found,
+            generic_official_homepage_found_rate=generic_official_homepage_found / total if total else 0.0,
+            finder_or_locator_found=finder_or_locator_found,
+            finder_or_locator_found_rate=finder_or_locator_found / total if total else 0.0,
             same_domain_query_covered=same_domain_query_covered,
             same_domain_query_coverage_rate=same_domain_query_covered / total if total else 0.0,
             selected_official=selected_official,
@@ -853,6 +900,12 @@ def evaluate_product_release_gate(
     tuning_labels = calibration_report.get("tuning_labels", "") if isinstance(calibration_report, dict) else ""
     holdout_labels = calibration_report.get("holdout_labels", "") if isinstance(calibration_report, dict) else ""
     compare_deltas = compare_report.get("deltas", {}) if isinstance(compare_report, dict) else {}
+    website_found_rate = float(
+        website_authority_report.get(
+            "place_relevant_official_found_rate",
+            website_authority_report.get("official_pages_found_rate", 0.0),
+        )
+    )
 
     checks = {
         "separate_tuning_and_holdout": bool(protocol == "separate_tuning_and_holdout_labels" and tuning_labels and holdout_labels and tuning_labels != holdout_labels),
@@ -862,7 +915,7 @@ def evaluate_product_release_gate(
         "replay_pages": int(replay_stats_report.get("pages_total", 0)) >= thresholds.min_replay_pages,
         "authoritative_pages_rate": float(replay_stats_report.get("authoritative_pages_rate", 0.0)) >= thresholds.min_authoritative_pages_rate,
         "targeted_authoritative_delta": float(compare_deltas.get("authoritative_found_rate", 0.0)) > thresholds.min_targeted_authoritative_delta,
-        "website_official_found_rate": float(website_authority_report.get("official_pages_found_rate", 0.0)) >= thresholds.min_website_official_found_rate,
+        "website_official_found_rate": website_found_rate >= thresholds.min_website_official_found_rate,
         "website_false_official_rate": float(website_authority_report.get("false_official_rate", 1.0)) <= thresholds.max_website_false_official_rate,
         "resolver_high_confidence_wrong_rate": float(resolver_report.get("high_confidence_wrong_rate", 1.0)) <= thresholds.max_resolver_high_confidence_wrong_rate,
     }
@@ -889,6 +942,9 @@ def evaluate_product_release_gate(
             "retrieval_deltas": compare_deltas,
             "website_authority": {
                 "official_pages_found_rate": website_authority_report.get("official_pages_found_rate", 0.0),
+                "place_relevant_official_found_rate": website_authority_report.get("place_relevant_official_found_rate", 0.0),
+                "generic_official_homepage_found_rate": website_authority_report.get("generic_official_homepage_found_rate", 0.0),
+                "finder_or_locator_found_rate": website_authority_report.get("finder_or_locator_found_rate", 0.0),
                 "false_official_rate": website_authority_report.get("false_official_rate", 0.0),
             },
             "resolver": {

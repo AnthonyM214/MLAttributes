@@ -376,7 +376,7 @@ def main() -> int:
     release_gate.add_argument("--min-holdout-website-accuracy", type=float, default=0.98)
     release_gate.add_argument("--max-holdout-high-confidence-wrong-rate", type=float, default=0.02)
     release_gate.add_argument("--max-holdout-abstention-rate", type=float, default=0.15)
-    release_gate.add_argument("--min-replay-pages", type=int, default=100)
+    release_gate.add_argument("--min-replay-pages", type=int, default=300)
     release_gate.add_argument("--min-authoritative-pages-rate", type=float, default=0.50)
     release_gate.add_argument("--min-targeted-authoritative-delta", type=float, default=0.0)
     release_gate.add_argument("--min-website-official-found-rate", type=float, default=0.05)

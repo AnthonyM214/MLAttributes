@@ -199,6 +199,8 @@ class HarnessTests(unittest.TestCase):
             report = evaluate_website_authority_replay(load_retrieval_episodes(path))
         self.assertEqual(report["total"], 1)
         self.assertEqual(report["official_pages_found_rate"], 1.0)
+        self.assertEqual(report["place_relevant_official_found_rate"], 1.0)
+        self.assertEqual(report["generic_official_homepage_found_rate"], 0.0)
         self.assertEqual(report["selected_official_rate"], 1.0)
         self.assertEqual(report["false_official_rate"], 0.0)
         self.assertEqual(report["authoritative_found_rate"], 1.0)
@@ -286,10 +288,15 @@ class HarnessTests(unittest.TestCase):
                 }
             },
         }
-        replay_stats = {"input": "merged.json", "episodes_total": 200, "pages_total": 150, "authoritative_pages_rate": 0.6}
+        replay_stats = {"input": "merged.json", "episodes_total": 200, "pages_total": 300, "authoritative_pages_rate": 0.6}
         compare = {"input": "merged.json", "deltas": {"authoritative_found_rate": 0.05}}
         resolver = {"input": "merged.json", "accuracy": 0.9, "abstention_rate": 0.1, "high_confidence_wrong_rate": 0.0}
-        website_authority = {"input": "merged.json", "official_pages_found_rate": 0.2, "false_official_rate": 0.0}
+        website_authority = {
+            "input": "merged.json",
+            "official_pages_found_rate": 0.0,
+            "place_relevant_official_found_rate": 0.2,
+            "false_official_rate": 0.0,
+        }
 
         report = evaluate_product_release_gate(
             calibration_report=calibration,
