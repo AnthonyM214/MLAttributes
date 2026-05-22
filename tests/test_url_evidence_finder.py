@@ -97,6 +97,89 @@ def test_ca_santa_cruz_and_aggregator_dorks_are_generated() -> None:
     assert any("site:yelp.com" in query for query in by_layer["aggregator_conflict"])
 
 
+def test_non_california_rows_do_not_generate_ca_registry_queries() -> None:
+    specs = ca_santa_cruz_query_specs(
+        _row(
+            name="Full Steam Tromso",
+            address="Sondre Tollbodgate 3",
+            city="",
+            state="",
+            phone="+4792044930",
+            current_value="https://fullsteam.no",
+            base_value="https://full-steam.no",
+        )
+    )
+
+    assert all(spec.search_layer != "ca_public_registry" for spec in specs)
+    assert any('"Full Steam Tromso" "Sondre Tollbodgate 3" official website' in spec.query for spec in specs)
+    assert any('"Full Steam Tromso" "+4792044930"' in spec.query for spec in specs)
+
+
+def test_city_only_rows_fail_closed_without_generic_queries(tmp_path: Path) -> None:
+    template = _write_template(
+        tmp_path / "evidence_template_001.csv",
+        [
+            _row(
+                name="",
+                address="",
+                phone="",
+                city="Santa Cruz",
+                state="CA",
+                current_value="",
+                base_value="",
+                prediction="",
+                website="",
+            )
+        ],
+    )
+
+    report = run_url_evidence_finder(
+        input_paths=[template],
+        output_dir=tmp_path / "finder",
+        provider=QueryOnlyProvider(),
+        retrieved_at="2026-01-01T00:00:00Z",
+    )
+
+    assert report["queries_total"] == 0
+    assert report["rows_missing_identifiers"] == 1
+    assert report["generic_city_only_query_count"] == 0
+    assert (tmp_path / "finder" / "search_queries.jsonl").read_text(encoding="utf-8") == ""
+    missing = (tmp_path / "finder" / "MISSING_IDENTIFIERS.md").read_text(encoding="utf-8")
+    assert "case-1" in missing
+    assert "missing_identifiers: `true`" in missing
+
+
+def test_manual_packet_surfaces_non_domain_identifiers_before_domain_queries(tmp_path: Path) -> None:
+    template = _write_template(
+        tmp_path / "evidence_template_001.csv",
+        [
+            _row(
+                name="Full Steam Tromso",
+                address="Sondre Tollbodgate 3",
+                city="",
+                state="",
+                phone="+4792044930",
+                current_value="https://fullsteam.no",
+                base_value="https://full-steam.no",
+            )
+        ],
+    )
+
+    run_url_evidence_finder(
+        input_paths=[template],
+        output_dir=tmp_path / "finder",
+        provider=QueryOnlyProvider(),
+        retrieved_at="2026-01-01T00:00:00Z",
+    )
+
+    packet = (tmp_path / "finder" / "MANUAL_SEARCH_PACKET.md").read_text(encoding="utf-8")
+    assert "- name: `Full Steam Tromso`" in packet
+    assert "- address: `Sondre Tollbodgate 3`" in packet
+    assert "- phone: `+4792044930`" in packet
+    assert "- `\"Full Steam Tromso\" \"Sondre Tollbodgate 3\" official website`" in packet
+    assert "- `\"Full Steam Tromso\" \"+4792044930\"`" in packet
+
+
 def test_candidate_scoring_rewards_name_address_phone_city_matches() -> None:
     result = SearchResult(
         url="https://demo.example/contact",

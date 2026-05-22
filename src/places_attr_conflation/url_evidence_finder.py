@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 import json
 import re
-from collections import Counter, defaultdict
+from collections import Counter, OrderedDict, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
@@ -45,6 +45,26 @@ CANDIDATE_FIELDS = [
     "retrieved_at",
 ]
 
+MANUAL_ENTRY_FIELDS = [
+    "case_id",
+    "attribute",
+    "priority_bucket",
+    "case_type_guess",
+    "website_label_guess",
+    "identity_label_guess",
+    "name",
+    "address",
+    "phone",
+    "domain_values",
+    "evidence_role",
+    "suggested_official_query",
+    "suggested_identity_query",
+    "suggested_aggregator_query",
+    "url",
+    "source_type",
+    "notes",
+]
+
 
 @dataclass(frozen=True)
 class QuerySpec:
@@ -67,7 +87,7 @@ class QuerySpec:
 
 
 def _clean(value: object) -> str:
-    return str(value or "").strip()
+    return re.sub(r"\s+", " ", str(value or "").strip())
 
 
 def _quote(value: str) -> str:
@@ -89,23 +109,74 @@ def _row_context(row: dict[str, str]) -> dict[str, str]:
     current = _clean(row.get("current_value"))
     base = _clean(row.get("base_value"))
     prediction = _clean(row.get("prediction"))
+    domain_values: list[str] = []
+    for value in [
+        _clean(row.get("website")),
+        _clean(row.get("base_website")),
+        current,
+        base,
+        prediction,
+    ]:
+        if _looks_like_url(value):
+            domain = _domain(value)
+            if domain and domain not in domain_values:
+                domain_values.append(domain)
     website = _clean(row.get("website")) or next((value for value in [current, base, prediction] if _looks_like_url(value)), "")
     return {
         "case_id": _row_case_id(row),
         "attribute": attribute,
         "priority_bucket": _clean(row.get("priority_bucket")),
-        "name": _clean(row.get("name") or row.get("business_name") or row.get("current_name") or row.get("base_name")),
+        "case_type_guess": _clean(row.get("case_type_guess")),
+        "website_label_guess": _clean(row.get("website_label_guess")),
+        "identity_label_guess": _clean(row.get("identity_label_guess")),
+        "name": _clean(row.get("name") or row.get("business_name") or row.get("current_name") or row.get("base_name") or (current if attribute == "name" else "")),
         "city": _clean(row.get("city") or row.get("locality")),
-        "state": _clean(row.get("state") or row.get("region") or "CA"),
+        "state": _clean(row.get("state") or row.get("region")),
         "address": _clean(row.get("address") or row.get("current_address") or row.get("base_address") or (current if attribute == "address" else "")),
         "phone": _clean(row.get("phone") or row.get("current_phone") or row.get("base_phone") or (current if attribute == "phone" else "")),
         "website": website,
+        "domain_values": "|".join(domain_values),
         "query": _clean(row.get("query")),
     }
 
 
 def _domain(value: str) -> str:
     return domain_from_url(value) if value else ""
+
+
+def _context_domains(context: dict[str, str]) -> list[str]:
+    return [domain for domain in context.get("domain_values", "").split("|") if domain]
+
+
+def _has_specific_identifier(context: dict[str, str]) -> bool:
+    return bool(context["name"] or context["address"] or context["phone"] or _context_domains(context))
+
+
+def _query_has_specific_identifier(query: str, context: dict[str, str]) -> bool:
+    haystack = _clean(query).lower()
+    identifiers = [context["name"], context["address"], context["phone"], *_context_domains(context)]
+    return any(identifier and _clean(identifier).lower() in haystack for identifier in identifiers)
+
+
+def _is_generic_city_only_query(query: str, context: dict[str, str]) -> bool:
+    city = context.get("city", "")
+    if not city or _query_has_specific_identifier(query, context):
+        return False
+    return city.lower() in query.lower()
+
+
+def _join_query_parts(*parts: str) -> str:
+    return " ".join(part for part in parts if _clean(part))
+
+
+def _has_non_domain_identifier(context: dict[str, str]) -> bool:
+    return bool(context["name"] or context["address"] or context["phone"])
+
+
+def _is_california_context(context: dict[str, str]) -> bool:
+    state = context["state"].strip().upper()
+    city = context["city"].strip().lower()
+    return state in {"CA", "CALIFORNIA"} or city == "santa cruz"
 
 
 def _add_query(queries: list[QuerySpec], seen: set[tuple[str, str]], context: dict[str, str], layer: str, query: str) -> None:
@@ -130,25 +201,49 @@ def _add_query(queries: list[QuerySpec], seen: set[tuple[str, str]], context: di
 
 def ca_santa_cruz_query_specs(row: dict[str, str]) -> list[QuerySpec]:
     context = _row_context(row)
+    if not _has_specific_identifier(context):
+        return []
+
     name = _quote(context["name"])
-    city = _quote(context["city"] or "Santa Cruz")
-    state = _clean(context["state"] or "CA")
+    city = _quote(context["city"])
+    state = _clean(context["state"])
     address = _quote(context["address"])
     phone = _quote(context["phone"])
-    domain = _domain(context["website"])
+    domains = _context_domains(context)
     queries: list[QuerySpec] = []
     seen: set[tuple[str, str]] = set()
 
-    for query in [
-        f"{name} {city} {state} official website -site:yelp.com -site:facebook.com -site:instagram.com",
-        f"{name} {address} {city} {state}",
-        f"{name} {phone}",
-        f"{name} {city} contact",
-        f"{name} {city} locations",
-    ]:
+    official_queries: list[str] = []
+    if name and address:
+        official_queries.append(_join_query_parts(name, address, city, state, "official website"))
+    if name and phone:
+        official_queries.append(_join_query_parts(name, phone))
+    if name and city:
+        official_queries.extend(
+            [
+                _join_query_parts(name, city, state, "official website", "-site:yelp.com -site:facebook.com -site:instagram.com"),
+                _join_query_parts(name, city, "contact"),
+                _join_query_parts(name, city, "locations"),
+            ]
+        )
+    if name and not city:
+        official_queries.extend([f"{name} official website", f"{name} contact"])
+    if domains:
+        for domain in domains[:3]:
+            official_queries.extend(
+                [
+                    f"{domain} official website",
+                    f"{domain} contact",
+                    f"{domain} location OR locations",
+                ]
+            )
+    if address:
+        official_queries.append(_join_query_parts(address, city, state, "official website"))
+
+    for query in official_queries:
         _add_query(queries, seen, context, "official", query)
 
-    if domain:
+    for domain in domains:
         for query in [
             f"site:{domain} {name}",
             f"site:{domain} {address}",
@@ -158,35 +253,91 @@ def ca_santa_cruz_query_specs(row: dict[str, str]) -> list[QuerySpec]:
         ]:
             _add_query(queries, seen, context, "website_validation", query)
 
-    for query in [
-        f"{name} {city} moved to",
-        f"{name} {city} formerly",
-        f"{name} {city} under new ownership",
-        f"{address} {city} formerly",
-        f"{address} {city} grand opening",
-        f"{name} {city} permanently closed",
-    ]:
+    identity_queries: list[str] = []
+    if name and city:
+        identity_queries.extend(
+            [
+                _join_query_parts(name, city, "moved to"),
+                _join_query_parts(name, city, "formerly"),
+                _join_query_parts(name, city, "under new ownership"),
+                _join_query_parts(name, city, "permanently closed"),
+            ]
+        )
+    if address and city:
+        identity_queries.extend(
+            [
+                _join_query_parts(address, city, "formerly"),
+                _join_query_parts(address, city, "grand opening"),
+            ]
+        )
+    if name and not city:
+        identity_queries.extend(
+            [
+                _join_query_parts(name, "formerly"),
+                _join_query_parts(name, "moved"),
+                _join_query_parts(name, "permanently closed"),
+            ]
+        )
+    if address and not city:
+        identity_queries.extend(
+            [
+                _join_query_parts(address, "formerly"),
+                _join_query_parts(address, "grand opening"),
+            ]
+        )
+    for domain in domains[:3]:
+        identity_queries.extend(
+            [
+                f"{domain} formerly",
+                f"{domain} moved",
+                f"{domain} permanently closed",
+            ]
+        )
+
+    for query in identity_queries:
         _add_query(queries, seen, context, "identity_drift", query)
 
-    for query in [
-        f"{name} {city} \"business license\"",
-        f"{name} {city} \"Santa Cruz\" \"business license\"",
-        f"{address} \"Santa Cruz\" business",
-        f"site:cityofsantacruz.com {name}",
-        f"site:santacruzcountyca.gov {name}",
-        f"site:ca.gov {name} {city}",
-    ]:
-        _add_query(queries, seen, context, "ca_public_registry", query)
+    if _is_california_context(context):
+        registry_queries: list[str] = []
+        if name and city:
+            registry_queries.extend(
+                [
+                    _join_query_parts(name, city, '"business license"'),
+                    _join_query_parts(name, city, state, '"business registry"'),
+                    _join_query_parts("site:ca.gov", name, city),
+                ]
+            )
+        if address and city:
+            registry_queries.append(_join_query_parts(address, city, "business"))
+        for domain in domains[:3]:
+            registry_queries.append(_join_query_parts("site:ca.gov", domain))
 
-    for query in [
-        f"site:yelp.com {name} {city}",
-        f"site:facebook.com {name} {city}",
-        f"site:instagram.com {name} {city}",
-        f"site:tripadvisor.com {name} {city}",
-    ]:
+        for query in registry_queries:
+            _add_query(queries, seen, context, "ca_public_registry", query)
+
+    aggregator_anchor = _join_query_parts(name, city) if name else ""
+    aggregator_queries: list[str] = []
+    if aggregator_anchor:
+        aggregator_queries.extend(
+            [
+                f"site:yelp.com {aggregator_anchor}",
+                f"site:facebook.com {aggregator_anchor}",
+                f"site:instagram.com {aggregator_anchor}",
+                f"site:tripadvisor.com {aggregator_anchor}",
+            ]
+        )
+    for domain in domains[:2]:
+        aggregator_queries.extend(
+            [
+                f"site:yelp.com {domain}",
+                f"site:facebook.com {domain}",
+            ]
+        )
+
+    for query in aggregator_queries:
         _add_query(queries, seen, context, "aggregator_conflict", query)
 
-    if not queries and context["query"]:
+    if not queries and context["query"] and _query_has_specific_identifier(context["query"], context):
         _add_query(queries, seen, context, "workplan", context["query"])
     return queries
 
@@ -351,6 +502,287 @@ def _write_candidates(path: Path, rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
+def _recommended_roles(priority_bucket: str) -> list[str]:
+    if priority_bucket == "P0_WEBSITE_CHAIN_OR_BRANCH":
+        return [
+            "official_location_candidate",
+            "official_chain_homepage_candidate",
+            "aggregator_conflict_candidate",
+            "identity_drift_candidate",
+        ]
+    if priority_bucket == "P0_IDENTITY_DRIFT_WEBSITE":
+        return [
+            "identity_drift_candidate",
+            "stale_candidate",
+            "official_candidate",
+            "aggregator_conflict_candidate",
+        ]
+    if priority_bucket == "P0_WEBSITE_AGGREGATOR_OR_SOCIAL":
+        return [
+            "official_candidate",
+            "official_location_candidate",
+            "aggregator_conflict_candidate",
+            "social_conflict_candidate",
+        ]
+    if priority_bucket == "P0_WEBSITE_MISSING":
+        return [
+            "official_candidate",
+            "official_location_candidate",
+            "public_registry_candidate",
+        ]
+    return [
+        "official_candidate",
+        "official_location_candidate",
+        "aggregator_conflict_candidate",
+        "identity_drift_candidate",
+    ]
+
+
+def _pick_queries(queries: list[str], limit: int, keywords: tuple[str, ...]) -> list[str]:
+    scored = []
+    for index, query in enumerate(queries):
+        lowered = query.lower()
+        score = sum(1 for keyword in keywords if keyword in lowered)
+        scored.append((-score, index, query))
+    return [query for _score, _index, query in sorted(scored)[:limit]]
+
+
+def _pick_manual_queries(
+    queries: list[str],
+    limit: int,
+    case: dict[str, object],
+    *,
+    keywords: tuple[str, ...],
+) -> list[str]:
+    name = _clean(case.get("name")).lower()
+    address = _clean(case.get("address")).lower()
+    phone = _clean(case.get("phone")).lower()
+    domains = [domain.lower() for domain in _context_domains(case)]
+    scored = []
+    for index, query in enumerate(queries):
+        lowered = _clean(query).lower()
+        anchor_score = 0
+        if name and address and name in lowered and address in lowered:
+            anchor_score = max(anchor_score, 100)
+        if name and phone and name in lowered and phone in lowered:
+            anchor_score = max(anchor_score, 95)
+        if name and name in lowered:
+            anchor_score = max(anchor_score, 80)
+        if address and address in lowered:
+            anchor_score = max(anchor_score, 70)
+        if phone and phone in lowered:
+            anchor_score = max(anchor_score, 65)
+        if any(domain in lowered for domain in domains):
+            anchor_score = max(anchor_score, 30)
+        keyword_score = sum(1 for keyword in keywords if keyword in lowered)
+        scored.append((-anchor_score, -keyword_score, index, query))
+    return [query for _anchor, _keyword, _index, query in sorted(scored)[:limit]]
+
+
+def _write_missing_identifiers(
+    path: Path,
+    missing_rows: list[dict[str, str]],
+    domain_only_rows: list[dict[str, str]],
+) -> None:
+    lines = [
+        "# Missing Identifiers",
+        "",
+        "Rows listed here did not have name, address, phone, or website/domain values. Generic city-only queries were not generated.",
+    ]
+    if not missing_rows:
+        lines.extend(["", "No rows missing identifiers."])
+    for row in missing_rows:
+        lines.extend(
+            [
+                "",
+                f"## `{row['case_id']}`",
+                "",
+                f"- attribute: `{row['attribute']}`",
+                f"- priority_bucket: `{row['priority_bucket']}`",
+                f"- city: `{row['city']}`",
+                f"- state: `{row['state']}`",
+                "- missing_identifiers: `true`",
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "## Domain-Only Identifier Rows",
+            "",
+            "Rows listed here have website/domain values but no name, address, or phone. These are usable leads, not sufficient entity anchors.",
+        ]
+    )
+    if not domain_only_rows:
+        lines.append("")
+        lines.append("No domain-only rows.")
+    for row in domain_only_rows:
+        lines.extend(
+            [
+                "",
+                f"### `{row['case_id']}`",
+                "",
+                f"- attribute: `{row['attribute']}`",
+                f"- priority_bucket: `{row['priority_bucket']}`",
+                f"- domain_values: `{row['domain_values']}`",
+                "- domain_only_identifiers: `true`",
+            ]
+        )
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+
+
+def _write_query_only_summary(path: Path, report: dict[str, object], layer_counts: Counter[str]) -> None:
+    lines = [
+        "# Query-Only URL Finder Summary",
+        "",
+        "## Run",
+        f"- Provider: `{report['provider']}`",
+        f"- Region: `{report['region']}`",
+        f"- Input rows: {report['rows_total']}",
+        f"- Persisted query records: {report['queries_total']}",
+        f"- Search results: {report['results_total']}",
+        f"- Candidate URLs: {report['candidates_total']}",
+        f"- Autofill written: {str(report['autofill_written']).lower()}",
+        "",
+        "## Identifier Coverage",
+        f"- Rows with name: {report['rows_with_name']}",
+        f"- Rows with address: {report['rows_with_address']}",
+        f"- Rows with phone: {report['rows_with_phone']}",
+        f"- Rows with domain value: {report['rows_with_domain_value']}",
+        f"- Rows with non-domain identifier: {report['rows_with_non_domain_identifier']}",
+        f"- Rows with domain-only identifiers: {report['rows_domain_only_identifiers']}",
+        f"- Rows missing identifiers: {report['rows_missing_identifiers']}",
+        f"- Generic city-only queries: {report['generic_city_only_query_count']}",
+        "",
+        "## Query Layers",
+    ]
+    if layer_counts:
+        for layer, count in sorted(layer_counts.items()):
+            lines.append(f"- `{layer}`: {count}")
+    else:
+        lines.append("- none")
+    lines.extend(
+        [
+            "",
+            "No live search was run in query-only mode. No evidence templates were overwritten and no truth labels were created.",
+        ]
+    )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _write_manual_packet(
+    output_root: Path,
+    loaded_rows: list[tuple[str, int, dict[str, str]]],
+    query_rows: list[dict[str, object]],
+) -> None:
+    cases: OrderedDict[tuple[str, str], dict[str, object]] = OrderedDict()
+    for _source_path, _line_no, row in loaded_rows:
+        context = _row_context(row)
+        key = (context["case_id"], context["attribute"])
+        cases[key] = {
+            **context,
+            "queries_by_layer": defaultdict(list),
+        }
+
+    for query_row in query_rows:
+        key = (_clean(query_row.get("case_id")), _clean(query_row.get("attribute")))
+        if key not in cases:
+            continue
+        layer = _clean(query_row.get("search_layer"))
+        query = _clean(query_row.get("query"))
+        if query and query not in cases[key]["queries_by_layer"][layer]:
+            cases[key]["queries_by_layer"][layer].append(query)
+
+    packet_lines = [
+        "# Manual Search Packet",
+        "",
+        "Use this packet for browser-assisted URL discovery. Leave URL fields empty until a human supplies explicit evidence URLs.",
+    ]
+    manual_rows: list[dict[str, str]] = []
+    for index, case in enumerate(cases.values(), start=1):
+        queries_by_layer = case["queries_by_layer"]
+        official = _pick_manual_queries(
+            queries_by_layer.get("official", []) + queries_by_layer.get("website_validation", []),
+            3,
+            case,
+            keywords=("official", "contact", "locations", "location", "site:"),
+        )
+        identity = _pick_manual_queries(
+            queries_by_layer.get("identity_drift", []),
+            2,
+            case,
+            keywords=("moved", "formerly", "ownership", "closed"),
+        )
+        aggregator = _pick_manual_queries(
+            queries_by_layer.get("aggregator_conflict", []),
+            2,
+            case,
+            keywords=("yelp", "facebook", "instagram", "tripadvisor"),
+        )
+        roles = _recommended_roles(_clean(case.get("priority_bucket")))
+        missing = not _has_specific_identifier(case)
+        domain_only = bool(_context_domains(case) and not _has_non_domain_identifier(case))
+        packet_lines.extend(
+            [
+                "",
+                f"## {index}. `{case['case_id']}`",
+                "",
+                f"- priority_bucket: `{case['priority_bucket']}`",
+                f"- case_type_guess: `{case['case_type_guess']}`",
+                f"- website_label_guess: `{case['website_label_guess']}`",
+                f"- identity_label_guess: `{case['identity_label_guess']}`",
+                f"- missing_identifiers: `{str(missing).lower()}`",
+                f"- domain_only_identifiers: `{str(domain_only).lower()}`",
+                f"- name: `{case['name']}`",
+                f"- address: `{case['address']}`",
+                f"- phone: `{case['phone']}`",
+                f"- domain_values: `{case['domain_values']}`",
+                f"- recommended evidence roles: {', '.join(f'`{role}`' for role in roles)}",
+                "",
+                "Official/contact queries:",
+            ]
+        )
+        packet_lines.extend(f"- `{query}`" for query in official)
+        if not official:
+            packet_lines.append("- none")
+        packet_lines.extend(["", "Identity drift queries:"])
+        packet_lines.extend(f"- `{query}`" for query in identity)
+        if not identity:
+            packet_lines.append("- none")
+        packet_lines.extend(["", "Aggregator/social queries:"])
+        packet_lines.extend(f"- `{query}`" for query in aggregator)
+        if not aggregator:
+            packet_lines.append("- none")
+
+        for role in roles:
+            manual_rows.append(
+                {
+                    "case_id": _clean(case["case_id"]),
+                    "attribute": _clean(case["attribute"]),
+                    "priority_bucket": _clean(case["priority_bucket"]),
+                    "case_type_guess": _clean(case["case_type_guess"]),
+                    "website_label_guess": _clean(case["website_label_guess"]),
+                    "identity_label_guess": _clean(case["identity_label_guess"]),
+                    "name": _clean(case["name"]),
+                    "address": _clean(case["address"]),
+                    "phone": _clean(case["phone"]),
+                    "domain_values": _clean(case["domain_values"]),
+                    "evidence_role": role,
+                    "suggested_official_query": official[0] if official else "",
+                    "suggested_identity_query": identity[0] if identity else "",
+                    "suggested_aggregator_query": aggregator[0] if aggregator else "",
+                    "url": "",
+                    "source_type": "",
+                    "notes": "",
+                }
+            )
+
+    (output_root / "MANUAL_SEARCH_PACKET.md").write_text("\n".join(packet_lines).rstrip() + "\n", encoding="utf-8")
+    with (output_root / "manual_url_entry.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=MANUAL_ENTRY_FIELDS)
+        writer.writeheader()
+        writer.writerows(manual_rows)
+
+
 def _eligible_for_autofill(candidate: dict[str, str], row: dict[str, str]) -> bool:
     if candidate["confidence_bucket"] != "high":
         return False
@@ -427,12 +859,50 @@ def run_url_evidence_finder(
     candidates: list[dict[str, str]] = []
     rows_by_input: dict[str, list[dict[str, str]]] = defaultdict(list)
     candidates_by_key: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    identifier_counts = Counter()
+    generic_city_only_query_count = 0
+    missing_identifier_rows: list[dict[str, str]] = []
+    domain_only_rows: list[dict[str, str]] = []
 
     for source_path, _line_no, row in loaded_rows:
         rows_by_input[source_path].append(row)
+        context = _row_context(row)
+        if context["name"]:
+            identifier_counts["rows_with_name"] += 1
+        if context["address"]:
+            identifier_counts["rows_with_address"] += 1
+        if context["phone"]:
+            identifier_counts["rows_with_phone"] += 1
+        if _context_domains(context):
+            identifier_counts["rows_with_domain_value"] += 1
+        if _has_non_domain_identifier(context):
+            identifier_counts["rows_with_non_domain_identifier"] += 1
+        elif _context_domains(context):
+            identifier_counts["rows_domain_only_identifiers"] += 1
+            domain_only_rows.append(
+                {
+                    "case_id": context["case_id"],
+                    "attribute": context["attribute"],
+                    "priority_bucket": context["priority_bucket"],
+                    "domain_values": context["domain_values"],
+                }
+            )
+        if not _has_specific_identifier(context):
+            identifier_counts["rows_missing_identifiers"] += 1
+            missing_identifier_rows.append(
+                {
+                    "case_id": context["case_id"],
+                    "attribute": context["attribute"],
+                    "priority_bucket": context["priority_bucket"],
+                    "city": context["city"],
+                    "state": context["state"],
+                }
+            )
         specs = ca_santa_cruz_query_specs(row)
         layer_by_query = {spec.query: spec.search_layer for spec in specs}
         for spec in specs:
+            if _is_generic_city_only_query(spec.query, context):
+                generic_city_only_query_count += 1
             query_rows.append(spec.to_dict(provider=provider.name, retrieved_at=timestamp))
             results = provider.search(spec.query, case_id=spec.case_id, limit=limit)
             for result in results:
@@ -445,9 +915,12 @@ def run_url_evidence_finder(
     _write_jsonl(output_root / "search_queries.jsonl", query_rows)
     _write_jsonl(output_root / "search_results_snapshot.jsonl", result_rows)
     _write_candidates(output_root / "url_candidates.csv", candidates)
+    _write_missing_identifiers(output_root / "MISSING_IDENTIFIERS.md", missing_identifier_rows, domain_only_rows)
+    _write_manual_packet(output_root, loaded_rows, query_rows)
 
     autofill_outputs = _write_autofill(input_paths, output_root, rows_by_input, candidates_by_key) if write_autofill else []
     candidate_counts = Counter(candidate["confidence_bucket"] for candidate in candidates)
+    layer_counts = Counter(str(row.get("search_layer") or "") for row in query_rows)
     report = {
         "inputs": [str(Path(path)) for path in input_paths],
         "output_dir": str(output_root),
@@ -459,6 +932,14 @@ def run_url_evidence_finder(
         "queries_total": len(query_rows),
         "results_total": len(result_rows),
         "candidates_total": len(candidates),
+        "rows_with_name": identifier_counts["rows_with_name"],
+        "rows_with_address": identifier_counts["rows_with_address"],
+        "rows_with_phone": identifier_counts["rows_with_phone"],
+        "rows_with_domain_value": identifier_counts["rows_with_domain_value"],
+        "rows_with_non_domain_identifier": identifier_counts["rows_with_non_domain_identifier"],
+        "rows_domain_only_identifiers": identifier_counts["rows_domain_only_identifiers"],
+        "rows_missing_identifiers": identifier_counts["rows_missing_identifiers"],
+        "generic_city_only_query_count": generic_city_only_query_count,
         "candidates_by_confidence": dict(sorted(candidate_counts.items())),
         "autofill_written": bool(write_autofill),
         "autofill_outputs": autofill_outputs,
@@ -466,6 +947,7 @@ def run_url_evidence_finder(
     }
     (output_root / "url_finder_report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (output_root / "url_finder_notes.md").write_text(_render_notes(report), encoding="utf-8")
+    _write_query_only_summary(output_root / "QUERY_ONLY_SUMMARY.md", report, layer_counts)
     return report
 
 

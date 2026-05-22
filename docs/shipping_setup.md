@@ -13,6 +13,17 @@ This repo is ready for reproducible benchmark work when these pieces are enabled
 
 ## Repo commands
 
+### Local install
+
+The repository ships with an offline-friendly PEP 517 backend, so these work without network access:
+
+```bash
+python3 -m pip install -e . --no-deps
+python3 -m pip wheel . --no-deps -w /tmp/mlattributes-wheelhouse
+```
+
+The editable install exposes the `mlattributes-eval` console script and keeps the `places_attr_conflation` package importable from `src/`.
+
 ### Unit tests
 
 ```bash
@@ -68,6 +79,20 @@ python3 scripts/run_harness.py ranker-dataset \
 python3 scripts/run_harness.py replay --input tests/fixtures/retrieval_replay_sample.json --arm targeted
 python3 scripts/run_harness.py rerank --input tests/fixtures/retrieval_replay_sample.json
 ```
+
+### Claim-level benchmark
+
+```bash
+python3 scripts/run_harness.py benchmark-v2 \
+  --replay tests/fixtures/hard_cases_replay.json \
+  --include-decisions
+
+python3 scripts/run_harness.py benchmark-v2 \
+  --replay tests/fixtures/pac_hard_cases_replay.json \
+  --include-decisions
+```
+
+This compares the existing row-scoring resolver with the claim-level resolver v2 and reports breakthrough, abstention, and failure cases. The `pac_hard_cases_replay.json` corpus also reports expected-behavior metrics for mixed-source, real-world-style ambiguity cases where abstention is sometimes the correct result.
 
 ### Raw dataset summary
 

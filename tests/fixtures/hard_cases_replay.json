@@ -1,0 +1,330 @@
+{
+  "schema_version": 1,
+  "episodes": [
+    {
+      "case_id": "hard-website-1",
+      "attribute": "website",
+      "place": {
+        "current_value": "https://shop.example.com",
+        "base_value": "https://old.example.com",
+        "website": "https://shop.example.com"
+      },
+      "gold_value": "https://shop.example.com/contact",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Shop Example contact",
+          "fetched_pages": [
+            {
+              "url": "https://shop.example.com",
+              "title": "Shop Example",
+              "page_text": "Contact us at https://shop.example.com/contact for store hours.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 5,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Official homepage mentions contact page."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-phone-1",
+      "attribute": "phone",
+      "place": {
+        "current_value": "415-555-9999",
+        "base_value": "415-555-8888",
+        "phone": "415-555-9999"
+      },
+      "gold_value": "+1 (415) 555-1212",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Shop Example phone",
+          "fetched_pages": [
+            {
+              "url": "https://shop.example.com/contact",
+              "title": "Contact Shop Example",
+              "page_text": "Call us at (415) 555-1212.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 3,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Contact page lists phone in text."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-address-1",
+      "attribute": "address",
+      "place": {
+        "current_value": "99 Old Rd, Santa Cruz, CA",
+        "base_value": "88 Base Rd, Santa Cruz, CA",
+        "address": "99 Old Rd, Santa Cruz, CA"
+      },
+      "gold_value": "123 Main St, Santa Cruz, CA 95060",
+      "search_attempts": [
+        {
+          "layer": "government",
+          "query": "Shop Example address",
+          "fetched_pages": [
+            {
+              "url": "https://city.example.gov/business/shop-example",
+              "title": "Business Registry",
+              "page_text": "123 Main St, Santa Cruz, CA 95060",
+              "source_type": "government",
+              "extracted_values": {},
+              "recency_days": 20,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Registry page lists the new address."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-phone-ambiguous",
+      "attribute": "phone",
+      "place": {
+        "current_value": "415-555-7777",
+        "base_value": "415-555-6666",
+        "phone": "415-555-7777"
+      },
+      "gold_value": "4155551212",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Shop Example phone",
+          "fetched_pages": [
+            {
+              "url": "https://shop.example.com/contact",
+              "title": "Contact Shop Example",
+              "page_text": "Call us at (415) 555-1212.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Official contact page lists one phone."
+            }
+          ]
+        },
+        {
+          "layer": "official",
+          "query": "Shop Example branch phone",
+          "fetched_pages": [
+            {
+              "url": "https://shop.example.com/branch",
+              "title": "Shop Example Branch",
+              "page_text": "Branch line: (415) 555-3434",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Branch page conflicts with contact page."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-html-jsonld",
+      "attribute": "website",
+      "place": {
+        "current_value": "https://example.com",
+        "base_value": "https://old.example.com",
+        "website": "https://example.com"
+      },
+      "gold_value": "https://example.com/contact",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe contact",
+          "fetched_pages": [
+            {
+              "url": "https://example.com",
+              "title": "Example Cafe",
+              "page_text": "<html><head><title>Example Cafe</title><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"CafeOrCoffeeShop\",\"name\":\"Example Cafe\",\"url\":\"https://example.com/contact\",\"telephone\":\"(415) 555-1212\",\"address\":{\"streetAddress\":\"123 Main St\",\"addressLocality\":\"Santa Cruz\",\"addressRegion\":\"CA\",\"postalCode\":\"95060\"}}</script></head><body><h1>Example Cafe</h1><p>Visit us for coffee and breakfast.</p></body></html>",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 1,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "HTML page with JSON-LD structured contact data."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-stale-official",
+      "attribute": "website",
+      "place": {
+        "current_value": "https://old.example.com",
+        "base_value": "https://legacy.example.com",
+        "website": "https://old.example.com"
+      },
+      "gold_value": "https://example.com/contact",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe permanently closed",
+          "fetched_pages": [
+            {
+              "url": "https://old.example.com",
+              "title": "Example Cafe",
+              "page_text": "Permanently closed. New location: https://example.com/contact",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 400,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Permanently closed and moved to a new contact page."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-locator-page",
+      "attribute": "website",
+      "place": {
+        "current_value": "https://shop.example.com",
+        "base_value": "https://old-shop.example.com",
+        "website": "https://shop.example.com"
+      },
+      "gold_value": "https://shop.example.com/locations/santa-cruz",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Shop Example Santa Cruz locator",
+          "fetched_pages": [
+            {
+              "url": "https://shop.example.com",
+              "title": "Shop Example Store Locator",
+              "page_text": "Find a store\nSanta Cruz location: https://shop.example.com/locations/santa-cruz",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 1,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Locator page exposes the branch-specific URL."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-branch-ambiguity",
+      "attribute": "phone",
+      "place": {
+        "current_value": "510-555-1212",
+        "base_value": "510-555-3434",
+        "phone": "510-555-1212"
+      },
+      "gold_value": "",
+      "expected_abstain": true,
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Shop Example Oakland branch phone",
+          "fetched_pages": [
+            {
+              "url": "https://chain.example/oakland/contact",
+              "title": "Oakland Shop Example",
+              "page_text": "Oakland branch: (510) 555-1212",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Oakland branch contact page."
+            }
+          ]
+        },
+        {
+          "layer": "official",
+          "query": "Shop Example Berkeley branch phone",
+          "fetched_pages": [
+            {
+              "url": "https://chain.example/berkeley/contact",
+              "title": "Berkeley Shop Example",
+              "page_text": "Berkeley branch: (510) 555-3434",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Berkeley branch contact page."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-meta-canonical",
+      "attribute": "website",
+      "place": {
+        "current_value": "https://example.com",
+        "base_value": "https://old.example.com",
+        "website": "https://example.com"
+      },
+      "gold_value": "https://example.com/contact",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe contact canonical meta",
+          "fetched_pages": [
+            {
+              "url": "https://example.com",
+              "title": "Example Cafe",
+              "page_text": "<html><head><title>Example Cafe</title><meta property=\"og:url\" content=\"https://example.com/contact\"><meta name=\"description\" content=\"Contact Example Cafe\"></head><body><h1>Example Cafe</h1><p>Welcome to Example Cafe.</p></body></html>",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 1,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Meta canonical URL points to the contact page."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-link-canonical",
+      "attribute": "website",
+      "place": {
+        "current_value": "https://example.com",
+        "base_value": "https://old.example.com",
+        "website": "https://example.com"
+      },
+      "gold_value": "https://example.com/contact",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe canonical link",
+          "fetched_pages": [
+            {
+              "url": "https://example.com",
+              "title": "Example Cafe",
+              "page_text": "<html><head><title>Example Cafe</title><link rel=\"canonical\" href=\"https://example.com/contact\"><meta name=\"description\" content=\"Contact Example Cafe\"></head><body><h1>Example Cafe</h1><p>Welcome to Example Cafe.</p></body></html>",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 1,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Canonical link points to the contact page."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

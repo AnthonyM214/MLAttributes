@@ -28,6 +28,7 @@ from places_attr_conflation.harness import (
     evaluate_dork_audit_gate,
     evaluate_final_decisions,
     evaluate_harness_report,
+    evaluate_pac_benchmark_suite,
     evaluate_resolver_on_replay,
     evaluate_website_authority_replay,
     evaluate_retrieval_proof,
@@ -70,6 +71,7 @@ from places_attr_conflation.golden import (
     write_conflict_csv,
     write_label_csv,
 )
+from places_attr_conflation.benchmark_v2 import evaluate_benchmark_v2
 from places_attr_conflation.overture_context import (
     build_overture_context_replay,
     build_overture_gap_dork_rows,
@@ -116,8 +118,12 @@ def _default_output_path(command: str) -> Path:
         return ROOT / "reports" / "replay_stats" / f"replay_stats_{_timestamp()}.json"
     if command == "compare":
         return ROOT / "reports" / "retrieval_compare" / f"compare_{_timestamp()}.json"
+    if command == "benchmark-v2":
+        return ROOT / "reports" / "harness" / f"benchmark_v2_{_timestamp()}.json"
     if command == "website-authority":
         return ROOT / "reports" / "website_authority" / f"website_authority_{_timestamp()}.json"
+    if command == "pac-benchmark":
+        return ROOT / "reports" / "pac_benchmark" / f"pac_benchmark_{_timestamp()}.json"
     if command == "resolver-on-replay":
         return ROOT / "reports" / "resolver_replay" / f"resolver_on_replay_{_timestamp()}.json"
     if command == "replay-seed":
@@ -308,6 +314,9 @@ def main() -> int:
     resolver_replay = subparsers.add_parser("resolver-on-replay", help="Evaluate evidence-backed resolver over replay pages.")
     resolver_replay.add_argument("--input", required=True, help="Merged replay JSON file.")
 
+    pac_benchmark = subparsers.add_parser("pac-benchmark", help="Evaluate hard PAC coverage: identity drift, source dependence, abstention, replay, retrieval, and resolver.")
+    pac_benchmark.add_argument("--input", required=True, help="Replay JSON file with hard PAC case labels.")
+
     website_authority = subparsers.add_parser("website-authority", help="Evaluate website authority discovery and false-official behavior.")
     website_authority.add_argument("--input", required=True, help="Merged replay JSON file.")
     website_authority.add_argument("--arm", default="targeted", choices=["targeted", "fallback", "all"])
@@ -338,6 +347,12 @@ def main() -> int:
     rerank = subparsers.add_parser("rerank", help="Train the optional tiny reranker from replay labels.")
     rerank.add_argument("--input", required=True, help="Retrieval replay JSON file.")
     rerank.add_argument("--holdout-fraction", type=float, default=0.25, help="Case-level holdout fraction for reranker evaluation.")
+
+    benchmark_v2 = subparsers.add_parser("benchmark-v2", help="Compare v1 resolver scoring with the claim-level v2 resolver.")
+    benchmark_v2.add_argument("--replay", required=True, help="Replay JSON file.")
+    benchmark_v2.add_argument("--attributes", nargs="+", help="Optional attribute filter.")
+    benchmark_v2.add_argument("--include-decisions", action="store_true")
+    benchmark_v2.add_argument("--output", help="Optional JSON report output path.")
 
     smoke = subparsers.add_parser("smoke", help="Run a small live retrieval smoke check with replay fallback.")
     smoke.add_argument("--url", action="append", dest="urls", help="Allowlisted URL to fetch. May be repeated.")
@@ -550,6 +565,10 @@ def main() -> int:
         episodes = load_retrieval_episodes(args.input)
         report = evaluate_resolver_on_replay(episodes)
         report["input"] = str(args.input)
+    elif args.command == "pac-benchmark":
+        episodes = load_retrieval_episodes(args.input)
+        report = evaluate_pac_benchmark_suite(episodes)
+        report["input"] = str(args.input)
     elif args.command == "website-authority":
         episodes = load_retrieval_episodes(args.input)
         report = evaluate_website_authority_replay(episodes, arm=args.arm, threshold=args.threshold)
@@ -619,6 +638,13 @@ def main() -> int:
     elif args.command == "rerank":
         episodes = load_retrieval_episodes(args.input)
         report = compare_reranker_on_replay(episodes, holdout_fraction=args.holdout_fraction)
+    elif args.command == "benchmark-v2":
+        episodes = load_retrieval_episodes(args.replay)
+        if args.attributes:
+            allowed = set(args.attributes)
+            episodes = [episode for episode in episodes if episode.attribute in allowed]
+        report = evaluate_benchmark_v2(episodes, include_decisions=args.include_decisions)
+        report["input"] = str(args.replay)
     elif args.command == "smoke":
         urls = args.urls or DEFAULT_SMOKE_URLS
         report = _run_smoke(urls, args.timeout, args.replay_input)

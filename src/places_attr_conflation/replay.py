@@ -173,10 +173,6 @@ class ReplayEpisode:
     expected_abstain: bool | None = None
     truth_source_type: str = ""
     label_origin: str = ""
-    website_label: str = ""
-    difficulty: str = ""
-    review_status: str = ""
-    reviewer_notes: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         payload = {
@@ -198,14 +194,6 @@ class ReplayEpisode:
             payload["truth_source_type"] = self.truth_source_type
         if self.label_origin:
             payload["label_origin"] = self.label_origin
-        if self.website_label:
-            payload["website_label"] = self.website_label
-        if self.difficulty:
-            payload["difficulty"] = self.difficulty
-        if self.review_status:
-            payload["review_status"] = self.review_status
-        if self.reviewer_notes:
-            payload["reviewer_notes"] = self.reviewer_notes
         if self.final_decision is not None:
             payload["final_decision"] = self.final_decision.to_dict()
         return payload
@@ -231,10 +219,6 @@ class ReplayEpisode:
             expected_abstain=payload.get("expected_abstain") if isinstance(payload.get("expected_abstain"), bool) else None,
             truth_source_type=str(payload.get("truth_source_type", "")),
             label_origin=str(payload.get("label_origin", "")),
-            website_label=str(payload.get("website_label", "")),
-            difficulty=str(payload.get("difficulty", "")),
-            review_status=str(payload.get("review_status", "")),
-            reviewer_notes=str(payload.get("reviewer_notes", "")),
         )
 
 

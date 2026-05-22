@@ -21,12 +21,14 @@ from urllib.parse import urlparse
 from typing import Iterable
 
 from .evaluation import evaluate_rows
+from .claim_extraction import extract_claims_from_replay_episode
 from .manifest import EvidenceItem
 from .dorking import website_domain_from_url
 from .replay import FetchedPage, ReplayEpisode, SearchAttempt, dump_replay_corpus, load_replay_corpus
 from .reproduce import reproduce_resolvepoi_baseline
 from .retrieval import SearchResult, score_search_result
 from .resolver import NORMALIZERS, resolve_attribute
+from .resolver_v2 import resolve_attribute_v2_from_claims
 from .small_model import TinyLinearModel, TrainingExample, build_feature_vector, train_tiny_model
 
 
@@ -35,6 +37,28 @@ FALLBACK_LAYER = "fallback"
 HIGH_CONFIDENCE_THRESHOLD = 0.75
 AUTHORITATIVE_SOURCE_TYPES = {"official_site", "government", "business_registry"}
 NON_CITATION_SOURCE_TYPES = {"aggregator", "social"}
+IDENTITY_DRIFT_LABELS = {
+    "MOVED_ENTITY",
+    "RENAMED_ENTITY",
+    "OWNERSHIP_CHANGE",
+    "NEW_ENTITY_SAME_ADDRESS",
+    "STALE_OFFICIAL_SITE",
+    "BRANCH_AMBIGUITY",
+    "TEMPORARY_CLOSURE",
+    "PERMANENT_CLOSURE",
+}
+REQUIRED_PAC_CASE_TYPES = {
+    "OFFICIAL_CORRECT_DIRECTORY_STALE",
+    "OFFICIAL_STALE_DIRECTORY_CURRENT",
+    "MOVED_ENTITY",
+    "RENAMED_ENTITY",
+    "NEW_ENTITY_SAME_ADDRESS",
+    "WRONG_BRANCH",
+    "AGGREGATOR_ECHO",
+    "WEAK_EVIDENCE_ABSTAIN",
+    "TIED_AUTHORITY_ABSTAIN",
+    "CLOSURE_AMBIGUITY",
+}
 
 # Backward-compatible aliases for older tests and callers.
 RetrievalEpisode = ReplayEpisode
@@ -111,6 +135,44 @@ class WebsiteAuthorityMetrics:
     delta_vs_fallback_authoritative: float
     delta_vs_fallback_citation_precision_proxy: float
     source_type_distribution: dict[str, int]
+
+
+@dataclass(frozen=True)
+class AbstentionExpectationMetrics:
+    total: int
+    expected_abstain: int
+    expected_resolve: int
+    correct_abstentions: int
+    false_abstentions: int
+    incorrect_resolutions: int
+    correct_abstention_rate: float
+    false_abstention_rate: float
+
+
+@dataclass(frozen=True)
+class IdentityDriftMetrics:
+    total_labeled: int
+    drift_labeled: int
+    drift_predicted: int
+    true_positive: int
+    false_positive: int
+    false_negative: int
+    identity_drift_precision: float
+    identity_drift_recall: float
+    false_merge_rate: float
+    false_split_rate: float
+    identity_ambiguity_abstention_rate: float
+    stale_official_detection_rate: float
+    branch_confusion_error_rate: float
+
+
+@dataclass(frozen=True)
+class SourceDependencyMetrics:
+    aggregator_echo_cases: int
+    aggregator_echo_false_confidence: int
+    aggregator_echo_false_confidence_rate: float
+    average_independent_source_count: float
+    average_dependent_source_cluster_count: float
 
 
 def _normalize_value(attribute: str, value: str | None) -> str:
@@ -202,6 +264,12 @@ def _merge_episode_group(episodes: list[ReplayEpisode]) -> ReplayEpisode:
         gold_value=first.gold_value,
         search_attempts=attempts,
         final_decision=final_decision,
+        identity_label=first.identity_label,
+        case_type=first.case_type,
+        expected_decision=first.expected_decision,
+        expected_abstain=first.expected_abstain,
+        truth_source_type=first.truth_source_type,
+        label_origin=first.label_origin,
     )
 
 
@@ -685,6 +753,328 @@ def evaluate_resolver_on_replay(
     }
 
 
+def _candidate_values_v2(episode: ReplayEpisode, claims: list[object]) -> list[str]:
+    values = _candidate_values(episode)
+    for claim in claims:
+        value = getattr(claim, "value", "")
+        if value:
+            values.append(value)
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        normalized = _normalize_value(episode.attribute, value)
+        if value and normalized not in seen:
+            seen.add(normalized)
+            output.append(value)
+    return output
+
+
+def evaluate_resolver_v2_on_replay(
+    episodes: Iterable[ReplayEpisode],
+    high_confidence_threshold: float = HIGH_CONFIDENCE_THRESHOLD,
+) -> dict[str, object]:
+    episodes = list(episodes)
+    rows: list[dict[str, object]] = []
+    by_attribute: dict[str, dict[str, int]] = defaultdict(
+        lambda: {"total": 0, "gold_total": 0, "correct": 0, "abstained": 0, "high_confidence_wrong": 0}
+    )
+    for episode in episodes:
+        claims = extract_claims_from_replay_episode(episode)
+        decision = resolve_attribute_v2_from_claims(
+            place_id=episode.case_id,
+            attribute=episode.attribute,
+            candidates=_candidate_values_v2(episode, claims),
+            claims=claims,
+            place_context=episode.place,
+        )
+        has_gold = bool(_normalize_value(episode.attribute, episode.gold_value))
+        predicted = _normalize_value(episode.attribute, decision.decision)
+        gold = _normalize_value(episode.attribute, episode.gold_value)
+        correct = has_gold and bool(predicted) and predicted == gold and not decision.abstained
+        high_conf_wrong = has_gold and not correct and not decision.abstained and decision.confidence >= high_confidence_threshold
+        row = {
+            "case_id": episode.case_id,
+            "attribute": episode.attribute,
+            "gold_value": episode.gold_value,
+            "decision": decision.decision,
+            "confidence": decision.confidence,
+            "abstained": decision.abstained,
+            "has_gold": has_gold,
+            "correct": correct,
+            "high_confidence_wrong": high_conf_wrong,
+            "reason": decision.reason,
+            "evidence_count": len(decision.evidence),
+        }
+        rows.append(row)
+        stats = by_attribute[episode.attribute]
+        stats["total"] += 1
+        stats["gold_total"] += int(has_gold)
+        stats["correct"] += int(correct)
+        stats["abstained"] += int(decision.abstained)
+        stats["high_confidence_wrong"] += int(high_conf_wrong)
+
+    per_attribute: dict[str, dict[str, object]] = {}
+    total_gold = sum(stats["gold_total"] for stats in by_attribute.values())
+    total_correct = sum(stats["correct"] for stats in by_attribute.values())
+    total_abstained = sum(stats["abstained"] for stats in by_attribute.values())
+    total_hc_wrong = sum(stats["high_confidence_wrong"] for stats in by_attribute.values())
+    for attribute, stats in sorted(by_attribute.items()):
+        gold_total = stats["gold_total"]
+        correct = stats["correct"]
+        abstained = stats["abstained"]
+        hc_wrong = stats["high_confidence_wrong"]
+        per_attribute[attribute] = {
+            **stats,
+            "accuracy": correct / gold_total if gold_total else 0.0,
+            "f1_proxy": correct / gold_total if gold_total else 0.0,
+            "abstention_rate": abstained / stats["total"] if stats["total"] else 0.0,
+            "high_confidence_wrong_rate": hc_wrong / gold_total if gold_total else 0.0,
+        }
+    return {
+        "resolver": "v2_evidence_graph",
+        "episodes_total": len(episodes),
+        "gold_episodes_total": total_gold,
+        "accuracy": total_correct / total_gold if total_gold else 0.0,
+        "f1_proxy": total_correct / total_gold if total_gold else 0.0,
+        "abstention_rate": total_abstained / len(episodes) if episodes else 0.0,
+        "high_confidence_wrong_rate": total_hc_wrong / total_gold if total_gold else 0.0,
+        "per_attribute": per_attribute,
+        "decisions": rows,
+    }
+
+
+def _resolver_decision_for_episode(episode: ReplayEpisode):
+    return resolve_attribute(episode.attribute, _candidate_values(episode), _episode_evidence(episode))
+
+
+def _page_source_family(page: FetchedPage) -> str:
+    if page.source_family_id:
+        return page.source_family_id
+    parsed = urlparse(page.url if "://" in page.url else f"https://{page.url}")
+    domain = parsed.netloc.lower().removeprefix("www.")
+    if not domain:
+        return page.source_type or "unknown"
+    parts = domain.split(".")
+    registrable = ".".join(parts[-2:]) if len(parts) >= 2 else domain
+    return f"{page.source_type}:{registrable}"
+
+
+def _episode_pages(episode: ReplayEpisode) -> list[FetchedPage]:
+    return [page for attempt in episode.search_attempts for page in attempt.fetched_pages]
+
+
+def _identity_drift_detected(episode: ReplayEpisode) -> bool:
+    return any(page.identity_change_score >= 0.5 or "moved" in page.notes.lower() or "formerly" in page.notes.lower() for page in _episode_pages(episode))
+
+
+def evaluate_abstention_expectations(episodes: Iterable[ReplayEpisode]) -> dict[str, object]:
+    total = expected_abstain = expected_resolve = correct_abstentions = false_abstentions = incorrect_resolutions = 0
+    rows: list[dict[str, object]] = []
+    for episode in episodes:
+        if episode.expected_abstain is None:
+            continue
+        total += 1
+        decision = _resolver_decision_for_episode(episode)
+        expected_decision = episode.expected_decision or episode.gold_value
+        correct_value = _normalize_value(episode.attribute, decision.decision) == _normalize_value(episode.attribute, expected_decision)
+        if episode.expected_abstain:
+            expected_abstain += 1
+            correct_abstentions += int(decision.abstained)
+            incorrect_resolutions += int(not decision.abstained)
+        else:
+            expected_resolve += 1
+            false_abstentions += int(decision.abstained)
+            incorrect_resolutions += int(not decision.abstained and not correct_value)
+        rows.append(
+            {
+                "case_id": episode.case_id,
+                "attribute": episode.attribute,
+                "expected_abstain": episode.expected_abstain,
+                "abstained": decision.abstained,
+                "decision": decision.decision,
+                "expected_decision": expected_decision,
+                "correct_value": correct_value,
+                "reason": decision.reason,
+            }
+        )
+    metrics = AbstentionExpectationMetrics(
+        total=total,
+        expected_abstain=expected_abstain,
+        expected_resolve=expected_resolve,
+        correct_abstentions=correct_abstentions,
+        false_abstentions=false_abstentions,
+        incorrect_resolutions=incorrect_resolutions,
+        correct_abstention_rate=correct_abstentions / expected_abstain if expected_abstain else 0.0,
+        false_abstention_rate=false_abstentions / expected_resolve if expected_resolve else 0.0,
+    )
+    return {**asdict(metrics), "rows": rows}
+
+
+def evaluate_identity_drift_replay(episodes: Iterable[ReplayEpisode]) -> dict[str, object]:
+    labeled = [episode for episode in episodes if episode.identity_label]
+    drift_cases = [episode for episode in labeled if episode.identity_label in IDENTITY_DRIFT_LABELS]
+    same_cases = [episode for episode in labeled if episode.identity_label == "SAME_ENTITY"]
+    predicted_drift = [episode for episode in labeled if _identity_drift_detected(episode)]
+    predicted_set = {episode.case_id for episode in predicted_drift}
+    drift_set = {episode.case_id for episode in drift_cases}
+    tp = len(predicted_set & drift_set)
+    fp = len(predicted_set - drift_set)
+    fn = len(drift_set - predicted_set)
+
+    false_merges = false_splits = ambiguity_abstentions = stale_detected = branch_errors = 0
+    stale_total = branch_total = ambiguity_total = 0
+    for episode in labeled:
+        decision = _resolver_decision_for_episode(episode)
+        if episode.identity_label in IDENTITY_DRIFT_LABELS and episode.expected_abstain and not decision.abstained:
+            false_merges += 1
+        if episode.identity_label == "SAME_ENTITY" and episode.expected_abstain is False and decision.abstained:
+            false_splits += 1
+        if episode.identity_label in {"BRANCH_AMBIGUITY", "UNKNOWN_IDENTITY"}:
+            ambiguity_total += 1
+            ambiguity_abstentions += int(decision.abstained)
+        if episode.identity_label == "STALE_OFFICIAL_SITE":
+            stale_total += 1
+            stale_detected += int(_identity_drift_detected(episode) and decision.abstained)
+        if episode.identity_label == "BRANCH_AMBIGUITY":
+            branch_total += 1
+            branch_errors += int(not decision.abstained)
+
+    metrics = IdentityDriftMetrics(
+        total_labeled=len(labeled),
+        drift_labeled=len(drift_cases),
+        drift_predicted=len(predicted_drift),
+        true_positive=tp,
+        false_positive=fp,
+        false_negative=fn,
+        identity_drift_precision=tp / (tp + fp) if tp + fp else 0.0,
+        identity_drift_recall=tp / (tp + fn) if tp + fn else 0.0,
+        false_merge_rate=false_merges / len(drift_cases) if drift_cases else 0.0,
+        false_split_rate=false_splits / len(same_cases) if same_cases else 0.0,
+        identity_ambiguity_abstention_rate=ambiguity_abstentions / ambiguity_total if ambiguity_total else 0.0,
+        stale_official_detection_rate=stale_detected / stale_total if stale_total else 0.0,
+        branch_confusion_error_rate=branch_errors / branch_total if branch_total else 0.0,
+    )
+    return asdict(metrics)
+
+
+def evaluate_source_dependency_replay(
+    episodes: Iterable[ReplayEpisode],
+    high_confidence_threshold: float = HIGH_CONFIDENCE_THRESHOLD,
+) -> dict[str, object]:
+    episodes = list(episodes)
+    echo_cases = false_confident = total_independent = total_dependent_clusters = 0
+    rows: list[dict[str, object]] = []
+    for episode in episodes:
+        pages = _episode_pages(episode)
+        families = {_page_source_family(page) for page in pages}
+        dependent_clusters = len(pages) - len(families)
+        total_independent += len(families)
+        total_dependent_clusters += max(0, dependent_clusters)
+        if episode.case_type != "AGGREGATOR_ECHO":
+            continue
+        echo_cases += 1
+        decision = _resolver_decision_for_episode(episode)
+        expected_decision = episode.expected_decision or episode.gold_value
+        wrong = not decision.abstained and _normalize_value(episode.attribute, decision.decision) != _normalize_value(episode.attribute, expected_decision)
+        is_false_confident = wrong and decision.confidence >= high_confidence_threshold
+        false_confident += int(is_false_confident)
+        rows.append(
+            {
+                "case_id": episode.case_id,
+                "independent_source_count": len(families),
+                "dependent_source_cluster_count": max(0, dependent_clusters),
+                "false_confident": is_false_confident,
+                "decision": decision.decision,
+                "confidence": decision.confidence,
+            }
+        )
+    denominator = len(episodes)
+    metrics = SourceDependencyMetrics(
+        aggregator_echo_cases=echo_cases,
+        aggregator_echo_false_confidence=false_confident,
+        aggregator_echo_false_confidence_rate=false_confident / echo_cases if echo_cases else 0.0,
+        average_independent_source_count=total_independent / denominator if denominator else 0.0,
+        average_dependent_source_cluster_count=total_dependent_clusters / denominator if denominator else 0.0,
+    )
+    return {**asdict(metrics), "rows": rows}
+
+
+def evaluate_confidence_calibration(
+    episodes: Iterable[ReplayEpisode],
+    buckets: tuple[float, ...] = (0.0, 0.5, 0.75, 0.9, 1.01),
+) -> dict[str, object]:
+    bucket_rows: dict[str, dict[str, int]] = {
+        f"{buckets[idx]:.2f}-{buckets[idx + 1]:.2f}": {"total": 0, "correct": 0, "abstained": 0}
+        for idx in range(len(buckets) - 1)
+    }
+    for episode in episodes:
+        decision = _resolver_decision_for_episode(episode)
+        confidence = max(0.0, min(1.0, float(decision.confidence)))
+        for idx in range(len(buckets) - 1):
+            lower = buckets[idx]
+            upper = buckets[idx + 1]
+            if lower <= confidence < upper:
+                key = f"{lower:.2f}-{upper:.2f}"
+                row = bucket_rows[key]
+                row["total"] += 1
+                row["abstained"] += int(decision.abstained)
+                correct = not decision.abstained and _normalize_value(episode.attribute, decision.decision) == _normalize_value(episode.attribute, episode.gold_value)
+                row["correct"] += int(correct)
+                break
+    return {
+        key: {
+            **row,
+            "accuracy": row["correct"] / row["total"] if row["total"] else 0.0,
+            "abstention_rate": row["abstained"] / row["total"] if row["total"] else 0.0,
+        }
+        for key, row in bucket_rows.items()
+    }
+
+
+def evaluate_pac_benchmark_suite(episodes: Iterable[ReplayEpisode]) -> dict[str, object]:
+    episodes = list(episodes)
+    present_case_types = {episode.case_type for episode in episodes if episode.case_type}
+    missing_case_types = sorted(REQUIRED_PAC_CASE_TYPES - present_case_types)
+    abstention = evaluate_abstention_expectations(episodes)
+    identity = evaluate_identity_drift_replay(episodes)
+    source_dependency = evaluate_source_dependency_replay(episodes)
+    calibration = evaluate_confidence_calibration(episodes)
+    resolver = evaluate_resolver_on_replay(episodes)
+    retrieval = evaluate_retrieval_proof(episodes)
+    checks = {
+        "required_case_types_present": not missing_case_types,
+        "identity_labels_present": identity["total_labeled"] > 0,
+        "identity_drift_measurable": identity["drift_labeled"] > 0,
+        "abstention_expectations_present": abstention["total"] > 0,
+        "aggregator_echo_present": source_dependency["aggregator_echo_cases"] > 0,
+        "replay_has_pages": replay_stats(episodes)["pages_total"] > 0,
+        "resolver_report_nonempty": resolver["episodes_total"] > 0,
+        "retrieval_report_nonempty": retrieval["all"]["total"] > 0,
+        "abstention_expectations_correct": abstention["incorrect_resolutions"] == 0,
+        "correct_abstention_rate": abstention["correct_abstention_rate"] >= 1.0 if abstention["expected_abstain"] else False,
+        "false_abstention_rate": abstention["false_abstention_rate"] <= 0.0 if abstention["expected_resolve"] else False,
+        "identity_drift_precision": identity["identity_drift_precision"] >= 1.0 if identity["drift_predicted"] else False,
+        "identity_drift_recall": identity["identity_drift_recall"] >= 1.0 if identity["drift_labeled"] else False,
+        "identity_false_merge_rate": identity["false_merge_rate"] <= 0.0,
+        "identity_false_split_rate": identity["false_split_rate"] <= 0.0,
+        "stale_official_detection_rate": identity["stale_official_detection_rate"] >= 1.0,
+        "branch_confusion_error_rate": identity["branch_confusion_error_rate"] <= 0.0,
+        "aggregator_echo_false_confidence_rate": source_dependency["aggregator_echo_false_confidence_rate"] <= 0.0,
+        "resolver_high_confidence_wrong_rate": resolver["high_confidence_wrong_rate"] <= 0.0,
+    }
+    return {
+        "passed": all(checks.values()),
+        "checks": checks,
+        "missing_case_types": missing_case_types,
+        "retrieval": retrieval,
+        "resolver": resolver,
+        "abstention": abstention,
+        "identity_drift": identity,
+        "source_dependency": source_dependency,
+        "calibration": calibration,
+    }
+
+
 def build_reranker_training_examples(episodes: Iterable[ReplayEpisode]) -> list[TrainingExample]:
     examples: list[TrainingExample] = []
     for episode in episodes:
@@ -823,6 +1213,7 @@ def evaluate_harness_report(
         decisions = evaluate_final_decisions(episodes)
         if decisions["total"]:
             report["decisions"] = decisions
+        report["pac_benchmark"] = evaluate_pac_benchmark_suite(episodes)
     return report
 
 
