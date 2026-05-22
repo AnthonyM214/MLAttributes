@@ -1,8 +1,10 @@
 # MLAttributes
 
-MLAttributes is an evidence-backed Place Attribute Conflation system.
+## About
 
-It resolves conflicting place attributes such as website, phone, address, name, and category by replaying evidence, scoring source authority and freshness, grouping claims by normalized value, and abstaining when the evidence is weak or contradictory.
+MLAttributes is a retrieval-aware Place Attribute Conflation system.
+
+It resolves conflicting place attributes such as website, phone, address, name, and category by replaying evidence, extracting claims, grouping them by normalized value, and abstaining when the evidence does not support a clear winner.
 
 The repo keeps a deterministic v1 baseline and adds a claim-level v2 resolver for the harder cases where simple current-vs-base selection is not enough.
 
