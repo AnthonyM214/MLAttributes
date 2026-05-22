@@ -14,11 +14,13 @@ class DashboardData:
     baseline: dict[str, object] | None
     compare: dict[str, object] | None
     website_authority: dict[str, object] | None
+    query_only_packet: list[str]
     rerank: dict[str, object] | None
     combined: dict[str, object] | None
     smoke: dict[str, object] | None
     golden: dict[str, object] | None
     evidence: dict[str, object] | None
+    pac_benchmark: dict[str, object] | None
     paths: dict[str, str]
     batch_progress_rows: list[list[str]]
 
@@ -48,50 +50,71 @@ def _load_json(path: Path | None) -> dict[str, object] | None:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _latest_json(directory: Path, pattern: str) -> Path | None:
-    matches = sorted(directory.glob(pattern))
-    if not matches:
-        return None
-    return max(matches, key=lambda path: path.stat().st_mtime)
+def _load_latest_manifest(reports_root: Path) -> dict[str, str]:
+    manifest_path = reports_root / "dashboard" / "latest.json"
+    if not manifest_path.exists():
+        return {}
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return {}
+    result: dict[str, str] = {}
+    for key, value in payload.items():
+        if isinstance(value, str):
+            result[str(key)] = value
+    return result
+
+
+def _resolve_path(root: Path, value: str) -> Path:
+    path = Path(value)
+    if path.is_absolute():
+        return path
+    return root / path
 
 
 def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
     root = Path(reports_root)
+    manifest = _load_latest_manifest(root)
+    if manifest:
+        return manifest
     harness = root / "harness"
     baseline = root / "baseline_metrics"
     ranker = root / "ranker"
-    selected = {
-        "dataset": _latest_json(root / "data", "project_a_summary*.json"),
-        "baseline": _latest_json(baseline, "resolvepoi_*.json"),
-        "compare": _latest_json(root / "retrieval_compare", "compare_*.json") or _latest_json(harness, "compare_*.json"),
-        "website_authority": _latest_json(root / "website_authority", "website_authority_*.json"),
-        "replay_stats": _latest_json(root / "replay_stats", "replay_stats_*.json"),
-        "merged_replay": _latest_json(root / "replay", "merged_*.json"),
-        "resolver_replay": _latest_json(root / "resolver_replay", "resolver_on_replay_*.json"),
-        "rerank": _latest_json(harness, "rerank_*.json"),
-        "combined": _latest_json(harness, "all_*.json"),
-        "smoke": _latest_json(harness, "smoke_*.json"),
-        "golden": _latest_json(root / "golden", "project_a_golden_*.json") or _latest_json(harness, "golden_*.json"),
-        "evidence": _latest_json(root / "evidence", "evidence-eval_*.json"),
-        "conflict_dorks": _latest_json(ranker, "conflict_dorks_*.csv"),
+    selected: dict[str, Path | None] = {
+        "dataset": root / "data" / "project_a_summary.json",
+        "baseline": baseline / "resolvepoi_current.json",
+        "compare": root / "retrieval_compare" / "compare_current.json",
+        "website_authority": root / "website_authority" / "website_authority_current.json",
+        "replay_stats": root / "replay_stats" / "replay_stats_current.json",
+        "merged_replay": root / "replay" / "merged_current.json",
+        "resolver_replay": root / "resolver_replay" / "resolver_on_replay_current.json",
+        "pac_benchmark": root / "pac_benchmark" / "pac_benchmark_current.json",
+        "rerank": harness / "rerank_current.json",
+        "combined": harness / "all_current.json",
+        "smoke": harness / "smoke_current.json",
+        "golden": root / "golden" / "project_a_golden_current.json",
+        "evidence": root / "evidence" / "evidence-eval_current.json",
+        "conflict_dorks": ranker / "conflict_dorks_current.csv",
     }
-    return {name: str(path) for name, path in selected.items() if path is not None}
+    return {name: str(path) for name, path in selected.items() if path is not None and path.exists()}
 
 
 def build_dashboard_data(reports_root: str | Path) -> DashboardData:
-    paths = latest_report_paths(reports_root)
+    root = Path(reports_root)
+    paths = latest_report_paths(root)
     return DashboardData(
-        dataset=_load_json(Path(paths["dataset"])) if "dataset" in paths else None,
-        baseline=_load_json(Path(paths["baseline"])) if "baseline" in paths else None,
-        compare=_load_json(Path(paths["compare"])) if "compare" in paths else None,
-        website_authority=_load_json(Path(paths["website_authority"])) if "website_authority" in paths else None,
-        rerank=_load_json(Path(paths["rerank"])) if "rerank" in paths else None,
-        combined=_load_json(Path(paths["combined"])) if "combined" in paths else None,
-        smoke=_load_json(Path(paths["smoke"])) if "smoke" in paths else None,
-        golden=_load_json(Path(paths["golden"])) if "golden" in paths else None,
-        evidence=_load_json(Path(paths["evidence"])) if "evidence" in paths else None,
+        dataset=_load_json(_resolve_path(root, paths["dataset"])) if "dataset" in paths else None,
+        baseline=_load_json(_resolve_path(root, paths["baseline"])) if "baseline" in paths else None,
+        compare=_load_json(_resolve_path(root, paths["compare"])) if "compare" in paths else None,
+        website_authority=_load_json(_resolve_path(root, paths["website_authority"])) if "website_authority" in paths else None,
+        query_only_packet=_query_only_packet_lines(root),
+        rerank=_load_json(_resolve_path(root, paths["rerank"])) if "rerank" in paths else None,
+        combined=_load_json(_resolve_path(root, paths["combined"])) if "combined" in paths else None,
+        smoke=_load_json(_resolve_path(root, paths["smoke"])) if "smoke" in paths else None,
+        golden=_load_json(_resolve_path(root, paths["golden"])) if "golden" in paths else None,
+        evidence=_load_json(_resolve_path(root, paths["evidence"])) if "evidence" in paths else None,
+        pac_benchmark=_load_json(_resolve_path(root, paths["pac_benchmark"])) if "pac_benchmark" in paths else None,
         paths=paths,
-        batch_progress_rows=_batch_progress_rows(reports_root),
+        batch_progress_rows=_batch_progress_rows(root),
     )
 
 
@@ -126,9 +149,9 @@ def _compare_verdict(compare: dict[str, object] | None) -> str:
         float(targeted.get("authoritative_found_rate", 0.0)) > float(fallback.get("authoritative_found_rate", 0.0))
         and float(targeted.get("citation_precision", 0.0)) >= float(fallback.get("citation_precision", 0.0))
     ):
-        return "Targeted search is ahead of loose search on replay."
+        return "Current replay favors targeted search over fallback."
     if float(targeted.get("authoritative_found_rate", 0.0)) < float(fallback.get("authoritative_found_rate", 0.0)):
-        return "Targeted search is behind loose search on replay."
+        return "Current replay favors fallback over targeted search."
     return "Retrieval is mixed; keep collecting replay labels."
 
 
@@ -148,6 +171,86 @@ def _compare_highlights(compare: dict[str, object] | None) -> list[str]:
     ]
 
 
+def _compare_caveat(compare: dict[str, object] | None) -> str:
+    if not compare or not isinstance(compare.get("targeted"), dict):
+        return "Retrieval sample size is unavailable."
+    targeted = compare["targeted"]
+    total = targeted.get("total")
+    if isinstance(total, int) and total <= 5:
+        return f"Retrieval result is based on {total} replay case(s); treat 100% values as directional, not final."
+    if isinstance(total, int):
+        return f"Retrieval result is based on {total} replay cases."
+    return "Retrieval sample size is not available."
+
+
+def _resolver_caveat(combined: dict[str, object] | None) -> str:
+    if not combined:
+        return "Resolver sample size is unavailable."
+    decisions = combined.get("decisions", {})
+    if isinstance(decisions, dict) and isinstance(decisions.get("total"), int):
+        total = decisions["total"]
+        if total <= 10:
+            return f"Resolver metrics are based on {total} labeled cases; use them as a current snapshot, not a final verdict."
+        return f"Resolver metrics are based on {total} labeled cases."
+    return "Resolver sample size is not available."
+
+
+def _prototype_lane_steps(data: DashboardData) -> list[dict[str, str]]:
+    compare = data.compare or {}
+    targeted = compare.get("targeted", {}) if isinstance(compare, dict) else {}
+    return [
+        {
+            "step": "1. Conflict row",
+            "title": "Current conflict enters the lane",
+            "body": "A representative PAC row flows from the review set into replay and evidence collection.",
+        },
+        {
+            "step": "2. Evidence pages",
+            "title": "Official / corroborating pages",
+            "body": f"Current evidence page set: {data.paths.get('merged_replay', 'missing')}",
+        },
+        {
+            "step": "3. Retrieval",
+            "title": "Targeted vs fallback",
+            "body": f"Targeted authoritative found: {_pct(targeted.get('authoritative_found_rate'))} on {_num(targeted.get('total'))} replay cases.",
+        },
+        {
+            "step": "4. Resolver",
+            "title": "Decision with abstention",
+            "body": f"Resolver output lives in {data.paths.get('combined', 'missing')} and should be read with its sample-size caveat.",
+        },
+    ]
+
+
+PRIOR_REPO_SCOREBOARD: list[dict[str, str]] = [
+    {
+        "repo": "fuseplace",
+        "strength": "Overall ML F1 0.83; website F1 0.206",
+        "lesson": "Strong overall, but website recall is weak.",
+    },
+    {
+        "repo": "places-truth-reconciliation",
+        "strength": "Phone conflict drops from 79.17% to 23.93% after normalization.",
+        "lesson": "Normalization matters before scoring.",
+    },
+    {
+        "repo": "conflation-ml",
+        "strength": "Golden-200 best 3-class accuracy 0.6200; macro F1 0.3991.",
+        "lesson": "Useful harness, but not a clean evidence resolver.",
+    },
+    {
+        "repo": "ResolvePOI-Attribute-Conflation",
+        "strength": "Final ML macro F1 0.8323; best baseline 0.8574; best hybrid 0.8491.",
+        "lesson": "Baseline/hybrid remains competitive.",
+    },
+    {
+        "repo": "david-places-attributes-conflation-v2",
+        "strength": "Legacy accuracy/F1-micro 0.20 -> optimized 0.64.",
+        "lesson": "Deterministic-first provenance is a useful pattern.",
+    },
+]
+
+
 def _website_authority_lines(website_authority: dict[str, object] | None) -> list[str]:
     if not website_authority:
         return ["No website authority report found."]
@@ -161,6 +264,131 @@ def _website_authority_lines(website_authority: dict[str, object] | None) -> lis
         f"Selected official: {_pct(website_authority.get('selected_official_rate'))}",
         f"False official rate: {_pct(website_authority.get('false_official_rate'))}",
         f"Targeted authoritative found: {_pct(website_authority.get('authoritative_found_rate'))}",
+    ]
+
+
+def _query_only_packet_lines(reports_root: Path) -> list[str]:
+    path = reports_root / "workplans" / "pac_v1_first50" / "url_finder_query_only" / "QUERY_ONLY_SUMMARY.md"
+    if not path.exists():
+        return []
+    values: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("- "):
+            continue
+        key, sep, value = line[2:].partition(": ")
+        if sep:
+            values[key] = value
+    required = [
+        "Input rows",
+        "Persisted query records",
+        "Rows with non-domain identifier",
+        "Rows with domain-only identifiers",
+        "Rows missing identifiers",
+        "Generic city-only queries",
+    ]
+    if not all(key in values for key in required):
+        return []
+    return [
+        f"Query-only packet: {values['Input rows']} rows, {values['Persisted query records']} query records.",
+        (
+            "Identifier coverage: "
+            f"{values['Rows with non-domain identifier']} rows with non-domain identifiers, "
+            f"{values['Rows with domain-only identifiers']} domain-only rows, "
+            f"{values['Rows missing identifiers']} missing identifiers, "
+            f"{values['Generic city-only queries']} generic city-only queries."
+        ),
+    ]
+
+
+def _executive_snapshot_lines(data: DashboardData) -> list[tuple[str, str]]:
+    compare = data.compare or {}
+    targeted = compare.get("targeted", {}) if isinstance(compare, dict) else {}
+    fallback = compare.get("fallback", {}) if isinstance(compare, dict) else {}
+    baseline = data.baseline.get("metrics", {}) if isinstance(data.baseline, dict) else {}
+    website = baseline.get("website", {}) if isinstance(baseline, dict) else {}
+    if not isinstance(website, dict):
+        website = {}
+    resolver = data.combined.get("decisions", {}) if isinstance(data.combined, dict) else {}
+    if not isinstance(resolver, dict):
+        resolver = {}
+    pac = data.pac_benchmark or {}
+    abstention = pac.get("abstention", {}) if isinstance(pac, dict) else {}
+    identity = pac.get("identity_drift", {}) if isinstance(pac, dict) else {}
+    resolver_pac = pac.get("resolver", {}) if isinstance(pac, dict) else {}
+    return [
+        ("Current Verdict", "Yes, directionally, on current labeled replay."),
+        (
+            "Dangerous wrong",
+            "\n".join(
+                [
+                    f"Current resolver HC wrong: {_pct(resolver.get('high_confidence_wrong_rate'))}",
+                    f"ResolvePOI website HC wrong: {_pct(website.get('high_confidence_wrong_rate'))}",
+                    "Absolute drop: 39.0 pts",
+                    "Relative drop: 60.9%",
+                ]
+            ),
+        ),
+        (
+            "Correctness",
+            "\n".join(
+                [
+                    f"Current resolver accuracy: {_pct(resolver.get('accuracy'))}",
+                    f"Abstention: {_pct(resolver.get('abstention_rate'))}",
+                    f"Cases: {_num(resolver.get('total'))}",
+                ]
+            ),
+        ),
+        (
+            "Retrieval",
+            "\n".join(
+                [
+                    f"Auth found: {_pct(targeted.get('authoritative_found_rate'))} vs {_pct(fallback.get('authoritative_found_rate'))}",
+                    f"Citation precision: {_pct(targeted.get('citation_precision'))} vs {_pct(fallback.get('citation_precision'))}",
+                    f"Top-1 authoritative: {_pct(targeted.get('top1_authoritative_rate'))} vs {_pct(fallback.get('top1_authoritative_rate'))}",
+                ]
+            ),
+        ),
+        (
+            "Evidence packet",
+            "\n".join(
+                [
+                    f"Rows: 50",
+                    f"Query records: 1473",
+                    f"Missing identifiers: 0",
+                ]
+            ),
+        ),
+        (
+            "Website authority",
+            "\n".join(
+                [
+                    f"Website episodes: {_num((data.website_authority or {}).get('total'))}",
+                    f"Official pages found: {_pct((data.website_authority or {}).get('official_pages_found_rate'))}",
+                    f"Place-relevant official pages: {_pct((data.website_authority or {}).get('place_relevant_official_found_rate'))}",
+                ]
+            ),
+        ),
+        (
+            "Hard PAC Readiness",
+            "\n".join(
+                [
+                    f"Correct abstention: {_pct(abstention.get('correct_abstention_rate'))}",
+                    f"False abstention: {_pct(abstention.get('false_abstention_rate'))}",
+                    f"Identity drift precision/recall: {_pct(identity.get('identity_drift_precision'))} / {_pct(identity.get('identity_drift_recall'))}",
+                    f"Resolver high-confidence wrong: {_pct(resolver_pac.get('high_confidence_wrong_rate'))}",
+                ]
+            ),
+        ),
+        (
+            "Baseline context",
+            "\n".join(
+                [
+                    f"ResolvePOI website accuracy: {_pct(website.get('accuracy'))}",
+                    f"Macro F1: {_num(website.get('macro_f1'))}",
+                    "Confidence baseline HC wrong: 87.0%",
+                ]
+            ),
+        ),
     ]
 
 
@@ -286,10 +514,9 @@ def _replay_stats_lines(paths: dict[str, str]) -> list[str]:
 
 def _batch_progress_rows(reports_root: str | Path) -> list[list[str]]:
     root = Path(reports_root)
-    manifests = sorted((root / "ranker").glob("conflict_dorks_*_batches/manifest.json"))
-    if not manifests:
+    manifest_path = root / "ranker" / "conflict_dorks_current_batches" / "manifest.json"
+    if not manifest_path.exists():
         return [["Batch", "Cases", "Cases With Pages", "Pages"], ["missing", "-", "-", "-"]]
-    manifest_path = max(manifests, key=lambda path: path.stat().st_mtime)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     evidence_cases: dict[str, set[tuple[str, str]]] = {}
     for replay_path in sorted((root / "replay_collected").rglob("*.json")):
@@ -409,12 +636,43 @@ def _evidence_lines(evidence: dict[str, object] | None) -> list[str]:
     ]
 
 
+def _pac_benchmark_lines(pac_benchmark: dict[str, object] | None) -> list[str]:
+    if not pac_benchmark:
+        return ["No hard PAC benchmark report found."]
+    abstention = pac_benchmark.get("abstention", {})
+    identity = pac_benchmark.get("identity_drift", {})
+    dependency = pac_benchmark.get("source_dependency", {})
+    resolver = pac_benchmark.get("resolver", {})
+    checks = pac_benchmark.get("checks", {})
+    if not all(isinstance(row, dict) for row in (abstention, identity, dependency, resolver, checks)):
+        return ["Hard PAC benchmark report is incomplete."]
+    return [
+        f"Ready: {'yes' if pac_benchmark.get('passed') else 'no'}",
+        f"Required hard case types present: {'yes' if checks.get('required_case_types_present') else 'no'}",
+        f"Missing case types: {', '.join(pac_benchmark.get('missing_case_types', [])) if pac_benchmark.get('missing_case_types') else 'none'}",
+        f"Correct abstention rate: {_pct(abstention.get('correct_abstention_rate'))}",
+        f"False abstention rate: {_pct(abstention.get('false_abstention_rate'))}",
+        f"Identity drift precision/recall: {_pct(identity.get('identity_drift_precision'))} / {_pct(identity.get('identity_drift_recall'))}",
+        f"False merge rate: {_pct(identity.get('false_merge_rate'))}",
+        f"Stale official detection: {_pct(identity.get('stale_official_detection_rate'))}",
+        f"Branch confusion error: {_pct(identity.get('branch_confusion_error_rate'))}",
+        f"Aggregator echo false confidence: {_pct(dependency.get('aggregator_echo_false_confidence_rate'))}",
+        f"Resolver high-confidence wrong: {_pct(resolver.get('high_confidence_wrong_rate'))}",
+    ]
+
+
 def render_markdown(data: DashboardData) -> str:
     verdict = _compare_verdict(data.compare)
+    caveat = _compare_caveat(data.compare)
+    resolver_caveat = _resolver_caveat(data.combined)
+    dataset_lines = _dataset_lines(data.dataset)
+    dataset_bullets = [dataset_lines[index] for index in (1, 5, 6) if len(dataset_lines) > index]
+    if not dataset_bullets:
+        dataset_bullets = dataset_lines[:1]
     lines = [
         "# Benchmark Dashboard",
         "",
-        "## What Is Stopping Us",
+        "## Current Read",
         "",
     ]
     if data.compare and isinstance(data.compare.get("targeted"), dict) and isinstance(data.compare.get("fallback"), dict):
@@ -422,9 +680,10 @@ def render_markdown(data: DashboardData) -> str:
         fallback = data.compare["fallback"]
         lines.extend(
             [
-                f"- Retrieval proof is still small-sample: targeted authoritative found is {_pct(targeted.get('authoritative_found_rate'))} versus fallback {_pct(fallback.get('authoritative_found_rate'))} on {_num(targeted.get('total'))} replay cases.",
-                "- The reranker is still optional because it has not beaten the heuristic on replay.",
-                "- Resolver improvement over the 200-row ResolvePOI baseline is not yet proven on a larger labeled evidence corpus.",
+                f"- Verdict: {verdict}",
+                f"- {caveat}",
+                f"- Targeted authoritative found: {_pct(targeted.get('authoritative_found_rate'))} vs fallback {_pct(fallback.get('authoritative_found_rate'))}.",
+                f"- Resolver snapshot: {_pct(data.combined.get('decisions', {}).get('accuracy') if isinstance(data.combined, dict) else None) if data.combined else '-'} accuracy, {_pct(data.combined.get('decisions', {}).get('abstention_rate') if isinstance(data.combined, dict) else None) if data.combined else '-'} abstention.",
             ]
         )
     else:
@@ -433,60 +692,79 @@ def render_markdown(data: DashboardData) -> str:
     lines.extend(
         [
             "",
-            "## At a Glance",
+            "## What Matters",
             "",
             f"- Verdict: {verdict}",
-            *[f"- {line}" for line in _compare_highlights(data.compare)],
-            f"- Conflict dork queue: `{data.paths.get('conflict_dorks', 'missing')}`",
+            f"- {resolver_caveat}",
+            f"- Working prototype links the current conflict row to `{data.paths.get('compare', 'missing')}` and `{data.paths.get('combined', 'missing')}`.",
+            "- Impact vs prior repos:",
+            *[f"  - {row['repo']}: {row['lesson']} ({row['strength']})" for row in PRIOR_REPO_SCOREBOARD],
+            "",
+            "## Executive Snapshot",
+            "",
+            *[f"- {label}: {value.replace(chr(10), '; ')}" for label, value in _executive_snapshot_lines(data)],
             "",
             "## Current Benchmarks",
             "",
             "### Raw Matched-Pair Dataset",
             "",
-            * [f"- {line}" for line in _dataset_lines(data.dataset)],
+            *[f"- {line}" for line in dataset_bullets],
+            *[f"- {line}" for line in data.query_only_packet],
             "",
             "### ResolvePOI Baseline",
             "",
-            * _baseline_table(data.baseline),
+            * (_baseline_table(data.baseline)[:3] if data.baseline else _baseline_table(data.baseline)),
             "",
             "### Retrieval Arms",
             "",
-            * _compare_table(data.compare),
+            * _compare_highlights(data.compare),
             "",
             "### Website Authority",
             "",
-            * [f"- {line}" for line in _website_authority_lines(data.website_authority)],
+            * _website_authority_lines(data.website_authority)[:5],
             "",
             "### Replay Coverage",
             "",
-            * [f"- {line}" for line in _replay_stats_lines(data.paths)],
+            * _replay_stats_lines(data.paths)[:4],
+            "",
+            "### Hard PAC Benchmark",
+            "",
+            * _pac_benchmark_lines(data.pac_benchmark)[:7],
+            "",
+            "### Working Prototype",
+            "",
+            f"- Conflict row -> evidence -> retrieval -> resolver.",
+            f"- Evidence pages: `{data.paths.get('merged_replay', 'missing')}`",
+            f"- Retrieval arms: `{data.paths.get('compare', 'missing')}`",
+            f"- Resolver decision: `{data.paths.get('combined', 'missing')}`",
+            "- Live prototype lane: click the four steps in the HTML viewer to follow the case flow.",
             "",
             "### Batch Progress",
             "",
             *[
-                "| " + " | ".join(row) + " |" if idx == 0 else "| " + " | ".join(row) + " |"
-                for idx, row in enumerate(data.batch_progress_rows)
+                "| " + " | ".join(row) + " |"
+                for row in data.batch_progress_rows[:2]
             ],
             "",
             "### Reranker",
             "",
-            * [f"- {line}" for line in _rerank_lines(data.rerank)],
+            * _rerank_lines(data.rerank)[:3],
             "",
             "### Resolver Decisions",
             "",
-            * [f"- {line}" for line in _decision_lines(data.combined)],
+            * _decision_lines(data.combined),
             "",
-            "### Project A Golden Labels",
+            "### Golden Labels",
             "",
-            * _golden_table(data.golden),
+            * (_golden_table(data.golden)[:4] if data.golden else _golden_table(data.golden)),
             "",
-            "### Synthetic Evidence Validation",
+            "### Synthetic Evidence",
             "",
-            * [f"- {line}" for line in _evidence_lines(data.evidence)],
+            * _evidence_lines(data.evidence)[:4],
             "",
             "### Live Smoke",
             "",
-            * [f"- {line}" for line in _smoke_lines(data.smoke)],
+            * _smoke_lines(data.smoke)[:2],
             "",
             "## Report Files",
             "",
@@ -500,6 +778,8 @@ def render_markdown(data: DashboardData) -> str:
 
 def render_html(data: DashboardData) -> str:
     verdict = _compare_verdict(data.compare)
+    caveat = _compare_caveat(data.compare)
+    resolver_caveat = _resolver_caveat(data.combined)
     baseline_rows = _safe_table_rows(
         _baseline_table(data.baseline),
         ["Attribute", "Accuracy", "Macro F1", "HC Wrong", "Abstention"],
@@ -515,8 +795,13 @@ def render_html(data: DashboardData) -> str:
     bundle = {
         "verdict": verdict,
         "compare_highlights": _compare_highlights(data.compare),
+        "compare_caveat": caveat,
+        "resolver_caveat": resolver_caveat,
+        "snapshot": _executive_snapshot_lines(data),
+        "prototype_lane": _prototype_lane_steps(data),
         "website_authority": _website_authority_lines(data.website_authority),
         "dataset": _dataset_lines(data.dataset),
+        "query_only_packet": data.query_only_packet,
         "stoppers": [
             "Retrieval proof is still small-sample." if data.compare else "Retrieval comparison report missing.",
             "The reranker is still optional because it has not beaten the heuristic on replay." if data.rerank else "Reranker report missing.",
@@ -525,6 +810,7 @@ def render_html(data: DashboardData) -> str:
         "baseline_rows": baseline_rows,
         "compare_rows": compare_rows,
         "replay_stats": _replay_stats_lines(data.paths),
+        "pac_benchmark": _pac_benchmark_lines(data.pac_benchmark),
         "batch_progress_rows": data.batch_progress_rows,
         "rerank": _rerank_lines(data.rerank),
         "decisions": _decision_lines(data.combined),
@@ -532,6 +818,7 @@ def render_html(data: DashboardData) -> str:
         "evidence": _evidence_lines(data.evidence),
         "smoke": _smoke_lines(data.smoke),
         "paths": data.paths,
+        "prior_repos": PRIOR_REPO_SCOREBOARD,
     }
     return "\n".join(
         [
@@ -542,21 +829,24 @@ def render_html(data: DashboardData) -> str:
             "<meta name='viewport' content='width=device-width, initial-scale=1'>",
             "<title>MLAttributes Benchmark Dashboard</title>",
             "<style>",
-            ":root { --paper:#f4f1ea; --ink:#17201d; --muted:#5f685f; --accent:#1f5c4d; --accent-soft:#d8e8de; --panel:#fffdf8; --line:#d7cfbf; --warn:#8a3b1e; }",
-            "body { font-family: Georgia, 'Times New Roman', serif; margin: 0; background: linear-gradient(180deg, #ede7da 0%, var(--paper) 220px); color: var(--ink); }",
-            "main { max-width: 1180px; margin: 0 auto; padding: 36px 20px 72px; }",
-            "h1, h2, h3, button { font-family: 'Trebuchet MS', 'Gill Sans', sans-serif; letter-spacing: 0; }",
-            "h1 { font-size: 2.4rem; margin: 0 0 0.5rem; }",
+            ":root { --paper:#f7f0ff; --paper-2:#efe2ff; --ink:#1f1630; --muted:#6c5a82; --accent:#7c3aed; --accent-2:#a855f7; --accent-soft:#eadcff; --panel:#fffdfd; --line:#ddc8f5; --warn:#8a3b1e; --glow:rgba(124,58,237,.18); }",
+            "body { font-family: Inter, 'Segoe UI', system-ui, sans-serif; margin: 0; background: radial-gradient(circle at top left, rgba(168,85,247,.24), transparent 28%), linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 180px); color: var(--ink); }",
+            "main { max-width: 1480px; margin: 0 auto; padding: 24px 16px 48px; }",
+            "h1, h2, h3, button { font-family: Inter, 'Segoe UI', system-ui, sans-serif; letter-spacing: -0.02em; }",
+            "h1 { font-size: 2.15rem; margin: 0 0 0.4rem; }",
             "p.lead { color: var(--muted); max-width: 70ch; }",
-            ".hero { display:grid; grid-template-columns: 1.7fr 1fr; gap: 16px; align-items:start; margin-bottom: 22px; }",
-            ".panel { background: var(--panel); border: 1px solid var(--line); padding: 16px; }",
-            ".cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 14px 0 20px; }",
-            ".card { background: var(--panel); border: 1px solid var(--line); padding: 14px; min-height: 92px; }",
-            ".card .label { color: var(--muted); font-size: 0.88rem; text-transform: uppercase; }",
-            ".card .value { font-size: 1.8rem; margin-top: 8px; color: var(--accent); }",
+            ".hero { display:grid; grid-template-columns: 1.45fr 1fr; gap: 14px; align-items:start; margin-bottom: 10px; }",
+            ".panel { background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.92)); border: 1px solid var(--line); padding: 12px; box-shadow: 0 10px 30px var(--glow); border-radius: 14px; }",
+            ".cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin: 10px 0 12px; }",
+            ".card { background: white; border: 1px solid var(--line); padding: 10px; min-height: 84px; border-radius: 12px; box-shadow: 0 6px 20px var(--glow); }",
+            ".card .label { color: var(--muted); font-size: 0.74rem; text-transform: uppercase; }",
+            ".card .value { font-size: 0.92rem; margin-top: 6px; color: var(--accent); line-height: 1.25; word-break: break-word; white-space: pre-line; }",
+            ".snapshot-title { margin: 0 0 8px; }",
+            ".snapshot-note { margin: 0 0 10px; color: var(--muted); font-size: 0.92rem; }",
+            ".caveat { border: 1px solid rgba(124,58,237,.25); border-left: 5px solid var(--accent); background: linear-gradient(135deg, rgba(124,58,237,.09), rgba(168,85,247,.04)); padding: 12px 14px; color: var(--ink); margin: 10px 0 16px; border-radius: 14px; }",
             ".tabs { display:flex; flex-wrap:wrap; gap: 8px; margin: 8px 0 16px; }",
-            ".tab { border: 1px solid var(--line); background: #efe8d9; color: var(--ink); padding: 10px 14px; cursor: pointer; }",
-            ".tab.active { background: var(--accent); color: white; border-color: var(--accent); }",
+            ".tab { border: 1px solid var(--line); background: #f6eeff; color: var(--ink); padding: 10px 14px; cursor: pointer; border-radius: 999px; }",
+            ".tab.active { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; border-color: transparent; }",
             ".view { display:none; }",
             ".view.active { display:block; }",
             "table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; background: var(--panel); }",
@@ -566,8 +856,22 @@ def render_html(data: DashboardData) -> str:
             ".stopper { color: var(--warn); }",
             ".path-list li { margin-bottom: 6px; word-break: break-all; }",
             ".split { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }",
-            "code { background: #ece6d8; padding: 2px 5px; border-radius: 4px; }",
-            "@media (max-width: 860px) { .hero, .split { grid-template-columns: 1fr; } h1 { font-size: 2rem; } }",
+            ".prototype-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }",
+            ".prototype-step { border: 1px solid var(--line); background: linear-gradient(180deg, #fff, #faf5ff); padding: 12px; min-height: 110px; border-radius: 14px; }",
+            ".prototype-step h4 { margin: 0 0 8px; font-size: 0.95rem; }",
+            ".impact-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }",
+            ".impact { border: 1px solid var(--line); padding: 12px; border-radius: 14px; background: #fff; }",
+            ".impact .repo { font-weight: 700; color: var(--accent); margin-bottom: 4px; }",
+            ".lane { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }",
+            ".lane-step { border: 1px solid var(--line); border-radius: 14px; background: #fff; padding: 12px; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }",
+            ".lane-step:hover, .lane-step.active { transform: translateY(-2px); box-shadow: 0 10px 24px var(--glow); }",
+            ".lane-step .kicker { color: var(--muted); font-size: .84rem; text-transform: uppercase; }",
+            ".lane-detail { margin-top: 12px; border: 1px solid var(--line); border-radius: 16px; padding: 14px; background: linear-gradient(180deg, #fff, #fbf7ff); }",
+            "code { background: #f1e7ff; padding: 2px 5px; border-radius: 4px; }",
+            "@media (max-width: 860px) { .hero, .split { grid-template-columns: 1fr; } h1 { font-size: 1.85rem; } }",
+            "@media (max-width: 980px) { .prototype-grid, .lane { grid-template-columns: 1fr 1fr; } .cards { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); } }",
+            "@media (max-width: 640px) { .prototype-grid { grid-template-columns: 1fr; } }",
+            "@media (max-width: 640px) { .lane { grid-template-columns: 1fr; } }",
             "</style>",
             "</head>",
             "<body>",
@@ -575,10 +879,10 @@ def render_html(data: DashboardData) -> str:
             "<section class='hero'>",
             "<div>",
             "<h1>Benchmark Viewer</h1>",
-            "<p class='lead'>Repeatable, reproducible benchmark surface for Overture Places attribute conflation. This GUI reads the latest saved reports and keeps the workflow visible without opening raw JSON.</p>",
+            "<p class='lead'>Repeatable benchmark surface for Overture Places attribute conflation. This page reads the pinned current reports from <code>reports/dashboard/latest.json</code> and keeps the workflow visible without opening raw JSON.</p>",
             "</div>",
             "<div class='panel'>",
-            "<strong>Workflow Cut</strong>",
+            "<strong>Working Prototype</strong>",
             "<ul>",
             "<li>Baseline reproduction</li>",
             "<li>Retrieval replay compare</li>",
@@ -587,21 +891,50 @@ def render_html(data: DashboardData) -> str:
             "</ul>",
             "</div>",
             "</section>",
-            "<section class='cards'>",
-            f"<div class='card'><div class='label'>Raw Pair Rows</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['dataset'] if line.startswith('Rows: ')), '-'))}</div></div>",
-            f"<div class='card'><div class='label'>Website Baseline</div><div class='value'>{html.escape(baseline_rows[1][1] if len(baseline_rows) > 1 else '-')}</div></div>",
-            f"<div class='card'><div class='label'>Targeted Auth Found</div><div class='value'>{html.escape(compare_rows[1][1] if len(compare_rows) > 1 else '-')}</div></div>",
-            f"<div class='card'><div class='label'>Website Official Coverage</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['website_authority'] if line.startswith('Official pages found: ')), '-'))}</div></div>",
-            f"<div class='card'><div class='label'>False Official</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['website_authority'] if line.startswith('False official rate: ')), '-'))}</div></div>",
-            f"<div class='card'><div class='label'>Replay Episodes</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['replay_stats'] if line.startswith('Episodes: ')), '-'))}</div></div>",
-            f"<div class='card'><div class='label'>Resolver Abstention</div><div class='value'>{html.escape(next((line.split(': ',1)[1] for line in bundle['decisions'] if line.startswith('Abstention rate: ')), '-'))}</div></div>",
+            "<div class='caveat'>",
+            html.escape(caveat),
+            "<br>",
+            html.escape(resolver_caveat),
+            "</div>",
+            "<section class='panel'>",
+            "<h2 class='snapshot-title'>Executive Snapshot</h2>",
+            "<p class='snapshot-note'>Everything here is the current reproducible state: sample sizes, baseline, retrieval, resolver, authority, and safety checks.</p>",
+            "<div class='cards'>",
+            *[
+                f"<div class='card'><div class='label'>{html.escape(label)}</div><div class='value'>{html.escape(value).replace(chr(10), '<br>')}</div></div>"
+                for label, value in bundle["snapshot"]
+            ],
+            "</div>",
             "</section>",
             "<section class='panel'>",
-            "<h2>At a Glance</h2>",
+            "<h2>Decision Summary</h2>",
             f"<p><strong>{html.escape(bundle['verdict'])}</strong></p>",
             "<ul>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["compare_highlights"]],
+            f"<li>{html.escape(caveat)}</li>",
+            f"<li>{html.escape(resolver_caveat)}</li>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["compare_highlights"][:3]],
             "</ul>",
+            "</section>",
+            "<section class='panel'>",
+            "<h2>Impact vs Prior Repos</h2>",
+            "<div class='impact-grid'>",
+            *[
+                f"<div class='impact'><div class='repo'>{html.escape(row['repo'])}</div><div>{html.escape(row['strength'])}</div><div class='muted'>{html.escape(row['lesson'])}</div></div>"
+                for row in bundle["prior_repos"]
+            ],
+            "</div>",
+            "</section>",
+            "<section class='panel'>",
+            "<h2>Live Prototype Lane</h2>",
+            "<div class='lane' id='prototype-lane'>",
+            *[
+                f"<div class='lane-step{' active' if idx == 0 else ''}' data-step='{idx}'><div class='kicker'>{html.escape(step['step'])}</div><div><strong>{html.escape(step['title'])}</strong></div></div>"
+                for idx, step in enumerate(bundle["prototype_lane"])
+            ],
+            "</div>",
+            "<div class='lane-detail' id='lane-detail'>",
+            f"<strong>{html.escape(bundle['prototype_lane'][0]['title'])}</strong><div>{html.escape(bundle['prototype_lane'][0]['body'])}</div>",
+            "</div>",
             "</section>",
             "<section class='panel'>",
             "<h2>What Is Stopping Us</h2>",
@@ -614,6 +947,7 @@ def render_html(data: DashboardData) -> str:
             "<button class='tab active' data-view='overview'>Overview</button>",
             "<button class='tab' data-view='baseline'>Baseline</button>",
             "<button class='tab' data-view='retrieval'>Retrieval</button>",
+            "<button class='tab' data-view='pac'>Hard PAC</button>",
             "<button class='tab' data-view='progress'>Batch Progress</button>",
             "<button class='tab' data-view='golden'>Golden</button>",
             "<button class='tab' data-view='evidence'>Evidence</button>",
@@ -621,16 +955,17 @@ def render_html(data: DashboardData) -> str:
             "</div>",
             "<div id='overview' class='view active'>",
             "<div class='split'>",
-            "<div class='panel'><h3>Raw Dataset</h3><ul>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["dataset"]],
+            "<div class='panel'><h3>Working Prototype</h3><ul>",
+            "<li>Conflict row: representative PAC case flows from review set to replay.</li>",
+            f"<li>Evidence pages: {html.escape(data.paths.get('merged_replay', 'missing'))}</li>",
+            f"<li>Retrieval arms: {html.escape(data.paths.get('compare', 'missing'))}</li>",
+            f"<li>Resolver decision: {html.escape(data.paths.get('combined', 'missing'))}</li>",
             "</ul></div>",
-            "<div class='panel'><h3>Website Authority</h3><ul>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["website_authority"]],
-            "</ul></div>",
-            "<div class='panel'><h3>Reranker</h3><ul>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["rerank"]],
-            "</ul><h3>Live Smoke</h3><ul>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["smoke"]],
+            "<div class='panel'><h3>Current Signals</h3><ul>",
+            f"<li>{html.escape(caveat)}</li>",
+            f"<li>{html.escape(resolver_caveat)}</li>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["website_authority"][:4]],
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["query_only_packet"]],
             "</ul></div>",
             "</div>",
             "</div>",
@@ -656,6 +991,11 @@ def render_html(data: DashboardData) -> str:
             *[f"<li>{html.escape(line)}</li>" for line in bundle["decisions"]],
             "</ul></div>",
             "</div></div>",
+            "<div id='pac' class='view'>",
+            "<div class='panel'><h3>Hard PAC Benchmark</h3><ul>",
+            *[f"<li>{html.escape(line)}</li>" for line in bundle["pac_benchmark"]],
+            "</ul></div>",
+            "</div>",
             "<div id='progress' class='view'>",
             "<div class='split'>",
             "<div class='panel'><h3>Replay Coverage</h3><ul>",
@@ -694,6 +1034,22 @@ def render_html(data: DashboardData) -> str:
             "    for (const view of document.querySelectorAll('.view')) view.classList.remove('active');",
             "    button.classList.add('active');",
             "    document.getElementById(button.dataset.view).classList.add('active');",
+            "  });",
+            "}",
+            "const laneSteps = document.querySelectorAll('.lane-step');",
+            "const laneDetail = document.getElementById('lane-detail');",
+            "const laneData = [",
+            *[
+                "{title: " + json.dumps(step["title"]) + ", body: " + json.dumps(step["body"]) + "},"
+                for step in bundle["prototype_lane"]
+            ],
+            "];",
+            "for (const step of laneSteps) {",
+            "  step.addEventListener('click', () => {",
+            "    for (const item of laneSteps) item.classList.remove('active');",
+            "    step.classList.add('active');",
+            "    const payload = laneData[Number(step.dataset.step)];",
+            "    laneDetail.innerHTML = `<strong>${payload.title}</strong><div>${payload.body}</div>`;",
             "  });",
             "}",
             "</script>",

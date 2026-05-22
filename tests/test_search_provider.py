@@ -2,8 +2,6 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
-
 from places_attr_conflation.search_provider import (
     CommandSearchProvider,
     QueryOnlyProvider,
@@ -50,8 +48,11 @@ def test_missing_api_keys_fall_back_to_query_only() -> None:
 
 
 def test_missing_api_keys_fail_when_live_search_required() -> None:
-    with pytest.raises(ValueError):
+    try:
         build_search_provider("google-cse", env={}, require_live_search=True)
+    except ValueError:
+        return
+    raise AssertionError("expected ValueError when live search is required without credentials")
 
 
 def test_google_provider_is_not_live_without_credentials() -> None:

@@ -14,14 +14,35 @@ from .conflict_priority import PRIORITY_ORDER, enrich_conflict_rows, summarize_p
 
 EVIDENCE_TEMPLATE_FIELDS = [
     "case_id",
+    "base_id",
     "attribute",
     "priority_bucket",
     "case_type_guess",
     "identity_label_guess",
     "website_label_guess",
     "difficulty",
+    "name",
+    "base_name",
+    "address",
+    "base_address",
+    "phone",
+    "base_phone",
+    "city",
+    "region",
+    "state",
+    "lat",
+    "lon",
+    "website",
+    "base_website",
+    "current_value",
+    "base_value",
+    "prediction",
+    "source_name",
+    "source",
+    "preferred_sources",
     "layer",
     "query",
+    "original_query",
     "url",
     "title",
     "page_text",
@@ -70,6 +91,76 @@ def _query_value(value: object) -> str:
     return raw
 
 
+def _first_nonempty(*values: object) -> str:
+    for value in values:
+        cleaned = str(value or "").strip()
+        if cleaned:
+            return cleaned
+    return ""
+
+
+def _build_case_identity_context(rows: Iterable[dict[str, object]]) -> dict[str, dict[str, str]]:
+    contexts: dict[str, dict[str, str]] = {}
+    for row in rows:
+        case_id = str(row.get("id") or row.get("case_id") or "").strip()
+        if not case_id:
+            continue
+        context = contexts.setdefault(case_id, {})
+        attribute = str(row.get("attribute") or "").strip()
+        current = str(row.get("current_value") or "").strip()
+        base = str(row.get("base_value") or "").strip()
+        prediction = str(row.get("prediction") or "").strip()
+
+        direct_fields = {
+            "name": ("name", "business_name", "current_name"),
+            "base_name": ("base_name",),
+            "address": ("address", "current_address"),
+            "base_address": ("base_address",),
+            "phone": ("phone", "current_phone"),
+            "base_phone": ("base_phone",),
+            "city": ("city", "locality"),
+            "region": ("region", "state"),
+            "state": ("state", "region"),
+            "lat": ("lat", "latitude"),
+            "lon": ("lon", "longitude", "lng"),
+            "website": ("website", "current_website"),
+            "base_website": ("base_website",),
+            "source_name": ("source_name",),
+            "source": ("source",),
+        }
+        for output_field, input_fields in direct_fields.items():
+            value = _first_nonempty(*(row.get(field) for field in input_fields))
+            if value and not context.get(output_field):
+                context[output_field] = value
+
+        if attribute == "name":
+            context.setdefault("name", _first_nonempty(current, prediction))
+            context.setdefault("base_name", base)
+        elif attribute == "address":
+            context.setdefault("address", _first_nonempty(current, prediction))
+            context.setdefault("base_address", base)
+        elif attribute == "phone":
+            context.setdefault("phone", _first_nonempty(current, prediction))
+            context.setdefault("base_phone", base)
+        elif attribute == "website":
+            context.setdefault("website", _first_nonempty(current, prediction))
+            context.setdefault("base_website", base)
+    return contexts
+
+
+def _attach_case_identity_context(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    contexts = _build_case_identity_context(rows)
+    hydrated: list[dict[str, object]] = []
+    for row in rows:
+        case_id = str(row.get("id") or row.get("case_id") or "").strip()
+        merged = dict(row)
+        for key, value in contexts.get(case_id, {}).items():
+            if value and not str(merged.get(key) or "").strip():
+                merged[key] = value
+        hydrated.append(merged)
+    return hydrated
+
+
 def _case_specific_template_query(row: dict[str, object]) -> str:
     values: list[str] = []
     for field in ("current_value", "base_value", "prediction"):
@@ -103,6 +194,7 @@ def _select_template_row(
     best = dict(ordered[0])
     generated_query = _case_specific_template_query(best)
     if generated_query and query_counts[generated_query] < max_query_duplicates:
+        best["original_query"] = best.get("query", "")
         best["query"] = generated_query
         return best
 
@@ -173,14 +265,35 @@ def _write_evidence_template(
             best = _select_template_row(group, query_counts, max_query_duplicates)
             template_row = {
                 "case_id": best.get("id", ""),
+                "base_id": best.get("base_id", ""),
                 "attribute": best.get("attribute", ""),
                 "priority_bucket": best.get("priority_bucket", ""),
                 "case_type_guess": best.get("case_type_guess", ""),
                 "identity_label_guess": best.get("identity_label_guess", ""),
                 "website_label_guess": best.get("website_label_guess", ""),
                 "difficulty": best.get("difficulty", ""),
+                "name": best.get("name", ""),
+                "base_name": best.get("base_name", ""),
+                "address": best.get("address", ""),
+                "base_address": best.get("base_address", ""),
+                "phone": best.get("phone", ""),
+                "base_phone": best.get("base_phone", ""),
+                "city": best.get("city", ""),
+                "region": best.get("region", ""),
+                "state": best.get("state", ""),
+                "lat": best.get("lat", ""),
+                "lon": best.get("lon", ""),
+                "website": best.get("website", ""),
+                "base_website": best.get("base_website", ""),
+                "current_value": best.get("current_value", ""),
+                "base_value": best.get("base_value", ""),
+                "prediction": best.get("prediction", ""),
+                "source_name": best.get("source_name", ""),
+                "source": best.get("source", ""),
+                "preferred_sources": best.get("preferred_sources", ""),
                 "layer": best.get("layer", ""),
                 "query": best.get("query", ""),
+                "original_query": best.get("original_query", best.get("query", "")),
                 "url": "",
                 "title": "",
                 "page_text": "",
@@ -210,7 +323,7 @@ def build_prioritized_evidence_workplan(
     pair are kept together, then sorted so authoritative layers appear first.
     """
 
-    enriched = enrich_conflict_rows(rows)
+    enriched = _attach_case_identity_context(enrich_conflict_rows(rows))
     grouped: dict[tuple[str, str], list[dict[str, object]]] = {}
     for row in enriched:
         key = _row_key(row)

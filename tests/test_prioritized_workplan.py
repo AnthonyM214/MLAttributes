@@ -110,3 +110,69 @@ def test_evidence_template_query_selection_caps_duplicates_with_case_specific_fa
     assert manifest["template_max_query_occurrences"] == 2
     assert manifest["template_duplicate_query_count"] == 2
     assert manifest["most_common_template_queries"][0] == {"query": "generic fallback query", "count": 2}
+
+
+def test_evidence_template_preserves_case_identifiers_from_sibling_attribute_rows(tmp_path):
+    rows = [
+        {
+            "id": "place-1",
+            "base_id": "base-1",
+            "attribute": "website",
+            "current_value": "https://current.example/location",
+            "base_value": "https://old.example",
+            "prediction": "https://old.example",
+            "correct": "false",
+            "layer": "official",
+            "query": "official website",
+        },
+        {
+            "id": "place-1",
+            "base_id": "base-1",
+            "attribute": "name",
+            "current_value": "Verve Coffee Roasters",
+            "base_value": "Verve Coffee",
+            "prediction": "Verve Coffee",
+            "correct": "true",
+            "layer": "official",
+            "query": "business name",
+        },
+        {
+            "id": "place-1",
+            "base_id": "base-1",
+            "attribute": "address",
+            "current_value": "816 Pacific Ave",
+            "base_value": "816 Pacific Avenue",
+            "prediction": "816 Pacific Avenue",
+            "correct": "true",
+            "layer": "official",
+            "query": "address",
+        },
+        {
+            "id": "place-1",
+            "base_id": "base-1",
+            "attribute": "phone",
+            "current_value": "+18315550100",
+            "base_value": "8315550100",
+            "prediction": "8315550100",
+            "correct": "true",
+            "layer": "official",
+            "query": "phone",
+        },
+    ]
+
+    build_prioritized_evidence_workplan(rows, tmp_path, cases_per_batch=1, batch_count=1)
+
+    with (tmp_path / "evidence_template_001.csv").open(newline="", encoding="utf-8") as handle:
+        template_rows = list(csv.DictReader(handle))
+
+    assert template_rows[0]["case_id"] == "place-1"
+    assert template_rows[0]["base_id"] == "base-1"
+    assert template_rows[0]["name"] == "Verve Coffee Roasters"
+    assert template_rows[0]["base_name"] == "Verve Coffee"
+    assert template_rows[0]["address"] == "816 Pacific Ave"
+    assert template_rows[0]["base_address"] == "816 Pacific Avenue"
+    assert template_rows[0]["phone"] == "+18315550100"
+    assert template_rows[0]["base_phone"] == "8315550100"
+    assert template_rows[0]["current_value"] == "https://current.example/location"
+    assert template_rows[0]["base_value"] == "https://old.example"
+    assert template_rows[0]["prediction"] == "https://old.example"

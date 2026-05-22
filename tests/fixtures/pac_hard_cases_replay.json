@@ -1,0 +1,280 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-05-16T00:00:00+00:00",
+  "episodes": [
+    {
+      "case_id": "official-current",
+      "attribute": "website",
+      "place": {"name": "PAC official-current", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://current.example",
+      "identity_label": "SAME_ENTITY",
+      "case_type": "OFFICIAL_CORRECT_DIRECTORY_STALE",
+      "expected_decision": "https://current.example",
+      "expected_abstain": false,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC official-current\" official website",
+          "fetched_pages": [
+            {"url": "https://current.example", "title": "current", "page_text": "Official current website.", "source_type": "official_site", "extracted_values": {"website": "https://current.example"}, "evidence_role": "truth", "source_family_id": "official:current.example", "recency_days": 10}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "PAC official-current website",
+          "fetched_pages": [
+            {"url": "https://directory.example/current", "title": "directory", "page_text": "Stale directory echo.", "source_type": "aggregator", "extracted_values": {"website": "https://old.example"}, "evidence_role": "corroboration", "source_family_id": "aggregator:directory.example", "recency_days": 900, "zombie_score": 0.9}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "official-stale",
+      "attribute": "website",
+      "place": {"name": "PAC official-stale", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://new-social.example",
+      "identity_label": "STALE_OFFICIAL_SITE",
+      "case_type": "OFFICIAL_STALE_DIRECTORY_CURRENT",
+      "expected_decision": "https://new-social.example",
+      "expected_abstain": true,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC official-stale\" official website",
+          "fetched_pages": [
+            {"url": "https://old-official.example", "title": "old official", "page_text": "Stale official site after moved notice.", "source_type": "official_site", "extracted_values": {"website": "https://old-official.example"}, "evidence_role": "truth", "source_family_id": "official:old-official.example", "recency_days": 900, "zombie_score": 1.0, "identity_change_score": 0.9, "notes": "stale official site after moved notice"}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "PAC official-stale website",
+          "fetched_pages": [
+            {"url": "https://social.example/new", "title": "social", "page_text": "Fresh social page shows new website.", "source_type": "social", "extracted_values": {"website": "https://new-social.example"}, "evidence_role": "corroboration", "source_family_id": "social:social.example", "recency_days": 5}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "moved",
+      "attribute": "website",
+      "place": {"name": "PAC moved", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://moved.example",
+      "identity_label": "MOVED_ENTITY",
+      "case_type": "MOVED_ENTITY",
+      "expected_decision": "https://moved.example",
+      "expected_abstain": false,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC moved\" official website",
+          "fetched_pages": [
+            {"url": "https://moved.example", "title": "moved", "page_text": "We moved.", "source_type": "official_site", "extracted_values": {"website": "https://moved.example"}, "evidence_role": "truth", "source_family_id": "official:moved.example", "recency_days": 10, "identity_change_score": 0.9, "notes": "we moved"}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "PAC moved website",
+          "fetched_pages": [
+            {"url": "https://old-dir.example/moved", "title": "old directory", "page_text": "Old stale website.", "source_type": "aggregator", "extracted_values": {"website": "https://old-moved.example"}, "evidence_role": "corroboration", "source_family_id": "aggregator:old-dir.example", "recency_days": 700, "zombie_score": 1.0}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "renamed",
+      "attribute": "website",
+      "place": {"name": "PAC renamed", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://renamed.example",
+      "identity_label": "RENAMED_ENTITY",
+      "case_type": "RENAMED_ENTITY",
+      "expected_decision": "https://renamed.example",
+      "expected_abstain": false,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC renamed\" official website",
+          "fetched_pages": [
+            {"url": "https://renamed.example", "title": "renamed", "page_text": "Formerly known as Old Name.", "source_type": "official_site", "extracted_values": {"website": "https://renamed.example"}, "evidence_role": "truth", "source_family_id": "official:renamed.example", "recency_days": 10, "identity_change_score": 0.8, "notes": "formerly known as Old Name"}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "PAC renamed website",
+          "fetched_pages": [
+            {"url": "https://directory.example/old-name", "title": "old directory", "page_text": "Old name directory.", "source_type": "aggregator", "extracted_values": {"website": "https://old-name.example"}, "evidence_role": "corroboration", "source_family_id": "aggregator:directory.example", "recency_days": 600}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "new-same-address",
+      "attribute": "website",
+      "place": {"name": "PAC new-same-address", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://new-tenant.example",
+      "identity_label": "NEW_ENTITY_SAME_ADDRESS",
+      "case_type": "NEW_ENTITY_SAME_ADDRESS",
+      "expected_decision": "https://new-tenant.example",
+      "expected_abstain": true,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC new-same-address\" official website",
+          "fetched_pages": [
+            {"url": "https://old-tenant.example", "title": "old tenant", "page_text": "Old tenant at address.", "source_type": "official_site", "extracted_values": {"website": "https://old-tenant.example"}, "evidence_role": "truth", "source_family_id": "official:old-tenant.example", "recency_days": 800, "zombie_score": 1.0, "identity_change_score": 0.9}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "PAC new-same-address website",
+          "fetched_pages": [
+            {"url": "https://new-tenant-social.example", "title": "new social", "page_text": "New tenant social page.", "source_type": "social", "extracted_values": {"website": "https://new-tenant.example"}, "evidence_role": "corroboration", "source_family_id": "social:new-tenant-social.example", "recency_days": 8, "identity_change_score": 0.8}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "wrong-branch",
+      "attribute": "website",
+      "place": {"name": "PAC wrong-branch", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://chain.example/oakland",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "case_type": "WRONG_BRANCH",
+      "expected_decision": "https://chain.example/oakland",
+      "expected_abstain": true,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC wrong-branch\" official website",
+          "fetched_pages": [
+            {"url": "https://chain.example/oakland", "title": "oakland", "page_text": "Oakland branch.", "source_type": "official_site", "extracted_values": {"website": "https://chain.example/oakland"}, "evidence_role": "truth", "source_family_id": "official:chain.example", "recency_days": 10, "identity_change_score": 0.7, "notes": "branch ambiguity"}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "PAC wrong-branch website",
+          "fetched_pages": [
+            {"url": "https://chain.example/berkeley", "title": "berkeley", "page_text": "Berkeley branch.", "source_type": "official_site", "extracted_values": {"website": "https://chain.example/berkeley"}, "evidence_role": "truth", "source_family_id": "official:chain.example", "recency_days": 10, "identity_change_score": 0.7, "notes": "branch ambiguity"}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "echo",
+      "attribute": "website",
+      "place": {"name": "PAC echo", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://echo-current.example",
+      "identity_label": "SAME_ENTITY",
+      "case_type": "AGGREGATOR_ECHO",
+      "expected_decision": "https://echo-current.example",
+      "expected_abstain": false,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC echo\" official website",
+          "fetched_pages": [
+            {"url": "https://echo-current.example", "title": "echo current", "page_text": "Official current website.", "source_type": "official_site", "extracted_values": {"website": "https://echo-current.example"}, "evidence_role": "truth", "source_family_id": "official:echo-current.example", "recency_days": 10}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "PAC echo website",
+          "fetched_pages": [
+            {"url": "https://yelplike.example/echo", "title": "echo directory one", "page_text": "Stale aggregator echo.", "source_type": "aggregator", "extracted_values": {"website": "https://echo-old.example"}, "evidence_role": "corroboration", "source_family_id": "aggregator:echo-cluster", "recency_days": 500, "zombie_score": 0.8},
+            {"url": "https://directorylike.example/echo", "title": "echo directory two", "page_text": "Stale aggregator echo.", "source_type": "aggregator", "extracted_values": {"website": "https://echo-old.example"}, "evidence_role": "corroboration", "source_family_id": "aggregator:echo-cluster", "recency_days": 500, "zombie_score": 0.8}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "weak",
+      "attribute": "website",
+      "place": {"name": "PAC weak", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://weak.example",
+      "identity_label": "UNKNOWN_IDENTITY",
+      "case_type": "WEAK_EVIDENCE_ABSTAIN",
+      "expected_decision": "https://weak.example",
+      "expected_abstain": true,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "fallback",
+          "query": "PAC weak website",
+          "fetched_pages": [
+            {"url": "https://social.example/weak", "title": "weak social", "page_text": "Weak social-only claim.", "source_type": "social", "extracted_values": {"website": "https://weak.example"}, "evidence_role": "corroboration", "source_family_id": "social:social.example", "recency_days": 10}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "tied",
+      "attribute": "website",
+      "place": {"name": "PAC tied", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://tie-a.example",
+      "identity_label": "SAME_ENTITY",
+      "case_type": "TIED_AUTHORITY_ABSTAIN",
+      "expected_decision": "https://tie-a.example",
+      "expected_abstain": true,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC tied\" official website",
+          "fetched_pages": [
+            {"url": "https://tie-a.example", "title": "tie a", "page_text": "Authority A.", "source_type": "official_site", "extracted_values": {"website": "https://tie-a.example"}, "evidence_role": "truth", "source_family_id": "official:tie-a.example", "recency_days": 10}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "PAC tied website",
+          "fetched_pages": [
+            {"url": "https://tie-b.example", "title": "tie b", "page_text": "Authority B.", "source_type": "official_site", "extracted_values": {"website": "https://tie-b.example"}, "evidence_role": "truth", "source_family_id": "official:tie-b.example", "recency_days": 10}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "closure",
+      "attribute": "category",
+      "place": {"name": "PAC closure", "city": "Oakland", "region": "CA"},
+      "gold_value": "temporarily_closed",
+      "identity_label": "TEMPORARY_CLOSURE",
+      "case_type": "CLOSURE_AMBIGUITY",
+      "expected_decision": "temporarily_closed",
+      "expected_abstain": true,
+      "truth_source_type": "official_site",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC closure\" official category",
+          "fetched_pages": [
+            {"url": "https://closure.example/status", "title": "closure status", "page_text": "Temporarily closed.", "source_type": "official_site", "extracted_values": {"category": "temporarily_closed"}, "evidence_role": "truth", "source_family_id": "official:closure.example", "recency_days": 10, "identity_change_score": 0.7, "notes": "closure ambiguity"}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "PAC closure category",
+          "fetched_pages": [
+            {"url": "https://closure.example/archive", "title": "closure archive", "page_text": "Permanently closed.", "source_type": "official_site", "extracted_values": {"category": "permanently_closed"}, "evidence_role": "truth", "source_family_id": "official:closure.example", "recency_days": 10, "identity_change_score": 0.7, "notes": "closure ambiguity"}
+          ]
+        }
+      ]
+    }
+  ]
+}

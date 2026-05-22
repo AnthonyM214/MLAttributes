@@ -111,6 +111,28 @@ class HarnessCliTests(unittest.TestCase):
         self.assertEqual(payload["false_official_rate"], 0.0)
         self.assertIn("authoritative_found_rate", payload)
 
+    def test_pac_benchmark_command_runs_hard_cases(self):
+        fixture = ROOT / "tests" / "fixtures" / "pac_hard_cases_replay.json"
+        completed = subprocess.run(
+            [
+                "python3",
+                "scripts/run_harness.py",
+                "pac-benchmark",
+                "--input",
+                str(fixture),
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertTrue(payload["passed"])
+        self.assertTrue(all(payload["checks"].values()))
+        self.assertEqual(payload["missing_case_types"], [])
+        self.assertEqual(payload["abstention"]["incorrect_resolutions"], 0)
+        self.assertEqual(payload["source_dependency"]["aggregator_echo_false_confidence_rate"], 0.0)
+
     def test_ranker_dataset_command_exports_candidate_csv(self):
         replay = ROOT / "tests" / "fixtures" / "retrieval_replay_sample.json"
         completed = subprocess.run(

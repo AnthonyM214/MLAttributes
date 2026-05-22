@@ -1,9 +1,18 @@
+[build-system]
+requires = []
+build-backend = "build_backend"
+backend-path = ["."]
+
 [project]
 name = "places-attribute-conflation"
 version = "0.1.0"
 description = "Evidence-backed resolver scaffold for Overture Places attribute conflation."
 requires-python = ">=3.11"
+dependencies = [
+  "duckdb>=1.0",
+  "pandas>=2.0",
+]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
+[project.scripts]
+mlattributes-eval = "places_attr_conflation.cli:main"
+pac-benchmark-v2 = "places_attr_conflation.benchmark_v2:main"
