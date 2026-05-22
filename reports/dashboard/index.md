@@ -37,8 +37,6 @@
 - Rows: 2000
 - Websites present: 85.6%
 - Base websites present: 99.9%
-- Query-only packet: 50 rows, 1473 query records.
-- Identifier coverage: 48 rows with non-domain identifiers, 2 domain-only rows, 0 missing identifiers, 0 generic city-only queries.
 
 ### ResolvePOI Baseline
 

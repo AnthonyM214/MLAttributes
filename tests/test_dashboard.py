@@ -283,6 +283,15 @@ class DashboardTests(unittest.TestCase):
             self.assertIn("Benchmark Viewer", html)
             self.assertIn("<td>missing</td>", html)
 
+    def test_dashboard_omits_missing_query_only_packet_section(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            data = build_dashboard_data(Path(tmpdir) / "reports")
+
+            markdown = render_markdown(data)
+
+        self.assertEqual(data.query_only_packet, [])
+        self.assertNotIn("Query-only packet summary not found.", markdown)
+
     def test_dashboard_counts_nested_replay_collected_json(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir) / "reports"

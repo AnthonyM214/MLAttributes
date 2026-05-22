@@ -270,7 +270,7 @@ def _website_authority_lines(website_authority: dict[str, object] | None) -> lis
 def _query_only_packet_lines(reports_root: Path) -> list[str]:
     path = reports_root / "workplans" / "pac_v1_first50" / "url_finder_query_only" / "QUERY_ONLY_SUMMARY.md"
     if not path.exists():
-        return ["Query-only packet summary not found."]
+        return []
     values: dict[str, str] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line.startswith("- "):
@@ -287,7 +287,7 @@ def _query_only_packet_lines(reports_root: Path) -> list[str]:
         "Generic city-only queries",
     ]
     if not all(key in values for key in required):
-        return ["Query-only packet summary not found."]
+        return []
     return [
         f"Query-only packet: {values['Input rows']} rows, {values['Persisted query records']} query records.",
         (
@@ -665,6 +665,10 @@ def render_markdown(data: DashboardData) -> str:
     verdict = _compare_verdict(data.compare)
     caveat = _compare_caveat(data.compare)
     resolver_caveat = _resolver_caveat(data.combined)
+    dataset_lines = _dataset_lines(data.dataset)
+    dataset_bullets = [dataset_lines[index] for index in (1, 5, 6) if len(dataset_lines) > index]
+    if not dataset_bullets:
+        dataset_bullets = dataset_lines[:1]
     lines = [
         "# Benchmark Dashboard",
         "",
@@ -704,9 +708,7 @@ def render_markdown(data: DashboardData) -> str:
             "",
             "### Raw Matched-Pair Dataset",
             "",
-            f"- {_dataset_lines(data.dataset)[1]}",
-            f"- {_dataset_lines(data.dataset)[5]}",
-            f"- {_dataset_lines(data.dataset)[6]}",
+            *[f"- {line}" for line in dataset_bullets],
             *[f"- {line}" for line in data.query_only_packet],
             "",
             "### ResolvePOI Baseline",
