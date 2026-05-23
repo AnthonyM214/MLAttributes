@@ -16,7 +16,7 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 - Santa Cruz challenge: 100.0% expected-behavior accuracy on authority-page ambiguity.
 - PAC hard benchmark: 100.0% correct abstention; identity drift precision/recall 100.0% / 100.0%.
 - Retrieval replay: 100.0% targeted vs 0.0% fallback.
-- Test suite: 219 tests passed.
+- Test suite: 221 tests passed.
 
 ## Completed Milestones
 
@@ -24,7 +24,7 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 - [x] Identity scoring split out - Place identity signals now live in identity.py and are used by claim extraction instead of being buried in the resolver.
 - [x] Selective router integrated - The ResolvePOI router is exposed as an opt-in learned reranker. Holdout full accuracy is 97.1% with 20.2 pts lift over the current baseline.
 - [x] Split verification made explicit - Holdout/train separation is inspectable and leak-checked instead of being implied by filenames.
-- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 219 tests passed.
+- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 221 tests passed.
 
 ## Important Stats
 
@@ -32,12 +32,12 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 | --- | ---: | --- |
 | Selective router | 97.7% all-attribute / 97.1% core | Lift vs current baseline: 20.2 pts; high-confidence wrong: 1.2% |
 | Claim-level v2 hard cases | 88.9% accuracy / 20.0% abstention | High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json |
-| Santa Cruz challenge | 100.0% expected / 5.0% abstention | Raw resolver accuracy: 95.0%; high-confidence wrong: 0.0%; covers branch, government primary-phone, relay/fax/footer phone, department-location-vs-footer address, official-vs-social, official-vs-directory, and title-cleaning cases. |
+| Santa Cruz challenge | 100.0% expected / 3.8% abstention | Raw resolver accuracy: 96.2%; high-confidence wrong: 0.0%; covers branch, government primary-phone, relay/fax/footer phone, department-location-vs-footer address, full-name/acronym, host-building name, tourism category, locator website, official-vs-social, and title-cleaning cases. |
 | PAC hard benchmark | 100.0% correct abstention / passed | Identity drift precision/recall: 100.0% / 100.0% |
 | PAC expected behavior | 100.0% expected-behavior accuracy | Expected abstention rate: 60.0%; claim-level benchmark captures the intended behavior on ambiguous cases. |
 | Retrieval proof | 100.0% targeted vs 0.0% fallback | Citation precision: 100.0% vs 0.0%; replay cases: 1 |
 | Website authority | 100.0% authoritative / 0.0% false official | Selected official: 100.0%; place-relevant official: 100.0% |
-| Test suite | 219 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
+| Test suite | 221 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
 
 ## Next Steps
 
@@ -71,10 +71,10 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 
 ### Santa Cruz Challenge
 
-- Expected-behavior accuracy (v1 / v2): 30.0% / 100.0%
-- Expected-behavior abstention (v1 / v2): 75.0% / 5.0%
-- Raw resolver accuracy: 95.0%
-- Raw resolver abstention: 5.0%
+- Expected-behavior accuracy (v1 / v2): 30.8% / 100.0%
+- Expected-behavior abstention (v1 / v2): 73.1% / 3.8%
+- Raw resolver accuracy: 96.2%
+- Raw resolver abstention: 3.8%
 - Raw high-confidence wrong: 0.0%
 
 ### PAC Benchmark-v2
@@ -164,25 +164,25 @@ Successful live checks: 0/1
 ### Report Files
 
 - `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json`
-- `benchmark_v2_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_hard_cases_current.json`
-- `benchmark_v2_pac_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_pac_hard_cases_current.json`
-- `benchmark_v2_santa_cruz_challenge`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_santa_cruz_challenge_current.json`
+- `benchmark_v2_hard_cases`: `reports/harness/benchmark_v2_hard_cases_current.json`
+- `benchmark_v2_pac_hard_cases`: `reports/harness/benchmark_v2_pac_hard_cases_current.json`
+- `benchmark_v2_santa_cruz_challenge`: `reports/harness/benchmark_v2_santa_cruz_challenge_current.json`
 - `combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json`
 - `compare`: `/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_20260516_190607_832714.json`
 - `conflict_dorks`: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_20260516_190554_511614.csv`
 - `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260516_190558_333845.json`
-- `engineering_report`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_ENGINEERING_REPORT.md`
+- `engineering_report`: `reports/harness/PAC_ENGINEERING_REPORT.md`
 - `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260516_190609_850830.json`
 - `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260516_190605_420989.json`
 - `merged_replay`: `/home/anthony/Overture/MLAttributes/reports/replay/merged_20260516_190607_831012.json`
-- `pac_benchmark`: `/home/anthony/Overture/MLAttributes/reports/pac_benchmark/pac_benchmark_current.json`
+- `pac_benchmark`: `reports/pac_benchmark/pac_benchmark_current.json`
 - `replay_stats`: `/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260516_190607_832512.json`
-- `repo_comparison`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md`
+- `repo_comparison`: `reports/harness/PAC_REPO_COMPARISON.md`
 - `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260516_190608_093696.json`
-- `resolvepoi_selective`: `/home/anthony/Overture/MLAttributes/reports/resolvepoi_selective/resolvepoi_selective_current.json`
+- `resolvepoi_selective`: `reports/resolvepoi_selective/resolvepoi_selective_current.json`
 - `resolver_replay`: `/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_20260516_190607_832894.json`
 - `santa_cruz_challenge_corpus`: `/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_challenge_replay.json`
 - `santa_cruz_expanded_corpus`: `/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_replay_corpus_expanded.json`
 - `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260516_190609_234474.json`
-- `technical_summary`: `/home/anthony/Overture/MLAttributes/reports/harness/technical_summary.md`
+- `technical_summary`: `reports/harness/technical_summary.md`
 - `website_authority`: `/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_20260516_190610_137713.json`

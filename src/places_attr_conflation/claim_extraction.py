@@ -63,6 +63,8 @@ _PLACE_CONTEXT_STOPWORDS = {
     "cruz",
 }
 _CATEGORY_TOKENS = (
+    "amusement park",
+    "aquarium",
     "restaurant",
     "cafe",
     "coffee",
@@ -85,7 +87,11 @@ _CATEGORY_TOKENS = (
 )
 _CATEGORY_PHRASES = {
     "academic support": "academic support",
+    "art and history museum": "museum",
+    "community-supported marine science education center": "science education center",
+    "marine science education center": "science education center",
     "natural history museum": "museum",
+    "seaside amusement park": "amusement park",
     "tutoring center": "tutoring service",
     "tutoring services": "tutoring service",
     "tutoring sessions": "tutoring service",
@@ -699,6 +705,54 @@ def _extract_name_candidate(page_title: str, text: str) -> str:
     return ""
 
 
+def _context_name_values(place_context: dict[str, str] | None) -> list[tuple[str, str, str]]:
+    if not place_context:
+        return []
+    values: list[tuple[str, str, str]] = []
+    for key in ("name", "current_name", "name_current", "current_value", "base_name", "name_base", "base_value"):
+        raw = place_context.get(key, "")
+        normalized = normalize_name(raw)
+        if normalized and len(normalized.split()) >= 2:
+            values.append((key, raw, normalized))
+    output: list[tuple[str, str, str]] = []
+    seen: set[str] = set()
+    for item in values:
+        if item[2] not in seen:
+            seen.add(item[2])
+            output.append(item)
+    return output
+
+
+def _extract_context_name_matches(
+    text: str,
+    *,
+    place_context: dict[str, str] | None = None,
+) -> list[tuple[str, str, float, float, str]]:
+    normalized_text = normalize_name(text)
+    matches: list[tuple[str, str, float, float, str]] = []
+    context_values = _context_name_values(place_context)
+    preferred_names = [
+        normalized
+        for role, _, normalized in context_values
+        if role in {"name", "current_name", "name_current", "current_value"} and normalized in normalized_text
+    ]
+    for role, raw, normalized in context_values:
+        if normalized not in normalized_text:
+            continue
+        if role not in {"name", "current_name", "name_current", "current_value"} and any(
+            normalized != preferred and normalized in preferred for preferred in preferred_names
+        ):
+            continue
+        if role in {"current_name", "name_current", "current_value"} and any(
+            normalized != preferred and normalized in preferred for preferred in preferred_names
+        ):
+            continue
+        confidence = 0.92 if role in {"name", "current_name", "name_current", "current_value"} else 0.35
+        identity = 0.95 if role in {"name", "current_name", "name_current", "current_value"} else 0.25
+        matches.append((raw, text, confidence, identity, f"context_name_role={role}"))
+    return matches
+
+
 def _extract_category_candidates(text: str) -> list[str]:
     values: list[str] = []
     lowered = (text or "").lower()
@@ -966,13 +1020,45 @@ def extract_claims_from_text(
             )
     elif attribute == "name":
         candidates = []
+        seen = set()
+        for value, evidence_text, confidence, claim_identity, notes in _extract_context_name_matches(text, place_context=place_context):
+            normalized = normalize_name(value)
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            claim_source_score = source_score
+            if "context_name_role=base" in notes or "context_name_role=name_base" in notes or "context_name_role=base_value" in notes:
+                claim_source_score = source_score * 0.45
+            claims.append(
+                _claim(
+                    place_id=place_id,
+                    attribute=attribute,
+                    value=value,
+                    source_url=source_url,
+                    source_type=source_type,
+                    extraction_method="context_name_in_text",
+                    evidence_text=evidence_text,
+                    place_context=place_context,
+                    page_title=page_title,
+                    query=query,
+                    page_relevance=relevance,
+                    extraction_confidence=confidence,
+                    source_authority_score=claim_source_score,
+                    freshness_score=freshness,
+                    stale_signal_score=stale,
+                    identity_signal_score=max(identity, claim_identity),
+                    notes=notes,
+                )
+            )
         value = _extract_name_candidate(page_title, text)
-        if value:
+        if value and value not in seen and not claims:
             candidates.append((value, 0.72 if page_title.strip() else 0.58, "title_or_first_line"))
+            seen.add(value)
         for jsonld_value in jsonld_fields.get("name", []):
             normalized_jsonld = normalize_name(jsonld_value)
-            if normalized_jsonld and normalized_jsonld not in {candidate[0] for candidate in candidates}:
+            if normalized_jsonld and normalized_jsonld not in seen:
                 candidates.append((normalized_jsonld, 0.82, "jsonld_name"))
+                seen.add(normalized_jsonld)
         for value, confidence, method in candidates:
             claims.append(
                 _claim(

@@ -148,6 +148,25 @@ class ClaimExtractionTests(unittest.TestCase):
 
         self.assertEqual([claim.normalized_value for claim in claims], ["santa cruz museum of natural history"])
 
+    def test_extracts_context_name_from_body_when_title_is_generic_or_nickname(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-3c",
+            attribute="name",
+            page_text="The Santa Cruz Museum of Art & History (MAH) is a thriving community gathering place.",
+            source_url="https://www.santacruzmah.org/history",
+            source_type="official_site",
+            page_title="History of the MAH",
+            place_context={
+                "name": "Santa Cruz Museum of Art & History",
+                "base_name": "The MAH",
+                "city": "Santa Cruz",
+            },
+        )
+
+        by_method = {claim.extraction_method: claim.normalized_value for claim in claims}
+        self.assertEqual(by_method["context_name_in_text"], "santa cruz museum of art and history")
+        self.assertNotIn("history of the mah", {claim.normalized_value for claim in claims})
+
     def test_extracts_address_from_text(self) -> None:
         claims = extract_claims_from_text(
             place_id="case-4",
@@ -257,6 +276,18 @@ class ClaimExtractionTests(unittest.TestCase):
 
         normalized = {claim.normalized_value for claim in claims}
         self.assertTrue(any(value in normalized for value in {"local business", "restaurant", "cafe"}))
+
+    def test_extracts_authority_category_phrases(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-5a",
+            attribute="category",
+            page_text="Our vibrant, bustling seaside amusement park is renowned for great rides.",
+            source_url="https://beachboardwalk.com/about/",
+            source_type="official_site",
+            page_title="About Us - Santa Cruz Beach Boardwalk",
+        )
+
+        self.assertIn("amusement park", {claim.normalized_value for claim in claims})
 
     def test_category_tokens_require_word_boundaries(self) -> None:
         claims = extract_claims_from_text(

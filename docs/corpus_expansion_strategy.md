@@ -121,6 +121,6 @@ New Santa Cruz cases should be accepted only when they add a new failure mode
 or strengthen coverage for an underrepresented attribute. Do not add more
 near-duplicate easy contact pages just to increase the count.
 
-Current checked-in Santa Cruz challenge status: 20 authority-page ambiguity
+Current checked-in Santa Cruz challenge status: 26 authority-page ambiguity
 episodes, with the next target at 50 reviewed cases before broadening beyond
 Santa Cruz.

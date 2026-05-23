@@ -26,18 +26,19 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         raise AssertionError(f"missing decision for {case_id}")
 
     def test_challenge_corpus_is_explicitly_hard(self) -> None:
-        self.assertEqual(len(self.episodes), 20)
+        self.assertEqual(len(self.episodes), 26)
         self.assertEqual(Counter(episode.attribute for episode in self.episodes), {
             "phone": 12,
             "address": 5,
-            "category": 1,
-            "name": 1,
-            "website": 1,
+            "category": 3,
+            "name": 3,
+            "website": 3,
         })
         self.assertEqual(Counter(episode.case_type for episode in self.episodes), {
             "BRANCH_AMBIGUITY": 1,
             "BRANCH_CONTEXT_CORROBORATED": 2,
             "GOVERNMENT_DEPARTMENT_ADDRESS_VS_FOOTER": 1,
+            "GOVERNMENT_LOCATOR_WEBSITE_VS_DIRECTORY": 1,
             "GOVERNMENT_PRIMARY_PHONE_VS_DIRECT": 1,
             "GOVERNMENT_PRIMARY_PHONE_VS_FAX_FOOTER": 1,
             "GOVERNMENT_PRIMARY_PHONE_VS_FAX_SOCIAL_FOOTER": 1,
@@ -46,12 +47,17 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "GOVERNMENT_ROOM_ADDRESS_VS_FOOTER": 1,
             "GOVERNMENT_SUITE_ADDRESS_VS_FOOTER": 1,
             "OFFICIAL_CATEGORY_VS_DIRECTORY": 1,
+            "OFFICIAL_CATEGORY_VS_DIRECTORY_TYPE": 1,
+            "OFFICIAL_CATEGORY_VS_TOURISM_TAGS": 1,
             "OFFICIAL_BRANCH_SPECIFIC": 1,
             "OFFICIAL_CONTACT_WITH_NON_PRIMARY_PHONE": 1,
             "OFFICIAL_CURRENT_ARCHIVE_STALE": 1,
+            "OFFICIAL_FULL_NAME_VS_NICKNAME": 1,
             "OFFICIAL_LOCATION_VS_MAILING_ADDRESS": 1,
             "OFFICIAL_NAME_VS_DIRECTORY_ALIAS": 1,
+            "OFFICIAL_PLACE_NAME_VS_HOST_BUILDING": 1,
             "OFFICIAL_PHONE_VS_FAX": 1,
+            "OFFICIAL_WEBSITE_VS_TOURISM_LISTING": 1,
             "OFFICIAL_WEBSITE_VS_SOCIAL": 1,
             "OFFICIAL_PAGE_VS_STAFF_PAGE": 1,
         })
@@ -62,13 +68,14 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "authoritative_santa_cruz_challenge_v3": 3,
             "authoritative_santa_cruz_challenge_v4": 4,
             "authoritative_santa_cruz_challenge_v5": 5,
+            "authoritative_santa_cruz_challenge_v6": 6,
         })
 
     def test_resolver_v2_expected_behavior_matches_challenge_labels(self) -> None:
         expected = self.report["expected_behavior"]["resolver_v2"]  # type: ignore[index]
 
         self.assertEqual(expected["accuracy"], 1.0)
-        self.assertAlmostEqual(expected["abstention_rate"], 1 / 20)
+        self.assertAlmostEqual(expected["abstention_rate"], 1 / 26)
         self.assertEqual(expected["high_confidence_wrong_rate"], 0.0)
 
         ambiguous = self._decision("scpl-branch-ambiguous-phone")
@@ -102,7 +109,13 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         expected_values = {
             "museum-official-contact-website-vs-social": "santacruzmuseum.org/about/contact-us",
             "museum-category-official-vs-directory": "museum",
-            "museum-name-contact-title-vs-directory": "santa cruz museum of natural history",
+            "museum-name-contact-title-vs-directory": "Santa Cruz Museum of Natural History",
+            "boardwalk-category-amusement-park-vs-shopping": "amusement park",
+            "seymour-category-science-center-vs-aquarium-directory": "science education center",
+            "mah-full-name-vs-acronym": "Santa Cruz Museum of Art & History",
+            "surfing-museum-name-vs-lighthouse-host": "Santa Cruz Surfing Museum",
+            "woodies-official-website-vs-directory": "woodiescafe.net",
+            "boardwalk-official-website-vs-tourism-listing": "beachboardwalk.com/about",
         }
 
         for case_id, expected_value in expected_values.items():

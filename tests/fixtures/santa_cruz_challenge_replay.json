@@ -835,6 +835,313 @@
         }
       ],
       "truth_source_type": "government"
+    },
+    {
+      "attribute": "name",
+      "case_id": "mah-full-name-vs-acronym",
+      "case_type": "OFFICIAL_FULL_NAME_VS_NICKNAME",
+      "expected_abstain": false,
+      "expected_decision": "Santa Cruz Museum of Art & History",
+      "gold_value": "Santa Cruz Museum of Art & History",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v6",
+      "place": {
+        "base_name": "The MAH",
+        "city": "Santa Cruz",
+        "current_name": "Santa Cruz Museum of Art & History",
+        "name": "Santa Cruz Museum of Art & History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official history page title uses the MAH nickname, but the body states the full organization name; full name should win.",
+              "page_text": "History of the MAH\nThe Santa Cruz Museum of Art & History (MAH) is a thriving community gathering place that offers rotating art and history exhibitions, visual and performing artworks, public festivals, education and outreach programs, and cultural celebrations.",
+              "recency_days": 7,
+              "source_type": "official_site",
+              "title": "History of the MAH",
+              "url": "https://www.santacruzmah.org/history",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzmah.org/history \"Santa Cruz Museum of Art & History\" \"MAH\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "name",
+      "case_id": "surfing-museum-name-vs-lighthouse-host",
+      "case_type": "OFFICIAL_PLACE_NAME_VS_HOST_BUILDING",
+      "expected_abstain": false,
+      "expected_decision": "Santa Cruz Surfing Museum",
+      "gold_value": "Santa Cruz Surfing Museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v6",
+      "place": {
+        "base_name": "Mark Abbott Memorial Lighthouse",
+        "city": "Santa Cruz",
+        "current_name": "Santa Cruz Surfing Museum",
+        "name": "Santa Cruz Surfing Museum",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "City page is about the Surfing Museum but repeatedly mentions its host lighthouse; the museum name should win over the building name.",
+              "page_text": "Surfing Museum\nThe Santa Cruz Surfing Museum is housed inside the Mark Abbott Memorial Lighthouse on Lighthouse Point in Santa Cruz. This little gem of a museum has photographs, surfboards, and artifacts tracing over 100 years of surfing history in Santa Cruz.\nContact Us\nLocation\nMark Abbott Memorial Lighthouse\nLighthouse Point\n701 West Cliff Drive Santa Cruz, CA 95060",
+              "recency_days": 7,
+              "source_type": "government",
+              "title": "Surfing Museum - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Surfing-Museum",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation/Surfing-Museum \"Santa Cruz Surfing Museum\" \"Mark Abbott Memorial Lighthouse\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "category",
+      "case_id": "boardwalk-category-amusement-park-vs-shopping",
+      "case_type": "OFFICIAL_CATEGORY_VS_TOURISM_TAGS",
+      "expected_abstain": false,
+      "expected_decision": "amusement park",
+      "gold_value": "amusement park",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v6",
+      "place": {
+        "base_category": "shopping area",
+        "city": "Santa Cruz",
+        "current_category": "amusement park",
+        "name": "Santa Cruz Beach Boardwalk",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official Boardwalk about page identifies the place as an amusement park; tourism shopping tags should not override the core category.",
+              "page_text": "About Us\nWelcome to the Santa Cruz Beach Boardwalk!\nThe Santa Cruz Beach Boardwalk is recognized as the best seaside park in the world. Our vibrant, bustling amusement park is renowned for its great rides, remarkable history, spectacular beach setting, and friendly attitude. California's Largest Admission Free Amusement Park.",
+              "recency_days": 7,
+              "source_type": "official_site",
+              "title": "About Us - Santa Cruz Beach Boardwalk",
+              "url": "https://beachboardwalk.com/about/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:beachboardwalk.com/about \"amusement park\" \"Santa Cruz Beach Boardwalk\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.15,
+              "notes": "Tourism listing includes shopping-related tags as secondary activity metadata.",
+              "page_text": "Santa Cruz Beach Boardwalk\nType of Activity\nPoints of Interest\nSightseeing\nMisc. Shopping\nShopping Area\nVisitors can enjoy rides, games, food and shopping.",
+              "recency_days": 90,
+              "source_type": "aggregator",
+              "title": "Santa Cruz Beach Boardwalk - Visit Santa Cruz County",
+              "url": "https://www.santacruz.org/listings/santa-cruz-beach-boardwalk/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "Santa Cruz Beach Boardwalk shopping area tourism listing"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "category",
+      "case_id": "seymour-category-science-center-vs-aquarium-directory",
+      "case_type": "OFFICIAL_CATEGORY_VS_DIRECTORY_TYPE",
+      "expected_abstain": false,
+      "expected_decision": "science education center",
+      "gold_value": "science education center",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v6",
+      "place": {
+        "base_category": "aquarium",
+        "city": "Santa Cruz",
+        "current_category": "science education center",
+        "name": "Seymour Marine Discovery Center",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official UCSC page defines Seymour with a more specific institutional category than the fallback type labels.",
+              "page_text": "About us\nThe Seymour Marine Discovery Center is a community-supported marine science education center of the University of California, Santa Cruz.\nContact\nSeymour Marine Discovery Center\n100 McAllister Way\nSanta Cruz, CA 95060\n(831) 459-3800",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "About - Seymour Marine Discovery Center",
+              "url": "https://seymourcenter.ucsc.edu/about/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:seymourcenter.ucsc.edu/about \"marine science education center\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.1,
+              "notes": "Directory text labels Seymour as museum and public aquarium, which should not override the official category phrase.",
+              "page_text": "Seymour Marine Discovery Center\nInstance of museum and public aquarium. Official website. Location Santa Cruz, California.",
+              "recency_days": 120,
+              "source_type": "aggregator",
+              "title": "Category:Seymour Marine Discovery Center",
+              "url": "https://commons.wikimedia.org/wiki/Category:Seymour_Marine_Discovery_Center",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "Seymour Marine Discovery Center museum public aquarium directory"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "woodies-official-website-vs-directory",
+      "case_type": "GOVERNMENT_LOCATOR_WEBSITE_VS_DIRECTORY",
+      "expected_abstain": false,
+      "expected_decision": "https://www.woodiescafe.net/",
+      "gold_value": "https://www.woodiescafe.net/",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v6",
+      "place": {
+        "base_website": "https://wanderlog.com/place/details/1274140",
+        "city": "Santa Cruz",
+        "current_website": "https://www.woodiescafe.net/",
+        "name": "Woodies Cafe",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "City wharf dining page acts as a government locator and links to the restaurant's official website.",
+              "page_text": "Dining\nWoodies Cafe\nLocated at 25 Municipal Wharf, A taste of Santa Cruz past and present! Woodies Cafe offers casual, affordable dining on the Wharf.\nWoodies Cafe Website https://www.woodiescafe.net/",
+              "recency_days": 2,
+              "source_type": "government",
+              "title": "Dining - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Santa-Cruz-Wharf/Dining",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation/Santa-Cruz-Wharf/Dining \"Woodies Cafe Website\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official Woodies Cafe homepage corroborates the website linked from the city wharf locator.",
+              "page_text": "Woodies Cafe\nOfficial website https://www.woodiescafe.net/\nWoodies Cafe is the first restaurant you'll encounter as you walk the Santa Cruz Wharf. Come on in and explore our family-friendly fare.",
+              "recency_days": 4,
+              "source_type": "official_site",
+              "title": "Woodies Cafe - Santa Cruz Wharf",
+              "url": "https://www.woodiescafe.net/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:woodiescafe.net \"Woodies Cafe\" \"Santa Cruz Wharf\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.15,
+              "notes": "Travel directory page is relevant but not the canonical business website.",
+              "page_text": "Woodies Cafe, Santa Cruz, CA - Reviews and tips. Directory page https://wanderlog.com/place/details/1274140",
+              "recency_days": 30,
+              "source_type": "aggregator",
+              "title": "Woodies Cafe - Wanderlog",
+              "url": "https://wanderlog.com/place/details/1274140",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "Woodies Cafe Santa Cruz directory website"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "website",
+      "case_id": "boardwalk-official-website-vs-tourism-listing",
+      "case_type": "OFFICIAL_WEBSITE_VS_TOURISM_LISTING",
+      "expected_abstain": false,
+      "expected_decision": "https://beachboardwalk.com/about/",
+      "gold_value": "https://beachboardwalk.com/about/",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v6",
+      "place": {
+        "base_website": "https://www.santacruz.org/listings/santa-cruz-beach-boardwalk/",
+        "city": "Santa Cruz",
+        "current_website": "https://beachboardwalk.com/about/",
+        "name": "Santa Cruz Beach Boardwalk",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official Boardwalk page should be preferred to the tourism listing URL.",
+              "page_text": "Santa Cruz Beach Boardwalk\nOfficial website https://beachboardwalk.com/about/\nThe Santa Cruz Beach Boardwalk is recognized as the best seaside park in the world. Our vibrant, bustling amusement park is renowned for its great rides.",
+              "recency_days": 7,
+              "source_type": "official_site",
+              "title": "About Us - Santa Cruz Beach Boardwalk",
+              "url": "https://beachboardwalk.com/about/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:beachboardwalk.com/about \"Santa Cruz Beach Boardwalk\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.15,
+              "notes": "Tourism listing is a corroborating page, not the canonical website.",
+              "page_text": "Santa Cruz Beach Boardwalk\n400 Beach Street\nSanta Cruz CA 95060\nListing URL https://www.santacruz.org/listings/santa-cruz-beach-boardwalk/\nview website",
+              "recency_days": 30,
+              "source_type": "aggregator",
+              "title": "Santa Cruz Beach Boardwalk - Visit Santa Cruz County",
+              "url": "https://www.santacruz.org/listings/santa-cruz-beach-boardwalk/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "Santa Cruz Beach Boardwalk Visit Santa Cruz County listing"
+        }
+      ],
+      "truth_source_type": "official_site"
     }
   ]
 }

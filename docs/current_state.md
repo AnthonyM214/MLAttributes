@@ -48,6 +48,6 @@ These files are still part of the repository history and can be useful, but they
 - Run the selective ResolvePOI benchmark: `python3 scripts/run_harness.py resolvepoi-selective --truth ... --train-parquet ... --train-labels ... --limit 400 --include-decisions`
 - Verify the ResolvePOI split: `python3 scripts/run_harness.py resolvepoi-split-verify --truth ... --train-parquet ... --train-labels ...`
 
-The Santa Cruz challenge fixture currently contains 20 authority-page ambiguity cases, including relay/fax/footer phone conflicts and department-location-vs-city-footer address conflicts.
+The Santa Cruz challenge fixture currently contains 26 authority-page ambiguity cases, including relay/fax/footer phone conflicts, department-location-vs-city-footer address conflicts, full-name-vs-acronym name conflicts, tourism category tag conflicts, and government-locator website conflicts.
 
 The point of this map is visibility: a cold reader should find the core resolver and benchmarks first, then follow the supporting or historical material only if needed.
