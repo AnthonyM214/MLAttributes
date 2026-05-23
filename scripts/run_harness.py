@@ -93,10 +93,13 @@ from places_attr_conflation.synthetic_evidence import (
 )
 from places_attr_conflation.reproduce import reproduce_resolvepoi_v2
 from places_attr_conflation.resolvepoi_selective import (
+    DEFAULT_ATTRIBUTES as DEFAULT_RESOLVEPOI_ATTRIBUTES,
     DEFAULT_TRAIN_LABELS as DEFAULT_RESOLVEPOI_TRAIN_LABELS,
     DEFAULT_TRAIN_PARQUET as DEFAULT_RESOLVEPOI_TRAIN_PARQUET,
     DEFAULT_TRUTH_PATH as DEFAULT_RESOLVEPOI_TRUTH_PATH,
+    build_resolvepoi_split_manifest,
     evaluate_resolvepoi_selective,
+    train_resolvepoi_selective_router,
 )
 
 
@@ -135,6 +138,8 @@ def _default_output_path(command: str) -> Path:
         return ROOT / "reports" / "resolvepoi_v2" / f"resolvepoi_v2_{_timestamp()}.json"
     if command == "resolvepoi-selective":
         return ROOT / "reports" / "resolvepoi_selective" / f"resolvepoi_selective_{_timestamp()}.json"
+    if command == "resolvepoi-split-verify":
+        return ROOT / "reports" / "resolvepoi_selective" / f"resolvepoi_split_verify_{_timestamp()}.json"
     if command == "resolver-on-replay":
         return ROOT / "reports" / "resolver_replay" / f"resolver_on_replay_{_timestamp()}.json"
     if command == "replay-seed":
@@ -361,6 +366,16 @@ def main() -> int:
     resolvepoi_selective.add_argument("--include-decisions", action="store_true", help="Include per-row decisions in the JSON report.")
     resolvepoi_selective.add_argument("--output", help="Optional JSON report output path.")
 
+    resolvepoi_split = subparsers.add_parser(
+        "resolvepoi-split-verify",
+        help="Verify ResolvePOI train/holdout separation and emit a split manifest.",
+    )
+    resolvepoi_split.add_argument("--truth", default=str(DEFAULT_RESOLVEPOI_TRUTH_PATH))
+    resolvepoi_split.add_argument("--train-parquet", default=str(DEFAULT_RESOLVEPOI_TRAIN_PARQUET))
+    resolvepoi_split.add_argument("--train-labels", default=str(DEFAULT_RESOLVEPOI_TRAIN_LABELS))
+    resolvepoi_split.add_argument("--limit", type=int, default=400)
+    resolvepoi_split.add_argument("--output", help="Optional JSON report output path.")
+
     website_authority = subparsers.add_parser("website-authority", help="Evaluate website authority discovery and false-official behavior.")
     website_authority.add_argument("--input", required=True, help="Merged replay JSON file.")
     website_authority.add_argument("--arm", default="targeted", choices=["targeted", "fallback", "all"])
@@ -396,6 +411,15 @@ def main() -> int:
     benchmark_v2.add_argument("--replay", required=True, help="Replay JSON file.")
     benchmark_v2.add_argument("--attributes", nargs="+", help="Optional attribute filter.")
     benchmark_v2.add_argument("--include-decisions", action="store_true")
+    benchmark_v2.add_argument(
+        "--learned-router",
+        choices=["none", "resolvepoi-selective"],
+        default="none",
+        help="Optional learned router to inject into resolver v2.",
+    )
+    benchmark_v2.add_argument("--resolvepoi-train-parquet", default=str(DEFAULT_RESOLVEPOI_TRAIN_PARQUET))
+    benchmark_v2.add_argument("--resolvepoi-train-labels", default=str(DEFAULT_RESOLVEPOI_TRAIN_LABELS))
+    benchmark_v2.add_argument("--resolvepoi-target-coverage", type=float, default=0.99)
     benchmark_v2.add_argument("--output", help="Optional JSON report output path.")
 
     smoke = subparsers.add_parser("smoke", help="Run a small live retrieval smoke check with replay fallback.")
@@ -631,6 +655,18 @@ def main() -> int:
         }
         if not args.include_decisions:
             report.pop("decisions", None)
+    elif args.command == "resolvepoi-split-verify":
+        report = build_resolvepoi_split_manifest(
+            truth_path=args.truth,
+            train_parquet=args.train_parquet,
+            train_labels=args.train_labels,
+            limit=args.limit,
+        )
+        report["input"] = {
+            "truth": str(args.truth),
+            "train_parquet": str(args.train_parquet),
+            "train_labels": str(args.train_labels),
+        }
     elif args.command == "website-authority":
         episodes = load_retrieval_episodes(args.input)
         report = evaluate_website_authority_replay(episodes, arm=args.arm, threshold=args.threshold)
@@ -705,7 +741,15 @@ def main() -> int:
         if args.attributes:
             allowed = set(args.attributes)
             episodes = [episode for episode in episodes if episode.attribute in allowed]
-        report = evaluate_benchmark_v2(episodes, include_decisions=args.include_decisions)
+        learned_router = None
+        if args.learned_router == "resolvepoi-selective":
+            learned_router = train_resolvepoi_selective_router(
+                train_parquet=args.resolvepoi_train_parquet,
+                train_labels=args.resolvepoi_train_labels,
+                target_coverage=args.resolvepoi_target_coverage,
+                attributes=args.attributes or DEFAULT_RESOLVEPOI_ATTRIBUTES,
+            )
+        report = evaluate_benchmark_v2(episodes, include_decisions=args.include_decisions, learned_router=learned_router)
         report["input"] = str(args.replay)
     elif args.command == "smoke":
         urls = args.urls or DEFAULT_SMOKE_URLS

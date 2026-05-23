@@ -11,6 +11,12 @@ from .baselines import agreement_only_baseline, base_baseline, completeness_base
 from .harness import evaluate_resolver_on_replay, evaluate_resolver_v2_on_replay, load_retrieval_episodes, replay_stats
 from .replay import ReplayEpisode
 from .normalization import normalize_address, normalize_category, normalize_name, normalize_phone, normalize_website
+from .resolvepoi_selective import (
+    DEFAULT_ATTRIBUTES as DEFAULT_RESOLVEPOI_ATTRIBUTES,
+    DEFAULT_TRAIN_LABELS as DEFAULT_RESOLVEPOI_TRAIN_LABELS,
+    DEFAULT_TRAIN_PARQUET as DEFAULT_RESOLVEPOI_TRAIN_PARQUET,
+    train_resolvepoi_selective_router,
+)
 
 
 def _decision_index(report: dict[str, object]) -> dict[tuple[str, str], dict[str, object]]:
@@ -277,6 +283,23 @@ def evaluate_benchmark_v2(
         "abstention_cases": abstention_cases,
         "breakthrough_cases": breakthrough_cases,
     }
+    if learned_router is not None:
+        report["learned_router"] = {
+            "type": learned_router.__class__.__name__,
+            "attributes": sorted(list(getattr(learned_router, "artifacts", {}).keys())),
+            "artifacts": {
+                attribute: {
+                    "model_type": artifact.model_type,
+                    "threshold": artifact.threshold,
+                    "target_coverage": artifact.target_coverage,
+                    "train_rows": artifact.train_rows,
+                    "calibration_rows": artifact.calibration_rows,
+                    "holdout_rows": artifact.holdout_rows,
+                    "constant_prediction": artifact.constant_prediction,
+                }
+                for attribute, artifact in getattr(learned_router, "artifacts", {}).items()
+            },
+        }
     if include_decisions:
         report["decisions"] = {
             "v1": v1.get("decisions", []),
@@ -291,13 +314,30 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", help="Optional JSON output path.")
     parser.add_argument("--attributes", nargs="+", help="Optional attribute filter.")
     parser.add_argument("--include-decisions", action="store_true")
+    parser.add_argument(
+        "--learned-router",
+        choices=["none", "resolvepoi-selective"],
+        default="none",
+        help="Optional learned router to inject into the claim-level resolver.",
+    )
+    parser.add_argument("--resolvepoi-train-parquet", default=str(DEFAULT_RESOLVEPOI_TRAIN_PARQUET))
+    parser.add_argument("--resolvepoi-train-labels", default=str(DEFAULT_RESOLVEPOI_TRAIN_LABELS))
+    parser.add_argument("--resolvepoi-target-coverage", type=float, default=0.99)
     args = parser.parse_args(argv)
 
     episodes = load_retrieval_episodes(args.replay)
     if args.attributes:
         allowed = set(args.attributes)
         episodes = [episode for episode in episodes if episode.attribute in allowed]
-    report = evaluate_benchmark_v2(episodes, include_decisions=args.include_decisions)
+    learned_router = None
+    if args.learned_router == "resolvepoi-selective":
+        learned_router = train_resolvepoi_selective_router(
+            train_parquet=args.resolvepoi_train_parquet,
+            train_labels=args.resolvepoi_train_labels,
+            target_coverage=args.resolvepoi_target_coverage,
+            attributes=args.attributes or DEFAULT_RESOLVEPOI_ATTRIBUTES,
+        )
+    report = evaluate_benchmark_v2(episodes, include_decisions=args.include_decisions, learned_router=learned_router)
     report["input"] = str(args.replay)
     out = Path(args.output) if args.output else Path("reports/harness") / "benchmark_v2_report.json"
     out.parent.mkdir(parents=True, exist_ok=True)

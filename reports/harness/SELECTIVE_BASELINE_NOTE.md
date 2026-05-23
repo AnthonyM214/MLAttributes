@@ -21,7 +21,7 @@ The implementation is intentionally aligned with the selective-prediction litera
 
 The selective baseline in [`src/places_attr_conflation/resolvepoi_selective.py`](../../src/places_attr_conflation/resolvepoi_selective.py) trains a per-attribute HistGradientBoosting router on the 2k ResolvePOI corpus and evaluates it on the held-out 400-ID benchmark slice.
 
-The same module now exposes `ResolvePOISelectiveRouter`, `predict_selective_source()`, and `train_resolvepoi_selective_router()`. `resolver_v2` can call this router while ranking EvidenceGraph claim groups. The learned vote can break close current/base evidence ties, but it cannot select a value unless the EvidenceGraph has an evidence-backed claim group for that value.
+The same module now exposes `ResolvePOISelectiveRouter`, `predict_selective_source()`, `train_resolvepoi_selective_router()`, and `verify_resolvepoi_split()`. `resolver_v2` can call this router while ranking EvidenceGraph claim groups. The learned vote can break close current/base evidence ties, but it cannot select a value unless the EvidenceGraph has an evidence-backed claim group for that value.
 
 It uses:
 
@@ -74,3 +74,12 @@ python3 scripts/run_harness.py resolvepoi-selective \
 ```
 
 The generated report is written to `reports/resolvepoi_selective/resolvepoi_selective_current.json`.
+
+To audit the split directly:
+
+```bash
+python3 scripts/run_harness.py resolvepoi-split-verify \
+  --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json \
+  --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet \
+  --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json
+```

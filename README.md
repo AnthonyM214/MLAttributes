@@ -43,6 +43,20 @@ python3 scripts/run_harness.py benchmark-v2 \
 
 The installed wheel also exposes `pac-benchmark-v2`.
 
+To benchmark the learned selective router inside `resolver_v2`, add:
+
+```bash
+python3 scripts/run_harness.py benchmark-v2 \
+  --replay tests/fixtures/hard_cases_replay.json \
+  --learned-router resolvepoi-selective \
+  --resolvepoi-train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet \
+  --resolvepoi-train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json \
+  --include-decisions
+```
+
+The installed wheel also exposes `pac-benchmark-v2` with the same flags.
+This path is experimental and opt-in: it can improve close structured cases, but it is not guaranteed to outperform plain `resolver_v2` on every replay set.
+
 Run the selective ResolvePOI benchmark:
 
 ```bash
@@ -68,6 +82,7 @@ That means MLAttributes is not just a current/base selector. It verifies competi
 
 It also includes a reusable selective router for the ResolvePOI corpus that can now be passed into `resolver_v2` as the learned current/base decision layer while EvidenceGraph still requires evidence-backed claim groups.
 Across all five attributes, the selective router reaches 97.7% full accuracy; on website, phone, address, and name, it reaches 97.1% core full accuracy.
+The selective benchmark depends on local ResolvePOI corpus artifacts, but the repo now also exposes a split-verification command to make the holdout separation explicit.
 
 ## Benchmarks
 

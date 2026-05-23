@@ -17,7 +17,10 @@ The existing resolver (`resolver.py`) scores evidence rows, normalizes candidate
 - the resolver can abstain when claims are tied or weak,
 - the benchmark can now show where the claim layer finds evidence that v1 misses.
 
+The selective ResolvePOI path now also emits an explicit split-verification manifest so the holdout separation is inspectable rather than implied.
+
 The learned router is deliberately constrained: it can rerank close EvidenceGraph claim groups, but it cannot invent or select a value that has no extracted claim. This keeps the high-scoring structured benchmark path connected to the evidence-backed truth-resolution architecture.
+In replay hard cases, that learned path is still opt-in because it can regress on ambiguous branch-level evidence; the report should therefore treat it as an experimental benchmark mode rather than the default resolver.
 
 ## What the hard-case benchmark shows
 
@@ -70,6 +73,8 @@ This is the better real-world readiness signal because it measures the intended 
 This avoids the trap of building another current-vs-base classifier. The repo now has a claim layer that reasons over evidence text and source authority before deciding.
 
 The ResolvePOI selective router is now useful beyond the side benchmark: `resolver_v2` can use it as a learned decision prior for current/base cases while still preserving claim-level evidence requirements and abstention.
+
+The repo now also exposes `resolvepoi-split-verify`, which makes the train/holdout split auditable in one command.
 
 ## Next highest-ROI improvements
 

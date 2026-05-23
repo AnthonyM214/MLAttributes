@@ -76,10 +76,10 @@ class EvidenceGraphTests(unittest.TestCase):
             source_type="government",
             claim_id="c2",
             normalized_value="456 old rd",
-        value="456 Old Rd",
-        stale_signal_score=0.8,
-        identity_signal_score=0.1,
-    )
+            value="456 Old Rd",
+            stale_signal_score=0.8,
+            identity_signal_score=0.1,
+        )
 
         self.assertGreater(score_claim(fresh), score_claim(stale))
 

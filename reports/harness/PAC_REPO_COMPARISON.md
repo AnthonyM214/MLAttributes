@@ -16,6 +16,7 @@ python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/pac_hard_cas
 python3 scripts/run_harness.py resolvepoi-v2 --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --limit 400 --output reports/resolvepoi_v2/resolvepoi_v2_400.json
 python3 scripts/run_harness.py resolvepoi-v2 --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --limit 200 --output reports/resolvepoi_v2/resolvepoi_v2_200.json
 python3 scripts/run_harness.py resolvepoi-selective --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json --limit 400 --include-decisions --output reports/resolvepoi_selective/resolvepoi_selective_current.json
+python3 scripts/run_harness.py resolvepoi-split-verify --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json --output reports/resolvepoi_selective/resolvepoi_split_verify_current.json
 ```
 
 Current outputs:
@@ -29,6 +30,7 @@ Current outputs:
 | `hard_cases_replay.json` | resolver v2 accuracy `0.8889`, abstention rate `0.2`, high-confidence-wrong rate `0.0` |
 | `pac_hard_cases_replay.json` | expected-behavior accuracy `1.0`, expected-behavior delta vs v1 `0.0` |
 | ResolvePOI selective router (400 holdout) | all-attribute full accuracy `0.9770`, coverage `1.0`, high-confidence-wrong rate `0.0125`; core full accuracy `0.9713`, coverage `1.0` |
+| ResolvePOI split verification | explicit holdout split manifest; `leak_check_passed=true` |
 | ResolvePOI v2 adapter (400 rows) | website accuracy `0.2350`, phone `0.3225`, address `0.3925`, category `0.3575`, name `0.1925`; no abstentions |
 | ResolvePOI v2 adapter (200 rows) | website accuracy `0.2150`, phone `0.3000`, address `0.4100`, category `0.3850`, name `0.2100`; no abstentions |
 

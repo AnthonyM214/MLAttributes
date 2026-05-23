@@ -22,6 +22,7 @@ from .normalization import (
     website_domain,
 )
 from .replay import FetchedPage, ReplayEpisode, SearchAttempt
+from .website_evidence import detect_identity_claims, detect_status, domain_from_url, registered_domain
 
 
 _URL_PATTERN = re.compile(r"https?://[^\s<>'\")]+|www\.[^\s<>'\")]+", re.IGNORECASE)
@@ -365,6 +366,77 @@ def _stale_signal_text(text: str) -> float:
     return _signal_strength(text, _STALE_SIGNAL_PATTERNS)
 
 
+def _identity_alignment_score(
+    *,
+    place_context: dict[str, str] | None,
+    attribute: str,
+    value: str,
+    source_url: str,
+    evidence_text: str,
+    page_title: str,
+    source_type: str,
+) -> tuple[float, float]:
+    text = f"{evidence_text}\n{page_title}".lower()
+    identity = _identity_signal_text(text, attribute)
+    stale = _stale_signal_text(text)
+
+    status = detect_status(text)
+    claims = detect_identity_claims(text)
+    if status in {"moved", "permanently_closed", "temporarily_closed"}:
+        stale = max(stale, 0.7)
+        identity = max(identity, 0.6)
+    if claims:
+        identity = max(identity, min(1.0, 0.45 + 0.15 * len(claims)))
+
+    normalized_value = {
+        "website": normalize_website,
+        "phone": normalize_phone,
+        "address": normalize_address,
+        "name": normalize_name,
+        "category": normalize_category,
+    }.get(attribute, lambda raw: (raw or "").strip().lower())(value)
+    normalized_source_url = normalize_website(source_url)
+    if attribute == "website":
+        value_domain = registered_domain(domain_from_url(normalized_value))
+        source_domain = registered_domain(domain_from_url(normalized_source_url))
+        if value_domain and source_domain and value_domain == source_domain:
+            identity = max(identity, 0.9)
+        if any(token in normalized_value for token in ("/contact", "/locations", "/location", "/about", "/hours")):
+            identity = max(identity, 0.85)
+        if normalized_value and normalized_source_url and normalized_value == normalized_source_url:
+            identity = max(identity, 0.95)
+    elif attribute == "phone":
+        if place_context:
+            current = normalize_phone(place_context.get("phone", "") or place_context.get("current_value", ""))
+            base = normalize_phone(place_context.get("base_value", ""))
+            if normalized_value and normalized_value in {current, base}:
+                identity = max(identity, 0.9)
+    elif attribute == "address":
+        if place_context:
+            current = normalize_address(place_context.get("address", "") or place_context.get("current_value", ""))
+            base = normalize_address(place_context.get("base_value", ""))
+            if normalized_value and normalized_value in {current, base}:
+                identity = max(identity, 0.85)
+        if any(token in normalized_value for token in ("suite", "ste", "fl", "floor")):
+            identity = max(identity, 0.65)
+    elif attribute == "name":
+        if place_context:
+            current = normalize_name(place_context.get("name", "") or place_context.get("current_value", ""))
+            base = normalize_name(place_context.get("base_value", ""))
+            if normalized_value and normalized_value in {current, base}:
+                identity = max(identity, 0.9)
+    elif attribute == "category":
+        if place_context:
+            current = normalize_category(place_context.get("category", "") or place_context.get("current_value", ""))
+            base = normalize_category(place_context.get("base_value", ""))
+            if normalized_value and normalized_value in {current, base}:
+                identity = max(identity, 0.8)
+
+    if source_type in {"official_site", "government"}:
+        identity = max(identity, 0.55)
+    return max(0.0, min(1.0, identity)), max(0.0, min(1.0, stale))
+
+
 def _claim(
     *,
     place_id: str,
@@ -374,6 +446,7 @@ def _claim(
     source_type: str,
     extraction_method: str,
     evidence_text: str,
+    place_context: dict[str, str] | None = None,
     page_title: str = "",
     query: str = "",
     page_relevance: str = "unknown",
@@ -384,8 +457,15 @@ def _claim(
     identity_signal_score: float = 0.0,
     notes: str = "",
 ) -> AttributeClaim:
-    inferred_stale = _stale_signal_text(evidence_text + "\n" + notes)
-    inferred_identity = _identity_signal_text(evidence_text + "\n" + page_title + "\n" + notes, attribute)
+    inferred_identity, inferred_stale = _identity_alignment_score(
+        place_context=place_context,
+        attribute=attribute,
+        value=value,
+        source_url=source_url,
+        evidence_text=evidence_text + "\n" + notes,
+        page_title=page_title,
+        source_type=source_type,
+    )
     lowered_context = f"{evidence_text}\n{notes}\n{page_title}".lower()
     if "new_location" in extraction_method:
         inferred_stale = 0.0
@@ -425,40 +505,6 @@ def _claim(
         notes=notes,
     )
 
-
-def _place_signal(place_context: dict[str, str] | None, attribute: str, value: str) -> float:
-    if not place_context:
-        return 0.5
-    candidates = [place_context.get(attribute, ""), place_context.get("current_value", ""), place_context.get("base_value", "")]
-    normalized_value = {
-        "website": normalize_website,
-        "phone": normalize_phone,
-        "address": normalize_address,
-        "name": normalize_name,
-        "category": normalize_category,
-    }.get(attribute, lambda raw: (raw or "").strip().lower())(value)
-    matches = 0
-    for candidate in candidates:
-        if not candidate:
-            continue
-        candidate_norm = {
-            "website": normalize_website,
-            "phone": normalize_phone,
-            "address": normalize_address,
-            "name": normalize_name,
-            "category": normalize_category,
-        }.get(attribute, lambda raw: (raw or "").strip().lower())(candidate)
-        if candidate_norm and candidate_norm == normalized_value:
-            matches += 1
-    if matches >= 2:
-        return 1.0
-    if matches == 1:
-        return 0.85
-    if attribute == "website" and normalized_value and website_domain(normalized_value) == website_domain(place_context.get("website", "")):
-        return 0.75
-    return 0.55
-
-
 def extract_claims_from_text(
     *,
     place_id: str,
@@ -489,7 +535,15 @@ def extract_claims_from_text(
     source_score = SOURCE_RANK.get(source_type, SOURCE_RANK["unknown"])
     freshness = 0.0
     stale = 0.0
-    identity = _place_signal(place_context, attribute, page_title or text or source_url)
+    identity, stale = _identity_alignment_score(
+        place_context=place_context,
+        attribute=attribute,
+        value="",
+        source_url=source_url,
+        evidence_text=text,
+        page_title=page_title,
+        source_type=source_type,
+    )
 
     claims: list[AttributeClaim] = []
     if attribute == "website":
@@ -522,6 +576,7 @@ def extract_claims_from_text(
                     source_type=source_type,
                     extraction_method=extraction_method if idx else extraction_method,
                     evidence_text=text,
+                    place_context=place_context,
                     page_title=page_title,
                     query=query,
                     page_relevance=relevance,
@@ -547,6 +602,7 @@ def extract_claims_from_text(
                     source_type=source_type,
                     extraction_method="phone_regex",
                     evidence_text=text,
+                    place_context=place_context,
                     page_title=page_title,
                     query=query,
                     page_relevance=relevance,
@@ -573,6 +629,7 @@ def extract_claims_from_text(
                     source_type=source_type,
                     extraction_method="address_regex",
                     evidence_text=text,
+                    place_context=place_context,
                     page_title=page_title,
                     query=query,
                     page_relevance=relevance,
@@ -602,6 +659,7 @@ def extract_claims_from_text(
                     source_type=source_type,
                     extraction_method=method,
                     evidence_text=text,
+                    place_context=place_context,
                     page_title=page_title,
                     query=query,
                     page_relevance=relevance,
@@ -664,6 +722,7 @@ def extract_claims_from_text(
                         source_type=source_type,
                         extraction_method="jsonld_url",
                         evidence_text="\n".join(jsonld_blocks),
+                        place_context=place_context,
                         page_title=page_title,
                         query=query,
                         page_relevance=relevance,
@@ -684,6 +743,7 @@ def extract_claims_from_text(
                         source_type=source_type,
                         extraction_method="jsonld_phone",
                         evidence_text="\n".join(jsonld_blocks),
+                        place_context=place_context,
                         page_title=page_title,
                         query=query,
                         page_relevance=relevance,
@@ -704,6 +764,7 @@ def extract_claims_from_text(
                         source_type=source_type,
                         extraction_method="jsonld_address",
                         evidence_text="\n".join(jsonld_blocks),
+                        place_context=place_context,
                         page_title=page_title,
                         query=query,
                         page_relevance=relevance,
@@ -724,6 +785,7 @@ def extract_claims_from_text(
                         source_type=source_type,
                         extraction_method="jsonld_name",
                         evidence_text="\n".join(jsonld_blocks),
+                        place_context=place_context,
                         page_title=page_title,
                         query=query,
                         page_relevance=relevance,
@@ -744,6 +806,7 @@ def extract_claims_from_text(
                         source_type=source_type,
                         extraction_method="jsonld_type",
                         evidence_text="\n".join(jsonld_blocks),
+                        place_context=place_context,
                         page_title=page_title,
                         query=query,
                         page_relevance=relevance,
@@ -785,6 +848,7 @@ def extract_claims_from_evidence_item(
             source_type=item.source_type,
             extraction_method="evidence_item",
             evidence_text=text,
+            place_context=place_context,
             query=item.query,
             page_relevance=relevance,
             extraction_confidence=extraction_confidence,
@@ -823,6 +887,7 @@ def extract_claims_from_replay_episode(episode: ReplayEpisode) -> list[Attribute
                         source_type=page.source_type,
                         extraction_method="page_extracted_value",
                         evidence_text=page.page_text or page.title,
+                        place_context=episode.place,
                         page_title=page.title,
                         query=attempt.query,
                         page_relevance=_page_relevance(page.url, page.title, page.page_text, page.source_type),

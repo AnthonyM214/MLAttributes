@@ -379,6 +379,18 @@ class ResolvePOISelectiveRouter:
         )
 
 
+@dataclass(frozen=True)
+class ResolvePOISplitVerification:
+    truth_rows: int
+    train_rows: int
+    label_rows: int
+    holdout_ids: int
+    eligible_holdout_ids: int
+    excluded_from_training: int
+    leak_check_passed: bool
+    per_attribute: dict[str, dict[str, object]]
+
+
 def _stable_bucket(identifier: str, modulus: int = 5) -> int:
     digest = hashlib.blake2b(identifier.encode("utf-8"), digest_size=8).digest()
     return int.from_bytes(digest, "big") % modulus
@@ -469,6 +481,64 @@ def _feature_frame_from_truth_rows(rows: list[dict], attribute: str, limit: int 
 
 def _feature_matrix(frame: pd.DataFrame) -> np.ndarray:
     return frame[FEATURE_NAMES].fillna(0.0).to_numpy(dtype=float) if not frame.empty else np.zeros((0, len(FEATURE_NAMES)))
+
+
+def verify_resolvepoi_split(
+    *,
+    truth_path: str | Path = DEFAULT_TRUTH_PATH,
+    train_parquet: str | Path = DEFAULT_TRAIN_PARQUET,
+    train_labels: str | Path = DEFAULT_TRAIN_LABELS,
+    limit: int = 400,
+    attributes: Iterable[str] = DEFAULT_ATTRIBUTES,
+) -> dict[str, object]:
+    train_frame = _load_training_frame(train_parquet)
+    label_map = _load_label_map(train_labels)
+    truth_rows = json.loads(Path(truth_path).read_text(encoding="utf-8"))
+    if not isinstance(truth_rows, list):
+        raise ValueError("ResolvePOI truth file must be a JSON list")
+    truth_rows = truth_rows[:limit]
+
+    truth_ids = [str(row.get("id", "")) for row in truth_rows if row.get("id")]
+    train_ids = set(train_frame["id"].astype(str))
+    label_ids = set(label_map)
+    eligible_holdout_ids = [row_id for row_id in truth_ids if row_id in train_ids and row_id in label_ids]
+    excluded_ids = set(eligible_holdout_ids)
+    if not eligible_holdout_ids:
+        raise ValueError("No overlapping ResolvePOI holdout ids found between truth rows, parquet, and labels")
+
+    per_attribute: dict[str, dict[str, object]] = {}
+    leak_check_passed = True
+    for attribute in tuple(attributes):
+        raw_frame = _feature_frame_from_parquet(train_frame, attribute, label_map, exclude_ids=None)
+        filtered_frame = _feature_frame_from_parquet(train_frame, attribute, label_map, exclude_ids=excluded_ids)
+        raw_ids = set(raw_frame["id"].astype(str)) if not raw_frame.empty else set()
+        filtered_ids = set(filtered_frame["id"].astype(str)) if not filtered_frame.empty else set()
+        raw_overlap = sorted(raw_ids & excluded_ids)
+        filtered_overlap = sorted(filtered_ids & excluded_ids)
+        leak_check_passed = leak_check_passed and not filtered_overlap
+        per_attribute[attribute] = {
+            "raw_rows": int(len(raw_frame)),
+            "filtered_rows": int(len(filtered_frame)),
+            "raw_holdout_overlap": int(len(raw_overlap)),
+            "filtered_holdout_overlap": int(len(filtered_overlap)),
+            "raw_holdout_overlap_sample": raw_overlap[:5],
+            "filtered_holdout_overlap_sample": filtered_overlap[:5],
+        }
+
+    report = {
+        "truth_rows": len(truth_rows),
+        "train_rows": len(train_frame),
+        "label_rows": len(label_map),
+        "holdout_ids": len(truth_ids),
+        "eligible_holdout_ids": len(eligible_holdout_ids),
+        "eligible_holdout_ids_sample": eligible_holdout_ids[:10],
+        "excluded_from_training": len(excluded_ids),
+        "leak_check_passed": leak_check_passed,
+        "per_attribute": per_attribute,
+    }
+    if not leak_check_passed:
+        raise ValueError("ResolvePOI split verification failed: holdout ids survived feature exclusion")
+    return report
 
 
 def _predict_with_model(model: HistGradientBoostingClassifier | None, threshold: float, attribute: str, current_raw: object, base_raw: object, current_confidence: object, base_confidence: object) -> tuple[str, float, bool]:
@@ -619,6 +689,13 @@ def build_resolvepoi_selective_rows(
 ) -> tuple[list[dict[str, str]], dict[str, object]]:
     train_frame = _load_training_frame(train_parquet)
     label_map = _load_label_map(train_labels)
+    split_verification = verify_resolvepoi_split(
+        truth_path=truth_path,
+        train_parquet=train_parquet,
+        train_labels=train_labels,
+        limit=limit,
+        attributes=attributes,
+    )
     truth_rows = json.loads(Path(truth_path).read_text(encoding="utf-8"))
     if not isinstance(truth_rows, list):
         raise ValueError("ResolvePOI truth file must be a JSON list")
@@ -786,6 +863,7 @@ def build_resolvepoi_selective_rows(
         },
         "metrics": source_selection_eval,
         "source_selection": source_selection_eval,
+        "split_verification": split_verification,
         "artifacts": {attribute: asdict(artifacts[attribute]) for attribute in attributes},
         "decisions": combined_rows,
         "rows": len(combined_rows),
@@ -876,6 +954,23 @@ def evaluate_resolvepoi_selective(
         target_coverage=target_coverage,
     )
     return report
+
+
+def build_resolvepoi_split_manifest(
+    *,
+    truth_path: str | Path = DEFAULT_TRUTH_PATH,
+    train_parquet: str | Path = DEFAULT_TRAIN_PARQUET,
+    train_labels: str | Path = DEFAULT_TRAIN_LABELS,
+    limit: int = 400,
+    attributes: Iterable[str] = DEFAULT_ATTRIBUTES,
+) -> dict[str, object]:
+    return verify_resolvepoi_split(
+        truth_path=truth_path,
+        train_parquet=train_parquet,
+        train_labels=train_labels,
+        limit=limit,
+        attributes=attributes,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
