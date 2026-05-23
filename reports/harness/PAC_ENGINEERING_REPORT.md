@@ -10,6 +10,7 @@ The existing resolver (`resolver.py`) scores evidence rows, normalizes candidate
 
 - page text and evidence rows are converted into `AttributeClaim` objects,
 - structured HTML and JSON-LD signals are extracted deterministically before scoring,
+- place-identity and stale-signal scoring live in a dedicated `identity.py` helper instead of being buried in the extractor,
 - claims are grouped by normalized value,
 - claim support is scored using source authority, extraction confidence, freshness, page relevance, and identity signals,
 - contradictions between claim groups are explicit,

@@ -1,5 +1,7 @@
 # MLAttributes
-[Anthony Martinez - Overture - Spring ]
+
+[Anthony Martinez - Overture/CRWN102]
+
 MLAttributes is an evidence-backed Place Attribute Conflation system.
 
 It resolves conflicting place attributes such as website, phone, address, name, and category by replaying evidence, scoring source authority and freshness, grouping claims by normalized value, and abstaining when the evidence is weak or contradictory.
@@ -10,6 +12,7 @@ The repo keeps a deterministic v1 baseline and adds a claim-level v2 resolver fo
 
 - `resolver.py` - evidence-scored baseline resolver
 - `claim_extraction.py` - deterministic claim extraction from text, HTML, meta tags, and JSON-LD
+- `identity.py` - place-identity and stale-signal scoring for extracted claims
 - `evidence_graph.py` - claim grouping and contradiction scoring
 - `resolver_v2.py` - claim-level resolver with abstention and optional learned selective routing
 - `resolvepoi_selective.py` - selective HGB router for the ResolvePOI held-out benchmark
@@ -55,7 +58,8 @@ python3 scripts/run_harness.py benchmark-v2 \
 ```
 
 The installed wheel also exposes `pac-benchmark-v2` with the same flags.
-This path is experimental and opt-in: it can improve close structured cases, but it is not guaranteed to outperform plain `resolver_v2` on every replay set.
+
+This path is experimental and opt-in. It can improve close structured cases, but it is not guaranteed to outperform plain `resolver_v2` on every replay set.
 
 Run the selective ResolvePOI benchmark:
 
@@ -80,9 +84,9 @@ dataset -> retrieval/dorking -> claim extraction -> evidence graph -> resolver v
 
 That means MLAttributes is not just a current/base selector. It verifies competing claims against replayable evidence and abstains when truth cannot be established.
 
-It also includes a reusable selective router for the ResolvePOI corpus that can now be passed into `resolver_v2` as the learned current/base decision layer while EvidenceGraph still requires evidence-backed claim groups.
-Across all five attributes, the selective router reaches 97.7% full accuracy; on website, phone, address, and name, it reaches 97.1% core full accuracy.
-The selective benchmark depends on local ResolvePOI corpus artifacts, but the repo now also exposes a split-verification command to make the holdout separation explicit.
+The ResolvePOI selective router is a separate, opt-in benchmark path. It can be passed into `resolver_v2` as the learned current/base decision layer, but it is not the default resolver mode.
+
+For a quick map of what is core versus legacy, see [`docs/current_state.md`](docs/current_state.md).
 
 ## Benchmarks
 

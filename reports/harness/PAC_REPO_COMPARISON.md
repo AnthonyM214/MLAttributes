@@ -23,7 +23,7 @@ Current outputs:
 
 | Artifact | Result |
 | --- | --- |
-| Unit tests | `183` tests passed |
+| Unit tests | `192` tests passed |
 | Retrieval compare | targeted authoritative found `0.75`, fallback `0.0`; targeted citation precision `0.75`; citation precision proxy delta `+1.0` |
 | Replay stats | `4` episodes, `8` attempts, `9` pages, authoritative pages rate `0.3333` |
 | Website authority | authoritative found rate `1.0`, false official rate `0.0` |
@@ -99,8 +99,7 @@ The new `resolvepoi-v2` adapter still serves as the legacy row-label proxy bench
 
 ## Reproducibility Notes
 
-- The local test suite passed on this checkout: `180` tests.
-- The local test suite now passes with the ResolvePOI adapter, selective router, and resolver_v2 integration paths included: `186` tests.
+- The local test suite passed on this checkout: `192` tests.
 - The benchmark outputs above were generated from checked-in fixtures and written to `reports/harness/benchmark_v2_*_current.json`.
 - The ResolvePOI adapter outputs were generated from the local `ResolvePOI-Attribute-Conflation` checkout and written to `reports/resolvepoi_v2/resolvepoi_v2_*`.
 - The public repo comparison is based on each repository’s README and should be treated as published claims, not a re-run benchmark.
