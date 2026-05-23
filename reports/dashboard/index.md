@@ -13,10 +13,10 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 
 - Selective router: 97.7% all-attribute / 97.1% core.
 - Claim-level hard cases: 88.9% accuracy / 20.0% abstention.
-- Santa Cruz challenge: 100.0% expected-behavior accuracy with branch-context proof.
+- Santa Cruz challenge: 100.0% expected-behavior accuracy on authority-page ambiguity.
 - PAC hard benchmark: 100.0% correct abstention; identity drift precision/recall 100.0% / 100.0%.
 - Retrieval replay: 100.0% targeted vs 0.0% fallback.
-- Test suite: 216 tests passed.
+- Test suite: 218 tests passed.
 
 ## Completed Milestones
 
@@ -24,7 +24,7 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 - [x] Identity scoring split out - Place identity signals now live in identity.py and are used by claim extraction instead of being buried in the resolver.
 - [x] Selective router integrated - The ResolvePOI router is exposed as an opt-in learned reranker. Holdout full accuracy is 97.1% with 20.2 pts lift over the current baseline.
 - [x] Split verification made explicit - Holdout/train separation is inspectable and leak-checked instead of being implied by filenames.
-- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 216 tests passed.
+- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 218 tests passed.
 
 ## Important Stats
 
@@ -32,12 +32,12 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 | --- | ---: | --- |
 | Selective router | 97.7% all-attribute / 97.1% core | Lift vs current baseline: 20.2 pts; high-confidence wrong: 1.2% |
 | Claim-level v2 hard cases | 88.9% accuracy / 20.0% abstention | High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json |
-| Santa Cruz challenge | 100.0% expected / 9.1% abstention | Raw resolver accuracy: 90.9%; high-confidence wrong: 0.0%; covers website, phone, address, category, and name with branch-context, office-vs-mailing, official-vs-social, official-vs-directory, and title-cleaning cases. |
+| Santa Cruz challenge | 100.0% expected / 6.7% abstention | Raw resolver accuracy: 93.3%; high-confidence wrong: 0.0%; covers branch, government primary-phone, room-address, official-vs-social, official-vs-directory, title-cleaning, and phone-vs-fax cases. |
 | PAC hard benchmark | 100.0% correct abstention / passed | Identity drift precision/recall: 100.0% / 100.0% |
 | PAC expected behavior | 100.0% expected-behavior accuracy | Expected abstention rate: 60.0%; claim-level benchmark captures the intended behavior on ambiguous cases. |
 | Retrieval proof | 100.0% targeted vs 0.0% fallback | Citation precision: 100.0% vs 0.0%; replay cases: 1 |
 | Website authority | 100.0% authoritative / 0.0% false official | Selected official: 100.0%; place-relevant official: 100.0% |
-| Test suite | 216 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
+| Test suite | 218 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
 
 ## Next Steps
 
@@ -71,10 +71,10 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 
 ### Santa Cruz Challenge
 
-- Expected-behavior accuracy (v1 / v2): 54.5% / 100.0%
-- Expected-behavior abstention (v1 / v2): 54.5% / 9.1%
-- Raw resolver accuracy: 90.9%
-- Raw resolver abstention: 9.1%
+- Expected-behavior accuracy (v1 / v2): 40.0% / 100.0%
+- Expected-behavior abstention (v1 / v2): 66.7% / 6.7%
+- Raw resolver accuracy: 93.3%
+- Raw resolver abstention: 6.7%
 - Raw high-confidence wrong: 0.0%
 
 ### PAC Benchmark-v2

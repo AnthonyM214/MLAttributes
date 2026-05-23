@@ -849,7 +849,7 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
         {
             "label": "Santa Cruz challenge",
             "value": f"{_pct(santa_expected_v2.get('accuracy'))} expected / {_pct(santa_expected_v2.get('abstention_rate'))} abstention",
-            "detail": f"Raw resolver accuracy: {_pct(santa_v2.get('accuracy'))}; high-confidence wrong: {_pct(santa_v2.get('high_confidence_wrong_rate'))}; covers website, phone, address, category, and name with branch-context, office-vs-mailing, official-vs-social, official-vs-directory, and title-cleaning cases.",
+            "detail": f"Raw resolver accuracy: {_pct(santa_v2.get('accuracy'))}; high-confidence wrong: {_pct(santa_v2.get('high_confidence_wrong_rate'))}; covers branch, government primary-phone, room-address, official-vs-social, official-vs-directory, title-cleaning, and phone-vs-fax cases.",
         },
         {
             "label": "PAC hard benchmark",
@@ -976,7 +976,7 @@ def render_markdown(data: DashboardData) -> str:
         "",
         f"- Selective router: {_pct((selective_metrics.get('macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('macro'), dict) else None)} all-attribute / {_pct((selective_metrics.get('core_macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('core_macro'), dict) else None)} core.",
         f"- Claim-level hard cases: {_pct(((hard_cases.get('resolver_v2') or {}).get('accuracy')) if isinstance(hard_cases, dict) else None)} accuracy / {_pct(((hard_cases.get('resolver_v2') or {}).get('abstention_rate')) if isinstance(hard_cases, dict) else None)} abstention.",
-        f"- Santa Cruz challenge: {_pct((((santa_cases.get('expected_behavior') or {}).get('resolver_v2') or {}).get('accuracy')) if isinstance(santa_cases, dict) else None)} expected-behavior accuracy with branch-context proof.",
+        f"- Santa Cruz challenge: {_pct((((santa_cases.get('expected_behavior') or {}).get('resolver_v2') or {}).get('accuracy')) if isinstance(santa_cases, dict) else None)} expected-behavior accuracy on authority-page ambiguity.",
         f"- PAC hard benchmark: {_pct(((data.pac_benchmark or {}).get('abstention') or {}).get('correct_abstention_rate') if isinstance(data.pac_benchmark, dict) else None)} correct abstention; identity drift precision/recall {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_precision') if isinstance(data.pac_benchmark, dict) else None)} / {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_recall') if isinstance(data.pac_benchmark, dict) else None)}.",
         f"- Retrieval replay: {_pct(((data.compare or {}).get('targeted') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} targeted vs {_pct(((data.compare or {}).get('fallback') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} fallback.",
         f"- Test suite: {_num(data.repo_comparison_tests)} tests passed.",

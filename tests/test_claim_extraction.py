@@ -32,6 +32,33 @@ class ClaimExtractionTests(unittest.TestCase):
 
         self.assertEqual([claim.normalized_value for claim in claims], ["4155551212"])
 
+    def test_primary_phone_label_outranks_secondary_contact_numbers(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-2a",
+            attribute="phone",
+            page_text="\n".join(
+                [
+                    "Contact Us",
+                    "Phone",
+                    "831-420-5800",
+                    "Non-Emergency",
+                    "831-471-1131",
+                    "Records Section",
+                    "831-420-5870",
+                    "P (831) 420-5030",
+                ]
+            ),
+            source_url="https://www.santacruzca.gov/Government/City-Departments/Police",
+            source_type="government",
+            page_title="Police - City of Santa Cruz",
+        )
+
+        by_value = {claim.normalized_value: claim for claim in claims}
+        self.assertEqual(by_value["8314205800"].extraction_method, "phone_regex_primary")
+        self.assertEqual(by_value["8314711131"].extraction_method, "phone_regex_secondary")
+        self.assertEqual(by_value["8314205870"].extraction_method, "phone_regex_secondary")
+        self.assertLess(by_value["8314711131"].source_authority_score, by_value["8314205800"].source_authority_score)
+
     def test_extracts_branch_directory_phone_with_address_corroborator(self) -> None:
         page_text = "\n".join(
             [

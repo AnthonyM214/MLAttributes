@@ -16,6 +16,8 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 
 - `tests/fixtures/hard_cases_replay.json`
 - `tests/fixtures/pac_hard_cases_replay.json`
+- `tests/fixtures/santa_cruz_challenge_replay.json`
+- `docs/corpus_expansion_strategy.md`
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
 - `reports/harness/PAC_REPO_COMPARISON.md`
 - `reports/harness/SELECTIVE_BASELINE_NOTE.md`
@@ -42,6 +44,7 @@ These files are still part of the repository history and can be useful, but they
 
 - Run tests: `python3 -m unittest discover -s tests -q`
 - Run the claim-level benchmark: `python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/hard_cases_replay.json --include-decisions`
+- Run the Santa Cruz challenge benchmark: `python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions`
 - Run the selective ResolvePOI benchmark: `python3 scripts/run_harness.py resolvepoi-selective --truth ... --train-parquet ... --train-labels ... --limit 400 --include-decisions`
 - Verify the ResolvePOI split: `python3 scripts/run_harness.py resolvepoi-split-verify --truth ... --train-parquet ... --train-labels ...`
 

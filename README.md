@@ -104,6 +104,10 @@ The hard-case replay benchmark is checked into `tests/fixtures/hard_cases_replay
 
 The mixed-source PAC benchmark is checked into `tests/fixtures/pac_hard_cases_replay.json` and measures expected behavior on official, aggregator, and social evidence with explicit abstention labels. That corpus is the better proxy for real-world readiness because it includes cases where abstaining is the right answer.
 
+The Santa Cruz challenge benchmark is checked into `tests/fixtures/santa_cruz_challenge_replay.json` and focuses on real authority-page ambiguity: branch directories, government department pages, city footers, staff/direct lines, fax numbers, stale archives, social profiles, and official museum/library/campus pages.
+
+Corpus expansion should follow [`docs/corpus_expansion_strategy.md`](docs/corpus_expansion_strategy.md): prior ProjectTerra corpora and Overture rows are seed queues, but benchmark truth requires replayable authoritative evidence.
+
 See `reports/harness/PAC_ENGINEERING_REPORT.md` for the current benchmark summary.
 
 ## Shipping notes

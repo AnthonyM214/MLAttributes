@@ -113,6 +113,31 @@ _PAGE_RELEVANCE_KEYWORDS = {
     "aggregator_listing": ("yelp", "tripadvisor", "foursquare", "doordash", "ubereats"),
     "social_page": ("facebook", "instagram", "linkedin", "x.com", "twitter"),
 }
+_PRIMARY_PHONE_LABELS = {
+    "phone",
+    "main",
+    "main phone",
+    "main line",
+    "contact phone",
+    "general inquiries",
+    "general business line",
+    "police general business line",
+}
+_SECONDARY_PHONE_LABELS = {
+    "anonymous tip line",
+    "billing",
+    "direct",
+    "emergency",
+    "fax",
+    "hotline",
+    "non emergency",
+    "non-emergency",
+    "property",
+    "property section",
+    "records",
+    "records section",
+    "tip line",
+}
 
 class _StructuredHTMLParser(HTMLParser):
     def __init__(self) -> None:
@@ -377,6 +402,37 @@ def _line_context_for_span(text: str, start: int, end: int, *, before: int = 4, 
     return "\n".join(line for _, _, line in selected if line).strip()
 
 
+def _phone_label_for_span(text: str, start: int, end: int) -> tuple[str, str]:
+    spans = _line_spans(text)
+    if not spans:
+        return "", ""
+    match_index = 0
+    for idx, (line_start, line_end, _) in enumerate(spans):
+        if line_start <= start < line_end or line_start < end <= line_end:
+            match_index = idx
+            break
+    lines = [line for _, _, line in spans]
+    current = lines[match_index].strip()
+    previous = ""
+    for prior in reversed(lines[:match_index]):
+        if prior.strip():
+            previous = prior.strip()
+            break
+    label_text = normalize_name(f"{previous} {current}")
+    if any(label in label_text for label in _SECONDARY_PHONE_LABELS):
+        return "secondary", previous or current
+    if current.lower().lstrip().startswith(("p ", "p:", "p(")):
+        return "secondary", current
+    if normalize_name(previous) in _PRIMARY_PHONE_LABELS:
+        return "primary", previous
+    # Staff/person direct numbers often appear under a named person and title,
+    # not under a generic "Phone" label. Keep them visible but weaker.
+    nearby = "\n".join(line for line in lines[max(0, match_index - 2): match_index + 1] if line.strip())
+    if "," in nearby and normalize_name(previous) not in _PRIMARY_PHONE_LABELS:
+        return "secondary", previous or current
+    return "", previous or current
+
+
 def _context_addresses(place_context: dict[str, str] | None) -> list[str]:
     if not place_context:
         return []
@@ -517,9 +573,14 @@ def _extract_phone_contexts(
         if not normalized:
             continue
         snippet = _line_context_for_span(text, match.start(), match.end())
+        label_kind, label = _phone_label_for_span(text, match.start(), match.end())
         snippet_terms = set(normalize_name(snippet).split())
         hits = terms & snippet_terms
-        if hits:
+        if label_kind == "primary":
+            contexts.append((normalized, snippet, 0.97, 0.92, f"phone_label={normalize_name(label)}", "phone_regex_primary"))
+        elif label_kind == "secondary":
+            contexts.append((normalized, snippet, 0.56, 0.48, f"secondary_phone_label={normalize_name(label)}", "phone_regex_secondary"))
+        elif hits:
             contexts.append((normalized, snippet, 0.9, 0.85, f"place_context_terms={','.join(sorted(hits))}", "phone_regex"))
         else:
             contexts.append((normalized, snippet, 0.78, 0.6, "", "phone_regex"))
@@ -768,6 +829,9 @@ def extract_claims_from_text(
             if key in seen:
                 continue
             seen.add(key)
+            claim_source_score = source_score
+            if extraction_method == "phone_regex_secondary":
+                claim_source_score = source_score * 0.45
             claims.append(
                 _claim(
                     place_id=place_id,
@@ -782,7 +846,7 @@ def extract_claims_from_text(
                     query=query,
                     page_relevance=relevance,
                     extraction_confidence=confidence,
-                    source_authority_score=source_score,
+                    source_authority_score=claim_source_score,
                     freshness_score=freshness,
                     stale_signal_score=stale,
                     identity_signal_score=max(identity, claim_identity),

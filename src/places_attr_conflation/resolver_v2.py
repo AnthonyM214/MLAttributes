@@ -240,9 +240,12 @@ def _resolve_from_claims(
     if total_support <= 0:
         return AttributeDecision(attribute=attribute, decision="", confidence=0.0, reason="Claims could not be scored.", evidence=[], abstained=True)
 
-    adjusted_total_support = sum(score for _, score in ranked_groups)
-    best_ratio = best_adjusted_support / adjusted_total_support if adjusted_total_support > 0 else best.total_support / total_support
-    second_ratio = second_adjusted_support / adjusted_total_support if second is not None and adjusted_total_support > 0 else 0.0
+    # Compare the winner against the nearest competing claim group. Summing
+    # every weaker alternative over-penalizes pages that list many secondary
+    # contact numbers, while a real contradiction is the best-vs-runner-up gap.
+    head_to_head_support = best_adjusted_support + second_adjusted_support
+    best_ratio = best_adjusted_support / head_to_head_support if head_to_head_support > 0 else best.total_support / total_support
+    second_ratio = second_adjusted_support / head_to_head_support if second is not None and head_to_head_support > 0 else 0.0
     margin_ratio = best_ratio - second_ratio
     evidence_confidence = max(best.max_support, 0.7 * best_ratio + 0.3 * best.max_support)
     if learned_vote and not learned_vote.abstained and learned_vote.confidence >= min_learned_confidence:

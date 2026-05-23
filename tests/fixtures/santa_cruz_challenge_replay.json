@@ -502,6 +502,154 @@
         }
       ],
       "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "city-clerk-primary-phone-vs-direct-and-fax",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_DIRECT",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5030",
+      "gold_value": "831-420-5030",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v4",
+      "place": {
+        "base_phone": "831-420-5035",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5030",
+        "name": "Santa Cruz City Clerk",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government department page includes a named clerk direct line, main phone, fax, and city footer phone; the primary Phone label should win without prefilled extraction.",
+              "page_text": "City Clerk\nContact Information\nBonnie Bush, CMC\nCity Clerk\n831-420-5035\nbbush@santacruzca.gov\nPhone\n831-420-5030\nFax\n831-420-5031\nLocation\n809 Center Street, Room 8\nSanta Cruz, CA 95060\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 4,
+              "source_type": "government",
+              "title": "City Clerk - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/City-Clerk \"Phone\" \"831-420-5030\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "police-primary-phone-vs-emergency-service-lines",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_SERVICE_LINES",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5800",
+      "gold_value": "831-420-5800",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v4",
+      "place": {
+        "base_phone": "831-471-1131",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5800",
+        "name": "Santa Cruz Police Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government police page lists primary phone, emergency, non-emergency, tip, records, property, and city footer numbers; primary contact phone should win.",
+              "page_text": "Police\nWelcome to the Santa Cruz Police Department's web page.\nContact Us\nPhone\n831-420-5800\nEmergency\n911\nNon-Emergency\n831-471-1131\nAnonymous Tip Line\n831-420-5995\nLocation\n155 Center Street\nSanta Cruz, CA 95060\nRecords Section\n831-420-5870\nProperty Section\n831-420-5900\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 4,
+              "source_type": "government",
+              "title": "Police - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Police",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Police \"Phone\" \"831-420-5800\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "address",
+      "case_id": "public-works-room-address-vs-city-footer",
+      "case_type": "GOVERNMENT_ROOM_ADDRESS_VS_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "809 Center Street, Room 201, Santa Cruz, CA 95060",
+      "gold_value": "809 Center Street, Room 201, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v4",
+      "place": {
+        "base_address": "809 Center St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "809 Center Street, Room 201, Santa Cruz, CA 95060",
+        "name": "Santa Cruz Public Works",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government department page has a department-specific room address and a generic city footer address; room-specific address should win.",
+              "page_text": "Public Works\nAbout\nPublic Works provides the City of Santa Cruz with engineering design, traffic engineering, street maintenance, resource recovery, wastewater, flood control, and parking control.\nContact Public Works\nPhone\n831-420-5160\nEmail\ncitypw@santacruzca.gov\nFax\n831-420-5161\nLocation\n809 Center Street, Room 201\nSanta Cruz, CA 95060\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 4,
+              "source_type": "government",
+              "title": "Public Works - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Public-Works",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Public-Works \"809 Center Street, Room 201\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "mah-primary-phone-vs-fax",
+      "case_type": "OFFICIAL_PHONE_VS_FAX",
+      "expected_abstain": false,
+      "expected_decision": "831-429-1964",
+      "gold_value": "831-429-1964",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v4",
+      "place": {
+        "base_phone": "831-429-1954",
+        "city": "Santa Cruz",
+        "current_phone": "831-429-1964",
+        "name": "Santa Cruz Museum of Art & History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official MAH visit page lists public phone and fax; public phone should win without prefilled extraction.",
+              "page_text": "Visit the MAH\nThe MAH\n705 Front St. Downtown Santa Cruz, CA 95060\nOpen\nMon 9AM-1PM\nThu-Fri 12-8pm\nSat-Sun 12-6PM\nTax ID 94-2718861\n(831) 429-1964\n(831) 429-1954 (Fax)\ninfo@santacruzmah.org",
+              "recency_days": 2,
+              "source_type": "official_site",
+              "title": "Visit the MAH",
+              "url": "https://www.santacruzmah.org/visit",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzmah.org/visit \"831-429-1964\" \"Fax\""
+        }
+      ],
+      "truth_source_type": "official_site"
     }
   ]
 }

@@ -26,10 +26,10 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         raise AssertionError(f"missing decision for {case_id}")
 
     def test_challenge_corpus_is_explicitly_hard(self) -> None:
-        self.assertEqual(len(self.episodes), 11)
+        self.assertEqual(len(self.episodes), 15)
         self.assertEqual(Counter(episode.attribute for episode in self.episodes), {
-            "phone": 6,
-            "address": 2,
+            "phone": 9,
+            "address": 3,
             "category": 1,
             "name": 1,
             "website": 1,
@@ -37,12 +37,16 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         self.assertEqual(Counter(episode.case_type for episode in self.episodes), {
             "BRANCH_AMBIGUITY": 1,
             "BRANCH_CONTEXT_CORROBORATED": 2,
+            "GOVERNMENT_PRIMARY_PHONE_VS_DIRECT": 1,
+            "GOVERNMENT_PRIMARY_PHONE_VS_SERVICE_LINES": 1,
+            "GOVERNMENT_ROOM_ADDRESS_VS_FOOTER": 1,
             "OFFICIAL_CATEGORY_VS_DIRECTORY": 1,
             "OFFICIAL_BRANCH_SPECIFIC": 1,
             "OFFICIAL_CONTACT_WITH_NON_PRIMARY_PHONE": 1,
             "OFFICIAL_CURRENT_ARCHIVE_STALE": 1,
             "OFFICIAL_LOCATION_VS_MAILING_ADDRESS": 1,
             "OFFICIAL_NAME_VS_DIRECTORY_ALIAS": 1,
+            "OFFICIAL_PHONE_VS_FAX": 1,
             "OFFICIAL_WEBSITE_VS_SOCIAL": 1,
             "OFFICIAL_PAGE_VS_STAFF_PAGE": 1,
         })
@@ -51,19 +55,20 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "authoritative_santa_cruz_challenge_v1": 5,
             "authoritative_santa_cruz_challenge_v2": 3,
             "authoritative_santa_cruz_challenge_v3": 3,
+            "authoritative_santa_cruz_challenge_v4": 4,
         })
 
     def test_resolver_v2_expected_behavior_matches_challenge_labels(self) -> None:
         expected = self.report["expected_behavior"]["resolver_v2"]  # type: ignore[index]
 
         self.assertEqual(expected["accuracy"], 1.0)
-        self.assertAlmostEqual(expected["abstention_rate"], 1 / 11)
+        self.assertAlmostEqual(expected["abstention_rate"], 1 / 15)
         self.assertEqual(expected["high_confidence_wrong_rate"], 0.0)
 
         ambiguous = self._decision("scpl-branch-ambiguous-phone")
         self.assertTrue(ambiguous["abstained"])
         self.assertTrue(ambiguous["correct"])
-        self.assertIn("contradict", str(ambiguous["reason"]).lower())
+        self.assertIn("abstain", str(ambiguous["reason"]).lower())
 
     def test_resolver_v2_selects_specific_authoritative_contact_values(self) -> None:
         expected_values = {
@@ -72,6 +77,9 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "registrar-phone-with-fax": "8314594412",
             "registrar-archive-stale-phone": "8314594412",
             "norris-center-vs-staff-phone": "8314594763",
+            "city-clerk-primary-phone-vs-direct-and-fax": "8314205030",
+            "police-primary-phone-vs-emergency-service-lines": "8314205800",
+            "mah-primary-phone-vs-fax": "8314291964",
         }
 
         for case_id, expected_value in expected_values.items():
@@ -103,6 +111,7 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         expected_values = {
             "scpl-branch-context-address-no-extracted": "224 Church Street, Santa Cruz, CA 95060",
             "registrar-office-vs-mailing-address": "190 Hahn Student Services Building",
+            "public-works-room-address-vs-city-footer": "809 Center Street, Room 201, Santa Cruz, CA 95060",
         }
 
         for case_id, expected_value in expected_values.items():
@@ -142,6 +151,22 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         decision = self._decision("scpl-branch-context-phone-no-extracted")
         self.assertFalse(decision["abstained"])
         self.assertEqual(decision["decision"], "8314277707")
+
+    def test_government_primary_phone_cases_select_labeled_primary_number(self) -> None:
+        for case_id in {
+            "city-clerk-primary-phone-vs-direct-and-fax",
+            "police-primary-phone-vs-emergency-service-lines",
+        }:
+            with self.subTest(case_id=case_id):
+                episode = next(episode for episode in self.episodes if episode.case_id == case_id)
+                claims = extract_claims_from_replay_episode(episode)
+                decision = self._decision(case_id)
+
+                self.assertTrue(any(claim.extraction_method == "phone_regex_primary" for claim in claims))
+                self.assertTrue(any(claim.extraction_method == "phone_regex_secondary" for claim in claims))
+                self.assertFalse(any(claim.extraction_method == "page_extracted_value" for claim in claims))
+                self.assertFalse(decision["abstained"])
+                self.assertTrue(decision["correct"])
 
 
 if __name__ == "__main__":
