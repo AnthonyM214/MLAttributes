@@ -10,8 +10,39 @@ from places_attr_conflation.resolvepoi_selective import (
     DEFAULT_TRAIN_LABELS,
     DEFAULT_TRAIN_PARQUET,
     DEFAULT_TRUTH_PATH,
+    ResolvePOISelectiveRouter,
+    SelectiveAttributeModel,
     evaluate_resolvepoi_selective,
+    predict_selective_source,
 )
+
+
+class SelectiveRouterAPITests(unittest.TestCase):
+    def test_constant_router_prediction_is_reusable_by_resolver_v2(self) -> None:
+        artifact = SelectiveAttributeModel(
+            attribute="category",
+            model_type="constant",
+            target_coverage=0.99,
+            threshold=1.0,
+            train_rows=10,
+            calibration_rows=0,
+            holdout_rows=0,
+            constant_prediction="current",
+        )
+
+        prediction = predict_selective_source(
+            model=None,
+            artifact=artifact,
+            attribute="category",
+            current_value="Restaurant",
+            base_value="Retail",
+        )
+        router = ResolvePOISelectiveRouter(models={"category": None}, artifacts={"category": artifact})
+        router_prediction = router.predict(attribute="category", current_value="Restaurant", base_value="Retail")
+
+        self.assertFalse(prediction.abstained)
+        self.assertEqual(prediction.source, "current")
+        self.assertEqual(router_prediction.source, "current")
 
 
 @unittest.skipUnless(

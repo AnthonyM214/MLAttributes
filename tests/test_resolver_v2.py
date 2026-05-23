@@ -2,9 +2,39 @@ from __future__ import annotations
 
 import unittest
 
+from places_attr_conflation.claim_extraction import AttributeClaim
 from places_attr_conflation.manifest import EvidenceItem
 from places_attr_conflation.normalization import normalize_phone, normalize_website
-from places_attr_conflation.resolver_v2 import resolve_attribute_v2
+from places_attr_conflation.resolver_v2 import LearnedRouterVote, resolve_attribute_v2, resolve_attribute_v2_from_claims
+
+
+class FakeLearnedRouter:
+    def __init__(self, vote: LearnedRouterVote) -> None:
+        self.vote = vote
+
+    def predict(self, **kwargs):
+        self.kwargs = kwargs
+        return self.vote
+
+
+def _claim(value: str, source_type: str, authority: float) -> AttributeClaim:
+    return AttributeClaim(
+        claim_id=f"{source_type}-{value}",
+        place_id="case-learned",
+        attribute="phone",
+        value=value,
+        normalized_value=normalize_phone(value),
+        source_url=f"https://{source_type}.example",
+        source_type=source_type,
+        extraction_method="test",
+        evidence_text=f"{source_type} says {value}",
+        page_relevance="place_page",
+        extraction_confidence=0.9,
+        source_authority_score=authority,
+        freshness_score=0.8,
+        stale_signal_score=0.0,
+        identity_signal_score=0.9,
+    )
 
 
 class ResolverV2Tests(unittest.TestCase):
@@ -112,6 +142,56 @@ class ResolverV2Tests(unittest.TestCase):
         )
 
         self.assertTrue(decision.abstained)
+
+    def test_learned_router_can_break_close_evidence_tie(self) -> None:
+        claims = [
+            _claim("(415) 555-1111", "official_site", 0.72),
+            _claim("(415) 555-2222", "osm", 0.67),
+        ]
+        context = {
+            "current_phone": "(415) 555-1111",
+            "base_phone": "(415) 555-2222",
+            "current_confidence": 0.7,
+            "base_confidence": 0.8,
+        }
+        without_router = resolve_attribute_v2_from_claims(
+            place_id="case-learned",
+            attribute="phone",
+            candidates=[context["current_phone"], context["base_phone"]],
+            claims=claims,
+            place_context=context,
+        )
+        with_router = resolve_attribute_v2_from_claims(
+            place_id="case-learned",
+            attribute="phone",
+            candidates=[context["current_phone"], context["base_phone"]],
+            claims=claims,
+            place_context=context,
+            learned_router=FakeLearnedRouter(LearnedRouterVote(source="base", confidence=0.99, reason="test router")),
+        )
+
+        self.assertTrue(without_router.abstained)
+        self.assertFalse(with_router.abstained)
+        self.assertEqual(normalize_phone(with_router.decision), "4155552222")
+        self.assertIn("learned selective router favored base", with_router.reason)
+
+    def test_learned_router_cannot_select_unsupported_candidate(self) -> None:
+        context = {
+            "current_phone": "(415) 555-1111",
+            "base_phone": "(415) 555-2222",
+        }
+        decision = resolve_attribute_v2_from_claims(
+            place_id="case-learned-unsupported",
+            attribute="phone",
+            candidates=[context["current_phone"], context["base_phone"]],
+            claims=[_claim("(415) 555-1111", "official_site", 0.8)],
+            place_context=context,
+            learned_router=FakeLearnedRouter(LearnedRouterVote(source="base", confidence=0.99, reason="test router")),
+        )
+
+        self.assertFalse(decision.abstained)
+        self.assertEqual(normalize_phone(decision.decision), "4155551111")
+        self.assertIn("no evidence-backed claim group", decision.reason)
 
 
 if __name__ == "__main__":

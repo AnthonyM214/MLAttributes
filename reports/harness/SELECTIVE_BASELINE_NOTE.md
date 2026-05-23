@@ -1,6 +1,6 @@
 # Selective ResolvePOI Baseline Note
 
-This repo now includes a reproducible selective baseline for the ResolvePOI corpus that is materially stronger than the old row-scoring adapter.
+This repo now includes a reusable selective router for the ResolvePOI corpus that is materially stronger than the old row-scoring adapter and can be used inside `resolver_v2` as the learned current/base decision layer.
 
 ## Why this design
 
@@ -20,6 +20,8 @@ The implementation is intentionally aligned with the selective-prediction litera
 ## What MLAttributes does
 
 The selective baseline in [`src/places_attr_conflation/resolvepoi_selective.py`](../../src/places_attr_conflation/resolvepoi_selective.py) trains a per-attribute HistGradientBoosting router on the 2k ResolvePOI corpus and evaluates it on the held-out 400-ID benchmark slice.
+
+The same module now exposes `ResolvePOISelectiveRouter`, `predict_selective_source()`, and `train_resolvepoi_selective_router()`. `resolver_v2` can call this router while ranking EvidenceGraph claim groups. The learned vote can break close current/base evidence ties, but it cannot select a value unless the EvidenceGraph has an evidence-backed claim group for that value.
 
 It uses:
 
@@ -56,7 +58,7 @@ The baseline is not just "better accuracy." It creates an explicit operating poi
 - the published configuration keeps coverage at `1.0`
 - stricter `--target-coverage` settings can trade coverage for lower accepted-risk
 - it sharply reduces high-confidence mistakes
-- it is fully reproducible from checked-in artifacts
+- it is reproducible from the checked-in code plus the local ResolvePOI corpus artifacts listed below
 
 ## Reproducibility
 

@@ -89,15 +89,16 @@ Based on the public README evidence, `ResolvePOI-Attribute-Conflation` still hol
 - abstention discipline
 - reproducible benchmark commands
 - a held-out ResolvePOI selective router that reaches `0.9770` all-attribute full accuracy and `0.9713` core full accuracy on the learnable attributes
+- resolver_v2 integration for that selective router, so the learned current/base signal can rank evidence-backed claim groups instead of living only as a side benchmark
 
 That makes it a stronger truth-verification system than the older row-scoring adapter path, and the new selective router gives it a real signal-bearing benchmark on the ResolvePOI corpus rather than only a README-level comparison.
 
-The new `resolvepoi-v2` adapter still serves as the legacy row-label proxy benchmark, but the selective router is now the stronger ResolvePOI result in this checkout.
+The new `resolvepoi-v2` adapter still serves as the legacy row-label proxy benchmark, but the selective router is now the stronger ResolvePOI result in this checkout and is callable from the EvidenceGraph resolver.
 
 ## Reproducibility Notes
 
 - The local test suite passed on this checkout: `180` tests.
-- The local test suite now passes with the ResolvePOI adapter and selective router paths included: `183` tests.
+- The local test suite now passes with the ResolvePOI adapter, selective router, and resolver_v2 integration paths included: `186` tests.
 - The benchmark outputs above were generated from checked-in fixtures and written to `reports/harness/benchmark_v2_*_current.json`.
 - The ResolvePOI adapter outputs were generated from the local `ResolvePOI-Attribute-Conflation` checkout and written to `reports/resolvepoi_v2/resolvepoi_v2_*`.
 - The public repo comparison is based on each repository’s README and should be treated as published claims, not a re-run benchmark.

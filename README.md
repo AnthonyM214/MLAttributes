@@ -11,7 +11,7 @@ The repo keeps a deterministic v1 baseline and adds a claim-level v2 resolver fo
 - `resolver.py` - evidence-scored baseline resolver
 - `claim_extraction.py` - deterministic claim extraction from text, HTML, meta tags, and JSON-LD
 - `evidence_graph.py` - claim grouping and contradiction scoring
-- `resolver_v2.py` - claim-level resolver with abstention
+- `resolver_v2.py` - claim-level resolver with abstention and optional learned selective routing
 - `resolvepoi_selective.py` - selective HGB router for the ResolvePOI held-out benchmark
 - `harness.py` - replay and evaluation machinery
 - `golden.py` - golden-label evaluation
@@ -66,7 +66,7 @@ dataset -> retrieval/dorking -> claim extraction -> evidence graph -> resolver v
 
 That means MLAttributes is not just a current/base selector. It verifies competing claims against replayable evidence and abstains when truth cannot be established.
 
-It also includes a reproducible selective router for the ResolvePOI corpus that reaches strong performance on the held-out 400-id slice of the 2k benchmark.
+It also includes a reusable selective router for the ResolvePOI corpus that can now be passed into `resolver_v2` as the learned current/base decision layer while EvidenceGraph still requires evidence-backed claim groups.
 Across all five attributes, the selective router reaches 97.7% full accuracy; on website, phone, address, and name, it reaches 97.1% core full accuracy.
 
 ## Benchmarks

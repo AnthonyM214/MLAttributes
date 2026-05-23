@@ -13,8 +13,11 @@ The existing resolver (`resolver.py`) scores evidence rows, normalizes candidate
 - claims are grouped by normalized value,
 - claim support is scored using source authority, extraction confidence, freshness, page relevance, and identity signals,
 - contradictions between claim groups are explicit,
+- an optional learned selective router can vote for current/base when a trained ResolvePOI-style model is available,
 - the resolver can abstain when claims are tied or weak,
 - the benchmark can now show where the claim layer finds evidence that v1 misses.
+
+The learned router is deliberately constrained: it can rerank close EvidenceGraph claim groups, but it cannot invent or select a value that has no extracted claim. This keeps the high-scoring structured benchmark path connected to the evidence-backed truth-resolution architecture.
 
 ## What the hard-case benchmark shows
 
@@ -66,10 +69,12 @@ This is the better real-world readiness signal because it measures the intended 
 
 This avoids the trap of building another current-vs-base classifier. The repo now has a claim layer that reasons over evidence text and source authority before deciding.
 
+The ResolvePOI selective router is now useful beyond the side benchmark: `resolver_v2` can use it as a learned decision prior for current/base cases while still preserving claim-level evidence requirements and abstention.
+
 ## Next highest-ROI improvements
 
-1. Add structured HTML/JSON-LD claim extraction.
+1. Train and inject the selective router in a larger replay benchmark so EvidenceGraph-v2-selective has its own headline metric.
 2. Add page-level identity matching against place context.
 3. Improve address reconstruction and canonical formatting.
 4. Expand the hard-case replay corpus with more moved/closed/branch ambiguity cases.
-5. Add prior-style baselines to the benchmark report for direct comparisons.
+5. Add a public-friendly ResolvePOI fixture or documented artifact fetch step so the strongest benchmark can run outside the local checkout.

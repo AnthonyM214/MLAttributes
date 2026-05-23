@@ -335,6 +335,50 @@ class SelectiveAttributeModel:
     feature_names: tuple[str, ...] = tuple(FEATURE_NAMES)
 
 
+@dataclass(frozen=True)
+class SelectiveRouterPrediction:
+    source: str
+    confidence: float
+    abstained: bool
+    reason: str = ""
+
+
+@dataclass(frozen=True)
+class ResolvePOISelectiveRouter:
+    """Reusable current/base router for resolver_v2 EvidenceGraph decisions."""
+
+    models: dict[str, HistGradientBoostingClassifier | None]
+    artifacts: dict[str, SelectiveAttributeModel]
+
+    def predict(
+        self,
+        *,
+        attribute: str,
+        current_value: object,
+        base_value: object,
+        current_confidence: object = 0.0,
+        base_confidence: object = 0.0,
+        **_: object,
+    ) -> SelectiveRouterPrediction:
+        artifact = self.artifacts.get(attribute)
+        if artifact is None:
+            return SelectiveRouterPrediction(
+                source="unclear",
+                confidence=0.0,
+                abstained=True,
+                reason=f"No selective model available for {attribute}.",
+            )
+        return predict_selective_source(
+            model=self.models.get(attribute),
+            artifact=artifact,
+            attribute=attribute,
+            current_value=current_value,
+            base_value=base_value,
+            current_confidence=current_confidence,
+            base_confidence=base_confidence,
+        )
+
+
 def _stable_bucket(identifier: str, modulus: int = 5) -> int:
     digest = hashlib.blake2b(identifier.encode("utf-8"), digest_size=8).digest()
     return int.from_bytes(digest, "big") % modulus
@@ -446,6 +490,58 @@ def _predict_with_model(model: HistGradientBoostingClassifier | None, threshold:
     if confidence < threshold:
         return "unclear", confidence, True
     return ("current" if current_prob >= base_prob else "base"), confidence, False
+
+
+def predict_selective_source(
+    *,
+    model: HistGradientBoostingClassifier | None,
+    artifact: SelectiveAttributeModel,
+    attribute: str,
+    current_value: object,
+    base_value: object,
+    current_confidence: object = 0.0,
+    base_confidence: object = 0.0,
+) -> SelectiveRouterPrediction:
+    """Predict whether current or base should win for one attribute pair."""
+    current_norm = _normalize_value(attribute, current_value)
+    base_norm = _normalize_value(attribute, base_value)
+    if current_norm and current_norm == base_norm:
+        confidence = max(float(current_confidence or 0.0), float(base_confidence or 0.0), 1.0)
+        return SelectiveRouterPrediction(
+            source="same",
+            confidence=confidence,
+            abstained=False,
+            reason="Current and base normalize to the same value.",
+        )
+    if artifact.constant_prediction:
+        return SelectiveRouterPrediction(
+            source=artifact.constant_prediction,
+            confidence=1.0,
+            abstained=False,
+            reason=f"Selective router uses constant {artifact.constant_prediction} policy for {attribute}.",
+        )
+    prediction, confidence, abstained = _predict_with_model(
+        model,
+        artifact.threshold,
+        attribute,
+        current_value,
+        base_value,
+        current_confidence,
+        base_confidence,
+    )
+    if abstained:
+        return SelectiveRouterPrediction(
+            source=prediction,
+            confidence=confidence,
+            abstained=True,
+            reason=f"Selective router confidence {confidence:.3f} is below threshold {artifact.threshold:.3f}.",
+        )
+    return SelectiveRouterPrediction(
+        source=prediction,
+        confidence=confidence,
+        abstained=False,
+        reason=f"Selective router chose {prediction} with confidence {confidence:.3f}.",
+    )
 
 
 def _train_attribute_model(train_frame: pd.DataFrame, calibration_fraction: float = 0.2, target_coverage: float = 0.9) -> tuple[HistGradientBoostingClassifier | None, SelectiveAttributeModel]:
@@ -724,6 +820,42 @@ def build_resolvepoi_selective_rows(
     }
     report["baseline_resolvepoi_v2"] = report["legacy_row_proxy"]
     return combined_rows, report
+
+
+def train_resolvepoi_selective_router(
+    *,
+    train_parquet: str | Path = DEFAULT_TRAIN_PARQUET,
+    train_labels: str | Path = DEFAULT_TRAIN_LABELS,
+    attributes: Iterable[str] = DEFAULT_ATTRIBUTES,
+    exclude_ids: Iterable[str] = (),
+    target_coverage: float = 0.99,
+) -> ResolvePOISelectiveRouter:
+    """Train reusable selective current/base models for resolver_v2.
+
+    The benchmark path emits rows and metrics. This path exposes the same
+    learned decision layer as a router object that EvidenceGraph can call.
+    """
+    train_frame = _load_training_frame(train_parquet)
+    label_map = _load_label_map(train_labels)
+    excluded = {str(row_id) for row_id in exclude_ids if str(row_id)}
+    models: dict[str, HistGradientBoostingClassifier | None] = {}
+    artifacts: dict[str, SelectiveAttributeModel] = {}
+    for attribute in tuple(attributes):
+        attr_train_frame = _feature_frame_from_parquet(train_frame, attribute, label_map, exclude_ids=excluded)
+        model, artifact = _train_attribute_model(attr_train_frame, target_coverage=target_coverage)
+        artifacts[attribute] = SelectiveAttributeModel(
+            attribute=attribute,
+            model_type=artifact.model_type,
+            target_coverage=artifact.target_coverage,
+            threshold=artifact.threshold,
+            train_rows=artifact.train_rows,
+            calibration_rows=artifact.calibration_rows,
+            holdout_rows=len(excluded),
+            constant_prediction=artifact.constant_prediction,
+            feature_names=artifact.feature_names,
+        )
+        models[attribute] = model
+    return ResolvePOISelectiveRouter(models=models, artifacts=artifacts)
 
 
 def evaluate_resolvepoi_selective(

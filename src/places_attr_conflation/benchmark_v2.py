@@ -190,11 +190,12 @@ def evaluate_benchmark_v2(
     episodes: Iterable[ReplayEpisode],
     *,
     include_decisions: bool = False,
+    learned_router: object | None = None,
 ) -> dict[str, object]:
     episodes = list(episodes)
     replay = replay_stats(episodes)
     v1 = evaluate_resolver_on_replay(episodes)
-    v2 = evaluate_resolver_v2_on_replay(episodes)
+    v2 = evaluate_resolver_v2_on_replay(episodes, learned_router=learned_router)
     expected_behavior_v1 = _evaluate_expected_behavior(episodes, v1, report_name="resolver_v1_expected_behavior")
     expected_behavior_v2 = _evaluate_expected_behavior(episodes, v2, report_name="resolver_v2_expected_behavior")
     baselines = {

@@ -772,6 +772,7 @@ def _candidate_values_v2(episode: ReplayEpisode, claims: list[object]) -> list[s
 def evaluate_resolver_v2_on_replay(
     episodes: Iterable[ReplayEpisode],
     high_confidence_threshold: float = HIGH_CONFIDENCE_THRESHOLD,
+    learned_router: object | None = None,
 ) -> dict[str, object]:
     episodes = list(episodes)
     rows: list[dict[str, object]] = []
@@ -786,6 +787,7 @@ def evaluate_resolver_v2_on_replay(
             candidates=_candidate_values_v2(episode, claims),
             claims=claims,
             place_context=episode.place,
+            learned_router=learned_router,
         )
         has_gold = bool(_normalize_value(episode.attribute, episode.gold_value))
         predicted = _normalize_value(episode.attribute, decision.decision)
@@ -831,7 +833,7 @@ def evaluate_resolver_v2_on_replay(
             "high_confidence_wrong_rate": hc_wrong / gold_total if gold_total else 0.0,
         }
     return {
-        "resolver": "v2_evidence_graph",
+        "resolver": "v2_evidence_graph_selective" if learned_router is not None else "v2_evidence_graph",
         "episodes_total": len(episodes),
         "gold_episodes_total": total_gold,
         "accuracy": total_correct / total_gold if total_gold else 0.0,
