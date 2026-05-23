@@ -26,10 +26,10 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         raise AssertionError(f"missing decision for {case_id}")
 
     def test_challenge_corpus_is_explicitly_hard(self) -> None:
-        self.assertEqual(len(self.episodes), 15)
+        self.assertEqual(len(self.episodes), 20)
         self.assertEqual(Counter(episode.attribute for episode in self.episodes), {
-            "phone": 9,
-            "address": 3,
+            "phone": 12,
+            "address": 5,
             "category": 1,
             "name": 1,
             "website": 1,
@@ -37,9 +37,14 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         self.assertEqual(Counter(episode.case_type for episode in self.episodes), {
             "BRANCH_AMBIGUITY": 1,
             "BRANCH_CONTEXT_CORROBORATED": 2,
+            "GOVERNMENT_DEPARTMENT_ADDRESS_VS_FOOTER": 1,
             "GOVERNMENT_PRIMARY_PHONE_VS_DIRECT": 1,
+            "GOVERNMENT_PRIMARY_PHONE_VS_FAX_FOOTER": 1,
+            "GOVERNMENT_PRIMARY_PHONE_VS_FAX_SOCIAL_FOOTER": 1,
+            "GOVERNMENT_PRIMARY_PHONE_VS_RELAY_FAX_FOOTER": 1,
             "GOVERNMENT_PRIMARY_PHONE_VS_SERVICE_LINES": 1,
             "GOVERNMENT_ROOM_ADDRESS_VS_FOOTER": 1,
+            "GOVERNMENT_SUITE_ADDRESS_VS_FOOTER": 1,
             "OFFICIAL_CATEGORY_VS_DIRECTORY": 1,
             "OFFICIAL_BRANCH_SPECIFIC": 1,
             "OFFICIAL_CONTACT_WITH_NON_PRIMARY_PHONE": 1,
@@ -56,13 +61,14 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "authoritative_santa_cruz_challenge_v2": 3,
             "authoritative_santa_cruz_challenge_v3": 3,
             "authoritative_santa_cruz_challenge_v4": 4,
+            "authoritative_santa_cruz_challenge_v5": 5,
         })
 
     def test_resolver_v2_expected_behavior_matches_challenge_labels(self) -> None:
         expected = self.report["expected_behavior"]["resolver_v2"]  # type: ignore[index]
 
         self.assertEqual(expected["accuracy"], 1.0)
-        self.assertAlmostEqual(expected["abstention_rate"], 1 / 15)
+        self.assertAlmostEqual(expected["abstention_rate"], 1 / 20)
         self.assertEqual(expected["high_confidence_wrong_rate"], 0.0)
 
         ambiguous = self._decision("scpl-branch-ambiguous-phone")
@@ -80,6 +86,9 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "city-clerk-primary-phone-vs-direct-and-fax": "8314205030",
             "police-primary-phone-vs-emergency-service-lines": "8314205800",
             "mah-primary-phone-vs-fax": "8314291964",
+            "city-manager-primary-phone-vs-relay-fax-footer": "8314205010",
+            "water-department-primary-phone-vs-fax-footer": "8314205200",
+            "parks-recreation-primary-phone-vs-fax-footer": "8314205270",
         }
 
         for case_id, expected_value in expected_values.items():
@@ -112,6 +121,8 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "scpl-branch-context-address-no-extracted": "224 Church Street, Santa Cruz, CA 95060",
             "registrar-office-vs-mailing-address": "190 Hahn Student Services Building",
             "public-works-room-address-vs-city-footer": "809 Center Street, Room 201, Santa Cruz, CA 95060",
+            "water-department-suite-address-vs-city-footer": "212 Locust Street, Suite A, Santa Cruz, CA 95060",
+            "parks-recreation-address-vs-city-footer": "323 Church Street, Santa Cruz, CA 95060",
         }
 
         for case_id, expected_value in expected_values.items():
@@ -155,7 +166,10 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
     def test_government_primary_phone_cases_select_labeled_primary_number(self) -> None:
         for case_id in {
             "city-clerk-primary-phone-vs-direct-and-fax",
+            "city-manager-primary-phone-vs-relay-fax-footer",
             "police-primary-phone-vs-emergency-service-lines",
+            "water-department-primary-phone-vs-fax-footer",
+            "parks-recreation-primary-phone-vs-fax-footer",
         }:
             with self.subTest(case_id=case_id):
                 episode = next(episode for episode in self.episodes if episode.case_id == case_id)

@@ -207,6 +207,44 @@ class ClaimExtractionTests(unittest.TestCase):
         self.assertIn("1156 high st", normalized)
         self.assertTrue(any(claim.extraction_method == "context_address_in_text" for claim in claims))
 
+    def test_department_location_address_outranks_city_footer_address(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-4e",
+            attribute="address",
+            page_text="\n".join(
+                [
+                    "Water Department",
+                    "Contact Information",
+                    "Phone",
+                    "831-420-5200",
+                    "Location",
+                    "212 Locust Street, Suite A",
+                    "Santa Cruz, CA 95060",
+                    "City of Santa Cruz",
+                    "809 Center St.",
+                    "Santa Cruz, CA 95060",
+                ]
+            ),
+            source_url="https://www.santacruzca.gov/Government/City-Departments/Water-Department",
+            source_type="government",
+            page_title="Water Department - City of Santa Cruz",
+            place_context={
+                "name": "Santa Cruz Water Department",
+                "current_address": "212 Locust Street, Suite A, Santa Cruz, CA 95060",
+                "base_address": "809 Center St, Santa Cruz, CA 95060",
+                "city": "Santa Cruz",
+                "region": "CA",
+            },
+        )
+
+        by_value = {claim.normalized_value: claim for claim in claims if claim.extraction_method == "context_address_in_text"}
+        department = by_value["212 locust st ste a santa cruz ca 95060"]
+        footer = by_value["809 center st santa cruz ca 95060"]
+        self.assertIn("address_label=primary_location", department.notes)
+        self.assertIn("address_label=secondary_footer", footer.notes)
+        self.assertGreater(department.source_authority_score, footer.source_authority_score)
+        self.assertGreater(department.extraction_confidence, footer.extraction_confidence)
+
     def test_extracts_category_from_schema_like_text(self) -> None:
         claims = extract_claims_from_text(
             place_id="case-5",

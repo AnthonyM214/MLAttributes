@@ -650,6 +650,191 @@
         }
       ],
       "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "city-manager-primary-phone-vs-relay-fax-footer",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_RELAY_FAX_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5010",
+      "gold_value": "831-420-5010",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_phone": "831-420-5040",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5010",
+        "name": "Santa Cruz City Manager",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government department page includes primary phone, TTY/relay instructions, fax, and the generic city footer phone; the department primary phone should win without prefilled extraction.",
+              "page_text": "City Manager\nContact Us\nPhone\n831-420-5010\nTYY\nHearing-impaired individuals should contact California Relay Service at 1-800-735-2929, then 831-420-5040.\nFax\n831-420-5011\nLocation\n809 Center Street, Room 10\nSanta Cruz, CA 95060\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 2,
+              "source_type": "government",
+              "title": "City Manager - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/government/city-departments/city-manager",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/government/city-departments/city-manager \"Phone\" \"831-420-5010\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "water-department-primary-phone-vs-fax-footer",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_FAX_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5200",
+      "gold_value": "831-420-5200",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_phone": "831-420-5201",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5200",
+        "name": "Santa Cruz Water Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government water department page lists department phone, fax, administrative hours, and generic city footer phone; the primary Phone label should win.",
+              "page_text": "Water Department\nContact Information\nE-mail\nwateradmin@santacruzca.gov\nPhone\n831-420-5200\nFax\n831-420-5201\nLocation\n212 Locust Street, Suite A\nSanta Cruz, CA 95060\nWater Administration Phone Hours\nMonday - Friday\n9:00 a.m. - 5:00 p.m.\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 7,
+              "source_type": "government",
+              "title": "Water Department - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Water-Department",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Water-Department \"Phone\" \"831-420-5200\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "address",
+      "case_id": "water-department-suite-address-vs-city-footer",
+      "case_type": "GOVERNMENT_SUITE_ADDRESS_VS_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "212 Locust Street, Suite A, Santa Cruz, CA 95060",
+      "gold_value": "212 Locust Street, Suite A, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_address": "809 Center St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "212 Locust Street, Suite A, Santa Cruz, CA 95060",
+        "name": "Santa Cruz Water Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government water department page has a department-specific suite address and a generic city footer address; suite address should win.",
+              "page_text": "Water Department\nContact Information\nPhone\n831-420-5200\nFax\n831-420-5201\nLocation\n212 Locust Street, Suite A\nSanta Cruz, CA 95060\nCustomer Service and Engineering Counter Lobby Hours\nMonday - Friday\n1:00 p.m. to 3:00 p.m.\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 7,
+              "source_type": "government",
+              "title": "Water Department - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Water-Department",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Water-Department \"212 Locust Street, Suite A\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "parks-recreation-primary-phone-vs-fax-footer",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_FAX_SOCIAL_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5270",
+      "gold_value": "831-420-5270",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_phone": "831-420-5271",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5270",
+        "name": "Santa Cruz Parks and Recreation Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government parks page lists director/staff names, department phone, fax, social handles, location, and generic footer phone; the labeled department phone should win.",
+              "page_text": "Parks & Recreation\nStaff\nTony Elliot\nDirector of Parks & Recreation\nMike Godsy\nSuperintendent of Parks\nPhone\n831-420-5270\nFax\n831-420-5271\nEmail\nparksandrec@santacruzca.gov\nLocation\n323 Church Street\nSanta Cruz, CA 95060\nFollow Us!\nFacebook\n@CityofSantaCruzParksandRecreation\nInstagram\n@SantaCruzParksRec\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 14,
+              "source_type": "government",
+              "title": "Parks & Recreation - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation \"Phone\" \"831-420-5270\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "address",
+      "case_id": "parks-recreation-address-vs-city-footer",
+      "case_type": "GOVERNMENT_DEPARTMENT_ADDRESS_VS_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "323 Church Street, Santa Cruz, CA 95060",
+      "gold_value": "323 Church Street, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_address": "809 Center St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "323 Church Street, Santa Cruz, CA 95060",
+        "name": "Santa Cruz Parks and Recreation Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government parks page has department location and city-wide footer location on the same page; department location should win.",
+              "page_text": "Parks & Recreation\nPhone\n831-420-5270\nFax\n831-420-5271\nEmail\nparksandrec@santacruzca.gov\nLocation\n323 Church Street\nSanta Cruz, CA 95060\nHours\nMonday - Friday\n8 a.m. - Noon\n1 p.m. - 5 p.m.\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 14,
+              "source_type": "government",
+              "title": "Parks & Recreation - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation \"323 Church Street\""
+        }
+      ],
+      "truth_source_type": "government"
     }
   ]
 }

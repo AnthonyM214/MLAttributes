@@ -126,17 +126,22 @@ _PRIMARY_PHONE_LABELS = {
 _SECONDARY_PHONE_LABELS = {
     "anonymous tip line",
     "billing",
+    "california relay service",
     "direct",
     "emergency",
     "fax",
+    "hearing impaired",
     "hotline",
     "non emergency",
     "non-emergency",
     "property",
     "property section",
+    "relay",
     "records",
     "records section",
     "tip line",
+    "tty",
+    "tyy",
 }
 
 class _StructuredHTMLParser(HTMLParser):
@@ -471,6 +476,40 @@ def _context_address_values(place_context: dict[str, str] | None) -> list[tuple[
     return output
 
 
+def _address_label_for_raw(text: str, raw: str) -> tuple[str, str]:
+    raw_norm = normalize_address(raw)
+    if not raw_norm:
+        return "", ""
+    lines = [line.strip() for line in (text or "").splitlines()]
+    match_index: int | None = None
+    raw_parts = [part.strip() for part in re.split(r"[,;\n]", raw) if part.strip()]
+    raw_part_norms = [
+        part
+        for part in (normalize_address(raw_part) for raw_part in raw_parts)
+        if part and re.search(r"\d", part) and any(token in f" {part} " for token in (" st ", " ave ", " rd ", " blvd ", " dr ", " way "))
+    ]
+    if not raw_part_norms:
+        raw_part_norms = [normalize_address(part) for part in raw_parts]
+    for idx, line in enumerate(lines):
+        line_norm = normalize_address(line)
+        if not line_norm:
+            continue
+        if raw_norm in line_norm or any(part and (part in line_norm or line_norm in part) for part in raw_part_norms):
+            match_index = idx
+            break
+    if match_index is None:
+        return "", ""
+    previous = [line for line in lines[max(0, match_index - 4):match_index] if line.strip()]
+    following = [line for line in lines[match_index:match_index + 2] if line.strip()]
+    label_text = normalize_name("\n".join(previous))
+    snippet = "\n".join(previous[-2:] + following).strip()
+    if any(label in label_text for label in ("city of santa cruz", "contact us", "back to top")):
+        return "secondary", snippet
+    if any(label in label_text for label in ("office location", "location", "department location", "contact public works")):
+        return "primary", snippet
+    return "", snippet
+
+
 def _extract_context_address_matches(
     text: str,
     *,
@@ -481,9 +520,19 @@ def _extract_context_address_matches(
     for role, raw, normalized in _context_address_values(place_context):
         if normalized not in normalized_text:
             continue
+        label_kind, snippet = _address_label_for_raw(text, raw)
         confidence = 0.93 if role in {"address", "current_address", "address_current", "current_value"} else 0.82
         identity = 0.95 if role in {"address", "current_address", "address_current", "current_value"} else 0.82
-        matches.append((raw, text, confidence, identity, f"context_address_role={role}"))
+        notes = f"context_address_role={role}"
+        if label_kind == "primary":
+            confidence = max(confidence, 0.96)
+            identity = max(identity, 0.96)
+            notes = f"{notes}; address_label=primary_location"
+        elif label_kind == "secondary":
+            confidence = min(confidence, 0.58)
+            identity = min(identity, 0.52)
+            notes = f"{notes}; address_label=secondary_footer"
+        matches.append((raw, snippet or text, confidence, identity, notes))
     return matches
 
 
@@ -861,6 +910,9 @@ def extract_claims_from_text(
             normalized = normalize_address(value)
             if not normalized or normalized in seen:
                 continue
+            claim_source_score = source_score
+            if "address_label=secondary_footer" in notes:
+                claim_source_score = source_score * 0.45
             claim = _claim(
                 place_id=place_id,
                 attribute=attribute,
@@ -874,7 +926,7 @@ def extract_claims_from_text(
                 query=query,
                 page_relevance=relevance,
                 extraction_confidence=confidence,
-                source_authority_score=source_score,
+                source_authority_score=claim_source_score,
                 freshness_score=freshness,
                 stale_signal_score=stale,
                 identity_signal_score=max(identity, claim_identity),
@@ -884,6 +936,12 @@ def extract_claims_from_text(
             claims.append(claim)
         for value in _extract_address_candidates(address_text):
             if value in seen:
+                continue
+            if any(
+                (value in explicit.normalized_value or explicit.normalized_value in value)
+                and "address_label=secondary_footer" in explicit.notes
+                for explicit in explicit_context_claims
+            ):
                 continue
             seen.add(value)
             claims.append(
