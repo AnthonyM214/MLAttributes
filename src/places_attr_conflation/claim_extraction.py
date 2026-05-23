@@ -28,11 +28,40 @@ _PHONE_PATTERN = re.compile(
     r"(?:\+?1[\s.-]*)?(?:\(?\d{3}\)?[\s.-]*)\d{3}[\s.-]*\d{4}",
     re.IGNORECASE,
 )
+_ADDRESS_TOKEN = r"(?=[A-Za-z0-9.'-]*[A-Za-z])[A-Za-z0-9.'-]+"
 _ADDRESS_PATTERN = re.compile(
-    r"\b\d{1,5}\s+[A-Za-z0-9.'-]+(?:\s+[A-Za-z0-9.'-]+){0,4}\s+"
+    rf"\b\d{{1,5}}\s+{_ADDRESS_TOKEN}(?:\s+{_ADDRESS_TOKEN}){{0,4}}\s+"
     r"(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Ln|Lane|Dr|Drive|Way|Ct|Court|Pl|Place|Pkwy|Parkway|Hwy|Highway)\b",
     re.IGNORECASE,
 )
+_CAMPUS_ADDRESS_PATTERN = re.compile(
+    rf"\b\d{{1,5}}\s+{_ADDRESS_TOKEN}(?:\s+{_ADDRESS_TOKEN}){{0,4}}\s+"
+    r"(?:Building|Hall|Center|Centre|Library|Services)\b",
+    re.IGNORECASE,
+)
+_ADDRESS_CUE_PATTERN = re.compile(
+    r"\b(?:mailing address|office address|physical address|street address|address|location|located at|visit us at)\b\s*:?",
+    re.IGNORECASE,
+)
+_POSTAL_CODE_PATTERN = re.compile(r"\b\d{5}(?:-\d{4})?\b")
+_PLACE_CONTEXT_STOPWORDS = {
+    "branch",
+    "center",
+    "city",
+    "department",
+    "library",
+    "libraries",
+    "office",
+    "public",
+    "santa",
+    "services",
+    "support",
+    "uc",
+    "ucsc",
+    "university",
+    "california",
+    "cruz",
+}
 _CATEGORY_TOKENS = (
     "restaurant",
     "cafe",
@@ -54,6 +83,27 @@ _CATEGORY_TOKENS = (
     "library",
     "salon",
 )
+_CATEGORY_PHRASES = {
+    "academic support": "academic support",
+    "natural history museum": "museum",
+    "tutoring center": "tutoring service",
+    "tutoring services": "tutoring service",
+    "tutoring sessions": "tutoring service",
+}
+_GENERIC_TITLE_SEGMENTS = {
+    "about",
+    "about us",
+    "contact",
+    "contact information",
+    "contact us",
+    "directions",
+    "home",
+    "hours",
+    "location",
+    "locations",
+    "visit",
+    "visit us",
+}
 _PAGE_RELEVANCE_KEYWORDS = {
     "place_page": ("contact", "about", "location", "locations", "directions", "hours", "menu", "visit us"),
     "contact_page": ("contact", "phone", "address", "hours"),
@@ -289,20 +339,249 @@ def _extract_phone_candidates(text: str) -> list[str]:
     return values
 
 
+def _place_context_terms(place_context: dict[str, str] | None) -> set[str]:
+    if not place_context:
+        return set()
+    raw_name = place_context.get("name", "")
+    city = set(normalize_name(place_context.get("city", "")).split())
+    region = set(normalize_name(place_context.get("region", "")).split())
+    terms = set()
+    for token in normalize_name(raw_name).split():
+        if len(token) < 4 or token in _PLACE_CONTEXT_STOPWORDS or token in city or token in region:
+            continue
+        terms.add(token)
+    return terms
+
+
+def _line_spans(text: str) -> list[tuple[int, int, str]]:
+    spans: list[tuple[int, int, str]] = []
+    offset = 0
+    for line in (text or "").splitlines(keepends=True):
+        start = offset
+        end = offset + len(line)
+        spans.append((start, end, line.strip()))
+        offset = end
+    return spans
+
+
+def _line_context_for_span(text: str, start: int, end: int, *, before: int = 4, after: int = 1) -> str:
+    spans = _line_spans(text)
+    if not spans:
+        return text[max(0, start - 120): min(len(text), end + 120)].strip()
+    match_index = 0
+    for idx, (line_start, line_end, _) in enumerate(spans):
+        if line_start <= start < line_end or line_start < end <= line_end:
+            match_index = idx
+            break
+    selected = spans[max(0, match_index - before): min(len(spans), match_index + after + 1)]
+    return "\n".join(line for _, _, line in selected if line).strip()
+
+
+def _context_addresses(place_context: dict[str, str] | None) -> list[str]:
+    if not place_context:
+        return []
+    values: list[str] = []
+    for key in ("address", "current_address", "base_address", "current_value", "base_value"):
+        normalized = normalize_address(place_context.get(key, ""))
+        if normalized and any(token in normalized for token in (" st ", " ave ", " rd ", " blvd ", " dr ", " way ")):
+            values.append(normalized)
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        if value not in seen:
+            seen.add(value)
+            output.append(value)
+    return output
+
+
+def _context_address_values(place_context: dict[str, str] | None) -> list[tuple[str, str, str]]:
+    if not place_context:
+        return []
+    values: list[tuple[str, str, str]] = []
+    for key in ("address", "current_address", "address_current", "current_value", "base_address", "address_base", "base_value"):
+        raw = place_context.get(key, "")
+        normalized = normalize_address(raw)
+        if not normalized:
+            continue
+        if len(normalized.split()) < 3:
+            continue
+        values.append((key, raw, normalized))
+    output: list[tuple[str, str, str]] = []
+    seen: set[str] = set()
+    for item in values:
+        if item[2] not in seen:
+            seen.add(item[2])
+            output.append(item)
+    return output
+
+
+def _extract_context_address_matches(
+    text: str,
+    *,
+    place_context: dict[str, str] | None = None,
+) -> list[tuple[str, str, float, float, str]]:
+    normalized_text = normalize_address(text)
+    matches: list[tuple[str, str, float, float, str]] = []
+    for role, raw, normalized in _context_address_values(place_context):
+        if normalized not in normalized_text:
+            continue
+        confidence = 0.93 if role in {"address", "current_address", "address_current", "current_value"} else 0.82
+        identity = 0.95 if role in {"address", "current_address", "address_current", "current_value"} else 0.82
+        matches.append((raw, text, confidence, identity, f"context_address_role={role}"))
+    return matches
+
+
+def _row_matches_context_address(row: str, place_context: dict[str, str] | None) -> bool:
+    row_address = normalize_address(row)
+    if not row_address:
+        return False
+    for context_address in _context_addresses(place_context):
+        if context_address in row_address or row_address in context_address:
+            return True
+    return False
+
+
+def _is_branch_header(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return False
+    if re.search(r"\d", stripped):
+        return False
+    if _PHONE_PATTERN.search(stripped) or _ADDRESS_PATTERN.search(stripped):
+        return False
+    normalized = normalize_name(stripped)
+    if not normalized:
+        return False
+    tokens = normalized.split()
+    if len(tokens) > 4:
+        return False
+    return bool(set(tokens) - _PLACE_CONTEXT_STOPWORDS)
+
+
+def _branch_rows(text: str) -> list[tuple[str, str]]:
+    lines = [line.strip(" \t-•#") for line in (text or "").splitlines()]
+    headers = [idx for idx, line in enumerate(lines) if _is_branch_header(line)]
+    rows: list[tuple[str, str]] = []
+    for pos, start in enumerate(headers):
+        end = headers[pos + 1] if pos + 1 < len(headers) else len(lines)
+        header = lines[start]
+        body = "\n".join(line for line in lines[start:end] if line)
+        if body:
+            rows.append((header, body))
+    return rows
+
+
+def _extract_branch_directory_phone_contexts(
+    text: str,
+    *,
+    place_context: dict[str, str] | None = None,
+) -> list[tuple[str, str, float, float, str, str]]:
+    terms = _place_context_terms(place_context)
+    if not terms:
+        return []
+    matches: list[tuple[str, str, str]] = []
+    for header, row in _branch_rows(text):
+        header_terms = set(normalize_name(header).split())
+        if not (terms & header_terms):
+            continue
+        phones = _extract_phone_candidates(row)
+        if len(phones) == 1:
+            matches.append((phones[0], row, header))
+    if len(matches) != 1:
+        return []
+    value, row, header = matches[0]
+    if not _row_matches_context_address(row, place_context):
+        return []
+    return [
+        (
+            value,
+            row,
+            0.95,
+            0.95,
+            f"branch_directory_header={normalize_name(header)}; corroborator=address",
+            "branch_directory_phone",
+        )
+    ]
+
+
+def _extract_phone_contexts(
+    text: str,
+    *,
+    place_context: dict[str, str] | None = None,
+) -> list[tuple[str, str, float, float, str, str]]:
+    matches = list(_PHONE_PATTERN.finditer(text or ""))
+    terms = _place_context_terms(place_context)
+    contexts: list[tuple[str, str, float, float, str, str]] = _extract_branch_directory_phone_contexts(text, place_context=place_context)
+    for match in matches:
+        normalized = normalize_phone(match.group(0))
+        if not normalized:
+            continue
+        snippet = _line_context_for_span(text, match.start(), match.end())
+        snippet_terms = set(normalize_name(snippet).split())
+        hits = terms & snippet_terms
+        if hits:
+            contexts.append((normalized, snippet, 0.9, 0.85, f"place_context_terms={','.join(sorted(hits))}", "phone_regex"))
+        else:
+            contexts.append((normalized, snippet, 0.78, 0.6, "", "phone_regex"))
+    return contexts
+
+
+def _trim_address_candidate(value: str) -> str:
+    value = value.strip(" \t-:;,.")
+    postal = _POSTAL_CODE_PATTERN.search(value)
+    if postal:
+        value = value[: postal.end()]
+    return value.strip(" \t-:;,.")
+
+
+def _address_segments(line: str) -> list[str]:
+    cues = list(_ADDRESS_CUE_PATTERN.finditer(line))
+    if cues:
+        return [line[cue.end():].strip() for cue in cues if line[cue.end():].strip()]
+    return [line]
+
+
 def _extract_address_candidates(text: str) -> list[str]:
     values: list[str] = []
     for line in (text or "").splitlines():
         stripped = line.strip(" \t-•")
         if not stripped:
             continue
-        if _ADDRESS_PATTERN.search(stripped):
-            values.append(normalize_address(stripped))
+        for segment in _address_segments(stripped):
+            for pattern in (_ADDRESS_PATTERN, _CAMPUS_ADDRESS_PATTERN):
+                for match in pattern.finditer(segment):
+                    candidate = _trim_address_candidate(segment[match.start():])
+                    normalized = normalize_address(candidate)
+                    if normalized:
+                        values.append(normalized)
     return values
+
+
+def _address_claim_overlaps_explicit(claim: AttributeClaim, explicit_claim: AttributeClaim) -> bool:
+    if claim.attribute != "address" or claim.extraction_method != "address_regex":
+        return False
+    left = claim.normalized_value
+    right = explicit_claim.normalized_value
+    if not left or not right or left == right:
+        return False
+    return left in right or right in left
+
+
+def _clean_title_name(page_title: str) -> str:
+    segments = [
+        normalize_name(segment)
+        for segment in re.split(r"\s+(?:[-|–—:])\s+|[|–—]", page_title)
+        if normalize_name(segment)
+    ]
+    specific = [segment for segment in segments if segment not in _GENERIC_TITLE_SEGMENTS]
+    if specific:
+        return max(specific, key=lambda segment: (len(segment.split()), len(segment)))
+    return normalize_name(page_title)
 
 
 def _extract_name_candidate(page_title: str, text: str) -> str:
     if page_title.strip():
-        return normalize_name(page_title)
+        return _clean_title_name(page_title)
     for line in (text or "").splitlines():
         stripped = line.strip()
         if stripped:
@@ -315,8 +594,11 @@ def _extract_category_candidates(text: str) -> list[str]:
     lowered = (text or "").lower()
     if "schema.org/" in lowered or "localbusiness" in lowered:
         values.append("local business")
+    for phrase, category in _CATEGORY_PHRASES.items():
+        if re.search(rf"\b{re.escape(phrase)}\b", lowered):
+            values.append(category)
     for token in _CATEGORY_TOKENS:
-        if token in lowered:
+        if re.search(rf"\b{re.escape(token)}\b", lowered):
             values.append(normalize_category(token))
     return values
 
@@ -480,10 +762,12 @@ def extract_claims_from_text(
             )
     elif attribute == "phone":
         seen: set[str] = set()
-        for value in _extract_phone_candidates(text + "\n" + "\n".join(jsonld_fields.get("telephone", []))):
-            if value in seen:
+        phone_text = text + "\n" + "\n".join(jsonld_fields.get("telephone", []))
+        for value, evidence_text, confidence, claim_identity, notes, extraction_method in _extract_phone_contexts(phone_text, place_context=place_context):
+            key = f"{extraction_method}:{value}"
+            if key in seen:
                 continue
-            seen.add(value)
+            seen.add(key)
             claims.append(
                 _claim(
                     place_id=place_id,
@@ -491,22 +775,49 @@ def extract_claims_from_text(
                     value=value,
                     source_url=source_url,
                     source_type=source_type,
-                    extraction_method="phone_regex",
-                    evidence_text=text,
+                    extraction_method=extraction_method,
+                    evidence_text=evidence_text or text,
                     place_context=place_context,
                     page_title=page_title,
                     query=query,
                     page_relevance=relevance,
-                    extraction_confidence=0.88,
+                    extraction_confidence=confidence,
                     source_authority_score=source_score,
                     freshness_score=freshness,
                     stale_signal_score=stale,
-                    identity_signal_score=identity,
+                    identity_signal_score=max(identity, claim_identity),
+                    notes=notes,
                 )
             )
     elif attribute == "address":
         seen = set()
         address_text = text + "\n" + "\n".join(jsonld_fields.get("address", []))
+        explicit_context_claims: list[AttributeClaim] = []
+        for value, evidence_text, confidence, claim_identity, notes in _extract_context_address_matches(address_text, place_context=place_context):
+            normalized = normalize_address(value)
+            if not normalized or normalized in seen:
+                continue
+            claim = _claim(
+                place_id=place_id,
+                attribute=attribute,
+                value=value,
+                source_url=source_url,
+                source_type=source_type,
+                extraction_method="context_address_in_text",
+                evidence_text=evidence_text or text,
+                place_context=place_context,
+                page_title=page_title,
+                query=query,
+                page_relevance=relevance,
+                extraction_confidence=confidence,
+                source_authority_score=source_score,
+                freshness_score=freshness,
+                stale_signal_score=stale,
+                identity_signal_score=max(identity, claim_identity),
+                notes=notes,
+            )
+            explicit_context_claims.append(claim)
+            claims.append(claim)
         for value in _extract_address_candidates(address_text):
             if value in seen:
                 continue
@@ -756,40 +1067,45 @@ def extract_claims_from_replay_episode(episode: ReplayEpisode) -> list[Attribute
     claims: list[AttributeClaim] = []
     for attempt in episode.search_attempts:
         for page in attempt.fetched_pages:
-            claims.extend(
-                extract_claims_from_text(
+            page_claims = extract_claims_from_text(
+                place_id=episode.case_id,
+                attribute=episode.attribute,
+                page_text="\n".join(part for part in [page.page_text, page.notes] if part),
+                source_url=page.url,
+                source_type=page.source_type,
+                page_title=page.title,
+                query=attempt.query,
+                place_context=episode.place,
+            )
+            explicit_claim = None
+            if page.extracted_values.get(episode.attribute):
+                explicit_claim = _claim(
                     place_id=episode.case_id,
                     attribute=episode.attribute,
-                    page_text="\n".join(part for part in [page.page_text, page.notes] if part),
+                    value=page.extracted_values[episode.attribute],
                     source_url=page.url,
                     source_type=page.source_type,
+                    extraction_method="page_extracted_value",
+                    evidence_text=page.page_text or page.title,
+                    place_context=episode.place,
                     page_title=page.title,
                     query=attempt.query,
-                    place_context=episode.place,
+                    page_relevance=_page_relevance(page.url, page.title, page.page_text, page.source_type),
+                    extraction_confidence=0.95,
+                    source_authority_score=SOURCE_RANK.get(page.source_type, SOURCE_RANK["unknown"]),
+                    freshness_score=freshness_bonus(page.recency_days),
+                    stale_signal_score=staleness_penalty(page.recency_days, page.zombie_score, page.identity_change_score),
+                    identity_signal_score=max(0.0, min(1.0, 1.0 - min(1.0, float(page.identity_change_score or 0.0)))),
+                    notes=page.notes,
                 )
-            )
-            if page.extracted_values.get(episode.attribute):
-                claims.append(
-                    _claim(
-                        place_id=episode.case_id,
-                        attribute=episode.attribute,
-                        value=page.extracted_values[episode.attribute],
-                        source_url=page.url,
-                        source_type=page.source_type,
-                        extraction_method="page_extracted_value",
-                        evidence_text=page.page_text or page.title,
-                        place_context=episode.place,
-                        page_title=page.title,
-                        query=attempt.query,
-                        page_relevance=_page_relevance(page.url, page.title, page.page_text, page.source_type),
-                        extraction_confidence=0.95,
-                        source_authority_score=SOURCE_RANK.get(page.source_type, SOURCE_RANK["unknown"]),
-                        freshness_score=freshness_bonus(page.recency_days),
-                        stale_signal_score=staleness_penalty(page.recency_days, page.zombie_score, page.identity_change_score),
-                        identity_signal_score=max(0.0, min(1.0, 1.0 - min(1.0, float(page.identity_change_score or 0.0)))),
-                        notes=page.notes,
-                    )
-                )
+            if explicit_claim is not None and episode.attribute == "address":
+                page_claims = [
+                    claim for claim in page_claims
+                    if not _address_claim_overlaps_explicit(claim, explicit_claim)
+                ]
+            claims.extend(page_claims)
+            if explicit_claim is not None:
+                claims.append(explicit_claim)
     return claims
 
 

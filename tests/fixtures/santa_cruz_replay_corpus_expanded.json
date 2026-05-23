@@ -1,0 +1,1446 @@
+{
+  "episodes": [
+    {
+      "attribute": "website",
+      "case_id": "sc-city-clerk-website",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "website",
+        "confidence": 0.98,
+        "decision": "https://www.santacruzca.gov",
+        "reason": "Official page supports the canonical website claim; the fallback page is broader and does not override it.",
+        "selected_source_type": "government",
+        "selected_url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk"
+      },
+      "gold_value": "https://www.santacruzca.gov",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "City Clerk",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "website": "https://www.santacruzca.gov"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official city clerk contact page.",
+              "page_text": "Contact information for the City Clerk. Bonnie Bush, CMC. Phone 831-420-5030. Location 809 Center Street, Room 8, Santa Cruz, CA 95060.",
+              "recency_days": 7,
+              "source_type": "government",
+              "title": "City Clerk | City of Santa Cruz, CA",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"City Clerk\" \"Santa Cruz\" official website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader city department page without city clerk contact details.",
+              "page_text": "Location and contact information for planning and community development, including a different room number and department phone numbers.",
+              "recency_days": 30,
+              "source_type": "government",
+              "title": "About & Contact Us | City of Santa Cruz",
+              "url": "https://www.cityofsantacruz.com/government/city-departments/planning-and-community-development/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:cityofsantacruz.com Santa Cruz department contact"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-city-clerk-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-420-5030",
+        "reason": "Official contact page exposes the direct phone number; the fallback page is broader and does not provide the target phone.",
+        "selected_source_type": "government",
+        "selected_url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk"
+      },
+      "gold_value": "831-420-5030",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "City Clerk",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-420-5030"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official city clerk contact page.",
+              "page_text": "Contact information for the City Clerk. Bonnie Bush, CMC. Phone 831-420-5030. Location 809 Center Street, Room 8, Santa Cruz, CA 95060.",
+              "recency_days": 7,
+              "source_type": "government",
+              "title": "City Clerk | City of Santa Cruz, CA",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"City Clerk\" \"831-420-5030\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader city department page without city clerk contact details.",
+              "page_text": "Location and contact information for planning and community development, including a different room number and department phone numbers.",
+              "recency_days": 30,
+              "source_type": "government",
+              "title": "About & Contact Us | City of Santa Cruz",
+              "url": "https://www.cityofsantacruz.com/government/city-departments/planning-and-community-development/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:cityofsantacruz.com Santa Cruz department contact"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-city-clerk-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "809 Center Street, Room 8, Santa Cruz, CA 95060",
+        "reason": "Official contact page exposes the direct address; the fallback page is broader and does not provide the target address.",
+        "selected_source_type": "government",
+        "selected_url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk"
+      },
+      "gold_value": "809 Center Street, Room 8, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "City Clerk",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "address": "809 Center Street, Room 8, Santa Cruz, CA 95060"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official city clerk contact page.",
+              "page_text": "Contact information for the City Clerk. Bonnie Bush, CMC. Phone 831-420-5030. Location 809 Center Street, Room 8, Santa Cruz, CA 95060.",
+              "recency_days": 7,
+              "source_type": "government",
+              "title": "City Clerk | City of Santa Cruz, CA",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"City Clerk\" \"809 Center Street\" \"Santa Cruz\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader city department page without city clerk contact details.",
+              "page_text": "Location and contact information for planning and community development, including a different room number and department phone numbers.",
+              "recency_days": 30,
+              "source_type": "government",
+              "title": "About & Contact Us | City of Santa Cruz",
+              "url": "https://www.cityofsantacruz.com/government/city-departments/planning-and-community-development/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:cityofsantacruz.com Santa Cruz department contact"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "website",
+      "case_id": "sc-scpl-downtown-website",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "website",
+        "confidence": 0.98,
+        "decision": "https://www.santacruzpl.org",
+        "reason": "Official page supports the canonical website claim; the fallback page is broader and does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://www.santacruzpl.org/contact/phonelist/"
+      },
+      "gold_value": "https://www.santacruzpl.org",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "website": "https://www.santacruzpl.org"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Downtown branch contact directory.",
+              "page_text": "Phone & Email Directory. Downtown 831-427-7707. 224 Church Street, Santa Cruz, CA 95060.",
+              "recency_days": 3,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/contact/phonelist/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Santa Cruz Public Libraries\" official website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "System-level planning page without Downtown Branch contact details.",
+              "page_text": "Strategic plan describing mission, vision, values and countywide services for the library system.",
+              "recency_days": 14,
+              "source_type": "official_site",
+              "title": "Strategic Plan - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/strategic-plan/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzpl.org strategic plan"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-scpl-downtown-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-427-7707",
+        "reason": "Official contact page exposes the direct phone number; the fallback page is broader and does not provide the target phone.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://www.santacruzpl.org/contact/phonelist/"
+      },
+      "gold_value": "831-427-7707",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-427-7707"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Downtown branch contact directory.",
+              "page_text": "Phone & Email Directory. Downtown 831-427-7707. 224 Church Street, Santa Cruz, CA 95060.",
+              "recency_days": 3,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/contact/phonelist/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Downtown\" \"Santa Cruz Public Libraries\" \"831-427-7707\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "System-level planning page without Downtown Branch contact details.",
+              "page_text": "Strategic plan describing mission, vision, values and countywide services for the library system.",
+              "recency_days": 14,
+              "source_type": "official_site",
+              "title": "Strategic Plan - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/strategic-plan/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzpl.org strategic plan"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-scpl-downtown-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "224 Church Street, Santa Cruz, CA 95060",
+        "reason": "Official contact page exposes the direct address; the fallback page is broader and does not provide the target address.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://www.santacruzpl.org/contact/phonelist/"
+      },
+      "gold_value": "224 Church Street, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "address": "224 Church Street, Santa Cruz, CA 95060"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Downtown branch contact directory.",
+              "page_text": "Phone & Email Directory. Downtown 831-427-7707. 224 Church Street, Santa Cruz, CA 95060.",
+              "recency_days": 3,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/contact/phonelist/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Downtown\" \"224 Church Street\" \"Santa Cruz\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "System-level planning page without Downtown Branch contact details.",
+              "page_text": "Strategic plan describing mission, vision, values and countywide services for the library system.",
+              "recency_days": 14,
+              "source_type": "official_site",
+              "title": "Strategic Plan - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/strategic-plan/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzpl.org strategic plan"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "sc-museum-natural-history-website",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "website",
+        "confidence": 0.98,
+        "decision": "https://santacruzmuseum.org",
+        "reason": "Official page supports the canonical website claim; the fallback page is broader and does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://santacruzmuseum.org/contact-us/"
+      },
+      "gold_value": "https://santacruzmuseum.org",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "website": "https://santacruzmuseum.org"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official museum contact page.",
+              "page_text": "General museum info. (831) 420-6115. 1305 E Cliff Dr, Santa Cruz, CA 95062.",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Santa Cruz Museum of Natural History\" official website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Historical overview page without current contact details.",
+              "page_text": "Museum history page describing the first public museum in Santa Cruz and the museum's evolution over time.",
+              "recency_days": 21,
+              "source_type": "official_site",
+              "title": "Museum History - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/about/museum-history/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzmuseum.org museum history"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-museum-natural-history-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-420-6115",
+        "reason": "Official contact page exposes the direct phone number; the fallback page is broader and does not provide the target phone.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://santacruzmuseum.org/contact-us/"
+      },
+      "gold_value": "831-420-6115",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-420-6115"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official museum contact page.",
+              "page_text": "General museum info. (831) 420-6115. 1305 E Cliff Dr, Santa Cruz, CA 95062.",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Santa Cruz Museum of Natural History\" \"420-6115\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Historical overview page without current contact details.",
+              "page_text": "Museum history page describing the first public museum in Santa Cruz and the museum's evolution over time.",
+              "recency_days": 21,
+              "source_type": "official_site",
+              "title": "Museum History - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/about/museum-history/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzmuseum.org museum history"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-museum-natural-history-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "1305 E Cliff Dr, Santa Cruz, CA 95062",
+        "reason": "Official contact page exposes the direct address; the fallback page is broader and does not provide the target address.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://santacruzmuseum.org/contact-us/"
+      },
+      "gold_value": "1305 E Cliff Dr, Santa Cruz, CA 95062",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "address": "1305 E Cliff Dr, Santa Cruz, CA 95062"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official museum contact page.",
+              "page_text": "General museum info. (831) 420-6115. 1305 E Cliff Dr, Santa Cruz, CA 95062.",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Santa Cruz Museum of Natural History\" \"1305 E Cliff Dr\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Historical overview page without current contact details.",
+              "page_text": "Museum history page describing the first public museum in Santa Cruz and the museum's evolution over time.",
+              "recency_days": 21,
+              "source_type": "official_site",
+              "title": "Museum History - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/about/museum-history/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzmuseum.org museum history"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "sc-scipp-website",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "website",
+        "confidence": 0.98,
+        "decision": "https://scipp.ucsc.edu",
+        "reason": "Official page supports the canonical website claim; the fallback page is broader and does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://scipp.ucsc.edu/about/contact-visitor-information/"
+      },
+      "gold_value": "https://scipp.ucsc.edu",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Institute for Particle Physics",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "website": "https://scipp.ucsc.edu"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official SCIPP contact and visitor information page.",
+              "page_text": "Contact us. Telephone (831) 459-4842. Physical address: Natural Sciences 2, Room #337, 1156 High Street, Santa Cruz, CA 95064.",
+              "recency_days": 2,
+              "source_type": "official_site",
+              "title": "Contact & Visitor Information \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/contact-visitor-information/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Santa Cruz Institute for Particle Physics\" official website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "About page without the contact snippet.",
+              "page_text": "SCIPP about page describing the institute's research mission and the work of its scientific and technical staff.",
+              "recency_days": 18,
+              "source_type": "official_site",
+              "title": "ABOUT \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:scipp.ucsc.edu about"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-scipp-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-4842",
+        "reason": "Official contact page exposes the direct phone number; the fallback page is broader and does not provide the target phone.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://scipp.ucsc.edu/about/contact-visitor-information/"
+      },
+      "gold_value": "831-459-4842",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Institute for Particle Physics",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-459-4842"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official SCIPP contact and visitor information page.",
+              "page_text": "Contact us. Telephone (831) 459-4842. Physical address: Natural Sciences 2, Room #337, 1156 High Street, Santa Cruz, CA 95064.",
+              "recency_days": 2,
+              "source_type": "official_site",
+              "title": "Contact & Visitor Information \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/contact-visitor-information/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"SCIPP\" \"459-4842\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "About page without the contact snippet.",
+              "page_text": "SCIPP about page describing the institute's research mission and the work of its scientific and technical staff.",
+              "recency_days": 18,
+              "source_type": "official_site",
+              "title": "ABOUT \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:scipp.ucsc.edu about"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-scipp-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "1156 High Street, Santa Cruz, CA 95064",
+        "reason": "Official contact page exposes the direct address; the fallback page is broader and does not provide the target address.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://scipp.ucsc.edu/about/contact-visitor-information/"
+      },
+      "gold_value": "1156 High Street, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Institute for Particle Physics",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "address": "1156 High Street, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official SCIPP contact and visitor information page.",
+              "page_text": "Contact us. Telephone (831) 459-4842. Physical address: Natural Sciences 2, Room #337, 1156 High Street, Santa Cruz, CA 95064.",
+              "recency_days": 2,
+              "source_type": "official_site",
+              "title": "Contact & Visitor Information \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/contact-visitor-information/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"SCIPP\" \"1156 High Street\" \"Santa Cruz\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "About page without the contact snippet.",
+              "page_text": "SCIPP about page describing the institute's research mission and the work of its scientific and technical staff.",
+              "recency_days": 18,
+              "source_type": "official_site",
+              "title": "ABOUT \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:scipp.ucsc.edu about"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "sc-history-website",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "website",
+        "confidence": 0.98,
+        "decision": "https://history.ucsc.edu",
+        "reason": "Official contact page supports the canonical website claim; the broader about page does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://history.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "https://history.ucsc.edu",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz History Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "website": "https://history.ucsc.edu"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official department contact page.",
+              "page_text": "Office location Humanities 1, room 201. Telephone (831) 459-3701. Mailing address UC Santa Cruz Department of History 1156 High Street Santa Cruz, CA 95064.",
+              "recency_days": 21,
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 History",
+              "url": "https://history.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:history.ucsc.edu \"History Department\" contact us"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader department overview without contact details.",
+              "page_text": "About the Department. The History Department explains its academic mission and orientation.",
+              "recency_days": 35,
+              "source_type": "official_site",
+              "title": "About the Department \u2013 History",
+              "url": "https://history.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:history.ucsc.edu about department history"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-history-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-3701",
+        "reason": "Official department contact page exposes the direct phone number; the broader about page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://history.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "831-459-3701",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz History Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-459-3701"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official department contact page.",
+              "page_text": "Telephone (831) 459-3701. Mailing address UC Santa Cruz Department of History 1156 High Street Santa Cruz, CA 95064.",
+              "recency_days": 21,
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 History",
+              "url": "https://history.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:history.ucsc.edu \"History Department\" phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader department overview without direct phone.",
+              "page_text": "About the Department. The department overview page lists academic information but not the direct phone number.",
+              "recency_days": 35,
+              "source_type": "official_site",
+              "title": "About the Department \u2013 History",
+              "url": "https://history.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:history.ucsc.edu faculty history department"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-history-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "1156 High Street, Santa Cruz, CA 95064",
+        "reason": "Official department contact page exposes the mailing address; the broader about page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://history.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "1156 High Street, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz History Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "address": "1156 High Street, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official department contact page.",
+              "page_text": "Mailing Address UC Santa Cruz Department of History 1156 High Street Santa Cruz, CA 95064.",
+              "recency_days": 21,
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 History",
+              "url": "https://history.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:history.ucsc.edu \"1156 High Street\" history department"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader department overview without mailing details.",
+              "page_text": "Department overview without the mailing address.",
+              "recency_days": 35,
+              "source_type": "official_site",
+              "title": "About the Department \u2013 History",
+              "url": "https://history.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:history.ucsc.edu history department overview"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "sc-registrar-website",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "website",
+        "confidence": 0.98,
+        "decision": "https://registrar.ucsc.edu",
+        "reason": "Official registrar contact page supports the canonical website claim; the mission page is broader and does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://registrar.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "https://registrar.ucsc.edu",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "website": "https://registrar.ucsc.edu"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official registrar contact page.",
+              "page_text": "General inquiries email registrar@ucsc.edu. Phone 831-459-4412. Office address 190 Hahn Student Services University of California, Santa Cruz Santa Cruz, CA 95064.",
+              "recency_days": 9,
+              "source_type": "official_site",
+              "title": "Contact Information \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu official registrar contact"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader mission page without direct contact details.",
+              "page_text": "Mission statement and values for the office.",
+              "recency_days": 28,
+              "source_type": "official_site",
+              "title": "Our Mission \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/our-mission/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:registrar.ucsc.edu mission office"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-registrar-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-4412",
+        "reason": "Official registrar contact page exposes the direct phone number; the mission page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://registrar.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "831-459-4412",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-459-4412"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official registrar contact page.",
+              "page_text": "Phone 831-459-4412. Office address 190 Hahn Student Services University of California, Santa Cruz Santa Cruz, CA 95064.",
+              "recency_days": 9,
+              "source_type": "official_site",
+              "title": "Contact Information \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu registrar phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader mission page without direct phone.",
+              "page_text": "Mission statement and support goals.",
+              "recency_days": 28,
+              "source_type": "official_site",
+              "title": "Our Mission \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/our-mission/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:registrar.ucsc.edu about registrar"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-registrar-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "190 Hahn Student Services, University of California, Santa Cruz, Santa Cruz, CA 95064",
+        "reason": "Official registrar contact page exposes the office address; the staff directory does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://registrar.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "190 Hahn Student Services, University of California, Santa Cruz, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "address": "190 Hahn Student Services, University of California, Santa Cruz, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official registrar contact page.",
+              "page_text": "Office address 190 Hahn Student Services University of California, Santa Cruz Santa Cruz, CA 95064.",
+              "recency_days": 9,
+              "source_type": "official_site",
+              "title": "Contact Information \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu \"190 Hahn Student Services\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader staff directory without the office address.",
+              "page_text": "Staff directory listing with email contacts and roles.",
+              "recency_days": 14,
+              "source_type": "official_site",
+              "title": "Staff Directory \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/staff-directory/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:registrar.ucsc.edu staff directory"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "sc-lss-website",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "website",
+        "confidence": 0.98,
+        "decision": "https://lss.ucsc.edu",
+        "reason": "Official LSS contact page supports the canonical website claim; the overview page is broader and does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://lss.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "https://lss.ucsc.edu",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Learning Support Services",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "website": "https://lss.ucsc.edu"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official LSS contact page.",
+              "page_text": "Contact information for Academic Resource Center. Mailing address 221 Academic Resource Center ARCenter University of California, Santa Cruz 1156 High Street Santa Cruz, CA 95064. Front desk phone 831.459.4333.",
+              "recency_days": 11,
+              "source_type": "official_site",
+              "title": "Come Visit & Contact Us",
+              "url": "https://lss.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:lss.ucsc.edu \"Come Visit & Contact Us\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader LSS overview without direct contact details.",
+              "page_text": "Program description and values for LSS.",
+              "recency_days": 29,
+              "source_type": "official_site",
+              "title": "Learning Support Services - UCSC's Undergraduate Tutoring and Learning Center",
+              "url": "https://lss.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:lss.ucsc.edu about index"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-lss-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-4333",
+        "reason": "Official LSS contact page exposes the direct phone number; the overview page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://lss.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "831-459-4333",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Learning Support Services",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831.459.4333"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official LSS contact page.",
+              "page_text": "Front Desk Phone 831.459.4333. General email lss@ucsc.edu.",
+              "recency_days": 11,
+              "source_type": "official_site",
+              "title": "Come Visit & Contact Us",
+              "url": "https://lss.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:lss.ucsc.edu front desk phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader LSS overview without direct phone.",
+              "page_text": "Program overview and support philosophy.",
+              "recency_days": 29,
+              "source_type": "official_site",
+              "title": "Learning Support Services - UCSC's Undergraduate Tutoring and Learning Center",
+              "url": "https://lss.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:lss.ucsc.edu tutoring center overview"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-lss-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "221 Academic Resource Center (ARCenter), University of California, Santa Cruz, 1156 High Street, Santa Cruz, CA 95064",
+        "reason": "Official LSS contact page exposes the mailing address; the overview page does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://lss.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "221 Academic Resource Center (ARCenter), University of California, Santa Cruz, 1156 High Street, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Learning Support Services",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "address": "221 Academic Resource Center (ARCenter), University of California, Santa Cruz, 1156 High Street, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official LSS contact page.",
+              "page_text": "Office Location Academic Resource Center ARCenter Room 221. Mailing address 221 Academic Resource Center ARCenter University of California, Santa Cruz 1156 High Street Santa Cruz, CA 95064.",
+              "recency_days": 11,
+              "source_type": "official_site",
+              "title": "Come Visit & Contact Us",
+              "url": "https://lss.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:lss.ucsc.edu ARCenter address"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader LSS overview without the mailing address.",
+              "page_text": "Program overview and values.",
+              "recency_days": 29,
+              "source_type": "official_site",
+              "title": "Learning Support Services - UCSC's Undergraduate Tutoring and Learning Center",
+              "url": "https://lss.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:lss.ucsc.edu about tutoring"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "sc-norris-website",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "website",
+        "confidence": 0.98,
+        "decision": "https://norriscenter.ucsc.edu",
+        "reason": "Official Norris Center contact page supports the canonical website claim; the staff page is broader and does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://norriscenter.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "https://norriscenter.ucsc.edu",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Norris Center for Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "website": "https://norriscenter.ucsc.edu"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official Norris Center contact page.",
+              "page_text": "Location Room 239 in the Natural Sciences 2 building at UC Santa Cruz. Email norriscenter@ucsc.edu. Phone (831) 459-4763.",
+              "recency_days": 6,
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:norriscenter.ucsc.edu contact us"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader staff page without direct contact details.",
+              "page_text": "Staff and affiliates overview with emails and bios.",
+              "recency_days": 18,
+              "source_type": "official_site",
+              "title": "Staff & Affiliates \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/staff-affiliates/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:norriscenter.ucsc.edu staff affiliates"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-norris-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-4763",
+        "reason": "Official Norris Center contact page exposes the direct phone number; the staff page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://norriscenter.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "831-459-4763",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Norris Center for Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-459-4763"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official Norris Center contact page.",
+              "page_text": "Phone (831) 459-4763. Location Room 239 in the Natural Sciences 2 building at UC Santa Cruz.",
+              "recency_days": 6,
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:norriscenter.ucsc.edu phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader staff page without the phone number.",
+              "page_text": "Staff and affiliates overview with bios and email contacts.",
+              "recency_days": 18,
+              "source_type": "official_site",
+              "title": "Staff & Affiliates \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/staff-affiliates/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:norriscenter.ucsc.edu about staff affiliates"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-norris-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "Room 239, Natural Sciences 2 Building, University of California, Santa Cruz, 1156 High St, Santa Cruz, CA 95064",
+        "reason": "Official Norris Center contact page exposes the location; the staff page does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://norriscenter.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "Room 239, Natural Sciences 2 Building, University of California, Santa Cruz, 1156 High St, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Norris Center for Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "address": "Room 239, Natural Sciences 2 Building, University of California, Santa Cruz, 1156 High St, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official Norris Center contact page.",
+              "page_text": "Location Room 239 in the Natural Sciences 2 building at UC Santa Cruz. Phone (831) 459-4763.",
+              "recency_days": 6,
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:norriscenter.ucsc.edu location room 239"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader staff page without the address.",
+              "page_text": "Staff and affiliates overview with bios and email contacts.",
+              "recency_days": 18,
+              "source_type": "official_site",
+              "title": "Staff & Affiliates \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/staff-affiliates/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:norriscenter.ucsc.edu history"
+        }
+      ],
+      "truth_source_type": "official_site"
+    }
+  ],
+  "generated_at": "2026-05-23T08:12:33.775770+00:00",
+  "schema_version": 1
+}

@@ -32,6 +32,71 @@ class ClaimExtractionTests(unittest.TestCase):
 
         self.assertEqual([claim.normalized_value for claim in claims], ["4155551212"])
 
+    def test_extracts_branch_directory_phone_with_address_corroborator(self) -> None:
+        page_text = "\n".join(
+            [
+                "Library Branches",
+                "Downtown",
+                "224 Church Street",
+                "Santa Cruz, CA 95060",
+                "831-427-7707",
+                "Felton",
+                "6121 Gushee St.",
+                "Felton, CA 95018",
+                "831-427-7708",
+            ]
+        )
+        claims = extract_claims_from_text(
+            place_id="case-2b",
+            attribute="phone",
+            page_text=page_text,
+            source_url="https://www.santacruzpl.org/branches/",
+            source_type="official_site",
+            page_title="Branch Libraries",
+            place_context={
+                "name": "Santa Cruz Public Libraries Downtown Branch",
+                "address": "224 Church Street, Santa Cruz, CA 95060",
+                "city": "Santa Cruz",
+                "region": "CA",
+            },
+        )
+
+        scoped = [claim for claim in claims if claim.extraction_method == "branch_directory_phone"]
+        self.assertEqual([claim.normalized_value for claim in scoped], ["8314277707"])
+        self.assertIn("Downtown", scoped[0].evidence_text)
+        self.assertNotIn("Felton", scoped[0].evidence_text)
+
+    def test_branch_directory_phone_requires_address_corroborator(self) -> None:
+        page_text = "\n".join(
+            [
+                "Library Branches",
+                "Downtown",
+                "224 Church Street",
+                "Santa Cruz, CA 95060",
+                "831-427-7707",
+                "Felton",
+                "6121 Gushee St.",
+                "Felton, CA 95018",
+                "831-427-7708",
+            ]
+        )
+        claims = extract_claims_from_text(
+            place_id="case-2c",
+            attribute="phone",
+            page_text=page_text,
+            source_url="https://www.santacruzpl.org/branches/",
+            source_type="official_site",
+            page_title="Branch Libraries",
+            place_context={
+                "name": "Santa Cruz Public Libraries Downtown Branch",
+                "city": "Santa Cruz",
+                "region": "CA",
+            },
+        )
+
+        self.assertFalse(any(claim.extraction_method == "branch_directory_phone" for claim in claims))
+        self.assertEqual({claim.normalized_value for claim in claims}, {"8314277707", "8314277708"})
+
     def test_extracts_name_from_title(self) -> None:
         claims = extract_claims_from_text(
             place_id="case-3",
@@ -43,6 +108,18 @@ class ClaimExtractionTests(unittest.TestCase):
         )
 
         self.assertEqual([claim.normalized_value for claim in claims], ["example cafe"])
+
+    def test_extracts_name_from_contact_title_without_generic_prefix(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-3b",
+            attribute="name",
+            page_text="Santa Cruz Museum of Natural History\nVisit Us",
+            source_url="https://santacruzmuseum.org/about/contact-us/",
+            source_type="official_site",
+            page_title="Contact Us - Santa Cruz Museum of Natural History",
+        )
+
+        self.assertEqual([claim.normalized_value for claim in claims], ["santa cruz museum of natural history"])
 
     def test_extracts_address_from_text(self) -> None:
         claims = extract_claims_from_text(
@@ -56,6 +133,53 @@ class ClaimExtractionTests(unittest.TestCase):
 
         self.assertEqual([claim.normalized_value for claim in claims], ["123 main st santa cruz ca 95060"])
 
+    def test_address_regex_strips_prose_prefix(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-4b",
+            attribute="address",
+            page_text="Mailing address UC Santa Cruz Department of History 1156 High Street Santa Cruz, CA 95064.",
+            source_url="https://history.ucsc.edu/about/contact-us/",
+            source_type="official_site",
+            page_title="Contact Us",
+        )
+
+        self.assertEqual([claim.normalized_value for claim in claims], ["1156 high st santa cruz ca 95064"])
+        self.assertNotIn("mailing address", claims[0].normalized_value)
+
+    def test_address_regex_ignores_phone_prefix(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-4c",
+            attribute="address",
+            page_text="Phone email directory Downtown 831 427 7707 224 Church Street Santa Cruz CA 95060",
+            source_url="https://www.santacruzpl.org/branches/",
+            source_type="official_site",
+            page_title="Branch Libraries",
+        )
+
+        self.assertEqual([claim.normalized_value for claim in claims], ["224 church st santa cruz ca 95060"])
+        self.assertNotIn("831 427 7707", claims[0].normalized_value)
+
+    def test_extracts_campus_building_address_from_official_contact_text(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-4d",
+            attribute="address",
+            page_text="Office Location\n190 Hahn Student Services Building\nMailing Address\n1156 High Street\nSanta Cruz, CA 95064",
+            source_url="https://registrar.ucsc.edu/about/contact-information/",
+            source_type="official_site",
+            page_title="Contact Information",
+            place_context={
+                "name": "UC Santa Cruz Office of the Registrar",
+                "current_address": "190 Hahn Student Services Building",
+                "city": "Santa Cruz",
+                "region": "CA",
+            },
+        )
+
+        normalized = [claim.normalized_value for claim in claims]
+        self.assertIn("190 hahn student services building", normalized)
+        self.assertIn("1156 high st", normalized)
+        self.assertTrue(any(claim.extraction_method == "context_address_in_text" for claim in claims))
+
     def test_extracts_category_from_schema_like_text(self) -> None:
         claims = extract_claims_from_text(
             place_id="case-5",
@@ -68,6 +192,21 @@ class ClaimExtractionTests(unittest.TestCase):
 
         normalized = {claim.normalized_value for claim in claims}
         self.assertTrue(any(value in normalized for value in {"local business", "restaurant", "cafe"}))
+
+    def test_category_tokens_require_word_boundaries(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-5b",
+            attribute="category",
+            page_text="Learning Support Services offers tutoring services, workshops, and academic support programs.",
+            source_url="https://lss.ucsc.edu/about/index.html",
+            source_type="official_site",
+            page_title="Learning Support Services",
+        )
+
+        normalized = {claim.normalized_value for claim in claims}
+        self.assertIn("tutoring service", normalized)
+        self.assertIn("academic support", normalized)
+        self.assertNotIn("shop", normalized)
 
     def test_blank_page_returns_no_claims(self) -> None:
         claims = extract_claims_from_text(

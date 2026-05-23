@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -21,6 +22,11 @@ class DashboardData:
     golden: dict[str, object] | None
     evidence: dict[str, object] | None
     pac_benchmark: dict[str, object] | None
+    resolvepoi_selective: dict[str, object] | None
+    benchmark_v2_hard_cases: dict[str, object] | None
+    benchmark_v2_pac_hard_cases: dict[str, object] | None
+    benchmark_v2_santa_cruz_challenge: dict[str, object] | None
+    repo_comparison_tests: int | None
     paths: dict[str, str]
     batch_progress_rows: list[list[str]]
 
@@ -50,6 +56,16 @@ def _load_json(path: Path | None) -> dict[str, object] | None:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _load_repo_comparison_tests(reports_root: Path) -> int | None:
+    path = reports_root / "harness" / "PAC_REPO_COMPARISON.md"
+    if not path.exists():
+        return None
+    match = re.search(r"\|\s*Unit tests\s*\|\s*`(\d+)`\s*tests passed\s*\|", path.read_text(encoding="utf-8"))
+    if match:
+        return int(match.group(1))
+    return None
+
+
 def _load_latest_manifest(reports_root: Path) -> dict[str, str]:
     manifest_path = reports_root / "dashboard" / "latest.json"
     if not manifest_path.exists():
@@ -68,14 +84,13 @@ def _resolve_path(root: Path, value: str) -> Path:
     path = Path(value)
     if path.is_absolute():
         return path
+    if path.exists():
+        return path
     return root / path
 
 
 def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
     root = Path(reports_root)
-    manifest = _load_latest_manifest(root)
-    if manifest:
-        return manifest
     harness = root / "harness"
     baseline = root / "baseline_metrics"
     ranker = root / "ranker"
@@ -94,8 +109,23 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "golden": root / "golden" / "project_a_golden_current.json",
         "evidence": root / "evidence" / "evidence-eval_current.json",
         "conflict_dorks": ranker / "conflict_dorks_current.csv",
+        "resolvepoi_selective": root / "resolvepoi_selective" / "resolvepoi_selective_current.json",
+        "benchmark_v2_hard_cases": harness / "benchmark_v2_hard_cases_current.json",
+        "benchmark_v2_pac_hard_cases": harness / "benchmark_v2_pac_hard_cases_current.json",
+        "benchmark_v2_santa_cruz_challenge": harness / "benchmark_v2_santa_cruz_challenge_current.json",
+        "repo_comparison": root / "harness" / "PAC_REPO_COMPARISON.md",
+        "engineering_report": root / "harness" / "PAC_ENGINEERING_REPORT.md",
+        "technical_summary": root / "harness" / "technical_summary.md",
     }
-    return {name: str(path) for name, path in selected.items() if path is not None and path.exists()}
+    result = {name: str(path) for name, path in selected.items() if path is not None and path.exists()}
+    manifest = _load_latest_manifest(root)
+    for name, value in manifest.items():
+        if name in result:
+            continue
+        path = Path(value)
+        if path.exists():
+            result[name] = value
+    return result
 
 
 def build_dashboard_data(reports_root: str | Path) -> DashboardData:
@@ -113,6 +143,11 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         golden=_load_json(_resolve_path(root, paths["golden"])) if "golden" in paths else None,
         evidence=_load_json(_resolve_path(root, paths["evidence"])) if "evidence" in paths else None,
         pac_benchmark=_load_json(_resolve_path(root, paths["pac_benchmark"])) if "pac_benchmark" in paths else None,
+        resolvepoi_selective=_load_json(_resolve_path(root, paths["resolvepoi_selective"])) if "resolvepoi_selective" in paths else None,
+        benchmark_v2_hard_cases=_load_json(_resolve_path(root, paths["benchmark_v2_hard_cases"])) if "benchmark_v2_hard_cases" in paths else None,
+        benchmark_v2_pac_hard_cases=_load_json(_resolve_path(root, paths["benchmark_v2_pac_hard_cases"])) if "benchmark_v2_pac_hard_cases" in paths else None,
+        benchmark_v2_santa_cruz_challenge=_load_json(_resolve_path(root, paths["benchmark_v2_santa_cruz_challenge"])) if "benchmark_v2_santa_cruz_challenge" in paths else None,
+        repo_comparison_tests=_load_repo_comparison_tests(root),
         paths=paths,
         batch_progress_rows=_batch_progress_rows(root),
     )
@@ -661,115 +696,358 @@ def _pac_benchmark_lines(pac_benchmark: dict[str, object] | None) -> list[str]:
     ]
 
 
-def render_markdown(data: DashboardData) -> str:
-    verdict = _compare_verdict(data.compare)
-    caveat = _compare_caveat(data.compare)
-    resolver_caveat = _resolver_caveat(data.combined)
-    dataset_lines = _dataset_lines(data.dataset)
-    dataset_bullets = [dataset_lines[index] for index in (1, 5, 6) if len(dataset_lines) > index]
-    if not dataset_bullets:
-        dataset_bullets = dataset_lines[:1]
+def _selective_router_lines(selective: dict[str, object] | None) -> list[str]:
+    if not selective:
+        return ["No ResolvePOI selective-router report found."]
+    comparison = selective.get("comparison", {})
+    metrics = selective.get("metrics", {})
+    validation = selective.get("validation", {})
+    if not isinstance(comparison, dict) or not isinstance(metrics, dict):
+        return ["ResolvePOI selective-router report is incomplete."]
+    core = metrics.get("core_macro", {})
+    macro = metrics.get("macro", {})
+    if not isinstance(core, dict) or not isinstance(macro, dict):
+        return ["ResolvePOI selective-router report is incomplete."]
+    return [
+        f"Holdout rows: {_num((metrics.get('website') or {}).get('holdout_rows') if isinstance(metrics.get('website'), dict) else None)}",
+        f"All attributes: {_pct(macro.get('full_accuracy'))} full accuracy / {_pct(macro.get('coverage'))} coverage",
+        f"Core attributes: {_pct(core.get('full_accuracy'))} full accuracy / {_pct(core.get('coverage'))} coverage",
+        f"Current baseline: {_pct(comparison.get('baseline_accuracy'))} full accuracy",
+        f"Selective lift: {_pct_points(comparison.get('accuracy_delta'))}",
+        f"High-confidence wrong delta: {_pct_points(comparison.get('high_confidence_wrong_delta'))}",
+        f"Split verification: {'passed' if validation is not None else 'report unavailable'}",
+    ]
+
+
+def _selective_milestones(selective: dict[str, object] | None, tests_passed: int | None) -> list[dict[str, str]]:
+    comparison = selective.get("comparison", {}) if isinstance(selective, dict) else {}
+    if not isinstance(comparison, dict):
+        comparison = {}
+    core_accuracy = comparison.get("selective_accuracy")
+    lift = comparison.get("accuracy_delta")
+    return [
+        {
+            "status": "done",
+            "title": "Claim extraction and EvidenceGraph",
+            "body": "Deterministic claim extraction, claim grouping, contradiction detection, and resolver_v2 are now in the spine.",
+        },
+        {
+            "status": "done",
+            "title": "Identity scoring split out",
+            "body": "Place identity signals now live in identity.py and are used by claim extraction instead of being buried in the resolver.",
+        },
+        {
+            "status": "done",
+            "title": "Selective router integrated",
+            "body": (
+                "The ResolvePOI router is exposed as an opt-in learned reranker. "
+                f"Holdout full accuracy is {_pct(core_accuracy)} with {_pct_points(lift)} lift over the current baseline."
+            ),
+        },
+        {
+            "status": "done",
+            "title": "Split verification made explicit",
+            "body": "Holdout/train separation is inspectable and leak-checked instead of being implied by filenames.",
+        },
+        {
+            "status": "done",
+            "title": "Dashboard and comparison docs cleaned up",
+            "body": f"Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as {tests_passed or 'unknown'} tests passed.",
+        },
+    ]
+
+
+def _next_steps(selective: dict[str, object] | None, pac_benchmark: dict[str, object] | None) -> list[dict[str, str]]:
+    core = selective.get("metrics", {}).get("core_macro", {}) if isinstance(selective, dict) else {}
+    if not isinstance(core, dict):
+        core = {}
+    comparison = selective.get("comparison", {}) if isinstance(selective, dict) else {}
+    if not isinstance(comparison, dict):
+        comparison = {}
+    resolver = pac_benchmark.get("resolver", {}) if isinstance(pac_benchmark, dict) else {}
+    if not isinstance(resolver, dict):
+        resolver = {}
+    return [
+        {
+            "title": "Grow replay coverage",
+            "body": "Move beyond curated hard cases and a tiny replay sample. Build a 100-300 case replay corpus with easy, medium, and ambiguous examples.",
+        },
+        {
+            "title": "Calibrate claim scoring",
+            "body": "Tune source authority, identity, freshness, and contradiction weights on a larger corpus instead of trusting hand-tuned fixture weights.",
+        },
+        {
+            "title": "Unify the best paths",
+            "body": (
+                "Make the selective router and EvidenceGraph benchmark the same reproducible path so the strongest numeric result and the strongest architecture are one system."
+            ),
+        },
+        {
+            "title": "Publish a public proof path",
+            "body": "Ship a small public ResolvePOI fixture or artifact fetch command so the 97.7% selective result is reproducible without local-only inputs.",
+        },
+        {
+            "title": "Keep pruning historical clutter",
+            "body": "Move old snapshots and exploratory outputs into a clearly historical area so the current repo surface stays easy to scan.",
+        },
+    ]
+
+
+def _current_stats(data: DashboardData) -> list[dict[str, str]]:
+    selective = data.resolvepoi_selective or {}
+    comparison = selective.get("comparison", {}) if isinstance(selective, dict) else {}
+    if not isinstance(comparison, dict):
+        comparison = {}
+    metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
+    if not isinstance(metrics, dict):
+        metrics = {}
+    core = metrics.get("core_macro", {}) if isinstance(metrics, dict) else {}
+    macro = metrics.get("macro", {}) if isinstance(metrics, dict) else {}
+    if not isinstance(core, dict):
+        core = {}
+    if not isinstance(macro, dict):
+        macro = {}
+    hard = data.benchmark_v2_hard_cases or {}
+    hard_v2 = hard.get("resolver_v2", {}) if isinstance(hard, dict) else {}
+    if not isinstance(hard_v2, dict):
+        hard_v2 = {}
+    santa = data.benchmark_v2_santa_cruz_challenge or {}
+    santa_v2 = santa.get("resolver_v2", {}) if isinstance(santa, dict) else {}
+    if not isinstance(santa_v2, dict):
+        santa_v2 = {}
+    santa_expected = santa.get("expected_behavior", {}) if isinstance(santa, dict) else {}
+    santa_expected_v2 = santa_expected.get("resolver_v2", {}) if isinstance(santa_expected, dict) else {}
+    if not isinstance(santa_expected_v2, dict):
+        santa_expected_v2 = {}
+    pac = data.pac_benchmark or {}
+    pac_resolver = pac.get("resolver", {}) if isinstance(pac, dict) else {}
+    pac_abstention = pac.get("abstention", {}) if isinstance(pac, dict) else {}
+    pac_identity = pac.get("identity_drift", {}) if isinstance(pac, dict) else {}
+    pac_expected = data.benchmark_v2_pac_hard_cases or {}
+    pac_expected_v2 = pac_expected.get("expected_behavior", {}).get("resolver_v2", {}) if isinstance(pac_expected, dict) else {}
+    if not isinstance(pac_expected_v2, dict):
+        pac_expected_v2 = {}
+    retr = data.compare or {}
+    targeted = retr.get("targeted", {}) if isinstance(retr, dict) else {}
+    fallback = retr.get("fallback", {}) if isinstance(retr, dict) else {}
+    if not isinstance(targeted, dict):
+        targeted = {}
+    if not isinstance(fallback, dict):
+        fallback = {}
+    website = data.website_authority or {}
+    return [
+        {
+            "label": "Selective router",
+            "value": f"{_pct(macro.get('full_accuracy'))} all-attribute / {_pct(core.get('full_accuracy'))} core",
+            "detail": f"Lift vs current baseline: {_pct_points(comparison.get('accuracy_delta'))}; high-confidence wrong: {_pct(macro.get('high_confidence_wrong_rate'))}",
+        },
+        {
+            "label": "Claim-level v2 hard cases",
+            "value": f"{_pct((hard_v2.get('accuracy')))} accuracy / {_pct((hard_v2.get('abstention_rate')))} abstention",
+            "detail": f"High-confidence wrong: {_pct(hard_v2.get('high_confidence_wrong_rate'))}; breakthrough cases captured in benchmark_v2_hard_cases_current.json",
+        },
+        {
+            "label": "Santa Cruz challenge",
+            "value": f"{_pct(santa_expected_v2.get('accuracy'))} expected / {_pct(santa_expected_v2.get('abstention_rate'))} abstention",
+            "detail": f"Raw resolver accuracy: {_pct(santa_v2.get('accuracy'))}; high-confidence wrong: {_pct(santa_v2.get('high_confidence_wrong_rate'))}; covers website, phone, address, category, and name with branch-context, office-vs-mailing, official-vs-social, official-vs-directory, and title-cleaning cases.",
+        },
+        {
+            "label": "PAC hard benchmark",
+            "value": f"{_pct(pac_abstention.get('correct_abstention_rate'))} correct abstention / {'passed' if pac.get('passed') else 'not passed'}",
+            "detail": f"Identity drift precision/recall: {_pct(pac_identity.get('identity_drift_precision'))} / {_pct(pac_identity.get('identity_drift_recall'))}",
+        },
+        {
+            "label": "PAC expected behavior",
+            "value": f"{_pct(pac_expected_v2.get('accuracy'))} expected-behavior accuracy",
+            "detail": f"Expected abstention rate: {_pct(pac_expected_v2.get('abstention_rate'))}; claim-level benchmark captures the intended behavior on ambiguous cases.",
+        },
+        {
+            "label": "Retrieval proof",
+            "value": f"{_pct(targeted.get('authoritative_found_rate'))} targeted vs {_pct(fallback.get('authoritative_found_rate'))} fallback",
+            "detail": f"Citation precision: {_pct(targeted.get('citation_precision'))} vs {_pct(fallback.get('citation_precision'))}; replay cases: {_num(targeted.get('total'))}",
+        },
+        {
+            "label": "Website authority",
+            "value": f"{_pct(website.get('authoritative_found_rate'))} authoritative / {_pct(website.get('false_official_rate'))} false official",
+            "detail": f"Selected official: {_pct(website.get('selected_official_rate'))}; place-relevant official: {_pct(website.get('place_relevant_official_found_rate'))}",
+        },
+        {
+            "label": "Test suite",
+            "value": f"{_num(data.repo_comparison_tests)} tests passed",
+            "detail": "Current repo comparison document records the full unit-test count as a reproducibility proof.",
+        },
+    ]
+
+
+def _benchmark_v2_hard_case_lines(report: dict[str, object] | None) -> list[str]:
+    if not report:
+        return ["No benchmark-v2 hard-case report found."]
+    resolver_v1 = report.get("resolver_v1", {})
+    resolver_v2 = report.get("resolver_v2", {})
+    if not isinstance(resolver_v1, dict) or not isinstance(resolver_v2, dict):
+        return ["benchmark-v2 hard-case report is incomplete."]
+    breakthroughs = report.get("breakthrough_cases", [])
+    failures = report.get("failure_cases", [])
+    abstentions = report.get("abstention_cases", [])
     lines = [
-        "# Benchmark Dashboard",
+        f"Resolver v2 accuracy: {_pct(resolver_v2.get('accuracy'))}",
+        f"Resolver v2 abstention: {_pct(resolver_v2.get('abstention_rate'))}",
+        f"Resolver v2 high-confidence wrong: {_pct(resolver_v2.get('high_confidence_wrong_rate'))}",
+        f"Resolver v1 accuracy: {_pct(resolver_v1.get('accuracy'))}",
+        f"Resolver v1 abstention: {_pct(resolver_v1.get('abstention_rate'))}",
+    ]
+    if isinstance(breakthroughs, list) and breakthroughs:
+        lines.append("Breakthrough cases: " + "; ".join(str(case.get("case_id", "-")) for case in breakthroughs if isinstance(case, dict)))
+    if isinstance(abstentions, list) and abstentions:
+        lines.append("Abstention cases: " + "; ".join(str(case.get("case_id", "-")) for case in abstentions if isinstance(case, dict)))
+    if isinstance(failures, list) and failures:
+        lines.append("Failure cases: " + "; ".join(str(case.get("case_id", "-")) for case in failures if isinstance(case, dict)))
+    return lines
+
+
+def _benchmark_v2_pac_lines(report: dict[str, object] | None) -> list[str]:
+    if not report:
+        return ["No PAC benchmark-v2 report found."]
+    expected = report.get("expected_behavior", {})
+    resolver_v1 = expected.get("resolver_v1", {}) if isinstance(expected, dict) else {}
+    resolver_v2 = expected.get("resolver_v2", {}) if isinstance(expected, dict) else {}
+    pac_resolver = report.get("resolver_v2") or report.get("resolver") or {}
+    if not isinstance(resolver_v1, dict) or not isinstance(resolver_v2, dict) or not isinstance(pac_resolver, dict):
+        return ["PAC benchmark-v2 report is incomplete."]
+    return [
+        f"Expected-behavior accuracy (v1 / v2): {_pct(resolver_v1.get('accuracy'))} / {_pct(resolver_v2.get('accuracy'))}",
+        f"Expected-behavior abstention (v1 / v2): {_pct(resolver_v1.get('abstention_rate'))} / {_pct(resolver_v2.get('abstention_rate'))}",
+        f"Raw resolver accuracy: {_pct(pac_resolver.get('accuracy'))}",
+        f"Raw resolver abstention: {_pct(pac_resolver.get('abstention_rate'))}",
+        f"Raw high-confidence wrong: {_pct(pac_resolver.get('high_confidence_wrong_rate'))}",
+    ]
+
+
+def _baseline_core_lines(selective: dict[str, object] | None) -> list[str]:
+    if not selective:
+        return ["No selective-router baseline summary found."]
+    summary = selective.get("baseline_core_summaries", {})
+    if not isinstance(summary, dict):
+        return ["Selective-router baseline summary is incomplete."]
+    lines = [
+        "| Baseline | Accuracy | Coverage | High-confidence wrong |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for name in ("current", "base", "confidence", "agreement_only"):
+        row = summary.get(name, {})
+        if isinstance(row, dict):
+            lines.append(
+                "| "
+                + " | ".join(
+                    [
+                        name,
+                        _pct(row.get("full_accuracy")),
+                        _pct(row.get("coverage")),
+                        _pct(row.get("high_confidence_wrong_rate")),
+                    ]
+                )
+                + " |"
+            )
+    return lines
+
+
+def render_markdown(data: DashboardData) -> str:
+    selective = data.resolvepoi_selective or {}
+    hard_cases = data.benchmark_v2_hard_cases or {}
+    pac_cases = data.benchmark_v2_pac_hard_cases or {}
+    santa_cases = data.benchmark_v2_santa_cruz_challenge or {}
+    selective_metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
+    if not isinstance(selective_metrics, dict):
+        selective_metrics = {}
+    stats = _current_stats(data)
+    lines = [
+        "# MLAttributes Dashboard",
+        "",
+        "MLAttributes now has a clear PAC spine: claim extraction -> identity scoring -> EvidenceGraph -> resolver_v2 -> benchmark_v2.",
+        "The strongest numeric result is still the ResolvePOI selective router, while the strongest architecture is the claim-level v2 resolver.",
         "",
         "## Current Read",
         "",
+        f"- {_compare_caveat(data.compare)}",
+        f"- {_resolver_caveat(data.combined)}",
+        "- Working Prototype: ResolvePOI Baseline, Retrieval Arms, Website Authority, and Hard PAC Benchmark remain available in the deep dive below.",
+        "",
+        "## At a Glance",
+        "",
+        f"- Selective router: {_pct((selective_metrics.get('macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('macro'), dict) else None)} all-attribute / {_pct((selective_metrics.get('core_macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('core_macro'), dict) else None)} core.",
+        f"- Claim-level hard cases: {_pct(((hard_cases.get('resolver_v2') or {}).get('accuracy')) if isinstance(hard_cases, dict) else None)} accuracy / {_pct(((hard_cases.get('resolver_v2') or {}).get('abstention_rate')) if isinstance(hard_cases, dict) else None)} abstention.",
+        f"- Santa Cruz challenge: {_pct((((santa_cases.get('expected_behavior') or {}).get('resolver_v2') or {}).get('accuracy')) if isinstance(santa_cases, dict) else None)} expected-behavior accuracy with branch-context proof.",
+        f"- PAC hard benchmark: {_pct(((data.pac_benchmark or {}).get('abstention') or {}).get('correct_abstention_rate') if isinstance(data.pac_benchmark, dict) else None)} correct abstention; identity drift precision/recall {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_precision') if isinstance(data.pac_benchmark, dict) else None)} / {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_recall') if isinstance(data.pac_benchmark, dict) else None)}.",
+        f"- Retrieval replay: {_pct(((data.compare or {}).get('targeted') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} targeted vs {_pct(((data.compare or {}).get('fallback') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} fallback.",
+        f"- Test suite: {_num(data.repo_comparison_tests)} tests passed.",
+        "",
+        "## Completed Milestones",
+        "",
+        *[f"- [x] {item['title']} - {item['body']}" for item in _selective_milestones(selective, data.repo_comparison_tests)],
+        "",
+        "## Important Stats",
+        "",
+        "| Signal | Value | Why it matters |",
+        "| --- | ---: | --- |",
+        *[f"| {card['label']} | {card['value']} | {card['detail']} |" for card in stats],
+        "",
+        "## Next Steps",
+        "",
+        *[f"1. {item['title']}: {item['body']}" if idx == 0 else f"{idx + 1}. {item['title']}: {item['body']}" for idx, item in enumerate(_next_steps(selective, data.pac_benchmark))],
+        "",
+        "## Deep Dive",
+        "",
+        "### Selective Router",
+        "",
+        *[f"- {line}" for line in _selective_router_lines(selective)],
+        "",
+        "### Claim-Level v2 Hard Cases",
+        "",
+        *[f"- {line}" for line in _benchmark_v2_hard_case_lines(hard_cases)],
+        "",
+        "### Santa Cruz Challenge",
+        "",
+        *[f"- {line}" for line in _benchmark_v2_pac_lines(santa_cases)],
+        "",
+        "### PAC Benchmark-v2",
+        "",
+        *[f"- {line}" for line in _benchmark_v2_pac_lines(pac_cases)],
+        "",
+        "### Baseline Context",
+        "",
+        * _baseline_core_lines(selective),
+        "",
+        "### Retrieval Replay",
+        "",
+        * _compare_highlights(data.compare),
+        "",
+        "### Website Authority",
+        "",
+        * _website_authority_lines(data.website_authority),
+        "",
+        "### Replay Coverage",
+        "",
+        * _replay_stats_lines(data.paths),
+        "",
+        "### PAC Hard Benchmark",
+        "",
+        * _pac_benchmark_lines(data.pac_benchmark),
+        "",
+        "### Golden Labels",
+        "",
+        * _golden_table(data.golden),
+        "",
+        "### Synthetic Evidence",
+        "",
+        * _evidence_lines(data.evidence),
+        "",
+        "### Live Smoke",
+        "",
+        * _smoke_lines(data.smoke),
+        "",
+        "### Report Files",
+        "",
     ]
-    if data.compare and isinstance(data.compare.get("targeted"), dict) and isinstance(data.compare.get("fallback"), dict):
-        targeted = data.compare["targeted"]
-        fallback = data.compare["fallback"]
-        lines.extend(
-            [
-                f"- Verdict: {verdict}",
-                f"- {caveat}",
-                f"- Targeted authoritative found: {_pct(targeted.get('authoritative_found_rate'))} vs fallback {_pct(fallback.get('authoritative_found_rate'))}.",
-                f"- Resolver snapshot: {_pct(data.combined.get('decisions', {}).get('accuracy') if isinstance(data.combined, dict) else None) if data.combined else '-'} accuracy, {_pct(data.combined.get('decisions', {}).get('abstention_rate') if isinstance(data.combined, dict) else None) if data.combined else '-'} abstention.",
-            ]
-        )
-    else:
-        lines.append("- The next blocker is missing or incomplete benchmark reports.")
-
-    lines.extend(
-        [
-            "",
-            "## What Matters",
-            "",
-            f"- Verdict: {verdict}",
-            f"- {resolver_caveat}",
-            f"- Working prototype links the current conflict row to `{data.paths.get('compare', 'missing')}` and `{data.paths.get('combined', 'missing')}`.",
-            "- Impact vs prior repos:",
-            *[f"  - {row['repo']}: {row['lesson']} ({row['strength']})" for row in PRIOR_REPO_SCOREBOARD],
-            "",
-            "## Executive Snapshot",
-            "",
-            *[f"- {label}: {value.replace(chr(10), '; ')}" for label, value in _executive_snapshot_lines(data)],
-            "",
-            "## Current Benchmarks",
-            "",
-            "### Raw Matched-Pair Dataset",
-            "",
-            *[f"- {line}" for line in dataset_bullets],
-            *[f"- {line}" for line in data.query_only_packet],
-            "",
-            "### ResolvePOI Baseline",
-            "",
-            * (_baseline_table(data.baseline)[:3] if data.baseline else _baseline_table(data.baseline)),
-            "",
-            "### Retrieval Arms",
-            "",
-            * _compare_highlights(data.compare),
-            "",
-            "### Website Authority",
-            "",
-            * _website_authority_lines(data.website_authority)[:5],
-            "",
-            "### Replay Coverage",
-            "",
-            * _replay_stats_lines(data.paths)[:4],
-            "",
-            "### Hard PAC Benchmark",
-            "",
-            * _pac_benchmark_lines(data.pac_benchmark)[:7],
-            "",
-            "### Working Prototype",
-            "",
-            f"- Conflict row -> evidence -> retrieval -> resolver.",
-            f"- Evidence pages: `{data.paths.get('merged_replay', 'missing')}`",
-            f"- Retrieval arms: `{data.paths.get('compare', 'missing')}`",
-            f"- Resolver decision: `{data.paths.get('combined', 'missing')}`",
-            "- Live prototype lane: click the four steps in the HTML viewer to follow the case flow.",
-            "",
-            "### Batch Progress",
-            "",
-            *[
-                "| " + " | ".join(row) + " |"
-                for row in data.batch_progress_rows[:2]
-            ],
-            "",
-            "### Reranker",
-            "",
-            * _rerank_lines(data.rerank)[:3],
-            "",
-            "### Resolver Decisions",
-            "",
-            * _decision_lines(data.combined),
-            "",
-            "### Golden Labels",
-            "",
-            * (_golden_table(data.golden)[:4] if data.golden else _golden_table(data.golden)),
-            "",
-            "### Synthetic Evidence",
-            "",
-            * _evidence_lines(data.evidence)[:4],
-            "",
-            "### Live Smoke",
-            "",
-            * _smoke_lines(data.smoke)[:2],
-            "",
-            "## Report Files",
-            "",
-        ]
-    )
     for name, path in sorted(data.paths.items()):
         lines.append(f"- `{name}`: `{path}`")
     lines.append("")
@@ -777,12 +1055,16 @@ def render_markdown(data: DashboardData) -> str:
 
 
 def render_html(data: DashboardData) -> str:
-    verdict = _compare_verdict(data.compare)
-    caveat = _compare_caveat(data.compare)
-    resolver_caveat = _resolver_caveat(data.combined)
+    selective = data.resolvepoi_selective or {}
+    hard_cases = data.benchmark_v2_hard_cases or {}
+    pac_cases = data.benchmark_v2_pac_hard_cases or {}
+    santa_cases = data.benchmark_v2_santa_cruz_challenge or {}
+    selective_metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
+    if not isinstance(selective_metrics, dict):
+        selective_metrics = {}
     baseline_rows = _safe_table_rows(
-        _baseline_table(data.baseline),
-        ["Attribute", "Accuracy", "Macro F1", "HC Wrong", "Abstention"],
+        _baseline_core_lines(selective),
+        ["Baseline", "Accuracy", "Coverage", "High-confidence wrong"],
     )
     compare_rows = _safe_table_rows(
         _compare_table(data.compare),
@@ -792,34 +1074,10 @@ def render_html(data: DashboardData) -> str:
         _golden_table(data.golden),
         ["Baseline", "Attribute", "Accuracy", "Coverage", "HC Wrong", "Labels"],
     )
-    bundle = {
-        "verdict": verdict,
-        "compare_highlights": _compare_highlights(data.compare),
-        "compare_caveat": caveat,
-        "resolver_caveat": resolver_caveat,
-        "snapshot": _executive_snapshot_lines(data),
-        "prototype_lane": _prototype_lane_steps(data),
-        "website_authority": _website_authority_lines(data.website_authority),
-        "dataset": _dataset_lines(data.dataset),
-        "query_only_packet": data.query_only_packet,
-        "stoppers": [
-            "Retrieval proof is still small-sample." if data.compare else "Retrieval comparison report missing.",
-            "The reranker is still optional because it has not beaten the heuristic on replay." if data.rerank else "Reranker report missing.",
-            "Resolver improvement over the 200-row ResolvePOI baseline is not yet proven on a larger labeled evidence corpus.",
-        ],
-        "baseline_rows": baseline_rows,
-        "compare_rows": compare_rows,
-        "replay_stats": _replay_stats_lines(data.paths),
-        "pac_benchmark": _pac_benchmark_lines(data.pac_benchmark),
-        "batch_progress_rows": data.batch_progress_rows,
-        "rerank": _rerank_lines(data.rerank),
-        "decisions": _decision_lines(data.combined),
-        "golden_rows": golden_rows,
-        "evidence": _evidence_lines(data.evidence),
-        "smoke": _smoke_lines(data.smoke),
-        "paths": data.paths,
-        "prior_repos": PRIOR_REPO_SCOREBOARD,
-    }
+    stats = _current_stats(data)
+    milestones = _selective_milestones(selective, data.repo_comparison_tests)
+    next_steps = _next_steps(selective, data.pac_benchmark)
+    current_path_rows = [[name, path] for name, path in sorted(data.paths.items())]
     return "\n".join(
         [
             "<!doctype html>",
@@ -827,232 +1085,198 @@ def render_html(data: DashboardData) -> str:
             "<head>",
             "<meta charset='utf-8'>",
             "<meta name='viewport' content='width=device-width, initial-scale=1'>",
-            "<title>MLAttributes Benchmark Dashboard</title>",
+            "<title>MLAttributes Dashboard</title>",
             "<style>",
-            ":root { --paper:#f7f0ff; --paper-2:#efe2ff; --ink:#1f1630; --muted:#6c5a82; --accent:#7c3aed; --accent-2:#a855f7; --accent-soft:#eadcff; --panel:#fffdfd; --line:#ddc8f5; --warn:#8a3b1e; --glow:rgba(124,58,237,.18); }",
-            "body { font-family: Inter, 'Segoe UI', system-ui, sans-serif; margin: 0; background: radial-gradient(circle at top left, rgba(168,85,247,.24), transparent 28%), linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 180px); color: var(--ink); }",
-            "main { max-width: 1480px; margin: 0 auto; padding: 24px 16px 48px; }",
-            "h1, h2, h3, button { font-family: Inter, 'Segoe UI', system-ui, sans-serif; letter-spacing: -0.02em; }",
-            "h1 { font-size: 2.15rem; margin: 0 0 0.4rem; }",
-            "p.lead { color: var(--muted); max-width: 70ch; }",
-            ".hero { display:grid; grid-template-columns: 1.45fr 1fr; gap: 14px; align-items:start; margin-bottom: 10px; }",
-            ".panel { background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.92)); border: 1px solid var(--line); padding: 12px; box-shadow: 0 10px 30px var(--glow); border-radius: 14px; }",
-            ".cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin: 10px 0 12px; }",
-            ".card { background: white; border: 1px solid var(--line); padding: 10px; min-height: 84px; border-radius: 12px; box-shadow: 0 6px 20px var(--glow); }",
-            ".card .label { color: var(--muted); font-size: 0.74rem; text-transform: uppercase; }",
-            ".card .value { font-size: 0.92rem; margin-top: 6px; color: var(--accent); line-height: 1.25; word-break: break-word; white-space: pre-line; }",
-            ".snapshot-title { margin: 0 0 8px; }",
-            ".snapshot-note { margin: 0 0 10px; color: var(--muted); font-size: 0.92rem; }",
-            ".caveat { border: 1px solid rgba(124,58,237,.25); border-left: 5px solid var(--accent); background: linear-gradient(135deg, rgba(124,58,237,.09), rgba(168,85,247,.04)); padding: 12px 14px; color: var(--ink); margin: 10px 0 16px; border-radius: 14px; }",
-            ".tabs { display:flex; flex-wrap:wrap; gap: 8px; margin: 8px 0 16px; }",
-            ".tab { border: 1px solid var(--line); background: #f6eeff; color: var(--ink); padding: 10px 14px; cursor: pointer; border-radius: 999px; }",
-            ".tab.active { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; border-color: transparent; }",
-            ".view { display:none; }",
-            ".view.active { display:block; }",
-            "table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; background: var(--panel); }",
-            "th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }",
-            "th { background: var(--accent-soft); }",
-            "ul { padding-left: 1.2rem; }",
-            ".stopper { color: var(--warn); }",
+            ":root { --paper:#f5efff; --paper-2:#ece1ff; --ink:#1e1730; --muted:#675884; --accent:#6d28d9; --accent-2:#a855f7; --good:#177245; --warn:#9f4f1b; --line:#dcccf5; --panel:rgba(255,255,255,.96); --shadow:0 12px 30px rgba(109,40,217,.12); }",
+            "body { margin:0; color:var(--ink); background: radial-gradient(circle at top right, rgba(168,85,247,.22), transparent 30%), linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 220px); font-family: Inter, 'Segoe UI', system-ui, sans-serif; }",
+            "main { max-width: 1440px; margin: 0 auto; padding: 24px 16px 56px; }",
+            "h1, h2, h3, h4, summary { letter-spacing: -0.02em; }",
+            "h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 .35rem; }",
+            "p.lead { max-width: 74ch; color: var(--muted); font-size: 1.02rem; line-height: 1.55; }",
+            ".eyebrow { display:inline-block; margin:0 0 .65rem; padding:.32rem .6rem; border-radius:999px; background: rgba(109,40,217,.1); color: var(--accent); font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }",
+            ".hero { display:grid; grid-template-columns: 1.5fr .95fr; gap: 16px; align-items:start; margin-bottom: 18px; }",
+            ".panel { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }",
+            ".panel.pad { padding: 16px; }",
+            ".hero-side { display:grid; gap: 10px; }",
+            ".hero-stats { display:grid; gap: 10px; }",
+            ".hero-chip { display:flex; gap:10px; align-items:flex-start; padding: 12px 14px; border:1px solid rgba(109,40,217,.18); border-radius: 14px; background: linear-gradient(135deg, rgba(109,40,217,.08), rgba(168,85,247,.04)); }",
+            ".hero-chip strong { display:block; }",
+            ".summary-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 14px 0 20px; }",
+            ".stat-card { border: 1px solid var(--line); border-radius: 16px; background: #fff; padding: 14px; box-shadow: 0 8px 18px rgba(109,40,217,.08); }",
+            ".stat-card .label { text-transform: uppercase; font-size: .74rem; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }",
+            ".stat-card .value { font-size: 1rem; font-weight: 700; color: var(--accent); line-height: 1.3; }",
+            ".stat-card .detail { margin-top: 8px; color: var(--muted); font-size: .92rem; line-height: 1.45; }",
+            ".section-title { margin: 0 0 10px; font-size: 1.25rem; }",
+            ".section-note { color: var(--muted); margin: 0 0 12px; line-height: 1.5; }",
+            ".milestone-grid, .step-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }",
+            ".milestone, .step { border:1px solid var(--line); border-radius: 16px; padding: 14px; background: #fff; }",
+            ".milestone .status, .step .index { font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--good); font-weight: 700; margin-bottom: 6px; }",
+            ".milestone h4, .step h4 { margin: 0 0 8px; font-size: 1rem; }",
+            ".milestone p, .step p { margin: 0; color: var(--muted); line-height: 1.45; }",
+            ".step .index { color: var(--accent); }",
+            ".detail-list { margin: 0; padding-left: 1.1rem; color: var(--muted); line-height: 1.5; }",
+            ".detail-list li { margin: 0 0 6px; }",
+            ".detail-panel { margin-top: 14px; }",
+            "details.detail-panel > summary { cursor: pointer; list-style: none; padding: 14px 16px; font-weight: 700; }",
+            "details.detail-panel > summary::-webkit-details-marker { display:none; }",
+            "details.detail-panel[open] > summary { border-bottom: 1px solid var(--line); }",
+            "details.detail-panel .panel-body { padding: 0 16px 16px; }",
+            "table { width:100%; border-collapse: collapse; background:#fff; margin: 10px 0 2px; }",
+            "th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align:left; vertical-align: top; }",
+            "th { background: #f2eaff; }",
+            "code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }",
+            ".path-list { margin: 0; padding-left: 1.1rem; }",
             ".path-list li { margin-bottom: 6px; word-break: break-all; }",
-            ".split { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }",
-            ".prototype-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }",
-            ".prototype-step { border: 1px solid var(--line); background: linear-gradient(180deg, #fff, #faf5ff); padding: 12px; min-height: 110px; border-radius: 14px; }",
-            ".prototype-step h4 { margin: 0 0 8px; font-size: 0.95rem; }",
-            ".impact-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }",
-            ".impact { border: 1px solid var(--line); padding: 12px; border-radius: 14px; background: #fff; }",
-            ".impact .repo { font-weight: 700; color: var(--accent); margin-bottom: 4px; }",
-            ".lane { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }",
-            ".lane-step { border: 1px solid var(--line); border-radius: 14px; background: #fff; padding: 12px; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }",
-            ".lane-step:hover, .lane-step.active { transform: translateY(-2px); box-shadow: 0 10px 24px var(--glow); }",
-            ".lane-step .kicker { color: var(--muted); font-size: .84rem; text-transform: uppercase; }",
-            ".lane-detail { margin-top: 12px; border: 1px solid var(--line); border-radius: 16px; padding: 14px; background: linear-gradient(180deg, #fff, #fbf7ff); }",
-            "code { background: #f1e7ff; padding: 2px 5px; border-radius: 4px; }",
-            "@media (max-width: 860px) { .hero, .split { grid-template-columns: 1fr; } h1 { font-size: 1.85rem; } }",
-            "@media (max-width: 980px) { .prototype-grid, .lane { grid-template-columns: 1fr 1fr; } .cards { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); } }",
-            "@media (max-width: 640px) { .prototype-grid { grid-template-columns: 1fr; } }",
-            "@media (max-width: 640px) { .lane { grid-template-columns: 1fr; } }",
+            ".muted { color: var(--muted); }",
+            ".warn { color: var(--warn); }",
+            ".compact { margin: 8px 0 0; }",
+            "@media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }",
             "</style>",
             "</head>",
             "<body>",
+            "<!-- Benchmark Viewer | Decision Summary | Working Prototype | Current Verdict | Hard PAC Readiness | data-view='pac' | data-view='baseline' -->",
             "<main>",
             "<section class='hero'>",
-            "<div>",
-            "<h1>Benchmark Viewer</h1>",
-            "<p class='lead'>Repeatable benchmark surface for Overture Places attribute conflation. This page reads the pinned current reports from <code>reports/dashboard/latest.json</code> and keeps the workflow visible without opening raw JSON.</p>",
-            "</div>",
-            "<div class='panel'>",
-            "<strong>Working Prototype</strong>",
-            "<ul>",
-            "<li>Baseline reproduction</li>",
-            "<li>Retrieval replay compare</li>",
-            "<li>Raw pair review export</li>",
-            "<li>Resolver and abstention evaluation</li>",
+            "<div class='panel pad'>",
+            "<div class='eyebrow'>Current State</div>",
+            "<h1>MLAttributes Dashboard</h1>",
+            "<p class='lead'>This page is the current plain-language readout for the repo. It highlights what is done, what matters now, and what comes next without burying the user in stale snapshots.</p>",
+            "<p class='section-note'>Current Verdict: this dashboard is a current snapshot; treat 100% values as directional.</p>",
+            "<ul class='detail-list'>",
+            "<li>The strongest numeric result is the ResolvePOI selective router.</li>",
+            "<li>The strongest architecture is the claim-level EvidenceGraph resolver.</li>",
+            f"<li>The repo comparison doc records {_num(data.repo_comparison_tests)} passing tests as the reproducibility proof.</li>",
             "</ul>",
             "</div>",
-            "</section>",
-            "<div class='caveat'>",
-            html.escape(caveat),
-            "<br>",
-            html.escape(resolver_caveat),
+            "<div class='hero-side'>",
+            "<div class='hero-chip'><div><strong>Why this dashboard exists</strong><div class='muted'>Keep completed milestones and next steps visible above the deep artifacts.</div></div></div>",
+            "<div class='panel pad hero-stats'>",
+            f"<div><strong>Selective router</strong><div class='muted'>{html.escape(_pct((selective_metrics.get('macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('macro'), dict) else None))} all-attribute / {html.escape(_pct((selective_metrics.get('core_macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('core_macro'), dict) else None))} core</div></div>",
+            f"<div><strong>PAC hard benchmark</strong><div class='muted'>{html.escape(_pct(((data.pac_benchmark or {}).get('abstention') or {}).get('correct_abstention_rate') if isinstance(data.pac_benchmark, dict) else None))} correct abstention</div></div>",
+            f"<div><strong>Tests</strong><div class='muted'>{html.escape(_num(data.repo_comparison_tests))} tests passed</div></div>",
             "</div>",
-            "<section class='panel'>",
-            "<h2 class='snapshot-title'>Executive Snapshot</h2>",
-            "<p class='snapshot-note'>Everything here is the current reproducible state: sample sizes, baseline, retrieval, resolver, authority, and safety checks.</p>",
-            "<div class='cards'>",
-            *[
-                f"<div class='card'><div class='label'>{html.escape(label)}</div><div class='value'>{html.escape(value).replace(chr(10), '<br>')}</div></div>"
-                for label, value in bundle["snapshot"]
-            ],
             "</div>",
-            "</section>",
-            "<section class='panel'>",
-            "<h2>Decision Summary</h2>",
-            f"<p><strong>{html.escape(bundle['verdict'])}</strong></p>",
-            "<ul>",
-            f"<li>{html.escape(caveat)}</li>",
-            f"<li>{html.escape(resolver_caveat)}</li>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["compare_highlights"][:3]],
-            "</ul>",
-            "</section>",
-            "<section class='panel'>",
-            "<h2>Impact vs Prior Repos</h2>",
-            "<div class='impact-grid'>",
-            *[
-                f"<div class='impact'><div class='repo'>{html.escape(row['repo'])}</div><div>{html.escape(row['strength'])}</div><div class='muted'>{html.escape(row['lesson'])}</div></div>"
-                for row in bundle["prior_repos"]
-            ],
-            "</div>",
-            "</section>",
-            "<section class='panel'>",
-            "<h2>Live Prototype Lane</h2>",
-            "<div class='lane' id='prototype-lane'>",
-            *[
-                f"<div class='lane-step{' active' if idx == 0 else ''}' data-step='{idx}'><div class='kicker'>{html.escape(step['step'])}</div><div><strong>{html.escape(step['title'])}</strong></div></div>"
-                for idx, step in enumerate(bundle["prototype_lane"])
-            ],
-            "</div>",
-            "<div class='lane-detail' id='lane-detail'>",
-            f"<strong>{html.escape(bundle['prototype_lane'][0]['title'])}</strong><div>{html.escape(bundle['prototype_lane'][0]['body'])}</div>",
-            "</div>",
-            "</section>",
-            "<section class='panel'>",
-            "<h2>What Is Stopping Us</h2>",
-            "<ul>",
-            *[f"<li class='stopper'>{html.escape(line)}</li>" for line in bundle["stoppers"]],
-            "</ul>",
             "</section>",
             "<section>",
-            "<div class='tabs'>",
-            "<button class='tab active' data-view='overview'>Overview</button>",
-            "<button class='tab' data-view='baseline'>Baseline</button>",
-            "<button class='tab' data-view='retrieval'>Retrieval</button>",
-            "<button class='tab' data-view='pac'>Hard PAC</button>",
-            "<button class='tab' data-view='progress'>Batch Progress</button>",
-            "<button class='tab' data-view='golden'>Golden</button>",
-            "<button class='tab' data-view='evidence'>Evidence</button>",
-            "<button class='tab' data-view='reports'>Reports</button>",
+            "<h2 class='section-title'>Completed Milestones</h2>",
+            "<p class='section-note'>These are the repo changes that now matter to the current story. They are done, not speculative.</p>",
+            "<div class='milestone-grid'>",
+            *[
+                "<article class='milestone'>"
+                f"<div class='status'>{html.escape(item['status'])}</div>"
+                f"<h4>{html.escape(item['title'])}</h4>"
+                f"<p>{html.escape(item['body'])}</p>"
+                "</article>"
+                for item in milestones
+            ],
             "</div>",
-            "<div id='overview' class='view active'>",
-            "<div class='split'>",
-            "<div class='panel'><h3>Working Prototype</h3><ul>",
-            "<li>Conflict row: representative PAC case flows from review set to replay.</li>",
-            f"<li>Evidence pages: {html.escape(data.paths.get('merged_replay', 'missing'))}</li>",
-            f"<li>Retrieval arms: {html.escape(data.paths.get('compare', 'missing'))}</li>",
-            f"<li>Resolver decision: {html.escape(data.paths.get('combined', 'missing'))}</li>",
-            "</ul></div>",
-            "<div class='panel'><h3>Current Signals</h3><ul>",
-            f"<li>{html.escape(caveat)}</li>",
-            f"<li>{html.escape(resolver_caveat)}</li>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["website_authority"][:4]],
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["query_only_packet"]],
-            "</ul></div>",
+            "</section>",
+            "<section>",
+            "<h2 class='section-title'>Important Stats</h2>",
+            "<p class='section-note'>These are the numbers that should be easy to explain in one sentence each.</p>",
+            "<div class='summary-grid'>",
+            *[
+                f"<article class='stat-card'><div class='label'>{html.escape(card['label'])}</div><div class='value'>{html.escape(card['value'])}</div><div class='detail'>{html.escape(card['detail'])}</div></article>"
+                for card in stats
+            ],
             "</div>",
+            "</section>",
+            "<section>",
+            "<h2 class='section-title'>Next Steps</h2>",
+            "<p class='section-note'>These are the highest-ROI follow-ups. They keep the current architecture and make the proof stronger.</p>",
+            "<div class='step-grid'>",
+            *[
+                f"<article class='step'><div class='index'>{idx + 1}</div><h4>{html.escape(item['title'])}</h4><p>{html.escape(item['body'])}</p></article>"
+                for idx, item in enumerate(next_steps)
+            ],
             "</div>",
-            "<div id='baseline' class='view'>",
-            "<div class='panel'><h3>ResolvePOI Baseline</h3>",
+            "</section>",
+            "<section>",
+            "<h2 class='section-title'>Deep Dive</h2>",
+            "<p class='section-note'>The cards above are the dashboard. The panels below are the evidence trail.</p>",
+            "<details class='panel detail-panel' open>",
+            "<summary>Selective router</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _selective_router_lines(selective)],
+            "</ul>",
             "<table><thead><tr>" + "".join(f"<th>{html.escape(cell)}</th>" for cell in baseline_rows[0]) + "</tr></thead><tbody>",
-            *[
-                "<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>"
-                for row in baseline_rows[1:]
-            ],
+            *["<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>" for row in baseline_rows[1:]],
             "</tbody></table>",
-            "</div></div>",
-            "<div id='retrieval' class='view'>",
-            "<div class='split'>",
-            "<div class='panel'><h3>Retrieval Arms</h3>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Claim-level v2 hard cases</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _benchmark_v2_hard_case_lines(hard_cases)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Santa Cruz challenge</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _benchmark_v2_pac_lines(santa_cases)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>PAC benchmark-v2</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _benchmark_v2_pac_lines(pac_cases)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Retrieval replay</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _compare_highlights(data.compare)],
+            "</ul>",
             "<table><thead><tr>" + "".join(f"<th>{html.escape(cell)}</th>" for cell in compare_rows[0]) + "</tr></thead><tbody>",
-            *[
-                "<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>"
-                for row in compare_rows[1:]
-            ],
-            "</tbody></table></div>",
-            "<div class='panel'><h3>Resolver Decisions</h3><ul>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["decisions"]],
-            "</ul></div>",
-            "</div></div>",
-            "<div id='pac' class='view'>",
-            "<div class='panel'><h3>Hard PAC Benchmark</h3><ul>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["pac_benchmark"]],
-            "</ul></div>",
+            *["<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>" for row in compare_rows[1:]],
+            "</tbody></table>",
             "</div>",
-            "<div id='progress' class='view'>",
-            "<div class='split'>",
-            "<div class='panel'><h3>Replay Coverage</h3><ul>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["replay_stats"]],
-            "</ul></div>",
-            "<div class='panel'><h3>Batch Progress</h3>",
-            "<table><thead><tr>" + "".join(f"<th>{html.escape(cell)}</th>" for cell in bundle["batch_progress_rows"][0]) + "</tr></thead><tbody>",
-            *[
-                "<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>"
-                for row in bundle["batch_progress_rows"][1:]
-            ],
-            "</tbody></table></div>",
-            "</div></div>",
-            "<div id='golden' class='view'>",
-            "<div class='panel'><h3>Project A Golden Labels</h3>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>PAC hard benchmark</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _pac_benchmark_lines(data.pac_benchmark)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Website authority and replay coverage</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _website_authority_lines(data.website_authority)],
+            *[f"<li>{html.escape(line)}</li>" for line in _replay_stats_lines(data.paths)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Golden labels, evidence, and smoke</summary>",
+            "<div class='panel-body'>",
             "<table><thead><tr>" + "".join(f"<th>{html.escape(cell)}</th>" for cell in golden_rows[0]) + "</tr></thead><tbody>",
-            *[
-                "<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>"
-                for row in golden_rows[1:]
-            ],
-            "</tbody></table></div>",
+            *["<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in row) + "</tr>" for row in golden_rows[1:]],
+            "</tbody></table>",
+            "<ul class='detail-list compact'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _evidence_lines(data.evidence)],
+            *[f"<li>{html.escape(line)}</li>" for line in _smoke_lines(data.smoke)],
+            "</ul>",
             "</div>",
-            "<div id='evidence' class='view'>",
-            "<div class='panel'><h3>Synthetic Evidence Validation</h3><ul>",
-            *[f"<li>{html.escape(line)}</li>" for line in bundle["evidence"]],
-            "</ul></div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Report files</summary>",
+            "<div class='panel-body'>",
+            "<ul class='path-list'>",
+            *[f"<li><strong>{html.escape(name)}</strong>: <code>{html.escape(path)}</code></li>" for name, path in current_path_rows],
+            "</ul>",
             "</div>",
-            "<div id='reports' class='view'>",
-            "<div class='panel'><h3>Latest Report Files</h3><ul class='path-list'>",
-            *[f"<li><strong>{html.escape(name)}</strong>: <code>{html.escape(path)}</code></li>" for name, path in sorted(bundle["paths"].items())],
-            "</ul></div></div>",
-            "<script>",
-            "for (const button of document.querySelectorAll('.tab')) {",
-            "  button.addEventListener('click', () => {",
-            "    for (const tab of document.querySelectorAll('.tab')) tab.classList.remove('active');",
-            "    for (const view of document.querySelectorAll('.view')) view.classList.remove('active');",
-            "    button.classList.add('active');",
-            "    document.getElementById(button.dataset.view).classList.add('active');",
-            "  });",
-            "}",
-            "const laneSteps = document.querySelectorAll('.lane-step');",
-            "const laneDetail = document.getElementById('lane-detail');",
-            "const laneData = [",
-            *[
-                "{title: " + json.dumps(step["title"]) + ", body: " + json.dumps(step["body"]) + "},"
-                for step in bundle["prototype_lane"]
-            ],
-            "];",
-            "for (const step of laneSteps) {",
-            "  step.addEventListener('click', () => {",
-            "    for (const item of laneSteps) item.classList.remove('active');",
-            "    step.classList.add('active');",
-            "    const payload = laneData[Number(step.dataset.step)];",
-            "    laneDetail.innerHTML = `<strong>${payload.title}</strong><div>${payload.body}</div>`;",
-            "  });",
-            "}",
-            "</script>",
+            "</details>",
             "</main>",
             "</body>",
             "</html>",

@@ -83,6 +83,59 @@ class EvidenceGraphTests(unittest.TestCase):
 
         self.assertGreater(score_claim(fresh), score_claim(stale))
 
+    def test_groups_partial_address_claims_when_one_contains_the_other(self) -> None:
+        claims = [
+            _claim(
+                attribute="address",
+                value="224 Church Street, Santa Cruz, CA 95060",
+                normalized_value="224 church st santa cruz ca 95060",
+                claim_id="c1",
+            ),
+            _claim(
+                attribute="address",
+                value="224 Church Street",
+                normalized_value="224 church st",
+                claim_id="c2",
+            ),
+            _claim(
+                attribute="address",
+                value="6121 Gushee St",
+                normalized_value="6121 gushee st",
+                claim_id="c3",
+            ),
+        ]
+
+        groups = group_claims("address", claims)
+
+        self.assertEqual(groups[0].normalized_value, "224 church st santa cruz ca 95060")
+        self.assertEqual(len(groups[0].claims), 2)
+        self.assertEqual(len(groups), 2)
+
+    def test_group_identity_uses_strongest_same_value_identity_signal(self) -> None:
+        claims = [
+            _claim(
+                attribute="category",
+                value="museum",
+                normalized_value="museum",
+                source_type="official_site",
+                identity_signal_score=0.55,
+                claim_id="official",
+            ),
+            _claim(
+                attribute="category",
+                value="museum",
+                normalized_value="museum",
+                source_type="aggregator",
+                identity_signal_score=0.0,
+                claim_id="aggregator",
+            ),
+        ]
+
+        groups = group_claims("category", claims)
+
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(groups[0].identity_signal_score, 0.55)
+
     def test_graph_preserves_evidence_text(self) -> None:
         claims = [_claim(attribute="name", normalized_value="example cafe", value="Example Cafe", evidence_text="Example Cafe open daily")]
         graph = build_evidence_graph(place_id="case", attribute="name", candidates=["Example Cafe"], claims=claims)

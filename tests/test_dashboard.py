@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -345,6 +346,25 @@ class DashboardTests(unittest.TestCase):
             data = build_dashboard_data(root)
 
             self.assertIn(["1", "1", "1", "1"], data.batch_progress_rows)
+
+    def test_dashboard_loads_relative_paths_that_already_include_reports_root(self):
+        old_cwd = Path.cwd()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            try:
+                os.chdir(tmpdir)
+                root = Path("reports")
+                hard_case_report = root / "harness" / "benchmark_v2_hard_cases_current.json"
+                hard_case_report.parent.mkdir(parents=True)
+                hard_case_report.write_text(
+                    json.dumps({"resolver_v2": {"accuracy": 0.5, "abstention_rate": 0.25, "high_confidence_wrong_rate": 0.0}}),
+                    encoding="utf-8",
+                )
+
+                data = build_dashboard_data(root)
+
+                self.assertEqual(data.benchmark_v2_hard_cases["resolver_v2"]["accuracy"], 0.5)
+            finally:
+                os.chdir(old_cwd)
 
 
 if __name__ == "__main__":

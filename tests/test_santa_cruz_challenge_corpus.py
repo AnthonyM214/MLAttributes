@@ -1,0 +1,148 @@
+from __future__ import annotations
+
+import unittest
+from collections import Counter
+from pathlib import Path
+
+from places_attr_conflation.benchmark_v2 import evaluate_benchmark_v2
+from places_attr_conflation.claim_extraction import extract_claims_from_replay_episode
+from places_attr_conflation.evidence_graph import build_evidence_graph
+from places_attr_conflation.replay import load_replay_corpus
+
+
+FIXTURE = Path(__file__).resolve().parent / "fixtures" / "santa_cruz_challenge_replay.json"
+
+
+class SantaCruzChallengeCorpusTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.episodes = load_replay_corpus(FIXTURE)
+        cls.report = evaluate_benchmark_v2(cls.episodes, include_decisions=True)
+
+    def _decision(self, case_id: str) -> dict[str, object]:
+        for row in self.report["expected_behavior"]["resolver_v2"]["decisions"]:  # type: ignore[index]
+            if row["case_id"] == case_id:
+                return row
+        raise AssertionError(f"missing decision for {case_id}")
+
+    def test_challenge_corpus_is_explicitly_hard(self) -> None:
+        self.assertEqual(len(self.episodes), 11)
+        self.assertEqual(Counter(episode.attribute for episode in self.episodes), {
+            "phone": 6,
+            "address": 2,
+            "category": 1,
+            "name": 1,
+            "website": 1,
+        })
+        self.assertEqual(Counter(episode.case_type for episode in self.episodes), {
+            "BRANCH_AMBIGUITY": 1,
+            "BRANCH_CONTEXT_CORROBORATED": 2,
+            "OFFICIAL_CATEGORY_VS_DIRECTORY": 1,
+            "OFFICIAL_BRANCH_SPECIFIC": 1,
+            "OFFICIAL_CONTACT_WITH_NON_PRIMARY_PHONE": 1,
+            "OFFICIAL_CURRENT_ARCHIVE_STALE": 1,
+            "OFFICIAL_LOCATION_VS_MAILING_ADDRESS": 1,
+            "OFFICIAL_NAME_VS_DIRECTORY_ALIAS": 1,
+            "OFFICIAL_WEBSITE_VS_SOCIAL": 1,
+            "OFFICIAL_PAGE_VS_STAFF_PAGE": 1,
+        })
+        self.assertEqual(sum(episode.expected_abstain is True for episode in self.episodes), 1)
+        self.assertEqual(Counter(episode.label_origin for episode in self.episodes), {
+            "authoritative_santa_cruz_challenge_v1": 5,
+            "authoritative_santa_cruz_challenge_v2": 3,
+            "authoritative_santa_cruz_challenge_v3": 3,
+        })
+
+    def test_resolver_v2_expected_behavior_matches_challenge_labels(self) -> None:
+        expected = self.report["expected_behavior"]["resolver_v2"]  # type: ignore[index]
+
+        self.assertEqual(expected["accuracy"], 1.0)
+        self.assertAlmostEqual(expected["abstention_rate"], 1 / 11)
+        self.assertEqual(expected["high_confidence_wrong_rate"], 0.0)
+
+        ambiguous = self._decision("scpl-branch-ambiguous-phone")
+        self.assertTrue(ambiguous["abstained"])
+        self.assertTrue(ambiguous["correct"])
+        self.assertIn("contradict", str(ambiguous["reason"]).lower())
+
+    def test_resolver_v2_selects_specific_authoritative_contact_values(self) -> None:
+        expected_values = {
+            "scpl-branch-context-phone-no-extracted": "8314277707",
+            "scpl-branch-specific-phone": "8314277707",
+            "registrar-phone-with-fax": "8314594412",
+            "registrar-archive-stale-phone": "8314594412",
+            "norris-center-vs-staff-phone": "8314594763",
+        }
+
+        for case_id, expected_value in expected_values.items():
+            with self.subTest(case_id=case_id):
+                decision = self._decision(case_id)
+                self.assertFalse(decision["abstained"])
+                self.assertEqual(decision["decision"], expected_value)
+                self.assertTrue(decision["correct"])
+
+    def test_resolver_v2_selects_cross_attribute_authoritative_values_without_prefilled_extraction(self) -> None:
+        expected_values = {
+            "museum-official-contact-website-vs-social": "santacruzmuseum.org/about/contact-us",
+            "museum-category-official-vs-directory": "museum",
+            "museum-name-contact-title-vs-directory": "santa cruz museum of natural history",
+        }
+
+        for case_id, expected_value in expected_values.items():
+            with self.subTest(case_id=case_id):
+                episode = next(episode for episode in self.episodes if episode.case_id == case_id)
+                claims = extract_claims_from_replay_episode(episode)
+                decision = self._decision(case_id)
+
+                self.assertFalse(any(claim.extraction_method == "page_extracted_value" for claim in claims))
+                self.assertFalse(decision["abstained"])
+                self.assertEqual(decision["decision"], expected_value)
+                self.assertTrue(decision["correct"])
+
+    def test_resolver_v2_selects_authoritative_address_values_without_prefilled_extraction(self) -> None:
+        expected_values = {
+            "scpl-branch-context-address-no-extracted": "224 Church Street, Santa Cruz, CA 95060",
+            "registrar-office-vs-mailing-address": "190 Hahn Student Services Building",
+        }
+
+        for case_id, expected_value in expected_values.items():
+            with self.subTest(case_id=case_id):
+                episode = next(episode for episode in self.episodes if episode.case_id == case_id)
+                claims = extract_claims_from_replay_episode(episode)
+                decision = self._decision(case_id)
+
+                self.assertTrue(any(claim.extraction_method == "context_address_in_text" for claim in claims))
+                self.assertFalse(any(claim.extraction_method == "page_extracted_value" for claim in claims))
+                self.assertFalse(decision["abstained"])
+                self.assertEqual(decision["decision"], expected_value)
+                self.assertTrue(decision["correct"])
+
+    def test_ambiguous_scpl_branch_page_builds_contradictory_claim_groups(self) -> None:
+        episode = next(episode for episode in self.episodes if episode.case_id == "scpl-branch-ambiguous-phone")
+        claims = extract_claims_from_replay_episode(episode)
+        graph = build_evidence_graph(
+            place_id=episode.case_id,
+            attribute=episode.attribute,
+            candidates=[],
+            claims=claims,
+        )
+
+        self.assertGreaterEqual(len(graph.groups), 3)
+        self.assertGreaterEqual(len(graph.contradictions), 3)
+        self.assertIn("8314277707", {group.normalized_value for group in graph.groups})
+        self.assertIn("8314277708", {group.normalized_value for group in graph.groups})
+
+    def test_branch_context_case_selects_without_prefilled_phone_extraction(self) -> None:
+        episode = next(episode for episode in self.episodes if episode.case_id == "scpl-branch-context-phone-no-extracted")
+        claims = extract_claims_from_replay_episode(episode)
+
+        self.assertTrue(any(claim.extraction_method == "branch_directory_phone" for claim in claims))
+        self.assertFalse(any(claim.extraction_method == "page_extracted_value" for claim in claims))
+
+        decision = self._decision("scpl-branch-context-phone-no-extracted")
+        self.assertFalse(decision["abstained"])
+        self.assertEqual(decision["decision"], "8314277707")
+
+
+if __name__ == "__main__":
+    unittest.main()

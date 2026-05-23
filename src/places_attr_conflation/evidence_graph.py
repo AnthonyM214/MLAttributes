@@ -106,6 +106,23 @@ def score_claim(claim: AttributeClaim) -> float:
     return _clamp(score)
 
 
+def _address_values_compatible(left: str, right: str) -> bool:
+    if left == right:
+        return True
+    padded_left = f" {left} "
+    padded_right = f" {right} "
+    return padded_left in padded_right or padded_right in padded_left
+
+
+def _group_key_for_normalized(attribute: str, normalized: str, existing_keys: Iterable[str]) -> tuple[str, str | None]:
+    if attribute != "address":
+        return normalized, None
+    for existing in existing_keys:
+        if _address_values_compatible(existing, normalized):
+            return (existing if len(existing) >= len(normalized) else normalized), existing
+    return normalized, None
+
+
 def group_claims(attribute: str, claims: list[AttributeClaim]) -> list[ClaimGroup]:
     normalizer = _normalizer(attribute)
     grouped: dict[str, list[AttributeClaim]] = {}
@@ -116,8 +133,12 @@ def group_claims(attribute: str, claims: list[AttributeClaim]) -> list[ClaimGrou
         normalized = claim.normalized_value or normalizer(claim.value)
         if not normalized:
             continue
-        grouped.setdefault(normalized, []).append(claim)
-        display.setdefault(normalized, claim.value or normalized)
+        key, existing = _group_key_for_normalized(attribute, normalized, grouped.keys())
+        if existing is not None and key != existing:
+            grouped[key] = grouped.pop(existing)
+            display[key] = claim.value if len(normalized) >= len(existing) else display.pop(existing, existing)
+        grouped.setdefault(key, []).append(claim)
+        display.setdefault(key, claim.value or key)
 
     groups: list[ClaimGroup] = []
     for normalized_value, items in grouped.items():
@@ -135,7 +156,7 @@ def group_claims(attribute: str, claims: list[AttributeClaim]) -> list[ClaimGrou
                 best_source_type=top_claim.source_type,
                 contradiction_count=0,
                 stale_signal_score=sum(claim.stale_signal_score for claim in items) / len(items),
-                identity_signal_score=sum(claim.identity_signal_score for claim in items) / len(items),
+                identity_signal_score=max(claim.identity_signal_score for claim in items),
             )
         )
     return sorted(groups, key=lambda group: (group.total_support, group.max_support), reverse=True)

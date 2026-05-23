@@ -13,6 +13,7 @@ python3 scripts/run_harness.py replay-stats --input tests/fixtures/retrieval_rep
 python3 scripts/run_harness.py website-authority --input tests/fixtures/retrieval_replay_sample.json
 python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/hard_cases_replay.json --include-decisions --output reports/harness/benchmark_v2_hard_cases_current.json
 python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/pac_hard_cases_replay.json --include-decisions --output reports/harness/benchmark_v2_pac_hard_cases_current.json
+python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions --output reports/harness/benchmark_v2_santa_cruz_challenge_current.json
 python3 scripts/run_harness.py resolvepoi-v2 --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --limit 400 --output reports/resolvepoi_v2/resolvepoi_v2_400.json
 python3 scripts/run_harness.py resolvepoi-v2 --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --limit 200 --output reports/resolvepoi_v2/resolvepoi_v2_200.json
 python3 scripts/run_harness.py resolvepoi-selective --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json --limit 400 --include-decisions --output reports/resolvepoi_selective/resolvepoi_selective_current.json
@@ -23,7 +24,9 @@ Current outputs:
 
 | Artifact | Result |
 | --- | --- |
-| Unit tests | `192` tests passed |
+| Unit tests | `216` tests passed |
+| Santa Cruz expanded corpus | `24` episodes; targeted authoritative found rate `1.0`, fallback `0.0`; final accuracy `1.0` |
+| Santa Cruz challenge corpus | `11` episodes across website, phone, address, category, and name; resolver v2 expected-behavior accuracy `1.0`, abstention rate `0.0909`, high-confidence-wrong rate `0.0`; v2 adds branch-context phone/address, office-vs-mailing address, official-vs-social website, official-vs-directory category, and title-cleaned name cases without prefilled extraction |
 | Retrieval compare | targeted authoritative found `0.75`, fallback `0.0`; targeted citation precision `0.75`; citation precision proxy delta `+1.0` |
 | Replay stats | `4` episodes, `8` attempts, `9` pages, authoritative pages rate `0.3333` |
 | Website authority | authoritative found rate `1.0`, false official rate `0.0` |
@@ -38,6 +41,7 @@ See:
 
 - [`reports/harness/benchmark_v2_hard_cases_current.json`](reports/harness/benchmark_v2_hard_cases_current.json)
 - [`reports/harness/benchmark_v2_pac_hard_cases_current.json`](reports/harness/benchmark_v2_pac_hard_cases_current.json)
+- [`reports/harness/benchmark_v2_santa_cruz_challenge_current.json`](reports/harness/benchmark_v2_santa_cruz_challenge_current.json)
 - [`reports/resolvepoi_selective/resolvepoi_selective_current.json`](reports/resolvepoi_selective/resolvepoi_selective_current.json)
 - [`reports/retrieval_compare/compare_20260522_094013_903966.json`](reports/retrieval_compare/compare_20260522_094013_903966.json)
 - [`reports/replay_stats/replay_stats_20260522_094014_236160.json`](reports/replay_stats/replay_stats_20260522_094014_236160.json)
@@ -99,7 +103,9 @@ The new `resolvepoi-v2` adapter still serves as the legacy row-label proxy bench
 
 ## Reproducibility Notes
 
-- The local test suite passed on this checkout: `192` tests.
+- The local test suite passed on this checkout: `216` tests.
+- The Santa Cruz replay corpus now includes an expanded `24`-episode slice in addition to the original `12`-episode starter corpus, and both replay cleanly.
+- The Santa Cruz challenge corpus adds `11` cases across all five core attributes for branch ambiguity, branch-context phone/address selection without prefilled extraction, office-vs-mailing address selection, official-vs-social website selection, official-vs-directory category selection, title-cleaned name selection, primary-phone vs fax, stale archive conflict, and contact-page vs staff-page conflict.
 - The benchmark outputs above were generated from checked-in fixtures and written to `reports/harness/benchmark_v2_*_current.json`.
 - The ResolvePOI adapter outputs were generated from the local `ResolvePOI-Attribute-Conflation` checkout and written to `reports/resolvepoi_v2/resolvepoi_v2_*`.
 - The public repo comparison is based on each repository’s README and should be treated as published claims, not a re-run benchmark.

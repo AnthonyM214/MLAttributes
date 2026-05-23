@@ -1,0 +1,507 @@
+{
+  "generated_at": "2026-05-23T08:45:00+00:00",
+  "schema_version": 1,
+  "episodes": [
+    {
+      "attribute": "phone",
+      "case_id": "scpl-branch-ambiguous-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "831-427-7707",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-427-7708",
+        "city": "Santa Cruz",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.35,
+              "notes": "Official branch directory lists several branches and phone numbers on the same page; branch-specific selection should abstain without stronger context.",
+              "page_text": "Library Branches\nDowntown\n224 Church Street\nSanta Cruz, CA 95060\n831-427-7707\nFelton\n6121 Gushee St.\nFelton, CA 95018\n831-427-7708\nGarfield Park\n705 Woodrow Avenue\nSanta Cruz, CA 95060\n831-427-7709",
+              "recency_days": 14,
+              "source_type": "official_site",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzpl.org branches Downtown Felton Garfield phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "scpl-branch-context-phone-no-extracted",
+      "case_type": "BRANCH_CONTEXT_CORROBORATED",
+      "expected_abstain": false,
+      "expected_decision": "831-427-7707",
+      "gold_value": "831-427-7707",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v2",
+      "place": {
+        "address": "224 Church Street, Santa Cruz, CA 95060",
+        "base_phone": "831-427-7708",
+        "city": "Santa Cruz",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official branch directory lists multiple branch phones; known branch address corroborates the Downtown row without using a prefilled phone extraction.",
+              "page_text": "Library Branches\nDowntown\n224 Church Street\nSanta Cruz, CA 95060\n831-427-7707\nFelton\n6121 Gushee St.\nFelton, CA 95018\n831-427-7708\nGarfield Park\n705 Woodrow Avenue\nSanta Cruz, CA 95060\n831-427-7709",
+              "recency_days": 14,
+              "source_type": "official_site",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzpl.org branches Downtown 224 Church Street phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "scpl-branch-context-address-no-extracted",
+      "case_type": "BRANCH_CONTEXT_CORROBORATED",
+      "expected_abstain": false,
+      "expected_decision": "224 Church Street, Santa Cruz, CA 95060",
+      "gold_value": "224 Church Street, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v2",
+      "place": {
+        "address": "224 Church Street, Santa Cruz, CA 95060",
+        "base_address": "117 Union Street, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "224 Church Street, Santa Cruz, CA 95060",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official SCPL directory lists several branch addresses; Downtown address in place context corroborates the correct row without prefilled extraction.",
+              "page_text": "Phone & Email Directory\nDowntown\n831-427-7707\n224 Church Street\nSanta Cruz, CA 95060\nFelton\n831-427-7708\n6121 Gushee St.\nFelton, CA 95018\nGarfield Park\n831-427-7709\n705 Woodrow Avenue\nSanta Cruz, CA 95060",
+              "recency_days": 3,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/contact/phonelist/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzpl.org/contact/phonelist Downtown 224 Church Street Santa Cruz"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "registrar-office-vs-mailing-address",
+      "case_type": "OFFICIAL_LOCATION_VS_MAILING_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "190 Hahn Student Services Building",
+      "gold_value": "190 Hahn Student Services Building",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v2",
+      "place": {
+        "base_address": "188 Unknown Road, Santa Cruz, CA",
+        "city": "Santa Cruz",
+        "current_address": "190 Hahn Student Services Building",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official registrar page contains both office location and mailing address; office location should win for the POI address.",
+              "page_text": "Contact Information\nOffice of the Registrar\nGeneral Inquiries\n831-459-4412\nOffice Location & Open Hours\nLocation\n190 Hahn Student Services Building\nMailing Address\nOffice of the Registrar\nUniversity of California, Santa Cruz\n1156 High Street\nSanta Cruz, CA 95064\nFax\n831-459-5051",
+              "recency_days": 7,
+              "source_type": "official_site",
+              "title": "Contact Information - Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-information/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu/about/contact-information \"190 Hahn Student Services\" \"1156 High Street\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "museum-official-contact-website-vs-social",
+      "case_type": "OFFICIAL_WEBSITE_VS_SOCIAL",
+      "expected_abstain": false,
+      "expected_decision": "https://santacruzmuseum.org/about/contact-us/",
+      "gold_value": "https://santacruzmuseum.org/about/contact-us/",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v3",
+      "place": {
+        "base_website": "https://facebook.com/santacruzmuseum",
+        "city": "Santa Cruz",
+        "current_website": "https://santacruzmuseum.org/",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official contact page exposes the museum contact URL in visible text; social profile must not become the canonical website.",
+              "page_text": "Santa Cruz Museum of Natural History\nGeneral Museum Info\nOfficial contact page: https://santacruzmuseum.org/about/contact-us/\n1305 E Cliff Dr, Santa Cruz, CA 95062\n(831) 420-6115",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzmuseum.org/about/contact-us Santa Cruz Museum contact website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.15,
+              "notes": "Social profile is relevant but not the authoritative website.",
+              "page_text": "Follow the Santa Cruz Museum of Natural History on Facebook: https://facebook.com/santacruzmuseum",
+              "recency_days": 20,
+              "source_type": "social",
+              "title": "Santa Cruz Museum of Natural History - Facebook",
+              "url": "https://facebook.com/santacruzmuseum",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "Santa Cruz Museum of Natural History Facebook"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "category",
+      "case_id": "museum-category-official-vs-directory",
+      "case_type": "OFFICIAL_CATEGORY_VS_DIRECTORY",
+      "expected_abstain": false,
+      "expected_decision": "museum",
+      "gold_value": "museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v3",
+      "place": {
+        "base_category": "library",
+        "city": "Santa Cruz",
+        "current_category": "museum",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official museum page describes the entity as a natural history museum.",
+              "page_text": "The Santa Cruz Museum of Natural History connects people with science and nature. General Museum Info. Natural history museum exhibits, collections, school programs, and public programs.",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzmuseum.org Santa Cruz Museum Natural History museum"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.2,
+              "notes": "Directory text uses a nearby historical library/building context and should not override official museum category.",
+              "page_text": "Directory listing near a historic library building and park. Santa Cruz Museum of Natural History.",
+              "recency_days": 120,
+              "source_type": "aggregator",
+              "title": "Santa Cruz attractions directory",
+              "url": "https://directory.example/santa-cruz-museum",
+              "zombie_score": 0.2
+            }
+          ],
+          "layer": "fallback",
+          "query": "Santa Cruz Museum category directory"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "name",
+      "case_id": "museum-name-contact-title-vs-directory",
+      "case_type": "OFFICIAL_NAME_VS_DIRECTORY_ALIAS",
+      "expected_abstain": false,
+      "expected_decision": "Santa Cruz Museum of Natural History",
+      "gold_value": "Santa Cruz Museum of Natural History",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v3",
+      "place": {
+        "base_name": "Seabright Museum",
+        "city": "Santa Cruz",
+        "current_name": "Santa Cruz Museum",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official contact title has a generic prefix that must be stripped before treating the title as the entity name.",
+              "page_text": "Santa Cruz Museum of Natural History\nGeneral Museum Info\n1305 E Cliff Dr, Santa Cruz, CA 95062\n(831) 420-6115",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzmuseum.org/about/contact-us \"Santa Cruz Museum of Natural History\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.15,
+              "notes": "Aggregator alias is shorter and less authoritative.",
+              "page_text": "Seabright Museum listing near Tyrrell Park.",
+              "recency_days": 150,
+              "source_type": "aggregator",
+              "title": "Seabright Museum - Local Directory",
+              "url": "https://directory.example/seabright-museum",
+              "zombie_score": 0.2
+            }
+          ],
+          "layer": "fallback",
+          "query": "Santa Cruz Museum alias directory"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "scpl-branch-specific-phone",
+      "case_type": "OFFICIAL_BRANCH_SPECIFIC",
+      "expected_abstain": false,
+      "expected_decision": "831-427-7707",
+      "gold_value": "831-427-7707",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-427-7708",
+        "city": "Santa Cruz",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-427-7707"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Downtown-specific extracted value from the official branch directory.",
+              "page_text": "Library Branches\nDowntown\n224 Church Street\nSanta Cruz, CA 95060\n831-427-7707\nFelton\n6121 Gushee St.\nFelton, CA 95018\n831-427-7708\nGarfield Park\n705 Woodrow Avenue\nSanta Cruz, CA 95060\n831-427-7709",
+              "recency_days": 14,
+              "source_type": "official_site",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzpl.org \"Downtown\" \"831-427-7707\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "registrar-phone-with-fax",
+      "case_type": "OFFICIAL_CONTACT_WITH_NON_PRIMARY_PHONE",
+      "expected_abstain": false,
+      "expected_decision": "831-459-4412",
+      "gold_value": "831-459-4412",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-459-5051",
+        "city": "Santa Cruz",
+        "current_phone": "831-459-4412",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-459-4412"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official registrar contact page includes both phone and fax; extracted primary phone must win.",
+              "page_text": "Contact Information Office of the Registrar\nPhone 831-459-4412\nFax 831-459-5051\nOffice Address\nOffice of the Registrar\n190 Hahn Student Services\nUniversity of California, Santa Cruz\nSanta Cruz, CA 95064\nMailing Address\nOffice of the Registrar\nUniversity of California, Santa Cruz\n1156 High Street\nSanta Cruz, CA 95064",
+              "recency_days": 9,
+              "source_type": "official_site",
+              "title": "Contact Information - Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu contact registrar phone fax"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "registrar-archive-stale-phone",
+      "case_type": "OFFICIAL_CURRENT_ARCHIVE_STALE",
+      "expected_abstain": false,
+      "expected_decision": "831-459-4412",
+      "gold_value": "831-459-4412",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-459-2868",
+        "city": "Santa Cruz",
+        "current_phone": "831-459-4412",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-459-4412"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Current official registrar contact page.",
+              "page_text": "Contact Information Office of the Registrar\nPhone 831-459-4412\nFax 831-459-5051\nOffice Address\nOffice of the Registrar\n190 Hahn Student Services\nUniversity of California, Santa Cruz\nSanta Cruz, CA 95064",
+              "recency_days": 9,
+              "source_type": "official_site",
+              "title": "Contact Information - Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu contact registrar phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.2,
+              "notes": "Archived registrar catalog page; stale source for live contact phone.",
+              "page_text": "Archived catalog page. For further information, call (831) 459-2868, visit the web site mep.soe.ucsc.edu, or drop by. Applications for undergraduates are available from the Office of the Registrar, 190 Hahn Student Services. For more information, call (831) 459-4412 or e-mail registrar@ucsc.edu.",
+              "recency_days": 4000,
+              "source_type": "official_site",
+              "title": "Search Registrar archive",
+              "url": "https://registrar.ucsc.edu/catalog/archive/09-10/2009-10updates.pdf",
+              "zombie_score": 0.9
+            }
+          ],
+          "layer": "freshness",
+          "query": "site:registrar.ucsc.edu archive registrar 2009 phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "norris-center-vs-staff-phone",
+      "case_type": "OFFICIAL_PAGE_VS_STAFF_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "831-459-4763",
+      "gold_value": "831-459-4763",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-459-5017",
+        "city": "Santa Cruz",
+        "current_phone": "831-459-4763",
+        "name": "UC Santa Cruz Norris Center for Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {
+                "phone": "831-459-4763"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official Norris Center contact page.",
+              "page_text": "Contact Us\nVisit Us\nNatural Sciences Building\nRoom 239\n1156 High St\nSanta Cruz, CA 95064\nContact Info\nEmail: norriscenter@ucsc.edu\nPhone: (831) 459-4763",
+              "recency_days": 6,
+              "source_type": "official_site",
+              "title": "Contact Us - Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:norriscenter.ucsc.edu contact phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.25,
+              "notes": "Staff profile page has a different staff phone and should not override the center contact page.",
+              "page_text": "Staff & Affiliates\nPhone: 831-459-5017\nRoom: Natural Sciences 2, Room 239\nStaff profile and affiliate contact details.",
+              "recency_days": 18,
+              "source_type": "official_site",
+              "title": "Staff & Affiliates - Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/staff-affiliates/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:norriscenter.ucsc.edu staff affiliates phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    }
+  ]
+}
