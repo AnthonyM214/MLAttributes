@@ -65,6 +65,9 @@ _PLACE_CONTEXT_STOPWORDS = {
 _CATEGORY_TOKENS = (
     "amusement park",
     "aquarium",
+    "auditorium",
+    "community center",
+    "event venue",
     "restaurant",
     "cafe",
     "coffee",
@@ -83,13 +86,17 @@ _CATEGORY_TOKENS = (
     "bank",
     "gas station",
     "library",
+    "park",
     "salon",
 )
 _CATEGORY_PHRASES = {
     "academic support": "academic support",
     "art and history museum": "museum",
+    "civic auditorium": "auditorium",
     "community-supported marine science education center": "science education center",
+    "community center": "community center",
     "marine science education center": "science education center",
+    "neighborhood park": "park",
     "natural history museum": "museum",
     "seaside amusement park": "amusement park",
     "tutoring center": "tutoring service",
@@ -753,17 +760,56 @@ def _extract_context_name_matches(
     return matches
 
 
-def _extract_category_candidates(text: str) -> list[str]:
+def _extract_category_candidates(
+    text: str,
+    *,
+    page_title: str = "",
+    place_context: dict[str, str] | None = None,
+) -> list[str]:
     values: list[str] = []
     lowered = (text or "").lower()
     if "schema.org/" in lowered or "localbusiness" in lowered:
         values.append("local business")
+    phrase_values: list[str] = []
     for phrase, category in _CATEGORY_PHRASES.items():
         if re.search(rf"\b{re.escape(phrase)}\b", lowered):
+            phrase_values.append(category)
             values.append(category)
+    primary_text = page_title
+    if place_context:
+        primary_text = "\n".join(
+            value
+            for key in ("name", "current_name", "name_current")
+            if (value := str(place_context.get(key, "") or "").strip())
+        ) + f"\n{page_title}"
+    primary_norm = normalize_category(primary_text)
+    primary_values = {
+        normalize_category(value)
+        for value in values
+        if value and re.search(rf"\b{re.escape(normalize_category(value))}\b", primary_norm)
+    }
+    accepted_specific_values = [normalize_category(value) for value in phrase_values]
     for token in _CATEGORY_TOKENS:
         if re.search(rf"\b{re.escape(token)}\b", lowered):
-            values.append(normalize_category(token))
+            normalized = normalize_category(token)
+            if any(
+                normalized != normalize_category(phrase_value)
+                and re.search(rf"\b{re.escape(normalized)}\b", normalize_category(phrase_value))
+                for phrase_value in phrase_values
+            ):
+                continue
+            if any(
+                normalized != specific
+                and re.search(rf"\b{re.escape(normalized)}\b", specific)
+                for specific in accepted_specific_values
+            ):
+                continue
+            accepted_specific_values.append(normalized)
+            values.append(normalized)
+            if re.search(rf"\b{re.escape(normalized)}\b", primary_norm):
+                primary_values.add(normalized)
+    if primary_values:
+        values = [value for value in values if normalize_category(value) in primary_values]
     return values
 
 
@@ -1082,7 +1128,11 @@ def extract_claims_from_text(
             )
     elif attribute == "category":
         seen = set()
-        for value in _extract_category_candidates(text + "\n" + "\n".join(jsonld_fields.get("type", []))):
+        for value in _extract_category_candidates(
+            text + "\n" + "\n".join(jsonld_fields.get("type", [])),
+            page_title=page_title,
+            place_context=place_context,
+        ):
             if value in seen:
                 continue
             seen.add(value)

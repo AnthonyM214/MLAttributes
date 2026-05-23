@@ -1142,6 +1142,171 @@
         }
       ],
       "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "category",
+      "case_id": "civic-auditorium-category-vs-box-office",
+      "case_type": "GOVERNMENT_CATEGORY_VS_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "auditorium",
+      "gold_value": "auditorium",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v7",
+      "place": {
+        "base_category": "ticket office",
+        "city": "Santa Cruz",
+        "current_category": "auditorium",
+        "name": "Santa Cruz Civic Auditorium",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government Civic Auditorium page is about the venue itself; box-office/ticketing language is a service surface, not the place category.",
+              "page_text": "Civic Auditorium\nThe Civic is home to several Parks and Recreation Events, Cabrillo Festival, Santa Cruz Symphony and numerous permitted events. The Civic is available for private rentals. Reserve as much space as you want to - one conference room for an hour or the whole 2000 seat auditorium for a week.\nContact Us\nSanta Cruz Civic Auditorium\n307 Church Street\nSanta Cruz, CA 95060",
+              "recency_days": 1,
+              "source_type": "government",
+              "title": "Civic Auditorium - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Civic-Auditorium",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation/Civic-Auditorium \"Santa Cruz Civic Auditorium\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.1,
+              "notes": "Box Office page is related but emphasizes ticket sales rather than the venue category.",
+              "page_text": "Box Office\nThe Civic Box Office is conveniently located in downtown Santa Cruz in the Civic Auditorium. Purchase tickets by phone or online via SantaCruzTickets.com.",
+              "recency_days": 30,
+              "source_type": "government",
+              "title": "Box Office - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/government/city-departments/parks-recreation/civic-auditorium/box-office",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzca.gov civic auditorium box office tickets"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "category",
+      "case_id": "london-nelson-category-vs-school-programs",
+      "case_type": "GOVERNMENT_CATEGORY_VS_PROGRAM_TENANTS",
+      "expected_abstain": false,
+      "expected_decision": "community center",
+      "gold_value": "community center",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v7",
+      "place": {
+        "base_category": "school",
+        "city": "Santa Cruz",
+        "current_category": "community center",
+        "name": "London Nelson Community Center",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official city page identifies the facility as a community center while also listing tenant programs including a community school.",
+              "page_text": "London Nelson Community Center\nThe London Nelson Community Center is a hub for social, recreational, and cultural activities for the Santa Cruz community. The Center is home to Downtown Senior Programs, Santa Cruz Teen Center, Community Bridges Meals on Wheels, and London Nelson Community School.\nContact Us\nLondon Nelson Community Center\n301 Center Street\nSanta Cruz, CA 95060",
+              "recency_days": 14,
+              "source_type": "government",
+              "title": "London Nelson Community Center - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Community-Spaces/London-Nelson-Community-Center",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation/Community-Spaces/London-Nelson-Community-Center \"community center\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "category",
+      "case_id": "laurel-park-category-vs-community-center-adjacent",
+      "case_type": "GOVERNMENT_CATEGORY_VS_ADJACENT_FACILITY",
+      "expected_abstain": false,
+      "expected_decision": "park",
+      "gold_value": "park",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v7",
+      "place": {
+        "base_category": "community center",
+        "city": "Santa Cruz",
+        "current_category": "park",
+        "name": "Laurel Park",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official park page says Laurel Park is a neighborhood park adjacent to the community center; adjacency should not become the category.",
+              "page_text": "Laurel Park\nA beautiful neighborhood park and reserveable lawn area adjacent to Louden Nelson Community Center. For information about reserving the lawn area, visit the London Nelson Community Center Laurel Park reservation page.\nTagged as:\nParks\nFacility Snapshot\nFeatures\nBasketball Court\nLarge Lawn Area\nPlayground",
+              "recency_days": 60,
+              "source_type": "government",
+              "title": "Laurel Park - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Parks-Beaches-Open-Spaces/Parks/Laurel-Park",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation/Parks-Beaches-Open-Spaces/Parks/Laurel-Park \"Laurel Park\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "website",
+      "case_id": "london-nelson-website-vs-city-page",
+      "case_type": "GOVERNMENT_LOCATOR_WEBSITE_VS_GOVERNMENT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "https://www.nelsoncenter.com",
+      "gold_value": "https://www.nelsoncenter.com",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v7",
+      "place": {
+        "base_website": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Community-Spaces/London-Nelson-Community-Center",
+        "city": "Santa Cruz",
+        "current_website": "https://www.nelsoncenter.com",
+        "name": "London Nelson Community Center",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "City government page provides the center-specific website in visible contact information.",
+              "page_text": "London Nelson Community Center\nContact Us\nLondon Nelson Community Center\n301 Center Street\nSanta Cruz, CA 95060\n831-420-6177\nnelsoncenter@santacruzca.gov\nwww.nelsoncenter.com\nCommunity Center Hours\nMonday - Saturday 9:00 am - 9:00 pm",
+              "recency_days": 14,
+              "source_type": "government",
+              "title": "London Nelson Community Center - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Community-Spaces/London-Nelson-Community-Center",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation/Community-Spaces/London-Nelson-Community-Center \"www.nelsoncenter.com\""
+        }
+      ],
+      "truth_source_type": "government"
     }
   ]
 }

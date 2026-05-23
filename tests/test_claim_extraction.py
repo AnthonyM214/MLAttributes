@@ -289,6 +289,20 @@ class ClaimExtractionTests(unittest.TestCase):
 
         self.assertIn("amusement park", {claim.normalized_value for claim in claims})
 
+    def test_extracts_civic_and_community_category_phrases(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-5aa",
+            attribute="category",
+            page_text="The Civic Auditorium is available for private rentals. The London Nelson Community Center hosts community events.",
+            source_url="https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation",
+            source_type="government",
+            page_title="Parks & Recreation",
+        )
+
+        normalized = {claim.normalized_value for claim in claims}
+        self.assertIn("auditorium", normalized)
+        self.assertIn("community center", normalized)
+
     def test_category_tokens_require_word_boundaries(self) -> None:
         claims = extract_claims_from_text(
             place_id="case-5b",

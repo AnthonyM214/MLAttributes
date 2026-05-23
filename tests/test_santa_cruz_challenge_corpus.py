@@ -26,18 +26,22 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         raise AssertionError(f"missing decision for {case_id}")
 
     def test_challenge_corpus_is_explicitly_hard(self) -> None:
-        self.assertEqual(len(self.episodes), 26)
+        self.assertEqual(len(self.episodes), 30)
         self.assertEqual(Counter(episode.attribute for episode in self.episodes), {
             "phone": 12,
             "address": 5,
-            "category": 3,
+            "category": 6,
             "name": 3,
-            "website": 3,
+            "website": 4,
         })
         self.assertEqual(Counter(episode.case_type for episode in self.episodes), {
             "BRANCH_AMBIGUITY": 1,
             "BRANCH_CONTEXT_CORROBORATED": 2,
+            "GOVERNMENT_CATEGORY_VS_ADJACENT_FACILITY": 1,
+            "GOVERNMENT_CATEGORY_VS_PROGRAM_TENANTS": 1,
+            "GOVERNMENT_CATEGORY_VS_SERVICE_PAGE": 1,
             "GOVERNMENT_DEPARTMENT_ADDRESS_VS_FOOTER": 1,
+            "GOVERNMENT_LOCATOR_WEBSITE_VS_GOVERNMENT_PAGE": 1,
             "GOVERNMENT_LOCATOR_WEBSITE_VS_DIRECTORY": 1,
             "GOVERNMENT_PRIMARY_PHONE_VS_DIRECT": 1,
             "GOVERNMENT_PRIMARY_PHONE_VS_FAX_FOOTER": 1,
@@ -69,13 +73,14 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "authoritative_santa_cruz_challenge_v4": 4,
             "authoritative_santa_cruz_challenge_v5": 5,
             "authoritative_santa_cruz_challenge_v6": 6,
+            "authoritative_santa_cruz_challenge_v7": 4,
         })
 
     def test_resolver_v2_expected_behavior_matches_challenge_labels(self) -> None:
         expected = self.report["expected_behavior"]["resolver_v2"]  # type: ignore[index]
 
         self.assertEqual(expected["accuracy"], 1.0)
-        self.assertAlmostEqual(expected["abstention_rate"], 1 / 26)
+        self.assertAlmostEqual(expected["abstention_rate"], 1 / 30)
         self.assertEqual(expected["high_confidence_wrong_rate"], 0.0)
 
         ambiguous = self._decision("scpl-branch-ambiguous-phone")
@@ -116,6 +121,10 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "surfing-museum-name-vs-lighthouse-host": "Santa Cruz Surfing Museum",
             "woodies-official-website-vs-directory": "woodiescafe.net",
             "boardwalk-official-website-vs-tourism-listing": "beachboardwalk.com/about",
+            "civic-auditorium-category-vs-box-office": "auditorium",
+            "london-nelson-category-vs-school-programs": "community center",
+            "laurel-park-category-vs-community-center-adjacent": "park",
+            "london-nelson-website-vs-city-page": "nelsoncenter.com",
         }
 
         for case_id, expected_value in expected_values.items():
