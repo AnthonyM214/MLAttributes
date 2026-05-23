@@ -23,8 +23,12 @@ class PackagingTests(unittest.TestCase):
                 self.assertIn("places_attribute_conflation-0.1.0.dist-info/entry_points.txt", names)
                 self.assertIn("places_attribute_conflation-0.1.0.dist-info/METADATA", names)
                 entry_points = zf.read("places_attribute_conflation-0.1.0.dist-info/entry_points.txt").decode("utf-8")
+                metadata = zf.read("places_attribute_conflation-0.1.0.dist-info/METADATA").decode("utf-8")
                 self.assertIn("mlattributes-eval", entry_points)
                 self.assertIn("pac-benchmark-v2", entry_points)
+                self.assertIn("pac-resolvepoi-selective", entry_points)
+                self.assertIn("Requires-Dist: scikit-learn>=1.4", metadata)
+                self.assertIn("Requires-Dist: pyarrow>=15.0", metadata)
 
     def test_build_editable_creates_pth_for_src_layout(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -30,7 +30,10 @@ def _metadata_text() -> str:
             "Summary: Evidence-backed resolver scaffold for Overture Places attribute conflation.",
             "Requires-Python: >=3.11",
             "Requires-Dist: duckdb>=1.0",
+            "Requires-Dist: numpy>=1.26",
             "Requires-Dist: pandas>=2.0",
+            "Requires-Dist: pyarrow>=15.0",
+            "Requires-Dist: scikit-learn>=1.4",
             "",
         ]
     )
@@ -54,6 +57,7 @@ def _entry_points_text() -> str:
             "[console_scripts]",
             "mlattributes-eval = places_attr_conflation.cli:main",
             "pac-benchmark-v2 = places_attr_conflation.benchmark_v2:main",
+            "pac-resolvepoi-selective = places_attr_conflation.resolvepoi_selective:main",
             "",
         ]
     )

@@ -25,9 +25,18 @@ _SOCIAL_OR_AGGREGATOR_DOMAINS = {
 }
 
 
+def _is_missing_text(value: str | None) -> bool:
+    if value is None:
+        return True
+    raw = str(value).strip()
+    if not raw:
+        return True
+    return raw.lower() in {"none", "null", "nan", "[]", "{}"}
+
+
 def normalize_phone(value: str | None) -> str:
     """Return comparable US-style phone digits, preserving country code when present."""
-    if not value:
+    if _is_missing_text(value):
         return ""
     digits = re.sub(r"\D+", "", value)
     if len(digits) == 11 and digits.startswith("1"):
@@ -37,7 +46,7 @@ def normalize_phone(value: str | None) -> str:
 
 def normalize_website(value: str | None) -> str:
     """Return comparable host/path without scheme, www, query, fragment, or trailing slash."""
-    if not value:
+    if _is_missing_text(value):
         return ""
     raw = value.strip().lower()
     if not raw:
@@ -61,7 +70,7 @@ def is_social_or_aggregator(value: str | None) -> bool:
 
 
 def normalize_name(value: str | None) -> str:
-    if not value:
+    if _is_missing_text(value):
         return ""
     value = value.lower()
     value = re.sub(r"&", " and ", value)
@@ -70,7 +79,7 @@ def normalize_name(value: str | None) -> str:
 
 
 def normalize_address(value: str | None) -> str:
-    if not value:
+    if _is_missing_text(value):
         return ""
     value = value.lower()
     replacements = {
@@ -89,7 +98,7 @@ def normalize_address(value: str | None) -> str:
 
 
 def normalize_category(value: str | None) -> str:
-    if not value:
+    if _is_missing_text(value):
         return ""
     value = value.lower().replace("_", " ").replace("-", " ")
     return re.sub(r"\s+", " ", value).strip()

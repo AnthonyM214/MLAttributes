@@ -12,6 +12,7 @@ The repo keeps a deterministic v1 baseline and adds a claim-level v2 resolver fo
 - `claim_extraction.py` - deterministic claim extraction from text, HTML, meta tags, and JSON-LD
 - `evidence_graph.py` - claim grouping and contradiction scoring
 - `resolver_v2.py` - claim-level resolver with abstention
+- `resolvepoi_selective.py` - selective HGB router for the ResolvePOI held-out benchmark
 - `harness.py` - replay and evaluation machinery
 - `golden.py` - golden-label evaluation
 - `synthetic_evidence.py` - resolver stress testing
@@ -42,6 +43,19 @@ python3 scripts/run_harness.py benchmark-v2 \
 
 The installed wheel also exposes `pac-benchmark-v2`.
 
+Run the selective ResolvePOI benchmark:
+
+```bash
+python3 scripts/run_harness.py resolvepoi-selective \
+  --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json \
+  --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet \
+  --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json \
+  --limit 400 \
+  --include-decisions
+```
+
+An installed wheel also exposes `pac-resolvepoi-selective` with the same arguments.
+
 ## Current shape
 
 The current ship path is:
@@ -51,6 +65,9 @@ dataset -> retrieval/dorking -> claim extraction -> evidence graph -> resolver v
 ```
 
 That means MLAttributes is not just a current/base selector. It verifies competing claims against replayable evidence and abstains when truth cannot be established.
+
+It also includes a reproducible selective router for the ResolvePOI corpus that reaches strong performance on the held-out 400-id slice of the 2k benchmark.
+Across all five attributes, the selective router reaches 97.7% full accuracy; on website, phone, address, and name, it reaches 97.1% core full accuracy.
 
 ## Benchmarks
 

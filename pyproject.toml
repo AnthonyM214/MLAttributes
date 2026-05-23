@@ -10,9 +10,13 @@ description = "Evidence-backed resolver scaffold for Overture Places attribute c
 requires-python = ">=3.11"
 dependencies = [
   "duckdb>=1.0",
+  "numpy>=1.26",
   "pandas>=2.0",
+  "pyarrow>=15.0",
+  "scikit-learn>=1.4",
 ]
 
 [project.scripts]
 mlattributes-eval = "places_attr_conflation.cli:main"
 pac-benchmark-v2 = "places_attr_conflation.benchmark_v2:main"
+pac-resolvepoi-selective = "places_attr_conflation.resolvepoi_selective:main"

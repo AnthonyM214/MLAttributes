@@ -5,7 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from .evaluation import evaluate_rows
-from .resolvepoi_adapter import canonicalize_resolvepoi_rows
+from .resolvepoi_adapter import canonicalize_resolvepoi_rows, resolvepoi_v2_rows
+from .resolvepoi_selective import evaluate_resolvepoi_selective
 
 
 BASELINE_FILENAMES = {
@@ -39,3 +40,31 @@ def reproduce_resolvepoi_baseline(
     )
     return evaluate_rows(rows, ["website", "phone", "address", "category", "name"])
 
+
+def reproduce_resolvepoi_v2(
+    truth_path: str | Path,
+    limit: int = 200,
+) -> dict:
+    rows = resolvepoi_v2_rows(
+        truth_path=truth_path,
+        limit=limit,
+        attributes=("website", "phone", "address", "category", "name"),
+    )
+    return evaluate_rows(rows, ["website", "phone", "address", "category", "name"])
+
+
+def reproduce_resolvepoi_selective(
+    truth_path: str | Path,
+    *,
+    train_parquet: str | Path,
+    train_labels: str | Path,
+    limit: int = 200,
+    target_coverage: float = 0.9,
+) -> dict:
+    return evaluate_resolvepoi_selective(
+        truth_path=truth_path,
+        train_parquet=train_parquet,
+        train_labels=train_labels,
+        limit=limit,
+        target_coverage=target_coverage,
+    )

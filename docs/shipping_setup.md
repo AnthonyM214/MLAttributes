@@ -41,6 +41,41 @@ python3 scripts/evaluate_resolvepoi_baselines.py \
   --output reports/baseline_metrics/resolvepoi_hybrid_eval.json
 ```
 
+### ResolvePOI v2 adapter
+
+```bash
+python3 scripts/run_harness.py resolvepoi-v2 \
+  --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json \
+  --limit 400 \
+  --output reports/resolvepoi_v2/resolvepoi_v2_400.json
+```
+
+This reuses the ResolvePOI current/base benchmark artifacts and runs them through the claim-level v2 resolver as a reproducible adapter benchmark.
+
+### ResolvePOI selective router
+
+```bash
+python3 scripts/run_harness.py resolvepoi-selective \
+  --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json \
+  --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet \
+  --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json \
+  --limit 400 \
+  --include-decisions \
+  --output reports/resolvepoi_selective/resolvepoi_selective_current.json
+```
+
+This trains a per-attribute HistGradientBoosting router on the 2k ResolvePOI corpus, applies a conformal-style acceptance threshold, and reports both the main source-selection benchmark and the legacy row-label proxy benchmark.
+
+Installed wheels expose the same benchmark as:
+
+```bash
+pac-resolvepoi-selective \
+  --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json \
+  --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet \
+  --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json \
+  --limit 400
+```
+
 ### Retrieval replay benchmark
 
 ```bash
