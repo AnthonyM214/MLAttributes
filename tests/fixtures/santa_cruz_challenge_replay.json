@@ -1307,6 +1307,209 @@
         }
       ],
       "truth_source_type": "government"
+    },
+    {
+      "attribute": "category",
+      "case_id": "bookshop-category-vs-school-services",
+      "case_type": "OFFICIAL_CATEGORY_VS_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "bookstore",
+      "gold_value": "bookstore",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v8",
+      "place": {
+        "base_category": "school",
+        "city": "Santa Cruz",
+        "current_category": "bookstore",
+        "name": "Bookshop Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official About page identifies Bookshop Santa Cruz as an independent bookstore.",
+              "page_text": "Bookshop Santa Cruz\nAbout Us\nBookshop Santa Cruz is a large independent bookstore located in the heart of downtown Santa Cruz, California since 1966. Bookshop Santa Cruz fills over 20,000 square feet with a wide selection of new, used, and sale books.\nConnect\nBookshop Santa Cruz\n1520 Pacific Ave\nSanta Cruz, CA 95060-3903\n(831) 423-0900",
+              "recency_days": 90,
+              "source_type": "official_site",
+              "title": "About Us | Bookshop Santa Cruz",
+              "url": "https://bookshopsantacruz.com/bookshop-santa-cruz-0",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:bookshopsantacruz.com \"Bookshop Santa Cruz\" \"independent bookstore\""
+        },
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.1,
+              "notes": "Service page mentions schools and libraries, but it is still a bookstore service surface.",
+              "page_text": "Bookshop Santa Cruz School Services\nWe are here to help teachers and librarians. Bookshop Santa Cruz has been Santa Cruz County's premier independent bookstore for over 58 years. Public school libraries and classroom services are customer programs, not the place category.",
+              "recency_days": 210,
+              "source_type": "official_site",
+              "title": "Bookshop Santa Cruz School Services | Bookshop Santa Cruz",
+              "url": "https://bookshopsantacruz.com/school-libraries",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:bookshopsantacruz.com \"Bookshop Santa Cruz School Services\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "category",
+      "case_id": "rio-theatre-category-vs-event-venue",
+      "case_type": "OFFICIAL_CATEGORY_VS_EVENT_LISTINGS",
+      "expected_abstain": false,
+      "expected_decision": "theater",
+      "gold_value": "theater",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v8",
+      "place": {
+        "base_category": "event venue",
+        "city": "Santa Cruz",
+        "current_category": "theater",
+        "name": "Rio Theatre",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official contact page names the theatre; event/venue wording is descriptive, not a replacement category.",
+              "page_text": "Rio Theatre\nContact The Rio Theatre\nThe Rio Theatre for the Performing Arts, a most versatile live venue in Santa Cruz California.\nRio Theatre\n1205 Soquel Avenue\nSanta Cruz, CA 95062\nBooking and Administration: Booking@riotheatre.com",
+              "recency_days": 7,
+              "source_type": "official_site",
+              "title": "Contact - Rio Theatre for the Performing Arts",
+              "url": "https://www.riotheatre.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:riotheatre.com/contact \"Rio Theatre\" \"Santa Cruz\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "verve-pacific-phone-vs-other-branches",
+      "case_type": "OFFICIAL_MULTI_BRANCH_PHONE",
+      "expected_abstain": false,
+      "expected_decision": "8314717726",
+      "gold_value": "831-471-7726",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v8",
+      "place": {
+        "base_phone": "831-706-2369",
+        "city": "Santa Cruz",
+        "current_address": "1540 Pacific Ave, Santa Cruz, CA 95060",
+        "current_phone": "831-471-7726",
+        "name": "Verve Coffee Roasters Pacific Avenue",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several Santa Cruz branches; Pacific Avenue phone must be selected by branch/address context.",
+              "page_text": "santa cruz\nPacific Avenue\n1540 Pacific Ave\nSanta Cruz, CA 95060\nEveryday: 7am - 6pm\n831-471-7726\nMap\norder ahead\n41st Avenue\n816 41st Ave\nSanta Cruz, CA 95062\n831-706-2369\nSeabright\n104 Bronson St Suite 19\nSanta Cruz, CA 95062\n831-216-4448\n1010 Fair\n1010 Fair Ave.\nSanta Cruz, CA 95060\n831-425-5648",
+              "recency_days": 2,
+              "source_type": "official_site",
+              "title": "All Locations | Verve Coffee",
+              "url": "https://www.vervecoffee.com/pages/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:vervecoffee.com/pages/locations \"Pacific Avenue\" \"831-471-7726\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "verve-pacific-address-vs-other-branches",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "1540 Pacific Ave, Santa Cruz, CA 95060",
+      "gold_value": "1540 Pacific Ave, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v8",
+      "place": {
+        "base_address": "816 41st Ave, Santa Cruz, CA 95062",
+        "city": "Santa Cruz",
+        "current_address": "1540 Pacific Ave, Santa Cruz, CA 95060",
+        "name": "Verve Coffee Roasters Pacific Avenue",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several branches; Pacific Avenue address must be selected by branch context.",
+              "page_text": "santa cruz\nPacific Avenue\n1540 Pacific Ave\nSanta Cruz, CA 95060\nEveryday: 7am - 6pm\n831-471-7726\nMap\norder ahead\n41st Avenue\n816 41st Ave\nSanta Cruz, CA 95062\n831-706-2369\nSeabright\n104 Bronson St Suite 19\nSanta Cruz, CA 95062\n831-216-4448\n1010 Fair\n1010 Fair Ave.\nSanta Cruz, CA 95060\n831-425-5648",
+              "recency_days": 2,
+              "source_type": "official_site",
+              "title": "All Locations | Verve Coffee",
+              "url": "https://www.vervecoffee.com/pages/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:vervecoffee.com/pages/locations \"Pacific Avenue\" \"1540 Pacific Ave\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "bookshop-address-vs-offsite-event-location",
+      "case_type": "OFFICIAL_ADDRESS_VS_OFFSITE_EVENT",
+      "expected_abstain": false,
+      "expected_decision": "1520 Pacific Ave, Santa Cruz, CA 95060",
+      "gold_value": "1520 Pacific Ave, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v8",
+      "place": {
+        "base_address": "1205 Soquel Avenue, Santa Cruz, CA 95062",
+        "city": "Santa Cruz",
+        "current_address": "1520 Pacific Ave, Santa Cruz, CA 95060",
+        "name": "Bookshop Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official home page includes offsite event venues; Connect footer contains the bookstore address.",
+              "page_text": "Bookshop Santa Cruz\nUpcoming Events\nOFFSITE EVENT: George Saunders, Vigil\nThe Rio Theatre\n1205 Soquel Avenue\nSanta Cruz, CA 95060\nTICKETS\nConnect\nBookshop Santa Cruz\n1520 Pacific Ave\nSanta Cruz, CA 95060-3903\n(831) 423-0900",
+              "recency_days": 90,
+              "source_type": "official_site",
+              "title": "Home Page | Bookshop Santa Cruz",
+              "url": "https://bookshopsantacruz.com/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:bookshopsantacruz.com \"Bookshop Santa Cruz\" \"1520 Pacific Ave\""
+        }
+      ],
+      "truth_source_type": "official_site"
     }
   ]
 }

@@ -849,7 +849,7 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
         {
             "label": "Santa Cruz challenge",
             "value": f"{_pct(santa_expected_v2.get('accuracy'))} expected / {_pct(santa_expected_v2.get('abstention_rate'))} abstention",
-            "detail": f"Raw resolver accuracy: {_pct(santa_v2.get('accuracy'))}; high-confidence wrong: {_pct(santa_v2.get('high_confidence_wrong_rate'))}; covers branch, government primary-phone, relay/fax/footer phone, department-location-vs-footer address, full-name/acronym, host-building name, tourism category, locator website, official-vs-social, title-cleaning, service-page category, program-tenant category, adjacent-facility category, and branch-specific website cases.",
+            "detail": f"Raw resolver accuracy: {_pct(santa_v2.get('accuracy'))}; high-confidence wrong: {_pct(santa_v2.get('high_confidence_wrong_rate'))}; covers branch, government primary-phone, relay/fax/footer phone, department-location-vs-footer address, full-name/acronym, host-building name, tourism category, locator website, official-vs-social, title-cleaning, service-page category, program-tenant category, adjacent-facility category, branch-specific website, offsite-event address, and multi-branch commercial location cases.",
         },
         {
             "label": "PAC hard benchmark",

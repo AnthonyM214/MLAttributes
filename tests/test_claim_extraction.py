@@ -303,6 +303,29 @@ class ClaimExtractionTests(unittest.TestCase):
         self.assertIn("auditorium", normalized)
         self.assertIn("community center", normalized)
 
+    def test_extracts_bookshop_and_theatre_category_aliases(self) -> None:
+        bookshop = extract_claims_from_text(
+            place_id="case-5ab",
+            attribute="category",
+            page_text="Bookshop Santa Cruz is a large independent bookstore. School services are available for teachers.",
+            source_url="https://bookshopsantacruz.com/bookshop-santa-cruz-0",
+            source_type="official_site",
+            page_title="About Us | Bookshop Santa Cruz",
+            place_context={"name": "Bookshop Santa Cruz", "current_category": "bookstore", "base_category": "school"},
+        )
+        theatre = extract_claims_from_text(
+            place_id="case-5ac",
+            attribute="category",
+            page_text="The Rio Theatre for the Performing Arts is a versatile live venue in Santa Cruz.",
+            source_url="https://www.riotheatre.com/contact",
+            source_type="official_site",
+            page_title="Contact - Rio Theatre for the Performing Arts",
+            place_context={"name": "Rio Theatre", "current_category": "theater", "base_category": "event venue"},
+        )
+
+        self.assertEqual({claim.normalized_value for claim in bookshop}, {"bookstore"})
+        self.assertEqual({claim.normalized_value for claim in theatre}, {"theater"})
+
     def test_category_tokens_require_word_boundaries(self) -> None:
         claims = extract_claims_from_text(
             place_id="case-5b",

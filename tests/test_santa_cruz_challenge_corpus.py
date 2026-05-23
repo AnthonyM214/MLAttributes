@@ -26,11 +26,11 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         raise AssertionError(f"missing decision for {case_id}")
 
     def test_challenge_corpus_is_explicitly_hard(self) -> None:
-        self.assertEqual(len(self.episodes), 30)
+        self.assertEqual(len(self.episodes), 35)
         self.assertEqual(Counter(episode.attribute for episode in self.episodes), {
-            "phone": 12,
-            "address": 5,
-            "category": 6,
+            "phone": 13,
+            "address": 7,
+            "category": 8,
             "name": 3,
             "website": 4,
         })
@@ -50,14 +50,19 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "GOVERNMENT_PRIMARY_PHONE_VS_SERVICE_LINES": 1,
             "GOVERNMENT_ROOM_ADDRESS_VS_FOOTER": 1,
             "GOVERNMENT_SUITE_ADDRESS_VS_FOOTER": 1,
+            "OFFICIAL_ADDRESS_VS_OFFSITE_EVENT": 1,
             "OFFICIAL_CATEGORY_VS_DIRECTORY": 1,
             "OFFICIAL_CATEGORY_VS_DIRECTORY_TYPE": 1,
+            "OFFICIAL_CATEGORY_VS_EVENT_LISTINGS": 1,
+            "OFFICIAL_CATEGORY_VS_SERVICE_PAGE": 1,
             "OFFICIAL_CATEGORY_VS_TOURISM_TAGS": 1,
             "OFFICIAL_BRANCH_SPECIFIC": 1,
             "OFFICIAL_CONTACT_WITH_NON_PRIMARY_PHONE": 1,
             "OFFICIAL_CURRENT_ARCHIVE_STALE": 1,
             "OFFICIAL_FULL_NAME_VS_NICKNAME": 1,
             "OFFICIAL_LOCATION_VS_MAILING_ADDRESS": 1,
+            "OFFICIAL_MULTI_BRANCH_ADDRESS": 1,
+            "OFFICIAL_MULTI_BRANCH_PHONE": 1,
             "OFFICIAL_NAME_VS_DIRECTORY_ALIAS": 1,
             "OFFICIAL_PLACE_NAME_VS_HOST_BUILDING": 1,
             "OFFICIAL_PHONE_VS_FAX": 1,
@@ -74,13 +79,14 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "authoritative_santa_cruz_challenge_v5": 5,
             "authoritative_santa_cruz_challenge_v6": 6,
             "authoritative_santa_cruz_challenge_v7": 4,
+            "authoritative_santa_cruz_challenge_v8": 5,
         })
 
     def test_resolver_v2_expected_behavior_matches_challenge_labels(self) -> None:
         expected = self.report["expected_behavior"]["resolver_v2"]  # type: ignore[index]
 
         self.assertEqual(expected["accuracy"], 1.0)
-        self.assertAlmostEqual(expected["abstention_rate"], 1 / 30)
+        self.assertAlmostEqual(expected["abstention_rate"], 1 / 35)
         self.assertEqual(expected["high_confidence_wrong_rate"], 0.0)
 
         ambiguous = self._decision("scpl-branch-ambiguous-phone")
@@ -125,6 +131,11 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "london-nelson-category-vs-school-programs": "community center",
             "laurel-park-category-vs-community-center-adjacent": "park",
             "london-nelson-website-vs-city-page": "nelsoncenter.com",
+            "bookshop-category-vs-school-services": "bookstore",
+            "rio-theatre-category-vs-event-venue": "theater",
+            "verve-pacific-phone-vs-other-branches": "8314717726",
+            "verve-pacific-address-vs-other-branches": "1540 Pacific Ave, Santa Cruz, CA 95060",
+            "bookshop-address-vs-offsite-event-location": "1520 Pacific Ave, Santa Cruz, CA 95060",
         }
 
         for case_id, expected_value in expected_values.items():

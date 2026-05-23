@@ -121,9 +121,12 @@ New Santa Cruz cases should be accepted only when they add a new failure mode
 or strengthen coverage for an underrepresented attribute. Do not add more
 near-duplicate easy contact pages just to increase the count.
 
-Current checked-in Santa Cruz challenge status: 30 authority-page ambiguity
+Current checked-in Santa Cruz challenge status: 35 authority-page ambiguity
 episodes, with the next target at 50 reviewed cases before broadening beyond
 Santa Cruz. The newest slice adds official civic/facility category ambiguity:
 Civic Auditorium vs box-office pages, London Nelson Community Center vs tenant
 programs, Laurel Park vs adjacent community-center language, and government
-locator pages that expose a branch-specific website.
+locator pages that expose a branch-specific website. It also adds commercial
+official-site ambiguity from Bookshop Santa Cruz, Rio Theatre, and Verve Coffee:
+service-page category conflicts, event-venue category wording, offsite-event
+addresses, and multi-branch phone/address selection.

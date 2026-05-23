@@ -66,6 +66,7 @@ _CATEGORY_TOKENS = (
     "amusement park",
     "aquarium",
     "auditorium",
+    "bookstore",
     "community center",
     "event venue",
     "restaurant",
@@ -81,6 +82,8 @@ _CATEGORY_TOKENS = (
     "school",
     "bar",
     "bakery",
+    "theater",
+    "theatre",
     "gym",
     "pharmacy",
     "bank",
@@ -92,16 +95,23 @@ _CATEGORY_TOKENS = (
 _CATEGORY_PHRASES = {
     "academic support": "academic support",
     "art and history museum": "museum",
+    "bookshop": "bookstore",
     "civic auditorium": "auditorium",
     "community-supported marine science education center": "science education center",
     "community center": "community center",
     "marine science education center": "science education center",
     "neighborhood park": "park",
     "natural history museum": "museum",
+    "performing arts": "theater",
     "seaside amusement park": "amusement park",
+    "theatre": "theater",
     "tutoring center": "tutoring service",
     "tutoring services": "tutoring service",
     "tutoring sessions": "tutoring service",
+}
+_CATEGORY_TOKEN_ALIASES = {
+    "bookshop": "bookstore",
+    "theatre": "theater",
 }
 _GENERIC_TITLE_SEGMENTS = {
     "about",
@@ -523,6 +533,53 @@ def _address_label_for_raw(text: str, raw: str) -> tuple[str, str]:
     return "", snippet
 
 
+def _address_branch_label_for_raw(
+    text: str,
+    raw: str,
+    place_context: dict[str, str] | None,
+) -> tuple[str, str]:
+    terms = _place_context_terms(place_context)
+    if not terms:
+        return "", ""
+    raw_norm = normalize_address(raw)
+    if not raw_norm:
+        return "", ""
+    branch_rows = _branch_rows(text)
+    if not branch_rows:
+        return "", ""
+    matching_headers = {
+        header
+        for header, _ in branch_rows
+        if terms & set(normalize_name(header).split())
+    }
+    if not matching_headers:
+        return "", ""
+    generic_headers = {
+        "about",
+        "city of santa cruz",
+        "contact",
+        "contact information",
+        "contact public works",
+        "email",
+        "fax",
+        "general inquiries",
+        "location",
+        "mailing address",
+        "office location",
+        "phone",
+    }
+    for header, row in branch_rows:
+        row_norm = normalize_address(row)
+        if raw_norm not in row_norm:
+            continue
+        header_terms = set(normalize_name(header).split())
+        if terms & header_terms:
+            return "primary", row
+        if normalize_name(header) not in generic_headers:
+            return "secondary", row
+    return "", ""
+
+
 def _extract_context_address_matches(
     text: str,
     *,
@@ -534,6 +591,10 @@ def _extract_context_address_matches(
         if normalized not in normalized_text:
             continue
         label_kind, snippet = _address_label_for_raw(text, raw)
+        branch_label_kind, branch_snippet = _address_branch_label_for_raw(text, raw, place_context)
+        if branch_label_kind:
+            label_kind = branch_label_kind
+            snippet = branch_snippet or snippet
         confidence = 0.93 if role in {"address", "current_address", "address_current", "current_value"} else 0.82
         identity = 0.95 if role in {"address", "current_address", "address_current", "current_value"} else 0.82
         notes = f"context_address_role={role}"
@@ -770,11 +831,6 @@ def _extract_category_candidates(
     lowered = (text or "").lower()
     if "schema.org/" in lowered or "localbusiness" in lowered:
         values.append("local business")
-    phrase_values: list[str] = []
-    for phrase, category in _CATEGORY_PHRASES.items():
-        if re.search(rf"\b{re.escape(phrase)}\b", lowered):
-            phrase_values.append(category)
-            values.append(category)
     primary_text = page_title
     if place_context:
         primary_text = "\n".join(
@@ -783,15 +839,23 @@ def _extract_category_candidates(
             if (value := str(place_context.get(key, "") or "").strip())
         ) + f"\n{page_title}"
     primary_norm = normalize_category(primary_text)
-    primary_values = {
+    primary_values: set[str] = set()
+    phrase_values: list[str] = []
+    for phrase, category in _CATEGORY_PHRASES.items():
+        if re.search(rf"\b{re.escape(phrase)}\b", lowered):
+            phrase_values.append(category)
+            values.append(category)
+        if re.search(rf"\b{re.escape(phrase)}\b", primary_norm):
+            primary_values.add(normalize_category(category))
+    primary_values.update(
         normalize_category(value)
         for value in values
         if value and re.search(rf"\b{re.escape(normalize_category(value))}\b", primary_norm)
-    }
+    )
     accepted_specific_values = [normalize_category(value) for value in phrase_values]
     for token in _CATEGORY_TOKENS:
         if re.search(rf"\b{re.escape(token)}\b", lowered):
-            normalized = normalize_category(token)
+            normalized = normalize_category(_CATEGORY_TOKEN_ALIASES.get(token, token))
             if any(
                 normalized != normalize_category(phrase_value)
                 and re.search(rf"\b{re.escape(normalized)}\b", normalize_category(phrase_value))
