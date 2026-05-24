@@ -72,6 +72,7 @@ from places_attr_conflation.golden import (
     write_label_csv,
 )
 from places_attr_conflation.benchmark_v2 import evaluate_benchmark_v2
+from places_attr_conflation.benchmark_v3 import evaluate_benchmark_v3
 from places_attr_conflation.overture_context import (
     build_overture_context_replay,
     build_overture_gap_dork_rows,
@@ -420,6 +421,12 @@ def main() -> int:
     benchmark_v2.add_argument("--resolvepoi-train-parquet", default=str(DEFAULT_RESOLVEPOI_TRAIN_PARQUET))
     benchmark_v2.add_argument("--resolvepoi-train-labels", default=str(DEFAULT_RESOLVEPOI_TRAIN_LABELS))
     benchmark_v2.add_argument("--resolvepoi-target-coverage", type=float, default=0.99)
+
+    benchmark_v3 = subparsers.add_parser("benchmark-v3", help="Compare claim-level v2 with corroboration-aware resolver v3.")
+    benchmark_v3.add_argument("--replay", required=True)
+    benchmark_v3.add_argument("--output")
+    benchmark_v3.add_argument("--attributes", nargs="+")
+    benchmark_v3.add_argument("--include-decisions", action="store_true")
     benchmark_v2.add_argument("--output", help="Optional JSON report output path.")
 
     smoke = subparsers.add_parser("smoke", help="Run a small live retrieval smoke check with replay fallback.")
@@ -750,6 +757,13 @@ def main() -> int:
                 attributes=args.attributes or DEFAULT_RESOLVEPOI_ATTRIBUTES,
             )
         report = evaluate_benchmark_v2(episodes, include_decisions=args.include_decisions, learned_router=learned_router)
+        report["input"] = str(args.replay)
+    elif args.command == "benchmark-v3":
+        episodes = load_retrieval_episodes(args.replay)
+        if args.attributes:
+            allowed = set(args.attributes)
+            episodes = [episode for episode in episodes if episode.attribute in allowed]
+        report = evaluate_benchmark_v3(episodes, include_decisions=args.include_decisions)
         report["input"] = str(args.replay)
     elif args.command == "smoke":
         urls = args.urls or DEFAULT_SMOKE_URLS

@@ -281,8 +281,15 @@ def _resolve_from_claims(
     min_confidence: float,
     min_support: float,
     min_margin: float,
+    contextual_scoring: bool,
 ) -> AttributeDecision:
-    graph = build_evidence_graph(place_id=place_id, attribute=attribute, candidates=candidates, claims=claims)
+    graph = build_evidence_graph(
+        place_id=place_id,
+        attribute=attribute,
+        candidates=candidates,
+        claims=claims,
+        place_context=place_context if contextual_scoring else None,
+    )
     if not graph.groups:
         return AttributeDecision(attribute=attribute, decision="", confidence=0.0, reason="No claims extracted from evidence.", evidence=[], abstained=True)
 
@@ -388,6 +395,7 @@ def resolve_attribute_v2_from_claims(
     min_confidence: float = 0.62,
     min_support: float = 0.58,
     min_margin: float = 0.08,
+    contextual_scoring: bool = False,
 ) -> AttributeDecision:
     return _resolve_from_claims(
         place_id=place_id,
@@ -401,6 +409,7 @@ def resolve_attribute_v2_from_claims(
         min_confidence=min_confidence,
         min_support=min_support,
         min_margin=min_margin,
+        contextual_scoring=contextual_scoring,
     )
 
 
@@ -417,6 +426,7 @@ def resolve_attribute_v2(
     min_confidence: float = 0.62,
     min_support: float = 0.58,
     min_margin: float = 0.08,
+    contextual_scoring: bool = False,
 ) -> AttributeDecision:
     claims: list[AttributeClaim] = []
     for item in evidence:
@@ -433,4 +443,5 @@ def resolve_attribute_v2(
         min_confidence=min_confidence,
         min_support=min_support,
         min_margin=min_margin,
+        contextual_scoring=contextual_scoring,
     )

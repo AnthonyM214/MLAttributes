@@ -24,13 +24,14 @@ Current outputs:
 
 | Artifact | Result |
 | --- | --- |
-| Unit tests | `230` tests passed |
+| Unit tests | `233` tests passed |
 | Santa Cruz expanded corpus | `24` episodes; targeted authoritative found rate `1.0`, fallback `0.0`; final accuracy `1.0` |
 | Santa Cruz challenge corpus | `50` curated replay episodes across website, phone, address, category, and name; resolver v2 expected-behavior accuracy `1.0`, raw accuracy `0.9565`, abstention rate `0.1200`, high-confidence-wrong rate `0.0`; v2 adds branch-context phone/address, office-vs-mailing address, official-vs-social website, official-vs-directory category, title-cleaned name, full-name-vs-acronym, place-name-vs-host-building, official-category-vs-tourism tags, government locator website, relay/fax/footer phone rejection, department-location-vs-city-footer address selection, official phone-vs-fax cases, official service-page category conflicts, program-tenant category conflicts, adjacent-facility category conflicts, branch-specific government-locator website extraction, offsite-event address conflict handling, multi-branch commercial location selection, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, social-only website abstention, generic homepage abstention, stale/closed phone abstention, and wrong-entity tenant website abstention without prefilled extraction |
 | Retrieval compare | targeted authoritative found `0.75`, fallback `0.0`; targeted citation precision `0.75`; citation precision proxy delta `+1.0` |
 | Replay stats | `4` episodes, `8` attempts, `9` pages, authoritative pages rate `0.3333` |
 | Website authority | authoritative found rate `1.0`, false official rate `0.0` |
 | `hard_cases_replay.json` | `18` episodes; resolver v2 accuracy `0.8462`, abstention rate `0.3889`, high-confidence-wrong rate `0.0`; added business registry, OSM, mixed-authoritative, and extra abstention coverage |
+| `benchmark_v3_hard_cases_current.json` | `18` episodes; resolver v3 accuracy `1.0`, abstention rate `0.2778`, high-confidence-wrong rate `0.0`; breakthrough cases cover ambiguous phone and mixed-authoritative name |
 | `pac_hard_cases_replay.json` | expected-behavior accuracy `1.0`, expected-behavior delta vs v1 `0.0`; source mix now includes official, government, social, business_registry, and osm evidence |
 | ResolvePOI selective router (400 holdout) | all-attribute full accuracy `0.9770`, coverage `1.0`, high-confidence-wrong rate `0.0125`; core full accuracy `0.9713`, coverage `1.0` |
 | ResolvePOI split verification | explicit holdout split manifest; `leak_check_passed=true` |
@@ -95,17 +96,18 @@ Based on the public README evidence, `ResolvePOI-Attribute-Conflation` still hol
 - abstention discipline
 - reproducible benchmark commands
 - a held-out ResolvePOI selective router that reaches `0.9770` all-attribute full accuracy and `0.9713` core full accuracy on the learnable attributes
-- resolver_v2 integration for that selective router, so the learned current/base signal can rank evidence-backed claim groups instead of living only as a side benchmark
+- resolver_v3 integration for that selective router, so the learned current/base signal can rank corroborated claim groups instead of living only as a side benchmark
 
 That makes it a stronger truth-verification system than the older row-scoring adapter path, and the new selective router gives it a real signal-bearing benchmark on the ResolvePOI corpus rather than only a README-level comparison.
 
-The new `resolvepoi-v2` adapter still serves as the legacy row-label proxy benchmark, but the selective router is now the stronger ResolvePOI result in this checkout and is callable from the EvidenceGraph resolver.
+The new `resolvepoi-v2` adapter still serves as the legacy row-label proxy benchmark, but the selective router is now the stronger ResolvePOI result in this checkout and is callable from the EvidenceGraph resolver. The claim-graph v3 benchmark is now the strongest local hard-case proof because it resolves the two remaining ambiguous cases that v2 still abstains on.
 
 ## Reproducibility Notes
 
-- The local test suite passed on this checkout: `224` tests.
+- The local test suite passed on this checkout: `233` tests.
 - The Santa Cruz replay corpus now includes an expanded `24`-episode slice in addition to the original `12`-episode starter corpus, and both replay cleanly.
 - The Santa Cruz challenge corpus adds `40` cases across all five core attributes for branch ambiguity, branch-context phone/address selection without prefilled extraction, office-vs-mailing address selection, official-vs-social website selection, official-vs-directory category selection, title-cleaned name selection, full-name-vs-acronym selection, place-name-vs-host-building selection, official-category-vs-tourism-tag selection, government-locator website selection, relay/fax/footer phone rejection, department-location-vs-city-footer address selection, official phone-vs-fax selection, stale archive conflict, contact-page vs staff-page conflict, service-page vs category conflict, program-tenant category conflict, adjacent-facility category conflict, branch-specific website extraction from a government locator page, offsite-event address conflict handling, multi-branch commercial phone/address selection, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, and expected-abstain host-page ambiguity.
 - The benchmark outputs above were generated from checked-in fixtures and written to `reports/harness/benchmark_v2_*_current.json`.
+- The claim-level v3 benchmark output was generated from a checked-in fixture and written to `reports/harness/benchmark_v3_hard_cases_current.json`.
 - The ResolvePOI adapter outputs were generated from the local `ResolvePOI-Attribute-Conflation` checkout and written to `reports/resolvepoi_v2/resolvepoi_v2_*`.
 - The public repo comparison is based on each repository’s README and should be treated as published claims, not a re-run benchmark.

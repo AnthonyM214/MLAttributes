@@ -23,6 +23,18 @@ The selective ResolvePOI path now also emits an explicit split-verification mani
 The learned router is deliberately constrained: it can rerank close EvidenceGraph claim groups, but it cannot invent or select a value that has no extracted claim. This keeps the high-scoring structured benchmark path connected to the evidence-backed truth-resolution architecture.
 In replay hard cases, that learned path is still opt-in because it can regress on ambiguous branch-level evidence; the report should therefore treat it as an experimental benchmark mode rather than the default resolver.
 
+## What v3 adds
+
+`resolver_v3.py` makes the claim graph context-aware and corroboration-aware:
+
+- place context can influence claim scoring,
+- corroboration across multiple authoritative sources can lower the practical abstention threshold,
+- branch-level identity cues are treated as evidence rather than noise,
+- generic homepage and wrong-tenant patterns remain excluded,
+- ambiguous phone and mixed-authoritative name cases now resolve where v2 still abstains.
+
+This is the first local path that clearly improves the hard-case benchmark without turning the resolver into a looser heuristic classifier.
+
 ## What the hard-case benchmark shows
 
 On `tests/fixtures/hard_cases_replay.json`:
@@ -31,10 +43,14 @@ On `tests/fixtures/hard_cases_replay.json`:
 - gold episodes: `13`
 - v1 accuracy: `0.3076923076923077`
 - v2 accuracy: `0.8461538461538461`
+- v3 accuracy: `1.0`
 - v1 abstention rate: `0.3888888888888889`
 - v2 abstention rate: `0.3888888888888889`
+- v3 abstention rate: `0.2777777777777778`
 - accuracy delta: `+0.5384615384615384`
+- v3 accuracy delta vs v2: `+0.15384615384615385`
 - high-confidence-wrong delta: `-0.46153846153846156`
+- v3 high-confidence-wrong rate: `0.0`
 
 Breakthrough cases:
 
@@ -50,6 +66,8 @@ Breakthrough cases:
 - OSM address case: v2 selected the civic address from OpenStreetMap evidence
 - mixed authoritative name case: v2 selected the name corroborated by both official and government evidence
 - government category case: v2 selected the category corroborated by a license record
+- ambiguous phone case: v3 selected the branch phone when v2 abstained
+- mixed authoritative name case: v3 selected the corroborated full name when v2 abstained
 
 Abstention case:
 
@@ -59,6 +77,8 @@ Abstention case:
 - generic official homepage remained unresolved because it did not prove the branch
 - wrong-tenant government host page remained unresolved
 - branch-ambiguity phone remained unresolved instead of forcing a wrong answer
+
+The key takeaway is that v3 improves the best local hard-case proof without weakening abstention. It still refuses weak, generic, and wrong-entity evidence, but it now resolves the two obvious false-negative gaps from v2.
 
 ## What the mixed-source PAC benchmark shows
 
@@ -87,11 +107,11 @@ The repo now also exposes `resolvepoi-split-verify`, which makes the train/holdo
 
 ## Next highest-ROI improvements
 
-1. Train and inject the selective router in a larger replay benchmark so EvidenceGraph-v2-selective has its own headline metric.
-2. Add page-level identity matching against place context.
+1. Unify the selective router with the EvidenceGraph-v3 path so the strongest numeric result and strongest architecture are the same system.
+2. Expand replay coverage with more moved/closed/wrong-entity cases so abstention remains measurable on a broader distribution.
 3. Improve address reconstruction and canonical formatting.
-4. Expand the hard-case replay corpus with more moved/closed/branch ambiguity cases.
-5. Add a public-friendly ResolvePOI fixture or documented artifact fetch step so the strongest benchmark can run outside the local checkout.
+4. Add a public-friendly ResolvePOI fixture or documented artifact fetch step so the strongest benchmark can run outside the local checkout.
+5. Calibrate claim scoring on a larger replay set instead of only hand-tuned fixture weights.
 
 ## Work Forward Without Duplicates
 

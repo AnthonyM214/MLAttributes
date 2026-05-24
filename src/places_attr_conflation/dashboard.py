@@ -26,6 +26,7 @@ class DashboardData:
     benchmark_v2_hard_cases: dict[str, object] | None
     benchmark_v2_pac_hard_cases: dict[str, object] | None
     benchmark_v2_santa_cruz_challenge: dict[str, object] | None
+    benchmark_v3_hard_cases: dict[str, object] | None
     repo_comparison_tests: int | None
     paths: dict[str, str]
     batch_progress_rows: list[list[str]]
@@ -113,6 +114,7 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "benchmark_v2_hard_cases": harness / "benchmark_v2_hard_cases_current.json",
         "benchmark_v2_pac_hard_cases": harness / "benchmark_v2_pac_hard_cases_current.json",
         "benchmark_v2_santa_cruz_challenge": harness / "benchmark_v2_santa_cruz_challenge_current.json",
+        "benchmark_v3_hard_cases": harness / "benchmark_v3_hard_cases_current.json",
         "work_ledger": root / "harness" / "PAC_WORK_LEDGER.md",
         "repo_comparison": root / "harness" / "PAC_REPO_COMPARISON.md",
         "engineering_report": root / "harness" / "PAC_ENGINEERING_REPORT.md",
@@ -148,6 +150,7 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         benchmark_v2_hard_cases=_load_json(_resolve_path(root, paths["benchmark_v2_hard_cases"])) if "benchmark_v2_hard_cases" in paths else None,
         benchmark_v2_pac_hard_cases=_load_json(_resolve_path(root, paths["benchmark_v2_pac_hard_cases"])) if "benchmark_v2_pac_hard_cases" in paths else None,
         benchmark_v2_santa_cruz_challenge=_load_json(_resolve_path(root, paths["benchmark_v2_santa_cruz_challenge"])) if "benchmark_v2_santa_cruz_challenge" in paths else None,
+        benchmark_v3_hard_cases=_load_json(_resolve_path(root, paths["benchmark_v3_hard_cases"])) if "benchmark_v3_hard_cases" in paths else None,
         repo_comparison_tests=_load_repo_comparison_tests(root),
         paths=paths,
         batch_progress_rows=_batch_progress_rows(root),
@@ -923,6 +926,10 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
     hard_v2 = hard.get("resolver_v2", {}) if isinstance(hard, dict) else {}
     if not isinstance(hard_v2, dict):
         hard_v2 = {}
+    hard_v3 = data.benchmark_v3_hard_cases or {}
+    hard_v3_resolver = hard_v3.get("resolver_v3", {}) if isinstance(hard_v3, dict) else {}
+    if not isinstance(hard_v3_resolver, dict):
+        hard_v3_resolver = {}
     santa = data.benchmark_v2_santa_cruz_challenge or {}
     santa_v2 = santa.get("resolver_v2", {}) if isinstance(santa, dict) else {}
     if not isinstance(santa_v2, dict):
@@ -957,6 +964,11 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
             "label": "Claim-level v2 hard cases",
             "value": f"{_pct((hard_v2.get('accuracy')))} accuracy / {_pct((hard_v2.get('abstention_rate')))} abstention",
             "detail": f"High-confidence wrong: {_pct(hard_v2.get('high_confidence_wrong_rate'))}; breakthrough cases captured in benchmark_v2_hard_cases_current.json",
+        },
+        {
+            "label": "Claim-level v3 hard cases",
+            "value": f"{_pct(hard_v3_resolver.get('accuracy'))} accuracy / {_pct(hard_v3_resolver.get('abstention_rate'))} abstention",
+            "detail": f"Corroboration-aware graph scoring; high-confidence wrong: {_pct(hard_v3_resolver.get('high_confidence_wrong_rate'))}",
         },
         {
             "label": "Santa Cruz challenge",
@@ -1007,6 +1019,32 @@ def _benchmark_v2_hard_case_lines(report: dict[str, object] | None) -> list[str]
         f"Resolver v2 high-confidence wrong: {_pct(resolver_v2.get('high_confidence_wrong_rate'))}",
         f"Resolver v1 accuracy: {_pct(resolver_v1.get('accuracy'))}",
         f"Resolver v1 abstention: {_pct(resolver_v1.get('abstention_rate'))}",
+    ]
+    if isinstance(breakthroughs, list) and breakthroughs:
+        lines.append("Breakthrough cases: " + "; ".join(str(case.get("case_id", "-")) for case in breakthroughs if isinstance(case, dict)))
+    if isinstance(abstentions, list) and abstentions:
+        lines.append("Abstention cases: " + "; ".join(str(case.get("case_id", "-")) for case in abstentions if isinstance(case, dict)))
+    if isinstance(failures, list) and failures:
+        lines.append("Failure cases: " + "; ".join(str(case.get("case_id", "-")) for case in failures if isinstance(case, dict)))
+    return lines
+
+
+def _benchmark_v3_hard_case_lines(report: dict[str, object] | None) -> list[str]:
+    if not report:
+        return ["No benchmark-v3 hard-case report found."]
+    resolver_v2 = report.get("resolver_v2", {})
+    resolver_v3 = report.get("resolver_v3", {})
+    if not isinstance(resolver_v2, dict) or not isinstance(resolver_v3, dict):
+        return ["benchmark-v3 hard-case report is incomplete."]
+    breakthroughs = report.get("breakthrough_cases", [])
+    failures = report.get("failure_cases", [])
+    abstentions = report.get("abstention_cases", [])
+    lines = [
+        f"Resolver v3 accuracy: {_pct(resolver_v3.get('accuracy'))}",
+        f"Resolver v3 abstention: {_pct(resolver_v3.get('abstention_rate'))}",
+        f"Resolver v3 high-confidence wrong: {_pct(resolver_v3.get('high_confidence_wrong_rate'))}",
+        f"Resolver v2 accuracy: {_pct(resolver_v2.get('accuracy'))}",
+        f"Resolver v2 abstention: {_pct(resolver_v2.get('abstention_rate'))}",
     ]
     if isinstance(breakthroughs, list) and breakthroughs:
         lines.append("Breakthrough cases: " + "; ".join(str(case.get("case_id", "-")) for case in breakthroughs if isinstance(case, dict)))
@@ -1068,6 +1106,7 @@ def render_markdown(data: DashboardData) -> str:
     hard_cases = data.benchmark_v2_hard_cases or {}
     pac_cases = data.benchmark_v2_pac_hard_cases or {}
     santa_cases = data.benchmark_v2_santa_cruz_challenge or {}
+    v3_cases = data.benchmark_v3_hard_cases or {}
     selective_metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
     if not isinstance(selective_metrics, dict):
         selective_metrics = {}
@@ -1143,6 +1182,10 @@ def render_markdown(data: DashboardData) -> str:
         "",
         *[f"- {line}" for line in _benchmark_v2_hard_case_lines(hard_cases)],
         "",
+        "### Claim-Level v3 Hard Cases",
+        "",
+        *[f"- {line}" for line in _benchmark_v3_hard_case_lines(v3_cases)],
+        "",
         "### Santa Cruz Challenge",
         "",
         *[f"- {line}" for line in _benchmark_v2_pac_lines(santa_cases)],
@@ -1197,6 +1240,7 @@ def render_html(data: DashboardData) -> str:
     hard_cases = data.benchmark_v2_hard_cases or {}
     pac_cases = data.benchmark_v2_pac_hard_cases or {}
     santa_cases = data.benchmark_v2_santa_cruz_challenge or {}
+    v3_cases = data.benchmark_v3_hard_cases or {}
     selective_metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
     if not isinstance(selective_metrics, dict):
         selective_metrics = {}
@@ -1400,6 +1444,14 @@ def render_html(data: DashboardData) -> str:
             "<div class='panel-body'>",
             "<ul class='detail-list'>",
             *[f"<li>{html.escape(line)}</li>" for line in _benchmark_v2_hard_case_lines(hard_cases)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Claim-level v3 hard cases</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _benchmark_v3_hard_case_lines(v3_cases)],
             "</ul>",
             "</div>",
             "</details>",
