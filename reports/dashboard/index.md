@@ -16,6 +16,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.
 - The Santa Cruz fixture is the clearest local demo: 50 replay cases, 100.0% expected behavior, 12.0% expected abstention, and 0.0% high-confidence wrong.
 - The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.
+- The pooled three-corpus router is a useful negative result: it only nudges ResolvePOI holdout (75.3% vs 75.0%), does not beat cross-corpus on David, and leaves hard cases tied at 84.6% accuracy.
 - The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.
 
 ## How We Evolved Past Dorking
@@ -26,6 +27,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - EvidenceGraph: Claims are grouped by normalized value and contradictions are explicit. Example: `hard-mixed-authoritative-name` combines official and government corroboration on the same name.
 - Resolver v3: V3 resolves `hard-phone-ambiguous` and `hard-mixed-authoritative-name` where v2 still abstains, while keeping high-confidence wrong at 0.0% on the hard set.
 - Selective router: The ResolvePOI selective router remains the strongest numeric result: 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.
+- Three-corpus pooled router: James labels are now loaded too, but the pooled router is only a diagnostic: it nudges ResolvePOI holdout from 75.0% to 75.3%, does not beat cross-corpus on David (67.4% vs 66.0%), and leaves hard cases tied at 84.6% accuracy.
 - Merged corpus OKR: The collected replay tree contains 38,518 loadable episodes and 5,078 unique case-attribute pairs. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.
 - Research alignment: The research note (/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.
 
@@ -72,6 +74,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Already done: selective ResolvePOI baseline: The learned router reaches 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.
 - Already done: hard-case abstention proof: The hard-case benchmark records 84.6% accuracy, 27.8% abstention, and 0.0% high-confidence wrong.
 - Already done: PAC benchmark expected behavior: The PAC hard benchmark now includes explicit expected-abstain labels and mixed authoritative sources instead of only positive examples.
+- Already done: pooled three-corpus diagnostic: James CSV labels now load correctly, but the pooled router only nudges ResolvePOI holdout, does not beat cross-corpus on David, and leaves hard cases tied at 84.6% accuracy / 27.8% abstention.
 - Already done: repo comparison and dashboard cleanup: The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with 233 passing tests as the reproducibility proof.
 - Do not duplicate: Do not spend time on another pure current-vs-base classifier, a fixture-only one-off proof, or dashboard polish that does not add replay coverage, abstention quality, or evidence structure.
 - Work forward: The next real leverage is a larger replay corpus, better public proof paths, calibrated claim scoring, and unifying the selective router with the EvidenceGraph path.
@@ -87,6 +90,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 | PAC hard benchmark | 100.0% correct abstention / passed | Identity drift precision/recall: 100.0% / 100.0% |
 | PAC expected behavior | 100.0% expected-behavior accuracy | Expected abstention rate: 60.0%; claim-level benchmark captures the intended behavior on ambiguous cases. |
 | Retrieval proof | 100.0% targeted vs 0.0% fallback | Citation precision: 100.0% vs 0.0%; replay cases: 1 |
+| Pooled router | 75.3% ResolvePOI / 66.0% David | Vs cross-corpus: 75.0% / 67.4%; hard cases tied at 84.6% |
 | Website authority | 100.0% authoritative / 0.0% false official | Selected official: 100.0%; place-relevant official: 100.0% |
 | Test suite | 233 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
 
@@ -94,7 +98,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 
 1. Grow replay coverage: Move beyond curated hard cases and a tiny replay sample. Build a 100-300 case replay corpus with easy, medium, and ambiguous examples.
 2. Calibrate claim scoring: Tune source authority, identity, freshness, and contradiction weights on a larger corpus instead of trusting hand-tuned fixture weights.
-3. Unify the best paths: Make the selective router and EvidenceGraph benchmark the same reproducible path so the strongest numeric result and the strongest architecture are one system.
+3. Unify the best paths: Make the selective router and EvidenceGraph benchmark the same reproducible path so the strongest numeric result and the strongest architecture are one system. Treat the pooled three-corpus router as a diagnostic, not the headline.
 4. Publish a public proof path: Ship a small public ResolvePOI fixture or artifact fetch command so the 97.7% selective result is reproducible without local-only inputs.
 5. Keep pruning historical clutter: Move old snapshots and exploratory outputs into a clearly historical area so the current repo surface stays easy to scan.
 
@@ -236,6 +240,7 @@ Successful live checks: 0/1
 ### Report Files
 
 - `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json`
+- `benchmark_pooled`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_pooled_current.json`
 - `benchmark_v2_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_hard_cases_current.json`
 - `benchmark_v2_pac_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_pac_hard_cases_current.json`
 - `benchmark_v2_santa_cruz_challenge`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_santa_cruz_challenge_current.json`

@@ -83,7 +83,8 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>Takeaway 2</div><div class='detail'>The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.</div></article>
 <article class='stat-card'><div class='label'>Takeaway 3</div><div class='detail'>The Santa Cruz fixture is the clearest local demo: 50 replay cases, 100.0% expected behavior, 12.0% expected abstention, and 0.0% high-confidence wrong.</div></article>
 <article class='stat-card'><div class='label'>Takeaway 4</div><div class='detail'>The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 5</div><div class='detail'>The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 5</div><div class='detail'>The pooled three-corpus router is a useful negative result: it only nudges ResolvePOI holdout (75.3% vs 75.0%), does not beat cross-corpus on David, and leaves hard cases tied at 84.6% accuracy.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 6</div><div class='detail'>The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.</div></article>
 </div>
 </section>
 <section>
@@ -96,6 +97,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>EvidenceGraph</div><div class='detail'>Claims are grouped by normalized value and contradictions are explicit. Example: `hard-mixed-authoritative-name` combines official and government corroboration on the same name.</div></article>
 <article class='stat-card'><div class='label'>Resolver v3</div><div class='detail'>V3 resolves `hard-phone-ambiguous` and `hard-mixed-authoritative-name` where v2 still abstains, while keeping high-confidence wrong at 0.0% on the hard set.</div></article>
 <article class='stat-card'><div class='label'>Selective router</div><div class='detail'>The ResolvePOI selective router remains the strongest numeric result: 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.</div></article>
+<article class='stat-card'><div class='label'>Three-corpus pooled router</div><div class='detail'>James labels are now loaded too, but the pooled router is only a diagnostic: it nudges ResolvePOI holdout from 75.0% to 75.3%, does not beat cross-corpus on David (67.4% vs 66.0%), and leaves hard cases tied at 84.6% accuracy.</div></article>
 <article class='stat-card'><div class='label'>Merged corpus OKR</div><div class='detail'>The collected replay tree contains 38,518 loadable episodes and 5,078 unique case-attribute pairs. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.</div></article>
 <article class='stat-card'><div class='label'>Research alignment</div><div class='detail'>The research note (/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.</div></article>
 </div>
@@ -138,6 +140,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>Already done: selective ResolvePOI baseline</div><div class='detail'>The learned router reaches 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.</div></article>
 <article class='stat-card'><div class='label'>Already done: hard-case abstention proof</div><div class='detail'>The hard-case benchmark records 84.6% accuracy, 27.8% abstention, and 0.0% high-confidence wrong.</div></article>
 <article class='stat-card'><div class='label'>Already done: PAC benchmark expected behavior</div><div class='detail'>The PAC hard benchmark now includes explicit expected-abstain labels and mixed authoritative sources instead of only positive examples.</div></article>
+<article class='stat-card'><div class='label'>Already done: pooled three-corpus diagnostic</div><div class='detail'>James CSV labels now load correctly, but the pooled router only nudges ResolvePOI holdout, does not beat cross-corpus on David, and leaves hard cases tied at 84.6% accuracy / 27.8% abstention.</div></article>
 <article class='stat-card'><div class='label'>Already done: repo comparison and dashboard cleanup</div><div class='detail'>The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with 233 passing tests as the reproducibility proof.</div></article>
 <article class='stat-card'><div class='label'>Do not duplicate</div><div class='detail'>Do not spend time on another pure current-vs-base classifier, a fixture-only one-off proof, or dashboard polish that does not add replay coverage, abstention quality, or evidence structure.</div></article>
 <article class='stat-card'><div class='label'>Work forward</div><div class='detail'>The next real leverage is a larger replay corpus, better public proof paths, calibrated claim scoring, and unifying the selective router with the EvidenceGraph path.</div></article>
@@ -154,6 +157,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>PAC hard benchmark</div><div class='value'>100.0% correct abstention / passed</div><div class='detail'>Identity drift precision/recall: 100.0% / 100.0%</div></article>
 <article class='stat-card'><div class='label'>PAC expected behavior</div><div class='value'>100.0% expected-behavior accuracy</div><div class='detail'>Expected abstention rate: 60.0%; claim-level benchmark captures the intended behavior on ambiguous cases.</div></article>
 <article class='stat-card'><div class='label'>Retrieval proof</div><div class='value'>100.0% targeted vs 0.0% fallback</div><div class='detail'>Citation precision: 100.0% vs 0.0%; replay cases: 1</div></article>
+<article class='stat-card'><div class='label'>Pooled router</div><div class='value'>75.3% ResolvePOI / 66.0% David</div><div class='detail'>Vs cross-corpus: 75.0% / 67.4%; hard cases tied at 84.6%</div></article>
 <article class='stat-card'><div class='label'>Website authority</div><div class='value'>100.0% authoritative / 0.0% false official</div><div class='detail'>Selected official: 100.0%; place-relevant official: 100.0%</div></article>
 <article class='stat-card'><div class='label'>Test suite</div><div class='value'>233 tests passed</div><div class='detail'>Current repo comparison document records the full unit-test count as a reproducibility proof.</div></article>
 </div>
@@ -174,7 +178,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <div class='step-grid'>
 <article class='step'><div class='index'>1</div><h4>Grow replay coverage</h4><p>Move beyond curated hard cases and a tiny replay sample. Build a 100-300 case replay corpus with easy, medium, and ambiguous examples.</p></article>
 <article class='step'><div class='index'>2</div><h4>Calibrate claim scoring</h4><p>Tune source authority, identity, freshness, and contradiction weights on a larger corpus instead of trusting hand-tuned fixture weights.</p></article>
-<article class='step'><div class='index'>3</div><h4>Unify the best paths</h4><p>Make the selective router and EvidenceGraph benchmark the same reproducible path so the strongest numeric result and the strongest architecture are one system.</p></article>
+<article class='step'><div class='index'>3</div><h4>Unify the best paths</h4><p>Make the selective router and EvidenceGraph benchmark the same reproducible path so the strongest numeric result and the strongest architecture are one system. Treat the pooled three-corpus router as a diagnostic, not the headline.</p></article>
 <article class='step'><div class='index'>4</div><h4>Publish a public proof path</h4><p>Ship a small public ResolvePOI fixture or artifact fetch command so the 97.7% selective result is reproducible without local-only inputs.</p></article>
 <article class='step'><div class='index'>5</div><h4>Keep pruning historical clutter</h4><p>Move old snapshots and exploratory outputs into a clearly historical area so the current repo surface stays easy to scan.</p></article>
 </div>
@@ -352,6 +356,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <div class='panel-body'>
 <ul class='path-list'>
 <li><strong>baseline</strong>: <code>/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json</code></li>
+<li><strong>benchmark_pooled</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_pooled_current.json</code></li>
 <li><strong>benchmark_v2_hard_cases</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_hard_cases_current.json</code></li>
 <li><strong>benchmark_v2_pac_hard_cases</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_pac_hard_cases_current.json</code></li>
 <li><strong>benchmark_v2_santa_cruz_challenge</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_santa_cruz_challenge_current.json</code></li>

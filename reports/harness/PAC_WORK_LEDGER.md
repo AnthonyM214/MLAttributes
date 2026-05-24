@@ -12,6 +12,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
 - Corroboration-aware `resolver_v3.py` is in place and now beats v2 on the hard-case replay corpus.
 - The selective ResolvePOI router is implemented and benchmarked on the 2k corpus / 400-ID holdout.
 - The cross-corpus selective router has been trained against ResolvePOI + David feature corpora and now serves as the learned-router baseline when we want safer abstention on hard cases.
+- The three-corpus pooled router now loads James labels correctly, but it remains diagnostic rather than breakthrough: it nudges ResolvePOI holdout a little, does not improve David over cross-corpus, and leaves hard cases tied.
 - The Santa Cruz replay corpus exists in both starter and expanded forms.
 - The hard-case PAC benchmark now includes:
   - abstentions
@@ -37,6 +38,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
 - Do not duplicate the curated Santa Cruz / PAC hard-case fixtures unless the new cases add a genuinely new failure mode.
 - Do not replace the selective router with another ad hoc heuristic router.
 - Do not redo the cross-corpus router unless a new corpus actually improves high-confidence error or claim coverage.
+- Do not promote the pooled three-corpus router unless it beats cross-corpus on both a holdout and an external corpus while preserving hard-case safety.
 
 ## Remaining High-Leverage Work
 

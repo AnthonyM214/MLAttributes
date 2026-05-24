@@ -52,6 +52,23 @@ DAVID_FEATURE_FILES = {
 }
 
 
+def _label_ids_from_json(path: str | Path) -> set[str]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(payload, list):
+        return set()
+    ids: set[str] = set()
+    for row in payload:
+        if not isinstance(row, dict):
+            continue
+        row_id = str(row.get("id") or "")
+        base_id = str(row.get("base_id") or "")
+        if row_id:
+            ids.add(row_id)
+        if base_id:
+            ids.add(base_id)
+    return ids
+
+
 def _coerce_float(value: object, default: float = 0.0) -> float:
     try:
         return float(value)
@@ -175,14 +192,23 @@ def _feature_row_from_raw(attribute: str, current_raw: object, base_raw: object,
     return {name: float(features.get(name, 0.0)) for name in FEATURE_NAMES}
 
 
-def _feature_frame_from_david_parquet(attribute: str, parquet_path: str | Path, *, include_same: bool = False) -> pd.DataFrame:
+def _feature_frame_from_david_parquet(
+    attribute: str,
+    parquet_path: str | Path,
+    *,
+    include_same: bool = False,
+    exclude_ids: set[str] | None = None,
+) -> pd.DataFrame:
     frame = pd.read_parquet(parquet_path)
     if frame.empty:
         return pd.DataFrame(columns=["id", "label", *FEATURE_NAMES])
     rows: list[dict[str, float | str]] = []
     for _, row in frame.iterrows():
         row_id = str(row.get("id", ""))
+        base_id = str(row.get("base_id", ""))
         if not row_id:
+            continue
+        if exclude_ids and (row_id in exclude_ids or base_id in exclude_ids):
             continue
         label_raw = str(row.get("label", "")).strip().lower()
         if label_raw == "same" and not include_same:
@@ -351,6 +377,7 @@ def train_cross_corpus_selective_router(
     resolvepoi_train_parquet: str | Path,
     resolvepoi_train_labels: str | Path,
     david_root: str | Path = DAVID_ROOT,
+    david_exclude_labels: str | Path | Iterable[str | Path] | None = None,
     limit: int = 400,
     attributes: Iterable[str] = ("website", "phone", "address", "category", "name"),
     target_coverage: float = 0.9,
@@ -365,6 +392,14 @@ def train_cross_corpus_selective_router(
     )
 
     david_root = Path(david_root)
+    if david_exclude_labels is None:
+        david_exclude_ids: set[str] = set()
+    elif isinstance(david_exclude_labels, (str, Path)):
+        david_exclude_ids = _label_ids_from_json(david_exclude_labels)
+    else:
+        david_exclude_ids = set()
+        for path in david_exclude_labels:
+            david_exclude_ids.update(_label_ids_from_json(path))
     combined_models: dict[str, HistGradientBoostingClassifier | None] = {}
     artifacts: dict[str, SelectiveAttributeModel] = {}
     summaries: dict[str, dict[str, object]] = {}
@@ -375,7 +410,7 @@ def train_cross_corpus_selective_router(
         for filename in david_files:
             path = david_root / filename
             if path.exists():
-                frames.append(_feature_frame_from_david_parquet(attribute, path))
+                frames.append(_feature_frame_from_david_parquet(attribute, path, exclude_ids=david_exclude_ids))
 
         train_frame = pd.concat([frame for frame in frames if not frame.empty], ignore_index=True) if frames else pd.DataFrame()
         if train_frame.empty:

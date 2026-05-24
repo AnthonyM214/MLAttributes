@@ -74,6 +74,7 @@ from places_attr_conflation.golden import (
 from places_attr_conflation.benchmark_v2 import evaluate_benchmark_v2
 from places_attr_conflation.benchmark_v2 import build_learned_router as build_learned_router_v2
 from places_attr_conflation.benchmark_v3 import evaluate_benchmark_v3
+from places_attr_conflation.benchmark_pooled import evaluate_pooled_benchmark
 from places_attr_conflation.overture_context import (
     build_overture_context_replay,
     build_overture_gap_dork_rows,
@@ -430,6 +431,24 @@ def main() -> int:
     benchmark_v3.add_argument("--include-decisions", action="store_true")
     benchmark_v2.add_argument("--output", help="Optional JSON report output path.")
 
+    benchmark_pooled = subparsers.add_parser(
+        "benchmark-pooled",
+        help="Benchmark the pooled cross-repo selective router on labeled holdouts and hard replay cases.",
+    )
+    benchmark_pooled.add_argument("--resolvepoi-truth-path", default=str(DEFAULT_RESOLVEPOI_TRUTH_PATH))
+    benchmark_pooled.add_argument("--resolvepoi-train-parquet", default=str(DEFAULT_RESOLVEPOI_TRAIN_PARQUET))
+    benchmark_pooled.add_argument("--resolvepoi-train-labels", default=str(DEFAULT_RESOLVEPOI_TRAIN_LABELS))
+    benchmark_pooled.add_argument("--resolvepoi-eval-parquet", default=str(DEFAULT_RESOLVEPOI_TRAIN_PARQUET))
+    benchmark_pooled.add_argument("--resolvepoi-eval-labels", default="/home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json")
+    benchmark_pooled.add_argument("--david-project-a-parquet", default="/home/anthony/projectterra_repos/david-places-attributes-conflation-v2/data/project_a_samples.parquet")
+    benchmark_pooled.add_argument("--david-test-labels", default="/home/anthony/projectterra_repos/david-places-attributes-conflation-v2/data/processed/golden_dataset_test.json")
+    benchmark_pooled.add_argument("--david-root", default="/home/anthony/projectterra_repos/david-places-attributes-conflation-v2/data/processed")
+    benchmark_pooled.add_argument("--james-csv", default="/home/anthony/projectterra_repos/James-Places-Attribute-Conflation/output_data/algorithm_labels.csv")
+    benchmark_pooled.add_argument("--hard-replay", default=str(ROOT / "tests" / "fixtures" / "hard_cases_replay.json"))
+    benchmark_pooled.add_argument("--target-coverage", type=float, default=0.99)
+    benchmark_pooled.add_argument("--include-decisions", action="store_true")
+    benchmark_pooled.add_argument("--output")
+
     smoke = subparsers.add_parser("smoke", help="Run a small live retrieval smoke check with replay fallback.")
     smoke.add_argument("--url", action="append", dest="urls", help="Allowlisted URL to fetch. May be repeated.")
     smoke.add_argument("--timeout", type=float, default=5.0)
@@ -766,6 +785,33 @@ def main() -> int:
             episodes = [episode for episode in episodes if episode.attribute in allowed]
         report = evaluate_benchmark_v3(episodes, include_decisions=args.include_decisions)
         report["input"] = str(args.replay)
+    elif args.command == "benchmark-pooled":
+        report = evaluate_pooled_benchmark(
+            resolvepoi_truth_path=args.resolvepoi_truth_path,
+            resolvepoi_train_parquet=args.resolvepoi_train_parquet,
+            resolvepoi_train_labels=args.resolvepoi_train_labels,
+            resolvepoi_eval_parquet=args.resolvepoi_eval_parquet,
+            resolvepoi_eval_labels=args.resolvepoi_eval_labels,
+            david_project_a_parquet=args.david_project_a_parquet,
+            david_test_labels=args.david_test_labels,
+            david_root=args.david_root,
+            james_csv=args.james_csv,
+            hard_replay=args.hard_replay,
+            target_coverage=args.target_coverage,
+            include_decisions=args.include_decisions,
+        )
+        report["input"] = {
+            "resolvepoi_truth_path": str(args.resolvepoi_truth_path),
+            "resolvepoi_train_parquet": str(args.resolvepoi_train_parquet),
+            "resolvepoi_train_labels": str(args.resolvepoi_train_labels),
+            "resolvepoi_eval_parquet": str(args.resolvepoi_eval_parquet),
+            "resolvepoi_eval_labels": str(args.resolvepoi_eval_labels),
+            "david_project_a_parquet": str(args.david_project_a_parquet),
+            "david_test_labels": str(args.david_test_labels),
+            "david_root": str(args.david_root),
+            "james_csv": str(args.james_csv),
+            "hard_replay": str(args.hard_replay),
+        }
     elif args.command == "smoke":
         urls = args.urls or DEFAULT_SMOKE_URLS
         report = _run_smoke(urls, args.timeout, args.replay_input)

@@ -22,6 +22,7 @@ class DashboardData:
     golden: dict[str, object] | None
     evidence: dict[str, object] | None
     pac_benchmark: dict[str, object] | None
+    benchmark_pooled: dict[str, object] | None
     resolvepoi_selective: dict[str, object] | None
     benchmark_v2_hard_cases: dict[str, object] | None
     benchmark_v2_pac_hard_cases: dict[str, object] | None
@@ -104,6 +105,7 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "merged_replay": root / "replay" / "merged_current.json",
         "resolver_replay": root / "resolver_replay" / "resolver_on_replay_current.json",
         "pac_benchmark": root / "pac_benchmark" / "pac_benchmark_current.json",
+        "benchmark_pooled": root / "harness" / "benchmark_pooled_current.json",
         "rerank": harness / "rerank_current.json",
         "combined": harness / "all_current.json",
         "smoke": harness / "smoke_current.json",
@@ -148,6 +150,7 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         golden=_load_json(_resolve_path(root, paths["golden"])) if "golden" in paths else None,
         evidence=_load_json(_resolve_path(root, paths["evidence"])) if "evidence" in paths else None,
         pac_benchmark=_load_json(_resolve_path(root, paths["pac_benchmark"])) if "pac_benchmark" in paths else None,
+        benchmark_pooled=_load_json(_resolve_path(root, paths["benchmark_pooled"])) if "benchmark_pooled" in paths else None,
         resolvepoi_selective=_load_json(_resolve_path(root, paths["resolvepoi_selective"])) if "resolvepoi_selective" in paths else None,
         benchmark_v2_hard_cases=_load_json(_resolve_path(root, paths["benchmark_v2_hard_cases"])) if "benchmark_v2_hard_cases" in paths else None,
         benchmark_v2_pac_hard_cases=_load_json(_resolve_path(root, paths["benchmark_v2_pac_hard_cases"])) if "benchmark_v2_pac_hard_cases" in paths else None,
@@ -785,7 +788,7 @@ def _next_steps(selective: dict[str, object] | None, pac_benchmark: dict[str, ob
         {
             "title": "Unify the best paths",
             "body": (
-                "Make the selective router and EvidenceGraph benchmark the same reproducible path so the strongest numeric result and the strongest architecture are one system."
+                "Make the selective router and EvidenceGraph benchmark the same reproducible path so the strongest numeric result and the strongest architecture are one system. Treat the pooled three-corpus router as a diagnostic, not the headline."
             ),
         },
         {
@@ -812,6 +815,11 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
     hard_resolver = hard_cases.get("resolver_v2", {}) if isinstance(hard_cases, dict) else {}
     if not isinstance(hard_resolver, dict):
         hard_resolver = {}
+    pooled = data.benchmark_pooled or {}
+    pooled_resolvepoi = pooled.get("resolvepoi_holdout", {}) if isinstance(pooled, dict) else {}
+    pooled_david = pooled.get("david_test", {}) if isinstance(pooled, dict) else {}
+    pooled_hard = pooled.get("hard_cases", {}) if isinstance(pooled, dict) else {}
+    pooled_hard_cross = pooled_hard.get("cross_corpus", {}) if isinstance(pooled_hard, dict) else {}
     pac_benchmark = data.pac_benchmark or {}
     pac_resolver = pac_benchmark.get("resolver", {}) if isinstance(pac_benchmark, dict) else {}
     if not isinstance(pac_resolver, dict):
@@ -839,6 +847,13 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
         {
             "title": "Already done: PAC benchmark expected behavior",
             "body": "The PAC hard benchmark now includes explicit expected-abstain labels and mixed authoritative sources instead of only positive examples.",
+        },
+        {
+            "title": "Already done: pooled three-corpus diagnostic",
+            "body": (
+                f"James CSV labels now load correctly, but the pooled router only nudges ResolvePOI holdout, does not beat cross-corpus on David, "
+                f"and leaves hard cases tied at {_pct(pooled_hard_cross.get('accuracy'))} accuracy / {_pct(pooled_hard_cross.get('abstention_rate'))} abstention."
+            ) if isinstance(pooled, dict) and pooled else "A pooled three-corpus benchmark exists, but the repo still needs the full report surfaced in the dashboard."
         },
         {
             "title": "Already done: repo comparison and dashboard cleanup",
@@ -876,6 +891,15 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
         macro = {}
     if not isinstance(core_macro, dict):
         core_macro = {}
+    pooled = data.benchmark_pooled or {}
+    pooled_resolvepoi = pooled.get("resolvepoi_holdout", {}) if isinstance(pooled, dict) else {}
+    pooled_david = pooled.get("david_test", {}) if isinstance(pooled, dict) else {}
+    pooled_hard = pooled.get("hard_cases", {}) if isinstance(pooled, dict) else {}
+    pooled_resolvepoi_pooled = pooled_resolvepoi.get("pooled", {}) if isinstance(pooled_resolvepoi, dict) else {}
+    pooled_resolvepoi_cross = pooled_resolvepoi.get("cross_corpus", {}) if isinstance(pooled_resolvepoi, dict) else {}
+    pooled_david_pooled = pooled_david.get("pooled", {}) if isinstance(pooled_david, dict) else {}
+    pooled_david_cross = pooled_david.get("cross_corpus", {}) if isinstance(pooled_david, dict) else {}
+    pooled_hard_cross = pooled_hard.get("cross_corpus", {}) if isinstance(pooled_hard, dict) else {}
     okr_path = data.paths.get("okr", "")
     research_path = data.paths.get("research_alignment", "")
     return [
@@ -923,6 +947,15 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
             ),
         },
         {
+            "title": "Three-corpus pooled router",
+            "body": (
+                f"James labels are now loaded too, but the pooled router is only a diagnostic: it nudges ResolvePOI holdout from "
+                f"{_pct(pooled_resolvepoi_cross.get('accuracy'))} to {_pct(pooled_resolvepoi_pooled.get('accuracy'))}, does not beat cross-corpus on David "
+                f"({_pct(pooled_david_cross.get('accuracy'))} vs {_pct(pooled_david_pooled.get('accuracy'))}), and leaves hard cases tied at "
+                f"{_pct(pooled_hard_cross.get('accuracy'))} accuracy."
+            ) if isinstance(pooled, dict) and pooled else "The pooled three-corpus router still needs a surfaced benchmark report."
+        },
+        {
             "title": "Merged corpus OKR",
             "body": (
                 f"The collected replay tree contains 38,518 loadable episodes and 5,078 unique case-attribute pairs. "
@@ -959,6 +992,14 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
         santa_v2 = {}
     if not isinstance(santa_expected_v2, dict):
         santa_expected_v2 = {}
+    pooled = data.benchmark_pooled or {}
+    pooled_resolvepoi = pooled.get("resolvepoi_holdout", {}) if isinstance(pooled, dict) else {}
+    pooled_david = pooled.get("david_test", {}) if isinstance(pooled, dict) else {}
+    pooled_hard = pooled.get("hard_cases", {}) if isinstance(pooled, dict) else {}
+    pooled_resolvepoi_pooled = pooled_resolvepoi.get("pooled", {}) if isinstance(pooled_resolvepoi, dict) else {}
+    pooled_resolvepoi_cross = pooled_resolvepoi.get("cross_corpus", {}) if isinstance(pooled_resolvepoi, dict) else {}
+    pooled_david_cross = pooled_david.get("cross_corpus", {}) if isinstance(pooled_david, dict) else {}
+    pooled_hard_cross = pooled_hard.get("cross_corpus", {}) if isinstance(pooled_hard, dict) else {}
     return [
         "Yes, MLAttributes has evolved past dorking. Dorking still matters, but it is now only the first step in a larger claim-verification pipeline.",
         "The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.",
@@ -970,6 +1011,12 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
             f"and {_pct(santa_v2.get('high_confidence_wrong_rate'))} high-confidence wrong."
         ),
         "The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.",
+        (
+            f"The pooled three-corpus router is a useful negative result: it only nudges ResolvePOI holdout ({_pct(pooled_resolvepoi_pooled.get('accuracy'))} vs {_pct(pooled_resolvepoi_cross.get('accuracy'))}), "
+            f"does not beat cross-corpus on David, and leaves hard cases tied at {_pct(pooled_hard_cross.get('accuracy'))} accuracy."
+            if isinstance(pooled, dict) and pooled
+            else "The pooled three-corpus router is a useful negative result: adding more training corpora is not yet the main source of leverage."
+        ),
         "The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.",
     ]
 
@@ -1052,6 +1099,15 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
     if not isinstance(fallback, dict):
         fallback = {}
     website = data.website_authority or {}
+    pooled = data.benchmark_pooled or {}
+    pooled_resolvepoi = pooled.get("resolvepoi_holdout", {}) if isinstance(pooled, dict) else {}
+    pooled_david = pooled.get("david_test", {}) if isinstance(pooled, dict) else {}
+    pooled_hard = pooled.get("hard_cases", {}) if isinstance(pooled, dict) else {}
+    pooled_resolvepoi_pooled = pooled_resolvepoi.get("pooled", {}) if isinstance(pooled_resolvepoi, dict) else {}
+    pooled_resolvepoi_cross = pooled_resolvepoi.get("cross_corpus", {}) if isinstance(pooled_resolvepoi, dict) else {}
+    pooled_david_pooled = pooled_david.get("pooled", {}) if isinstance(pooled_david, dict) else {}
+    pooled_david_cross = pooled_david.get("cross_corpus", {}) if isinstance(pooled_david, dict) else {}
+    pooled_hard_cross = pooled_hard.get("cross_corpus", {}) if isinstance(pooled_hard, dict) else {}
     return [
         {
             "label": "Selective router",
@@ -1087,6 +1143,11 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
             "label": "Retrieval proof",
             "value": f"{_pct(targeted.get('authoritative_found_rate'))} targeted vs {_pct(fallback.get('authoritative_found_rate'))} fallback",
             "detail": f"Citation precision: {_pct(targeted.get('citation_precision'))} vs {_pct(fallback.get('citation_precision'))}; replay cases: {_num(targeted.get('total'))}",
+        },
+        {
+            "label": "Pooled router",
+            "value": f"{_pct(pooled_resolvepoi_pooled.get('accuracy'))} ResolvePOI / {_pct(pooled_david_pooled.get('accuracy'))} David",
+            "detail": f"Vs cross-corpus: {_pct(pooled_resolvepoi_cross.get('accuracy'))} / {_pct(pooled_david_cross.get('accuracy'))}; hard cases tied at {_pct(pooled_hard_cross.get('accuracy'))}",
         },
         {
             "label": "Website authority",

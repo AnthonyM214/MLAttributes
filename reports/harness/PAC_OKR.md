@@ -10,6 +10,7 @@ The current resolver improvements proved an important point:
 
 - `resolver_v3` beats `resolver_v2` on the curated hard-case benchmark.
 - The new cross-corpus selective router keeps the same hard-case accuracy as the ResolvePOI-only router while raising abstention and removing the high-confidence name error.
+- The new three-corpus pooled router now loads James labels correctly, but it is a diagnostic result rather than a breakthrough: it nudges ResolvePOI holdout a bit, does not beat cross-corpus on David, and leaves hard-case behavior tied rather than improved.
 - But on the merged replay corpus, the bottleneck is no longer the resolver.
 - The bottleneck is claim construction coverage.
 
@@ -61,6 +62,7 @@ The literature points the same way:
 - `v1`: row-scoring baseline
 - `v2`: claim-level evidence graph baseline
 - `v3`: corroboration-aware claim graph baseline
+- `pooled`: three-corpus selective router diagnostic; useful for analysis, not the headline baseline
 - `next`: claim-construction coverage + graph-guided node masking + calibrated accept/reject
 
 ## Non-goals
