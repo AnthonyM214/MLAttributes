@@ -119,6 +119,7 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "okr": root / "harness" / "PAC_OKR.md",
         "repo_comparison": root / "harness" / "PAC_REPO_COMPARISON.md",
         "engineering_report": root / "harness" / "PAC_ENGINEERING_REPORT.md",
+        "research_alignment": root / "harness" / "PAC_RESEARCH_ALIGNMENT.md",
         "technical_summary": root / "harness" / "technical_summary.md",
     }
     result = {name: str(path) for name, path in selected.items() if path is not None and path.exists()}
@@ -876,6 +877,7 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
     if not isinstance(core_macro, dict):
         core_macro = {}
     okr_path = data.paths.get("okr", "")
+    research_path = data.paths.get("research_alignment", "")
     return [
         {
             "title": "Yes, we moved past dorking",
@@ -927,6 +929,24 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
                 f"The new OKR ({okr_path or 'reports/harness/PAC_OKR.md'}) says the next disruptive gain is claim coverage, not more resolver tuning."
             ),
         },
+        {
+            "title": "Research alignment",
+            "body": (
+                f"The research note ({research_path or 'reports/harness/PAC_RESEARCH_ALIGNMENT.md'}) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, "
+                "and learning-to-defer onto the repo’s claim-construction-first direction."
+            ),
+        },
+    ]
+
+
+def _research_alignment_lines(data: DashboardData) -> list[str]:
+    research_path = data.paths.get("research_alignment", "")
+    if not research_path:
+        return ["No research alignment note found."]
+    return [
+        f"Paper-backed direction: claim graphs, graph-guided retrieval planning, noise suppression, and calibrated abstention.",
+        f"Research note: {research_path}",
+        "Why it matters: the merged corpus shows claim coverage is the bottleneck, so the next gain comes from better evidence construction rather than another scorer.",
     ]
 
 
@@ -1216,6 +1236,10 @@ def render_markdown(data: DashboardData) -> str:
         "",
         *[f"- {item['title']}: {item['body']}" for item in evolution_story],
         "",
+        "## Research Alignment",
+        "",
+        *[f"- {line}" for line in _research_alignment_lines(data)],
+        "",
         "## What The 100% Numbers Mean",
         "",
         *[f"- {line}" for line in limitations],
@@ -1447,6 +1471,13 @@ def render_html(data: DashboardData) -> str:
                 for item in evolution_story
             ],
             "</div>",
+            "</section>",
+            "<section>",
+            "<h2 class='section-title'>Research Alignment</h2>",
+            "<p class='section-note'>The repo’s current direction matches recent fact-verification and selective-decision research: claim graphs, simpler retrieval, noise control, and explicit abstention.</p>",
+            "<ul class='detail-list panel pad'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _research_alignment_lines(data)],
+            "</ul>",
             "</section>",
             "<section>",
             "<h2 class='section-title'>What The 100% Numbers Mean</h2>",

@@ -20,6 +20,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
   - identity drift labels
 - The large replay corpus diagnosis shows the next bottleneck is claim coverage, not more resolver tuning.
 - The new OKR in `PAC_OKR.md` formalizes the pivot toward claim-construction coverage and graph-guided noise control.
+- The research alignment note in `PAC_RESEARCH_ALIGNMENT.md` explains why current PAC research points to claim graphs, simplified retrieval, noise suppression, and abstention.
 - The dashboard has been cleaned up and made human-readable.
 - The repo comparison doc covers the public ProjectTerra PAC repos and preserves the timeline of work.
 - The CI determinism issue around the evidence workplan test has already been fixed.
@@ -53,3 +54,7 @@ The next step is best guided by two proven patterns:
 - Selective prediction / conformal reject-option control for abstention
 
 Those are the directions that add new capability without repeating the older repos’ row-scoring or current-vs-base-only pattern.
+
+See also:
+
+- [PAC Research Alignment](PAC_RESEARCH_ALIGNMENT.md)

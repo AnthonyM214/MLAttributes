@@ -97,7 +97,17 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>Resolver v3</div><div class='detail'>V3 resolves `hard-phone-ambiguous` and `hard-mixed-authoritative-name` where v2 still abstains, while keeping high-confidence wrong at 0.0% on the hard set.</div></article>
 <article class='stat-card'><div class='label'>Selective router</div><div class='detail'>The ResolvePOI selective router remains the strongest numeric result: 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.</div></article>
 <article class='stat-card'><div class='label'>Merged corpus OKR</div><div class='detail'>The collected replay tree contains 38,518 loadable episodes and 5,078 unique case-attribute pairs. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.</div></article>
+<article class='stat-card'><div class='label'>Research alignment</div><div class='detail'>The research note (/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.</div></article>
 </div>
+</section>
+<section>
+<h2 class='section-title'>Research Alignment</h2>
+<p class='section-note'>The repo’s current direction matches recent fact-verification and selective-decision research: claim graphs, simpler retrieval, noise control, and explicit abstention.</p>
+<ul class='detail-list panel pad'>
+<li>Paper-backed direction: claim graphs, graph-guided retrieval planning, noise suppression, and calibrated abstention.</li>
+<li>Research note: /home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md</li>
+<li>Why it matters: the merged corpus shows claim coverage is the bottleneck, so the next gain comes from better evidence construction rather than another scorer.</li>
+</ul>
 </section>
 <section>
 <h2 class='section-title'>What The 100% Numbers Mean</h2>
@@ -357,6 +367,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <li><strong>replay_stats</strong>: <code>/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260516_190607_832512.json</code></li>
 <li><strong>repo_comparison</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md</code></li>
 <li><strong>rerank</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260516_190608_093696.json</code></li>
+<li><strong>research_alignment</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md</code></li>
 <li><strong>resolvepoi_selective</strong>: <code>/home/anthony/Overture/MLAttributes/reports/resolvepoi_selective/resolvepoi_selective_current.json</code></li>
 <li><strong>resolver_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_20260516_190607_832894.json</code></li>
 <li><strong>santa_cruz_challenge_corpus</strong>: <code>/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_challenge_replay.json</code></li>

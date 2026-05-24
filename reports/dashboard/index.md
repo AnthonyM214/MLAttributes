@@ -27,6 +27,13 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Resolver v3: V3 resolves `hard-phone-ambiguous` and `hard-mixed-authoritative-name` where v2 still abstains, while keeping high-confidence wrong at 0.0% on the hard set.
 - Selective router: The ResolvePOI selective router remains the strongest numeric result: 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.
 - Merged corpus OKR: The collected replay tree contains 38,518 loadable episodes and 5,078 unique case-attribute pairs. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.
+- Research alignment: The research note (/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.
+
+## Research Alignment
+
+- Paper-backed direction: claim graphs, graph-guided retrieval planning, noise suppression, and calibrated abstention.
+- Research note: /home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md
+- Why it matters: the merged corpus shows claim coverage is the bottleneck, so the next gain comes from better evidence construction rather than another scorer.
 
 ## What The 100% Numbers Mean
 
@@ -244,6 +251,7 @@ Successful live checks: 0/1
 - `replay_stats`: `/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260516_190607_832512.json`
 - `repo_comparison`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md`
 - `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260516_190608_093696.json`
+- `research_alignment`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md`
 - `resolvepoi_selective`: `/home/anthony/Overture/MLAttributes/reports/resolvepoi_selective/resolvepoi_selective_current.json`
 - `resolver_replay`: `/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_20260516_190607_832894.json`
 - `santa_cruz_challenge_corpus`: `/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_challenge_replay.json`
