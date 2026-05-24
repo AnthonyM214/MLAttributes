@@ -1,3 +1,4 @@
+import csv
 import json
 import subprocess
 import tempfile
@@ -196,9 +197,38 @@ class HarnessCliTests(unittest.TestCase):
         self.assertIn("Benchmark Viewer", html)
 
     def test_evidence_workplan_command_writes_batches_and_templates(self):
-        batch_dir = ROOT / "reports" / "ranker" / "conflict_dorks_20260512_032836_536355_batches"
         with tempfile.TemporaryDirectory() as tmpdir:
-            out = Path(tmpdir) / "workplan"
+            tmp = Path(tmpdir)
+            batch_dir = tmp / "batches"
+            batch_dir.mkdir()
+            out = tmp / "workplan"
+            replay_dir = tmp / "replay_collected"
+            replay_dir.mkdir()
+            rows = []
+            for idx, attribute in enumerate(["website", "name", "category", "website", "name", "category"], start=1):
+                rows.append(
+                    {
+                        "id": f"ci-case-{idx}",
+                        "base_id": f"ci-base-{idx}",
+                        "attribute": attribute,
+                        "truth": f"truth-{idx}",
+                        "truth_source": "manual",
+                        "prediction": f"prediction-{idx}",
+                        "baseline": "hybrid",
+                        "correct": "False",
+                        "needs_evidence": "True",
+                        "current_value": f"current-{idx}",
+                        "base_value": f"base-{idx}",
+                        "preferred_sources": "official_site,government,business_registry",
+                        "layer": "official",
+                        "query": f"{attribute} ci query {idx}",
+                        "priority": "baseline_wrong",
+                    }
+                )
+            with (batch_dir / "batch_001.csv").open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
+                writer.writeheader()
+                writer.writerows(rows)
             completed = subprocess.run(
                 [
                     "python3",
@@ -208,6 +238,8 @@ class HarnessCliTests(unittest.TestCase):
                     str(batch_dir),
                     "--output-dir",
                     str(out),
+                    "--replay-dir",
+                    str(replay_dir),
                     "--batches",
                     "2",
                     "--cases-per-batch",
