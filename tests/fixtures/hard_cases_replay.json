@@ -325,6 +325,302 @@
           ]
         }
       ]
+    },
+    {
+      "case_id": "hard-business-registry-website",
+      "attribute": "website",
+      "place": {
+        "current_value": "https://shop.example.com",
+        "base_value": "https://old.example.com",
+        "website": "https://shop.example.com"
+      },
+      "gold_value": "https://shop.example.com/contact",
+      "identity_label": "SAME_ENTITY",
+      "truth_source_type": "business_registry",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Shop Example business registry website",
+          "fetched_pages": [
+            {
+              "url": "https://registry.example/shop-example",
+              "title": "Shop Example Registry",
+              "page_text": "Business registry contact page lists https://shop.example.com/contact.",
+              "source_type": "business_registry",
+              "extracted_values": {
+                "website": "https://shop.example.com/contact"
+              },
+              "recency_days": 30,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Registry confirms the contact URL."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-osm-address",
+      "attribute": "address",
+      "place": {
+        "current_value": "120 Main St",
+        "base_value": "118 Main St",
+        "address": "120 Main St"
+      },
+      "gold_value": "120 Main St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "truth_source_type": "osm",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Shop Example OSM address",
+          "fetched_pages": [
+            {
+              "url": "https://www.openstreetmap.org/node/123",
+              "title": "OpenStreetMap Shop Example",
+              "page_text": "OpenStreetMap lists 120 Main St, Santa Cruz, CA 95060.",
+              "source_type": "osm",
+              "extracted_values": {
+                "address": "120 Main St, Santa Cruz, CA 95060"
+              },
+              "recency_days": 12,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "OSM corroborates the street address."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-mixed-authoritative-name",
+      "attribute": "name",
+      "place": {
+        "current_value": "Example Cafe",
+        "base_value": "Example Coffee",
+        "name": "Example Cafe"
+      },
+      "gold_value": "Example Cafe Santa Cruz",
+      "identity_label": "SAME_ENTITY",
+      "truth_source_type": "mixed_authoritative_corroboration",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe official name",
+          "fetched_pages": [
+            {
+              "url": "https://example.com/about",
+              "title": "Example Cafe",
+              "page_text": "Official name: Example Cafe Santa Cruz.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "name": "Example Cafe Santa Cruz"
+              },
+              "recency_days": 4,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Official page names the business."
+            }
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "Example Cafe government registry name",
+          "fetched_pages": [
+            {
+              "url": "https://registry.example/example-cafe",
+              "title": "Example Cafe Registry",
+              "page_text": "Government registry confirms Example Cafe Santa Cruz.",
+              "source_type": "government",
+              "extracted_values": {
+                "name": "Example Cafe Santa Cruz"
+              },
+              "recency_days": 20,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Registry corroborates the name."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-category-government-corroboration",
+      "attribute": "category",
+      "place": {
+        "current_value": "cafe",
+        "base_value": "coffee shop",
+        "category": "cafe"
+      },
+      "gold_value": "cafe",
+      "identity_label": "SAME_ENTITY",
+      "truth_source_type": "government",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe government category",
+          "fetched_pages": [
+            {
+              "url": "https://example.gov/licenses/example-cafe",
+              "title": "Example Cafe License",
+              "page_text": "Business license category: cafe.",
+              "source_type": "government",
+              "extracted_values": {
+                "category": "cafe"
+              },
+              "recency_days": 18,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Government license corroborates the category."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-social-only-abstain",
+      "attribute": "website",
+      "place": {
+        "current_value": "https://old.example.com",
+        "base_value": "https://old.example.com",
+        "website": "https://old.example.com"
+      },
+      "gold_value": "",
+      "expected_abstain": true,
+      "identity_label": "INSUFFICIENT_EVIDENCE",
+      "truth_source_type": "social",
+      "search_attempts": [
+        {
+          "layer": "fallback",
+          "query": "Shop Example social website",
+          "fetched_pages": [
+            {
+              "url": "https://instagram.com/shopexample",
+              "title": "Shop Example Instagram",
+              "page_text": "Shop Example Instagram profile only.",
+              "source_type": "social",
+              "extracted_values": {},
+              "recency_days": 9,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Social profile only; no canonical website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-generic-homepage-abstain",
+      "attribute": "website",
+      "place": {
+        "current_value": "https://www.starbucks.com/",
+        "base_value": "https://www.starbucks.com/store-locator/store/1234/mission-st-santa-cruz",
+        "website": "https://www.starbucks.com/"
+      },
+      "gold_value": "",
+      "expected_abstain": true,
+      "identity_label": "INSUFFICIENT_EVIDENCE",
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "fallback",
+          "query": "Starbucks Mission Street Santa Cruz official website",
+          "fetched_pages": [
+            {
+              "url": "https://www.starbucks.com/",
+              "title": "Starbucks Coffee Company",
+              "page_text": "Coffee, beverages, and rewards. Find a store near you.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 3,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Generic official homepage without branch identity."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-wrong-tenant-abstain",
+      "attribute": "website",
+      "place": {
+        "current_value": "",
+        "base_value": "",
+        "website": ""
+      },
+      "gold_value": "",
+      "expected_abstain": true,
+      "identity_label": "WRONG_ENTITY_RISK",
+      "truth_source_type": "government",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "London Nelson Senior Programs website",
+          "fetched_pages": [
+            {
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Community-Spaces/London-Nelson-Community-Center",
+              "title": "London Nelson Community Center - City of Santa Cruz",
+              "page_text": "London Nelson Community Center is home to multiple tenant programs. The government host page is not a separate tenant website.",
+              "source_type": "government",
+              "extracted_values": {},
+              "recency_days": 14,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.65,
+              "notes": "Government host page lists the center, not the tenant."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "hard-branch-ambiguity-phone",
+      "attribute": "phone",
+      "place": {
+        "current_value": "510-555-1212",
+        "base_value": "510-555-3434",
+        "phone": "510-555-1212"
+      },
+      "gold_value": "",
+      "expected_abstain": true,
+      "identity_label": "BRANCH_AMBIGUITY",
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Shop Example Oakland branch phone",
+          "fetched_pages": [
+            {
+              "url": "https://chain.example/oakland/contact",
+              "title": "Oakland Shop Example",
+              "page_text": "Oakland branch: (510) 555-1212",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Oakland branch contact page."
+            }
+          ]
+        },
+        {
+          "layer": "official",
+          "query": "Shop Example Berkeley branch phone",
+          "fetched_pages": [
+            {
+              "url": "https://chain.example/berkeley/contact",
+              "title": "Berkeley Shop Example",
+              "page_text": "Berkeley branch: (510) 555-3434",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Berkeley branch contact page."
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -63,7 +63,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <ul class='detail-list'>
 <li>The strongest numeric result is the ResolvePOI selective router.</li>
 <li>The strongest architecture is the claim-level EvidenceGraph resolver.</li>
-<li>The repo comparison doc records 229 passing tests as the reproducibility proof.</li>
+<li>The repo comparison doc records 230 passing tests as the reproducibility proof.</li>
 </ul>
 </div>
 <div class='hero-side'>
@@ -71,7 +71,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <div class='panel pad hero-stats'>
 <div><strong>Selective router</strong><div class='muted'>97.7% all-attribute / 97.1% core</div></div>
 <div><strong>PAC hard benchmark</strong><div class='muted'>100.0% correct abstention</div></div>
-<div><strong>Tests</strong><div class='muted'>229 tests passed</div></div>
+<div><strong>Tests</strong><div class='muted'>230 tests passed</div></div>
 </div>
 </div>
 </section>
@@ -103,7 +103,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <article class='milestone'><div class='status'>done</div><h4>Identity scoring split out</h4><p>Place identity signals now live in identity.py and are used by claim extraction instead of being buried in the resolver.</p></article>
 <article class='milestone'><div class='status'>done</div><h4>Selective router integrated</h4><p>The ResolvePOI router is exposed as an opt-in learned reranker. Holdout full accuracy is 97.1% with 20.2 pts lift over the current baseline.</p></article>
 <article class='milestone'><div class='status'>done</div><h4>Split verification made explicit</h4><p>Holdout/train separation is inspectable and leak-checked instead of being implied by filenames.</p></article>
-<article class='milestone'><div class='status'>done</div><h4>Dashboard and comparison docs cleaned up</h4><p>Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 229 tests passed.</p></article>
+<article class='milestone'><div class='status'>done</div><h4>Dashboard and comparison docs cleaned up</h4><p>Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 230 tests passed.</p></article>
 </div>
 </section>
 <section>
@@ -111,13 +111,13 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <p class='section-note'>These are the numbers that should be easy to explain in one sentence each.</p>
 <div class='summary-grid'>
 <article class='stat-card'><div class='label'>Selective router</div><div class='value'>97.7% all-attribute / 97.1% core</div><div class='detail'>Lift vs current baseline: 20.2 pts; high-confidence wrong: 1.2%</div></article>
-<article class='stat-card'><div class='label'>Claim-level v2 hard cases</div><div class='value'>88.9% accuracy / 20.0% abstention</div><div class='detail'>High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json</div></article>
+<article class='stat-card'><div class='label'>Claim-level v2 hard cases</div><div class='value'>84.6% accuracy / 38.9% abstention</div><div class='detail'>High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json</div></article>
 <article class='stat-card'><div class='label'>Santa Cruz challenge</div><div class='value'>100.0% expected / 12.0% abstention</div><div class='detail'>Raw resolver accuracy: 95.7%; high-confidence wrong: 0.0%; 50 curated cases covering branch ambiguity, websites, stale/closed signals, social-only evidence, generic homepages, and wrong-entity tenant pages.</div></article>
 <article class='stat-card'><div class='label'>PAC hard benchmark</div><div class='value'>100.0% correct abstention / passed</div><div class='detail'>Identity drift precision/recall: 100.0% / 100.0%</div></article>
 <article class='stat-card'><div class='label'>PAC expected behavior</div><div class='value'>100.0% expected-behavior accuracy</div><div class='detail'>Expected abstention rate: 60.0%; claim-level benchmark captures the intended behavior on ambiguous cases.</div></article>
 <article class='stat-card'><div class='label'>Retrieval proof</div><div class='value'>100.0% targeted vs 0.0% fallback</div><div class='detail'>Citation precision: 100.0% vs 0.0%; replay cases: 1</div></article>
 <article class='stat-card'><div class='label'>Website authority</div><div class='value'>100.0% authoritative / 0.0% false official</div><div class='detail'>Selected official: 100.0%; place-relevant official: 100.0%</div></article>
-<article class='stat-card'><div class='label'>Test suite</div><div class='value'>229 tests passed</div><div class='detail'>Current repo comparison document records the full unit-test count as a reproducibility proof.</div></article>
+<article class='stat-card'><div class='label'>Test suite</div><div class='value'>230 tests passed</div><div class='detail'>Current repo comparison document records the full unit-test count as a reproducibility proof.</div></article>
 </div>
 </section>
 <section>
@@ -180,13 +180,13 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <summary>Claim-level v2 hard cases</summary>
 <div class='panel-body'>
 <ul class='detail-list'>
-<li>Resolver v2 accuracy: 88.9%</li>
-<li>Resolver v2 abstention: 20.0%</li>
+<li>Resolver v2 accuracy: 84.6%</li>
+<li>Resolver v2 abstention: 38.9%</li>
 <li>Resolver v2 high-confidence wrong: 0.0%</li>
-<li>Resolver v1 accuracy: 0.0%</li>
-<li>Resolver v1 abstention: 40.0%</li>
+<li>Resolver v1 accuracy: 30.8%</li>
+<li>Resolver v1 abstention: 38.9%</li>
 <li>Breakthrough cases: hard-website-1; hard-phone-1; hard-address-1; hard-html-jsonld; hard-stale-official; hard-locator-page; hard-meta-canonical; hard-link-canonical</li>
-<li>Abstention cases: hard-phone-ambiguous; hard-branch-ambiguity</li>
+<li>Abstention cases: hard-phone-ambiguous; hard-branch-ambiguity; hard-mixed-authoritative-name; hard-social-only-abstain; hard-generic-homepage-abstain; hard-wrong-tenant-abstain; hard-branch-ambiguity-phone</li>
 </ul>
 </div>
 </details>

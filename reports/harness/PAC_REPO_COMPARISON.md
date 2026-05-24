@@ -24,14 +24,14 @@ Current outputs:
 
 | Artifact | Result |
 | --- | --- |
-| Unit tests | `229` tests passed |
+| Unit tests | `230` tests passed |
 | Santa Cruz expanded corpus | `24` episodes; targeted authoritative found rate `1.0`, fallback `0.0`; final accuracy `1.0` |
 | Santa Cruz challenge corpus | `50` curated replay episodes across website, phone, address, category, and name; resolver v2 expected-behavior accuracy `1.0`, raw accuracy `0.9565`, abstention rate `0.1200`, high-confidence-wrong rate `0.0`; v2 adds branch-context phone/address, office-vs-mailing address, official-vs-social website, official-vs-directory category, title-cleaned name, full-name-vs-acronym, place-name-vs-host-building, official-category-vs-tourism tags, government locator website, relay/fax/footer phone rejection, department-location-vs-city-footer address selection, official phone-vs-fax cases, official service-page category conflicts, program-tenant category conflicts, adjacent-facility category conflicts, branch-specific government-locator website extraction, offsite-event address conflict handling, multi-branch commercial location selection, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, social-only website abstention, generic homepage abstention, stale/closed phone abstention, and wrong-entity tenant website abstention without prefilled extraction |
 | Retrieval compare | targeted authoritative found `0.75`, fallback `0.0`; targeted citation precision `0.75`; citation precision proxy delta `+1.0` |
 | Replay stats | `4` episodes, `8` attempts, `9` pages, authoritative pages rate `0.3333` |
 | Website authority | authoritative found rate `1.0`, false official rate `0.0` |
-| `hard_cases_replay.json` | resolver v2 accuracy `0.8889`, abstention rate `0.2`, high-confidence-wrong rate `0.0` |
-| `pac_hard_cases_replay.json` | expected-behavior accuracy `1.0`, expected-behavior delta vs v1 `0.0` |
+| `hard_cases_replay.json` | `18` episodes; resolver v2 accuracy `0.8462`, abstention rate `0.3889`, high-confidence-wrong rate `0.0`; added business registry, OSM, mixed-authoritative, and extra abstention coverage |
+| `pac_hard_cases_replay.json` | expected-behavior accuracy `1.0`, expected-behavior delta vs v1 `0.0`; source mix now includes official, government, social, business_registry, and osm evidence |
 | ResolvePOI selective router (400 holdout) | all-attribute full accuracy `0.9770`, coverage `1.0`, high-confidence-wrong rate `0.0125`; core full accuracy `0.9713`, coverage `1.0` |
 | ResolvePOI split verification | explicit holdout split manifest; `leak_check_passed=true` |
 | ResolvePOI v2 adapter (400 rows) | website accuracy `0.2350`, phone `0.3225`, address `0.3925`, category `0.3575`, name `0.1925`; no abstentions |

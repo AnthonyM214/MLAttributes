@@ -34,11 +34,11 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 ## At a Glance
 
 - Selective router: 97.7% all-attribute / 97.1% core.
-- Claim-level hard cases: 88.9% accuracy / 20.0% abstention.
+- Claim-level hard cases: 84.6% accuracy / 38.9% abstention.
 - Santa Cruz challenge: 100.0% expected-behavior accuracy on authority-page ambiguity.
 - PAC hard benchmark: 100.0% correct abstention; identity drift precision/recall 100.0% / 100.0%.
 - Retrieval replay: 100.0% targeted vs 0.0% fallback.
-- Test suite: 229 tests passed.
+- Test suite: 230 tests passed.
 
 ## Completed Milestones
 
@@ -46,20 +46,20 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - [x] Identity scoring split out - Place identity signals now live in identity.py and are used by claim extraction instead of being buried in the resolver.
 - [x] Selective router integrated - The ResolvePOI router is exposed as an opt-in learned reranker. Holdout full accuracy is 97.1% with 20.2 pts lift over the current baseline.
 - [x] Split verification made explicit - Holdout/train separation is inspectable and leak-checked instead of being implied by filenames.
-- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 229 tests passed.
+- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 230 tests passed.
 
 ## Important Stats
 
 | Signal | Value | Why it matters |
 | --- | ---: | --- |
 | Selective router | 97.7% all-attribute / 97.1% core | Lift vs current baseline: 20.2 pts; high-confidence wrong: 1.2% |
-| Claim-level v2 hard cases | 88.9% accuracy / 20.0% abstention | High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json |
+| Claim-level v2 hard cases | 84.6% accuracy / 38.9% abstention | High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json |
 | Santa Cruz challenge | 100.0% expected / 12.0% abstention | Raw resolver accuracy: 95.7%; high-confidence wrong: 0.0%; 50 curated cases covering branch ambiguity, websites, stale/closed signals, social-only evidence, generic homepages, and wrong-entity tenant pages. |
 | PAC hard benchmark | 100.0% correct abstention / passed | Identity drift precision/recall: 100.0% / 100.0% |
 | PAC expected behavior | 100.0% expected-behavior accuracy | Expected abstention rate: 60.0%; claim-level benchmark captures the intended behavior on ambiguous cases. |
 | Retrieval proof | 100.0% targeted vs 0.0% fallback | Citation precision: 100.0% vs 0.0%; replay cases: 1 |
 | Website authority | 100.0% authoritative / 0.0% false official | Selected official: 100.0%; place-relevant official: 100.0% |
-| Test suite | 229 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
+| Test suite | 230 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
 
 ## Next Steps
 
@@ -92,13 +92,13 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 
 ### Claim-Level v2 Hard Cases
 
-- Resolver v2 accuracy: 88.9%
-- Resolver v2 abstention: 20.0%
+- Resolver v2 accuracy: 84.6%
+- Resolver v2 abstention: 38.9%
 - Resolver v2 high-confidence wrong: 0.0%
-- Resolver v1 accuracy: 0.0%
-- Resolver v1 abstention: 40.0%
+- Resolver v1 accuracy: 30.8%
+- Resolver v1 abstention: 38.9%
 - Breakthrough cases: hard-website-1; hard-phone-1; hard-address-1; hard-html-jsonld; hard-stale-official; hard-locator-page; hard-meta-canonical; hard-link-canonical
-- Abstention cases: hard-phone-ambiguous; hard-branch-ambiguity
+- Abstention cases: hard-phone-ambiguous; hard-branch-ambiguity; hard-mixed-authoritative-name; hard-social-only-abstain; hard-generic-homepage-abstain; hard-wrong-tenant-abstain; hard-branch-ambiguity-phone
 
 ### Santa Cruz Challenge
 

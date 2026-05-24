@@ -27,14 +27,14 @@ In replay hard cases, that learned path is still opt-in because it can regress o
 
 On `tests/fixtures/hard_cases_replay.json`:
 
-- episodes total: `10`
-- gold episodes: `9`
-- v1 accuracy: `0.00`
-- v2 accuracy: `0.8888888888888888`
-- v1 abstention rate: `0.5`
-- v2 abstention rate: `0.2`
-- accuracy delta: `+0.8888888888888888`
-- high-confidence-wrong delta: `-0.6666666666666666`
+- episodes total: `18`
+- gold episodes: `13`
+- v1 accuracy: `0.3076923076923077`
+- v2 accuracy: `0.8461538461538461`
+- v1 abstention rate: `0.3888888888888889`
+- v2 abstention rate: `0.3888888888888889`
+- accuracy delta: `+0.5384615384615384`
+- high-confidence-wrong delta: `-0.46153846153846156`
 
 Breakthrough cases:
 
@@ -46,15 +46,23 @@ Breakthrough cases:
 - locator-page website case: v2 selected the branch URL from a store-locator page
 - meta-tag canonical website case: v2 selected the contact URL from `og:url`
 - canonical-link website case: v2 selected the contact URL from `<link rel="canonical">`
+- business-registry website case: v2 selected the registry-backed contact URL
+- OSM address case: v2 selected the civic address from OpenStreetMap evidence
+- mixed authoritative name case: v2 selected the name corroborated by both official and government evidence
+- government category case: v2 selected the category corroborated by a license record
 
 Abstention case:
 
 - ambiguous phone evidence remained unresolved instead of forcing a wrong answer
 - competing official branch phones remained unresolved instead of forcing a wrong answer
+- social-only website evidence remained unresolved
+- generic official homepage remained unresolved because it did not prove the branch
+- wrong-tenant government host page remained unresolved
+- branch-ambiguity phone remained unresolved instead of forcing a wrong answer
 
 ## What the mixed-source PAC benchmark shows
 
-On `tests/fixtures/pac_hard_cases_replay.json`, the more realistic mixed-source corpus that includes official, aggregator, and social evidence plus explicit `expected_abstain` labels:
+On `tests/fixtures/pac_hard_cases_replay.json`, the more realistic mixed-source corpus that includes official, aggregator, social, business registry, OSM, and explicit `expected_abstain` labels:
 
 - expected-behavior accuracy for v2: `1.0`
 - expected-behavior accuracy delta vs v1: `0.0`

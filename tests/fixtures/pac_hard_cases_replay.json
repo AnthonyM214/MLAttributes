@@ -275,6 +275,97 @@
           ]
         }
       ]
+    },
+    {
+      "case_id": "business-registry-current",
+      "attribute": "website",
+      "place": {"name": "PAC business-registry-current", "city": "Oakland", "region": "CA"},
+      "gold_value": "https://registry.example/current",
+      "identity_label": "SAME_ENTITY",
+      "case_type": "BUSINESS_REGISTRY_CORROBORATION",
+      "expected_decision": "https://registry.example/current",
+      "expected_abstain": false,
+      "truth_source_type": "business_registry",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC business-registry-current\" business registry website",
+          "fetched_pages": [
+            {"url": "https://registry.example/current", "title": "registry current", "page_text": "Business registry current website.", "source_type": "business_registry", "extracted_values": {"website": "https://registry.example/current"}, "evidence_role": "truth", "source_family_id": "business_registry:registry.example", "recency_days": 20}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "osm-corroborated-address",
+      "attribute": "address",
+      "place": {"name": "PAC osm-corroborated-address", "city": "Oakland", "region": "CA"},
+      "gold_value": "123 Main St, Oakland, CA 94607",
+      "identity_label": "SAME_ENTITY",
+      "case_type": "OSM_CORROBORATION",
+      "expected_decision": "123 Main St, Oakland, CA 94607",
+      "expected_abstain": false,
+      "truth_source_type": "osm",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC osm-corroborated-address\" osm address",
+          "fetched_pages": [
+            {"url": "https://www.openstreetmap.org/node/42", "title": "osm address", "page_text": "OpenStreetMap lists 123 Main St, Oakland, CA 94607.", "source_type": "osm", "extracted_values": {"address": "123 Main St, Oakland, CA 94607"}, "evidence_role": "truth", "source_family_id": "osm:openstreetmap.org", "recency_days": 14}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "mixed-authoritative-name",
+      "attribute": "name",
+      "place": {"name": "PAC mixed-authoritative-name", "city": "Oakland", "region": "CA"},
+      "gold_value": "PAC Mixed Authoritative Name",
+      "identity_label": "SAME_ENTITY",
+      "case_type": "MIXED_AUTHORITATIVE_CORROBORATION",
+      "expected_decision": "PAC Mixed Authoritative Name",
+      "expected_abstain": false,
+      "truth_source_type": "mixed_authoritative_corroboration",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "\"PAC mixed-authoritative-name\" official name",
+          "fetched_pages": [
+            {"url": "https://official.example/name", "title": "official name", "page_text": "Official name PAC Mixed Authoritative Name.", "source_type": "official_site", "extracted_values": {"name": "PAC Mixed Authoritative Name"}, "evidence_role": "truth", "source_family_id": "official:official.example", "recency_days": 8}
+          ]
+        },
+        {
+          "layer": "fallback",
+          "query": "\"PAC mixed-authoritative-name\" government name",
+          "fetched_pages": [
+            {"url": "https://data.example/name", "title": "government name", "page_text": "Government registry confirms PAC Mixed Authoritative Name.", "source_type": "government", "extracted_values": {"name": "PAC Mixed Authoritative Name"}, "evidence_role": "truth", "source_family_id": "government:data.example", "recency_days": 12}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "social-only-abstain",
+      "attribute": "website",
+      "place": {"name": "PAC social-only-abstain", "city": "Oakland", "region": "CA"},
+      "gold_value": "",
+      "identity_label": "UNKNOWN_IDENTITY",
+      "case_type": "SOCIAL_ONLY_ABSTAIN",
+      "expected_decision": "",
+      "expected_abstain": true,
+      "truth_source_type": "social",
+      "label_origin": "hard PAC fixture",
+      "search_attempts": [
+        {
+          "layer": "fallback",
+          "query": "\"PAC social-only-abstain\" website",
+          "fetched_pages": [
+            {"url": "https://instagram.com/pac-social-only", "title": "social only", "page_text": "Instagram profile only. No canonical website.", "source_type": "social", "extracted_values": {}, "evidence_role": "corroboration", "source_family_id": "social:instagram.com", "recency_days": 5}
+          ]
+        }
+      ]
     }
   ]
 }

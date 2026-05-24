@@ -4,6 +4,7 @@ import json
 import subprocess
 import tempfile
 import unittest
+from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -43,8 +44,21 @@ class BenchmarkV2Tests(unittest.TestCase):
         self.assertIn("current", report["baselines"])
         self.assertIn("agreement_only", report["baselines"])
         self.assertGreaterEqual(len(report["breakthrough_cases"]), 1)
-        self.assertGreaterEqual(len(report["abstention_cases"]), 1)
+        self.assertGreaterEqual(len(report["abstention_cases"]), 4)
+        self.assertGreaterEqual(float(report["resolver_v2"]["abstention_rate"]), 0.25)
         self.assertIn("decisions", report)
+
+    def test_hard_cases_fixture_has_mixed_truth_sources_and_identity_labels(self) -> None:
+        replay = ROOT / "tests" / "fixtures" / "hard_cases_replay.json"
+        episodes = load_replay_corpus(replay)
+
+        self.assertGreaterEqual(sum(episode.expected_abstain is True for episode in episodes), 4)
+        self.assertIn("business_registry", {episode.truth_source_type for episode in episodes})
+        self.assertIn("osm", {episode.truth_source_type for episode in episodes})
+        self.assertIn("mixed_authoritative_corroboration", {episode.truth_source_type for episode in episodes})
+        self.assertGreaterEqual(Counter(episode.attribute for episode in episodes)["name"], 1)
+        self.assertGreaterEqual(Counter(episode.attribute for episode in episodes)["category"], 1)
+        self.assertGreaterEqual(len({episode.identity_label for episode in episodes if episode.identity_label}), 4)
 
     def test_pac_hard_cases_report_expected_behavior_metrics(self) -> None:
         replay = ROOT / "tests" / "fixtures" / "pac_hard_cases_replay.json"
