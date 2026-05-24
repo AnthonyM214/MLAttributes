@@ -26,13 +26,13 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
         raise AssertionError(f"missing decision for {case_id}")
 
     def test_challenge_corpus_is_explicitly_hard(self) -> None:
-        self.assertEqual(len(self.episodes), 35)
+        self.assertEqual(len(self.episodes), 40)
         self.assertEqual(Counter(episode.attribute for episode in self.episodes), {
-            "phone": 13,
+            "phone": 14,
             "address": 7,
             "category": 8,
-            "name": 3,
-            "website": 4,
+            "name": 6,
+            "website": 5,
         })
         self.assertEqual(Counter(episode.case_type for episode in self.episodes), {
             "BRANCH_AMBIGUITY": 1,
@@ -50,7 +50,10 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "GOVERNMENT_PRIMARY_PHONE_VS_SERVICE_LINES": 1,
             "GOVERNMENT_ROOM_ADDRESS_VS_FOOTER": 1,
             "GOVERNMENT_SUITE_ADDRESS_VS_FOOTER": 1,
+            "HOST_PAGE_PHONE_AMBIGUITY": 1,
             "OFFICIAL_ADDRESS_VS_OFFSITE_EVENT": 1,
+            "OFFICIAL_BRANCH_NAME_VS_ORG_NAME": 1,
+            "OFFICIAL_BRANCH_WEBSITE_VS_SOCIAL": 1,
             "OFFICIAL_CATEGORY_VS_DIRECTORY": 1,
             "OFFICIAL_CATEGORY_VS_DIRECTORY_TYPE": 1,
             "OFFICIAL_CATEGORY_VS_EVENT_LISTINGS": 1,
@@ -63,14 +66,16 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "OFFICIAL_LOCATION_VS_MAILING_ADDRESS": 1,
             "OFFICIAL_MULTI_BRANCH_ADDRESS": 1,
             "OFFICIAL_MULTI_BRANCH_PHONE": 1,
+            "OFFICIAL_NAME_VS_GENERIC_ALIAS": 1,
             "OFFICIAL_NAME_VS_DIRECTORY_ALIAS": 1,
+            "OFFICIAL_NAME_VS_VENUE_SUFFIX": 1,
             "OFFICIAL_PLACE_NAME_VS_HOST_BUILDING": 1,
             "OFFICIAL_PHONE_VS_FAX": 1,
             "OFFICIAL_WEBSITE_VS_TOURISM_LISTING": 1,
             "OFFICIAL_WEBSITE_VS_SOCIAL": 1,
             "OFFICIAL_PAGE_VS_STAFF_PAGE": 1,
         })
-        self.assertEqual(sum(episode.expected_abstain is True for episode in self.episodes), 1)
+        self.assertEqual(sum(episode.expected_abstain is True for episode in self.episodes), 2)
         self.assertEqual(Counter(episode.label_origin for episode in self.episodes), {
             "authoritative_santa_cruz_challenge_v1": 5,
             "authoritative_santa_cruz_challenge_v2": 3,
@@ -80,13 +85,14 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "authoritative_santa_cruz_challenge_v6": 6,
             "authoritative_santa_cruz_challenge_v7": 4,
             "authoritative_santa_cruz_challenge_v8": 5,
+            "authoritative_santa_cruz_challenge_v9": 5,
         })
 
     def test_resolver_v2_expected_behavior_matches_challenge_labels(self) -> None:
         expected = self.report["expected_behavior"]["resolver_v2"]  # type: ignore[index]
 
         self.assertEqual(expected["accuracy"], 1.0)
-        self.assertAlmostEqual(expected["abstention_rate"], 1 / 35)
+        self.assertAlmostEqual(expected["abstention_rate"], 2 / 40)
         self.assertEqual(expected["high_confidence_wrong_rate"], 0.0)
 
         ambiguous = self._decision("scpl-branch-ambiguous-phone")
@@ -136,6 +142,10 @@ class SantaCruzChallengeCorpusTests(unittest.TestCase):
             "verve-pacific-phone-vs-other-branches": "8314717726",
             "verve-pacific-address-vs-other-branches": "1540 Pacific Ave, Santa Cruz, CA 95060",
             "bookshop-address-vs-offsite-event-location": "1520 Pacific Ave, Santa Cruz, CA 95060",
+            "delmar-name-vs-cinema-alias": "Landmark Del Mar Theatre, Santa Cruz",
+            "kuumbwa-name-vs-venue-suffix": "Kuumbwa Jazz",
+            "downtown-farmers-market-website-vs-social": "santacruzfarmersmarket.org/markets/downtown-santa-cruz",
+            "downtown-farmers-market-name-vs-org": "Downtown Santa Cruz Market",
         }
 
         for case_id, expected_value in expected_values.items():

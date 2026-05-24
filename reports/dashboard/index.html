@@ -63,7 +63,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <ul class='detail-list'>
 <li>The strongest numeric result is the ResolvePOI selective router.</li>
 <li>The strongest architecture is the claim-level EvidenceGraph resolver.</li>
-<li>The repo comparison doc records 223 passing tests as the reproducibility proof.</li>
+<li>The repo comparison doc records 224 passing tests as the reproducibility proof.</li>
 </ul>
 </div>
 <div class='hero-side'>
@@ -71,7 +71,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <div class='panel pad hero-stats'>
 <div><strong>Selective router</strong><div class='muted'>97.7% all-attribute / 97.1% core</div></div>
 <div><strong>PAC hard benchmark</strong><div class='muted'>100.0% correct abstention</div></div>
-<div><strong>Tests</strong><div class='muted'>223 tests passed</div></div>
+<div><strong>Tests</strong><div class='muted'>224 tests passed</div></div>
 </div>
 </div>
 </section>
@@ -83,7 +83,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <article class='milestone'><div class='status'>done</div><h4>Identity scoring split out</h4><p>Place identity signals now live in identity.py and are used by claim extraction instead of being buried in the resolver.</p></article>
 <article class='milestone'><div class='status'>done</div><h4>Selective router integrated</h4><p>The ResolvePOI router is exposed as an opt-in learned reranker. Holdout full accuracy is 97.1% with 20.2 pts lift over the current baseline.</p></article>
 <article class='milestone'><div class='status'>done</div><h4>Split verification made explicit</h4><p>Holdout/train separation is inspectable and leak-checked instead of being implied by filenames.</p></article>
-<article class='milestone'><div class='status'>done</div><h4>Dashboard and comparison docs cleaned up</h4><p>Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 223 tests passed.</p></article>
+<article class='milestone'><div class='status'>done</div><h4>Dashboard and comparison docs cleaned up</h4><p>Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 224 tests passed.</p></article>
 </div>
 </section>
 <section>
@@ -92,12 +92,12 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <div class='summary-grid'>
 <article class='stat-card'><div class='label'>Selective router</div><div class='value'>97.7% all-attribute / 97.1% core</div><div class='detail'>Lift vs current baseline: 20.2 pts; high-confidence wrong: 1.2%</div></article>
 <article class='stat-card'><div class='label'>Claim-level v2 hard cases</div><div class='value'>88.9% accuracy / 20.0% abstention</div><div class='detail'>High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json</div></article>
-<article class='stat-card'><div class='label'>Santa Cruz challenge</div><div class='value'>100.0% expected / 2.9% abstention</div><div class='detail'>Raw resolver accuracy: 97.1%; high-confidence wrong: 0.0%; covers branch, government primary-phone, relay/fax/footer phone, department-location-vs-footer address, full-name/acronym, host-building name, tourism category, locator website, official-vs-social, title-cleaning, service-page category, program-tenant category, adjacent-facility category, branch-specific website, offsite-event address, and multi-branch commercial location cases.</div></article>
+<article class='stat-card'><div class='label'>Santa Cruz challenge</div><div class='value'>100.0% expected / 5.0% abstention</div><div class='detail'>Raw resolver accuracy: 95.0%; high-confidence wrong: 0.0%; covers branch, government primary-phone, relay/fax/footer phone, department-location-vs-footer address, full-name/acronym, host-building name, tourism category, locator website, official-vs-social, title-cleaning, service-page category, program-tenant category, adjacent-facility category, branch-specific website, offsite-event address, multi-branch commercial location, branch-name, branch-website, and host-page ambiguity cases.</div></article>
 <article class='stat-card'><div class='label'>PAC hard benchmark</div><div class='value'>100.0% correct abstention / passed</div><div class='detail'>Identity drift precision/recall: 100.0% / 100.0%</div></article>
 <article class='stat-card'><div class='label'>PAC expected behavior</div><div class='value'>100.0% expected-behavior accuracy</div><div class='detail'>Expected abstention rate: 60.0%; claim-level benchmark captures the intended behavior on ambiguous cases.</div></article>
 <article class='stat-card'><div class='label'>Retrieval proof</div><div class='value'>100.0% targeted vs 0.0% fallback</div><div class='detail'>Citation precision: 100.0% vs 0.0%; replay cases: 1</div></article>
 <article class='stat-card'><div class='label'>Website authority</div><div class='value'>100.0% authoritative / 0.0% false official</div><div class='detail'>Selected official: 100.0%; place-relevant official: 100.0%</div></article>
-<article class='stat-card'><div class='label'>Test suite</div><div class='value'>223 tests passed</div><div class='detail'>Current repo comparison document records the full unit-test count as a reproducibility proof.</div></article>
+<article class='stat-card'><div class='label'>Test suite</div><div class='value'>224 tests passed</div><div class='detail'>Current repo comparison document records the full unit-test count as a reproducibility proof.</div></article>
 </div>
 </section>
 <section>
@@ -152,10 +152,10 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <summary>Santa Cruz challenge</summary>
 <div class='panel-body'>
 <ul class='detail-list'>
-<li>Expected-behavior accuracy (v1 / v2): 22.9% / 100.0%</li>
-<li>Expected-behavior abstention (v1 / v2): 80.0% / 2.9%</li>
-<li>Raw resolver accuracy: 97.1%</li>
-<li>Raw resolver abstention: 2.9%</li>
+<li>Expected-behavior accuracy (v1 / v2): 25.0% / 100.0%</li>
+<li>Expected-behavior abstention (v1 / v2): 80.0% / 5.0%</li>
+<li>Raw resolver accuracy: 95.0%</li>
+<li>Raw resolver abstention: 5.0%</li>
 <li>Raw high-confidence wrong: 0.0%</li>
 </ul>
 </div>

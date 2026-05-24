@@ -67,6 +67,61 @@ def _summarize_claims(best_group: ClaimGroup) -> str:
     return f"{best_group.display_value} supported by {source_types}"
 
 
+def _context_values_for_corroboration(place_context: dict[str, Any] | None) -> list[str]:
+    if not place_context:
+        return []
+    values: list[str] = []
+    for key in (
+        "name",
+        "current_name",
+        "name_current",
+        "current_address",
+        "address",
+        "current_phone",
+        "phone",
+    ):
+        value = str(place_context.get(key, "") or "").strip()
+        if value:
+            values.append(value)
+    return values
+
+
+def _website_group_lacks_target_corroboration(best_group: ClaimGroup, place_context: dict[str, Any] | None) -> bool:
+    if best_group.attribute != "website":
+        return False
+    normalized = normalize_website(best_group.normalized_value or best_group.display_value)
+    if not normalized or "/" in normalized:
+        return False
+    context_values = _context_values_for_corroboration(place_context)
+    if not context_values:
+        return False
+    if not all(_looks_like_generic_homepage_claim(claim) for claim in best_group.claims):
+        return False
+    for claim in best_group.claims:
+        evidence_text = normalize_name("\n".join([claim.evidence_text, claim.page_title, claim.notes, claim.source_url]))
+        for value in context_values:
+            if value and _normalize_for_corroboration(value) in evidence_text:
+                return False
+    return True
+
+
+def _looks_like_generic_homepage_claim(claim: AttributeClaim) -> bool:
+    text = normalize_name("\n".join([claim.evidence_text, claim.page_title, claim.notes]))
+    if any(signal in text for signal in ("official current", "we moved", "moved", "formerly", "contact", "about")):
+        return False
+    return any(signal in text for signal in ("home", "welcome", "locations", "corporate homepage", "all locations"))
+
+
+def _normalize_for_corroboration(value: str) -> str:
+    normalized_phone = normalize_phone(value)
+    if normalized_phone:
+        return normalized_phone
+    normalized_address = normalize_address(value)
+    if normalized_address and any(char.isdigit() for char in normalized_address):
+        return normalized_address
+    return normalize_name(value)
+
+
 def _context_value(place_context: dict[str, Any] | None, attribute: str, side: str) -> str:
     if not place_context:
         return ""
@@ -256,6 +311,7 @@ def _resolve_from_claims(
     severe_identity_risk = best.identity_signal_score < 0.45 and best_ratio < (min_confidence + 0.05)
     severe_stale_risk = best.stale_signal_score > 0.45 and (best_ratio < (min_support + 0.10) or best.max_support < 0.95)
     severe_contradiction_risk = best.contradiction_count > 0 and margin_ratio < (min_margin + 0.03)
+    generic_website_risk = _website_group_lacks_target_corroboration(best, place_context)
     learned_context = f" {learned_note}." if learned_note else ""
 
     if best.max_support < min_support:
@@ -267,7 +323,7 @@ def _resolve_from_claims(
             evidence=_supporting_evidence(best),
             abstained=True,
         )
-    if confidence < min_confidence or margin_ratio < min_margin or severe_identity_risk or severe_stale_risk or severe_contradiction_risk:
+    if confidence < min_confidence or margin_ratio < min_margin or severe_identity_risk or severe_stale_risk or severe_contradiction_risk or generic_website_risk:
         reasons = []
         if confidence < min_confidence:
             reasons.append("confidence too low")
@@ -279,6 +335,8 @@ def _resolve_from_claims(
             reasons.append("stale signal")
         if severe_contradiction_risk:
             reasons.append("contradictory claims")
+        if generic_website_risk:
+            reasons.append("generic website lacks target corroboration")
         reason = ", ".join(reasons) if reasons else "evidence is too weak or tied"
         return AttributeDecision(
             attribute=attribute,

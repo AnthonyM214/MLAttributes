@@ -1510,6 +1510,191 @@
         }
       ],
       "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "name",
+      "case_id": "delmar-name-vs-cinema-alias",
+      "case_type": "OFFICIAL_NAME_VS_GENERIC_ALIAS",
+      "expected_abstain": false,
+      "expected_decision": "Landmark Del Mar Theatre, Santa Cruz",
+      "gold_value": "Landmark Del Mar Theatre, Santa Cruz",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v9",
+      "place": {
+        "base_name": "Del Mar Cinema",
+        "city": "Santa Cruz",
+        "current_name": "Landmark Del Mar Theatre, Santa Cruz",
+        "name": "Landmark Del Mar Theatre, Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official Landmark location page uses the full branded theatre/location name.",
+              "page_text": "Landmark Del Mar Theatre, Santa Cruz\n3 Screens, DLP Digital Projection and Sound. Landmark's Del Mar Theatre is an art deco triplex featuring a grand auditorium, beer and wine, independent and foreign language films, and weekly Midnight Movies.\n1124 Pacific Avenue\nSanta Cruz, CA 95060\n8313594447",
+              "recency_days": 14,
+              "source_type": "official_site",
+              "title": "Theatres - Landmark Del Mar Theatre, Santa Cruz - Landmark Theatres",
+              "url": "https://www.landmarktheatres.com/our-locations/x00qv-landmark-del-mar-theatre-santa-cruz/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:landmarktheatres.com \"Landmark Del Mar Theatre, Santa Cruz\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "name",
+      "case_id": "kuumbwa-name-vs-venue-suffix",
+      "case_type": "OFFICIAL_NAME_VS_VENUE_SUFFIX",
+      "expected_abstain": false,
+      "expected_decision": "Kuumbwa Jazz",
+      "gold_value": "Kuumbwa Jazz",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v9",
+      "place": {
+        "base_name": "Kuumbwa Jazz Center",
+        "city": "Santa Cruz",
+        "current_name": "Kuumbwa Jazz",
+        "name": "Kuumbwa Jazz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official contact page distinguishes the organization name from the venue/address label.",
+              "page_text": "Contact Us\nKuumbwa Jazz\nKuumbwa Jazz Center 320-2 Cedar Street Santa Cruz, CA 95060\n831-427-2227\nStaff\nExecutive Director\nVenue Manager\nEducation and Event Coordinator",
+              "recency_days": 30,
+              "source_type": "official_site",
+              "title": "Contact - Kuumbwa Jazz",
+              "url": "https://www.kuumbwajazz.org/contact/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:kuumbwajazz.org/contact \"Kuumbwa Jazz\" \"320-2 Cedar\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "downtown-farmers-market-website-vs-social",
+      "case_type": "OFFICIAL_BRANCH_WEBSITE_VS_SOCIAL",
+      "expected_abstain": false,
+      "expected_decision": "https://santacruzfarmersmarket.org/markets/downtown-santa-cruz/",
+      "gold_value": "https://santacruzfarmersmarket.org/markets/downtown-santa-cruz/",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v9",
+      "place": {
+        "base_website": "https://facebook.com/santacruzfarmersmarket",
+        "city": "Santa Cruz",
+        "current_website": "https://santacruzfarmersmarket.org/markets/downtown-santa-cruz/",
+        "name": "Downtown Santa Cruz Market",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official market page is branch-specific and documents the moved downtown location.",
+              "page_text": "Downtown Santa Cruz Market\nThe Downtown Santa Cruz Market runs year-round on Wednesdays, 12:30-5pm.\nLocation: Cedar St & Church St, Downtown Santa Cruz\nThe Downtown Market Has Moved to Church and Cedar.\nhttps://santacruzfarmersmarket.org/markets/downtown-santa-cruz/",
+              "recency_days": 2,
+              "source_type": "official_site",
+              "title": "Downtown | Santa Cruz Farmers Markets",
+              "url": "https://santacruzfarmersmarket.org/markets/downtown-santa-cruz/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzfarmersmarket.org/markets/downtown-santa-cruz \"Downtown Santa Cruz Market\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "abbott-square-host-phone-ambiguous",
+      "case_type": "HOST_PAGE_PHONE_AMBIGUITY",
+      "expected_abstain": true,
+      "expected_decision": "",
+      "gold_value": "831-429-1964",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v9",
+      "place": {
+        "base_phone": "831-429-1954",
+        "city": "Santa Cruz",
+        "current_phone": "831-429-1964",
+        "name": "Abbott Square Market",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.2,
+              "notes": "Host museum page lists MAH contact and fax numbers; it does not clearly prove an Abbott Square Market primary phone.",
+              "page_text": "Abbott Square\nThe MAH's outdoor public plaza is home to Abbott Square Market which boasts seven restaurants and two bars.\nAbbott Square Market\n705 Front St. Downtown Santa Cruz, CA 95060\nTax ID 94-2718861\n(831) 429-1964\n(831) 429-1954 (Fax)\ninfo@santacruzmah.org",
+              "recency_days": 1,
+              "source_type": "official_site",
+              "title": "Abbott Square | MAH",
+              "url": "https://www.santacruzmah.org/abbott-square",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzmah.org/abbott-square \"Abbott Square Market\" phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "name",
+      "case_id": "downtown-farmers-market-name-vs-org",
+      "case_type": "OFFICIAL_BRANCH_NAME_VS_ORG_NAME",
+      "expected_abstain": false,
+      "expected_decision": "Downtown Santa Cruz Market",
+      "gold_value": "Downtown Santa Cruz Market",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v9",
+      "place": {
+        "base_name": "Santa Cruz Farmers Market",
+        "city": "Santa Cruz",
+        "current_name": "Downtown Santa Cruz Market",
+        "name": "Downtown Santa Cruz Market",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official market page identifies the specific downtown market rather than only the parent farmers market organization.",
+              "page_text": "Downtown Santa Cruz Market\nThe Downtown Santa Cruz Market runs year-round on Wednesdays, 12:30-5pm.\nLocation: Cedar St & Church St, Downtown Santa Cruz\nThe Downtown Market Has Moved to Church and Cedar.\nSCCFM operates multiple markets across Santa Cruz County.",
+              "recency_days": 2,
+              "source_type": "official_site",
+              "title": "Downtown | Santa Cruz Farmers Markets",
+              "url": "https://santacruzfarmersmarket.org/markets/downtown-santa-cruz/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzfarmersmarket.org/markets/downtown-santa-cruz \"Downtown Santa Cruz Market\" \"moved\""
+        }
+      ],
+      "truth_source_type": "official_site"
     }
   ]
 }

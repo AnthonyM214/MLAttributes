@@ -102,6 +102,28 @@ class ResolverV2Tests(unittest.TestCase):
         self.assertFalse(decision.abstained)
         self.assertEqual(normalize_website(decision.decision), "example.com/contact")
 
+    def test_uncorroborated_root_homepage_abstains(self) -> None:
+        evidence = [
+            EvidenceItem(
+                source_type="official_site",
+                url="https://chain.example",
+                attribute="website",
+                extracted_value="https://chain.example",
+                notes="Home Welcome locations",
+            ),
+        ]
+
+        decision = resolve_attribute_v2(
+            place_id="case-generic-root",
+            attribute="website",
+            candidates=["https://chain.example"],
+            evidence=evidence,
+            place_context={"name": "Target Coffee Santa Cruz", "city": "Santa Cruz"},
+        )
+
+        self.assertTrue(decision.abstained)
+        self.assertIn("generic website", decision.reason)
+
     def test_phone_formatting_only_groups_correctly(self) -> None:
         evidence = [
             EvidenceItem(source_type="official_site", url="https://example.com/contact", attribute="phone", extracted_value="(415) 555-1212", notes="Formatted phone"),
