@@ -92,3 +92,15 @@ The repo now also exposes `resolvepoi-split-verify`, which makes the train/holdo
 3. Improve address reconstruction and canonical formatting.
 4. Expand the hard-case replay corpus with more moved/closed/branch ambiguity cases.
 5. Add a public-friendly ResolvePOI fixture or documented artifact fetch step so the strongest benchmark can run outside the local checkout.
+
+## Work Forward Without Duplicates
+
+The no-duplicate checklist now lives in [`PAC_WORK_LEDGER.md`](PAC_WORK_LEDGER.md).
+
+Use it before starting new work. If a proposal only rebuilds:
+
+- row scoring without a claim graph,
+- a current-vs-base classifier without replay evidence,
+- or dashboard polish that does not improve proof quality,
+
+then it is a duplicate of work already done or already ruled out.

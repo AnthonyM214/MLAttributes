@@ -113,6 +113,7 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "benchmark_v2_hard_cases": harness / "benchmark_v2_hard_cases_current.json",
         "benchmark_v2_pac_hard_cases": harness / "benchmark_v2_pac_hard_cases_current.json",
         "benchmark_v2_santa_cruz_challenge": harness / "benchmark_v2_santa_cruz_challenge_current.json",
+        "work_ledger": root / "harness" / "PAC_WORK_LEDGER.md",
         "repo_comparison": root / "harness" / "PAC_REPO_COMPARISON.md",
         "engineering_report": root / "harness" / "PAC_ENGINEERING_REPORT.md",
         "technical_summary": root / "harness" / "technical_summary.md",
@@ -793,6 +794,62 @@ def _next_steps(selective: dict[str, object] | None, pac_benchmark: dict[str, ob
     ]
 
 
+def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
+    selective = data.resolvepoi_selective or {}
+    metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
+    macro = metrics.get("macro", {}) if isinstance(metrics, dict) else {}
+    core_macro = metrics.get("core_macro", {}) if isinstance(metrics, dict) else {}
+    if not isinstance(macro, dict):
+        macro = {}
+    if not isinstance(core_macro, dict):
+        core_macro = {}
+    hard_cases = data.benchmark_v2_hard_cases or {}
+    hard_resolver = hard_cases.get("resolver_v2", {}) if isinstance(hard_cases, dict) else {}
+    if not isinstance(hard_resolver, dict):
+        hard_resolver = {}
+    pac_benchmark = data.pac_benchmark or {}
+    pac_resolver = pac_benchmark.get("resolver", {}) if isinstance(pac_benchmark, dict) else {}
+    if not isinstance(pac_resolver, dict):
+        pac_resolver = {}
+    return [
+        {
+            "title": "Already done: claim-level PAC spine",
+            "body": "claim_extraction.py, evidence_graph.py, resolver_v2.py, and the replay harness are in place, so we are no longer just scoring rows.",
+        },
+        {
+            "title": "Already done: selective ResolvePOI baseline",
+            "body": (
+                f"The learned router reaches {_pct((macro or {}).get('full_accuracy'))} all-attribute / "
+                f"{_pct((core_macro or {}).get('full_accuracy'))} core full accuracy on the held-out 400-ID slice."
+            ),
+        },
+        {
+            "title": "Already done: hard-case abstention proof",
+            "body": (
+                f"The hard-case benchmark records {_pct(hard_resolver.get('accuracy'))} accuracy, "
+                f"{_pct(hard_resolver.get('abstention_rate'))} abstention, and "
+                f"{_pct(hard_resolver.get('high_confidence_wrong_rate'))} high-confidence wrong."
+            ),
+        },
+        {
+            "title": "Already done: PAC benchmark expected behavior",
+            "body": "The PAC hard benchmark now includes explicit expected-abstain labels and mixed authoritative sources instead of only positive examples.",
+        },
+        {
+            "title": "Already done: repo comparison and dashboard cleanup",
+            "body": f"The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with { _num(data.repo_comparison_tests) } passing tests as the reproducibility proof.",
+        },
+        {
+            "title": "Do not duplicate",
+            "body": "Do not spend time on another pure current-vs-base classifier, a fixture-only one-off proof, or dashboard polish that does not add replay coverage, abstention quality, or evidence structure.",
+        },
+        {
+            "title": "Work forward",
+            "body": "The next real leverage is a larger replay corpus, better public proof paths, calibrated claim scoring, and unifying the selective router with the EvidenceGraph path.",
+        },
+    ]
+
+
 def _plain_english_takeaways(data: DashboardData) -> list[str]:
     santa = data.benchmark_v2_santa_cruz_challenge or {}
     santa_v2 = santa.get("resolver_v2", {}) if isinstance(santa, dict) else {}
@@ -1017,6 +1074,7 @@ def render_markdown(data: DashboardData) -> str:
     stats = _current_stats(data)
     takeaways = _plain_english_takeaways(data)
     limitations = _proof_limitations(data)
+    work_ledger = _work_ledger(data)
     demo_steps = _demo_steps()
     glossary = _glossary_lines()
     lines = [
@@ -1056,6 +1114,10 @@ def render_markdown(data: DashboardData) -> str:
         "## Completed Milestones",
         "",
         *[f"- [x] {item['title']} - {item['body']}" for item in _selective_milestones(selective, data.repo_comparison_tests)],
+        "",
+        "## Work Ledger",
+        "",
+        *[f"- {item['title']}: {item['body']}" for item in work_ledger],
         "",
         "## Important Stats",
         "",
@@ -1155,6 +1217,7 @@ def render_html(data: DashboardData) -> str:
     next_steps = _next_steps(selective, data.pac_benchmark)
     takeaways = _plain_english_takeaways(data)
     limitations = _proof_limitations(data)
+    work_ledger = _work_ledger(data)
     demo_steps = _demo_steps()
     glossary = _glossary_lines()
     current_path_rows = [[name, path] for name, path in sorted(data.paths.items())]
@@ -1265,6 +1328,16 @@ def render_html(data: DashboardData) -> str:
                 f"<p>{html.escape(item['body'])}</p>"
                 "</article>"
                 for item in milestones
+            ],
+            "</div>",
+            "</section>",
+            "<section>",
+            "<h2 class='section-title'>Work Ledger</h2>",
+            "<p class='section-note'>This is the no-duplicate checklist. It shows what is already done, what should not be rebuilt, and where the real leverage is next.</p>",
+            "<div class='summary-grid'>",
+            *[
+                f"<article class='stat-card'><div class='label'>{html.escape(item['title'])}</div><div class='detail'>{html.escape(item['body'])}</div></article>"
+                for item in work_ledger
             ],
             "</div>",
             "</section>",

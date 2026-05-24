@@ -48,6 +48,16 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - [x] Split verification made explicit - Holdout/train separation is inspectable and leak-checked instead of being implied by filenames.
 - [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as 230 tests passed.
 
+## Work Ledger
+
+- Already done: claim-level PAC spine: claim_extraction.py, evidence_graph.py, resolver_v2.py, and the replay harness are in place, so we are no longer just scoring rows.
+- Already done: selective ResolvePOI baseline: The learned router reaches 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.
+- Already done: hard-case abstention proof: The hard-case benchmark records 84.6% accuracy, 38.9% abstention, and 0.0% high-confidence wrong.
+- Already done: PAC benchmark expected behavior: The PAC hard benchmark now includes explicit expected-abstain labels and mixed authoritative sources instead of only positive examples.
+- Already done: repo comparison and dashboard cleanup: The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with 230 passing tests as the reproducibility proof.
+- Do not duplicate: Do not spend time on another pure current-vs-base classifier, a fixture-only one-off proof, or dashboard polish that does not add replay coverage, abstention quality, or evidence structure.
+- Work forward: The next real leverage is a larger replay corpus, better public proof paths, calibrated claim scoring, and unifying the selective router with the EvidenceGraph path.
+
 ## Important Stats
 
 | Signal | Value | Why it matters |
@@ -217,3 +227,4 @@ Successful live checks: 0/1
 - `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260516_190609_234474.json`
 - `technical_summary`: `/home/anthony/Overture/MLAttributes/reports/harness/technical_summary.md`
 - `website_authority`: `/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_20260516_190610_137713.json`
+- `work_ledger`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_WORK_LEDGER.md`

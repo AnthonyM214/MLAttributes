@@ -107,6 +107,19 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 </div>
 </section>
 <section>
+<h2 class='section-title'>Work Ledger</h2>
+<p class='section-note'>This is the no-duplicate checklist. It shows what is already done, what should not be rebuilt, and where the real leverage is next.</p>
+<div class='summary-grid'>
+<article class='stat-card'><div class='label'>Already done: claim-level PAC spine</div><div class='detail'>claim_extraction.py, evidence_graph.py, resolver_v2.py, and the replay harness are in place, so we are no longer just scoring rows.</div></article>
+<article class='stat-card'><div class='label'>Already done: selective ResolvePOI baseline</div><div class='detail'>The learned router reaches 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.</div></article>
+<article class='stat-card'><div class='label'>Already done: hard-case abstention proof</div><div class='detail'>The hard-case benchmark records 84.6% accuracy, 38.9% abstention, and 0.0% high-confidence wrong.</div></article>
+<article class='stat-card'><div class='label'>Already done: PAC benchmark expected behavior</div><div class='detail'>The PAC hard benchmark now includes explicit expected-abstain labels and mixed authoritative sources instead of only positive examples.</div></article>
+<article class='stat-card'><div class='label'>Already done: repo comparison and dashboard cleanup</div><div class='detail'>The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with 230 passing tests as the reproducibility proof.</div></article>
+<article class='stat-card'><div class='label'>Do not duplicate</div><div class='detail'>Do not spend time on another pure current-vs-base classifier, a fixture-only one-off proof, or dashboard polish that does not add replay coverage, abstention quality, or evidence structure.</div></article>
+<article class='stat-card'><div class='label'>Work forward</div><div class='detail'>The next real leverage is a larger replay corpus, better public proof paths, calibrated claim scoring, and unifying the selective router with the EvidenceGraph path.</div></article>
+</div>
+</section>
+<section>
 <h2 class='section-title'>Important Stats</h2>
 <p class='section-note'>These are the numbers that should be easy to explain in one sentence each.</p>
 <div class='summary-grid'>
@@ -320,6 +333,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <li><strong>smoke</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260516_190609_234474.json</code></li>
 <li><strong>technical_summary</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/technical_summary.md</code></li>
 <li><strong>website_authority</strong>: <code>/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_20260516_190610_137713.json</code></li>
+<li><strong>work_ledger</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_WORK_LEDGER.md</code></li>
 </ul>
 </div>
 </details>
