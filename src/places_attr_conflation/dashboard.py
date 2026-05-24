@@ -793,6 +793,61 @@ def _next_steps(selective: dict[str, object] | None, pac_benchmark: dict[str, ob
     ]
 
 
+def _plain_english_takeaways(data: DashboardData) -> list[str]:
+    santa = data.benchmark_v2_santa_cruz_challenge or {}
+    santa_v2 = santa.get("resolver_v2", {}) if isinstance(santa, dict) else {}
+    santa_expected = santa.get("expected_behavior", {}) if isinstance(santa, dict) else {}
+    santa_expected_v2 = santa_expected.get("resolver_v2", {}) if isinstance(santa_expected, dict) else {}
+    if not isinstance(santa_v2, dict):
+        santa_v2 = {}
+    if not isinstance(santa_expected_v2, dict):
+        santa_expected_v2 = {}
+    return [
+        "The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.",
+        (
+            "The Santa Cruz fixture is the clearest local demo: "
+            f"{_num(santa_v2.get('episodes_total'))} replay cases, "
+            f"{_pct(santa_expected_v2.get('accuracy'))} expected behavior, "
+            f"{_pct(santa_expected_v2.get('abstention_rate'))} expected abstention, "
+            f"and {_pct(santa_v2.get('high_confidence_wrong_rate'))} high-confidence wrong."
+        ),
+        "The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.",
+        "The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.",
+    ]
+
+
+def _proof_limitations(data: DashboardData) -> list[str]:
+    compare_total = None
+    if isinstance(data.compare, dict) and isinstance(data.compare.get("targeted"), dict):
+        compare_total = data.compare["targeted"].get("total")
+    return [
+        "A 100% expected-behavior score means the resolver matched the labels on a curated replay fixture. It does not mean production accuracy is 100%.",
+        "The retrieval replay is still tiny" + (f" ({compare_total} case(s))." if isinstance(compare_total, int) else "."),
+        "Santa Cruz is one geography. It is useful because it has real authority-page ambiguity, but it does not prove nationwide generalization.",
+        "Several older starter fixtures are still smoke tests with formulaic page text. The dashboard treats them as supporting evidence, not the main proof.",
+    ]
+
+
+def _demo_steps() -> list[str]:
+    return [
+        "Run `python3 -m unittest discover -s tests -q` to prove the code and fixtures are reproducible.",
+        "Run `python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions` to show claim-level PAC decisions and abstentions.",
+        "Open `reports/dashboard/index.html` to show the executive readout, then expand the deep-dive panels only if someone asks for details.",
+        "When explaining the project, say: MLAttributes verifies claims against replayable evidence; it does not merely choose current or base.",
+    ]
+
+
+def _glossary_lines() -> list[str]:
+    return [
+        "PAC: Place Attribute Conflation, meaning choosing the right website, phone, address, category, or name for a place.",
+        "Claim: one extracted statement from evidence, such as a phone number on an official contact page.",
+        "EvidenceGraph: grouped claims for the same attribute, including contradictions and source strength.",
+        "Abstention: the resolver refuses to guess because evidence is weak, stale, generic, social-only, or about the wrong entity.",
+        "High-confidence wrong: the dangerous failure mode where the resolver is confident and incorrect.",
+        "Expected behavior: pass/fail against fixture labels, including cases where abstaining is the correct answer.",
+    ]
+
+
 def _current_stats(data: DashboardData) -> list[dict[str, str]]:
     selective = data.resolvepoi_selective or {}
     comparison = selective.get("comparison", {}) if isinstance(selective, dict) else {}
@@ -849,7 +904,7 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
         {
             "label": "Santa Cruz challenge",
             "value": f"{_pct(santa_expected_v2.get('accuracy'))} expected / {_pct(santa_expected_v2.get('abstention_rate'))} abstention",
-            "detail": f"Raw resolver accuracy: {_pct(santa_v2.get('accuracy'))}; high-confidence wrong: {_pct(santa_v2.get('high_confidence_wrong_rate'))}; covers branch, government primary-phone, relay/fax/footer phone, department-location-vs-footer address, full-name/acronym, host-building name, tourism category, locator website, official-vs-social, title-cleaning, service-page category, program-tenant category, adjacent-facility category, branch-specific website, offsite-event address, multi-branch commercial location, branch-name, branch-website, and host-page ambiguity cases.",
+            "detail": f"Raw resolver accuracy: {_pct(santa_v2.get('accuracy'))}; high-confidence wrong: {_pct(santa_v2.get('high_confidence_wrong_rate'))}; 50 curated cases covering branch ambiguity, websites, stale/closed signals, social-only evidence, generic homepages, and wrong-entity tenant pages.",
         },
         {
             "label": "PAC hard benchmark",
@@ -960,17 +1015,34 @@ def render_markdown(data: DashboardData) -> str:
     if not isinstance(selective_metrics, dict):
         selective_metrics = {}
     stats = _current_stats(data)
+    takeaways = _plain_english_takeaways(data)
+    limitations = _proof_limitations(data)
+    demo_steps = _demo_steps()
+    glossary = _glossary_lines()
     lines = [
         "# MLAttributes Dashboard",
         "",
-        "MLAttributes now has a clear PAC spine: claim extraction -> identity scoring -> EvidenceGraph -> resolver_v2 -> benchmark_v2.",
-        "The strongest numeric result is still the ResolvePOI selective router, while the strongest architecture is the claim-level v2 resolver.",
+        "This is the human-readable status page for MLAttributes.",
+        "Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark. It is shippable as a project milestone, but not yet a production accuracy claim.",
         "",
         "## Current Read",
         "",
         f"- {_compare_caveat(data.compare)}",
         f"- {_resolver_caveat(data.combined)}",
         "- Working Prototype: ResolvePOI Baseline, Retrieval Arms, Website Authority, and Hard PAC Benchmark remain available in the deep dive below.",
+        "- Current Verdict: the architecture is differentiated; the proof still needs broader replay coverage before anyone should call it production-ready.",
+        "",
+        "## Plain-English Summary",
+        "",
+        *[f"- {line}" for line in takeaways],
+        "",
+        "## What The 100% Numbers Mean",
+        "",
+        *[f"- {line}" for line in limitations],
+        "",
+        "## Demo Script",
+        "",
+        *[f"{idx + 1}. {line}" for idx, line in enumerate(demo_steps)],
         "",
         "## At a Glance",
         "",
@@ -994,6 +1066,10 @@ def render_markdown(data: DashboardData) -> str:
         "## Next Steps",
         "",
         *[f"1. {item['title']}: {item['body']}" if idx == 0 else f"{idx + 1}. {item['title']}: {item['body']}" for idx, item in enumerate(_next_steps(selective, data.pac_benchmark))],
+        "",
+        "## Glossary",
+        "",
+        *[f"- {line}" for line in glossary],
         "",
         "## Deep Dive",
         "",
@@ -1077,6 +1153,10 @@ def render_html(data: DashboardData) -> str:
     stats = _current_stats(data)
     milestones = _selective_milestones(selective, data.repo_comparison_tests)
     next_steps = _next_steps(selective, data.pac_benchmark)
+    takeaways = _plain_english_takeaways(data)
+    limitations = _proof_limitations(data)
+    demo_steps = _demo_steps()
+    glossary = _glossary_lines()
     current_path_rows = [[name, path] for name, path in sorted(data.paths.items())]
     return "\n".join(
         [
@@ -1087,8 +1167,8 @@ def render_html(data: DashboardData) -> str:
             "<meta name='viewport' content='width=device-width, initial-scale=1'>",
             "<title>MLAttributes Dashboard</title>",
             "<style>",
-            ":root { --paper:#f5efff; --paper-2:#ece1ff; --ink:#1e1730; --muted:#675884; --accent:#6d28d9; --accent-2:#a855f7; --good:#177245; --warn:#9f4f1b; --line:#dcccf5; --panel:rgba(255,255,255,.96); --shadow:0 12px 30px rgba(109,40,217,.12); }",
-            "body { margin:0; color:var(--ink); background: radial-gradient(circle at top right, rgba(168,85,247,.22), transparent 30%), linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 220px); font-family: Inter, 'Segoe UI', system-ui, sans-serif; }",
+            ":root { --paper:#f7f1e5; --paper-2:#e9dbc3; --ink:#201812; --muted:#655744; --accent:#0f766e; --accent-2:#b45309; --good:#177245; --warn:#9f4f1b; --line:#ddceb5; --panel:rgba(255,252,245,.97); --shadow:0 14px 34px rgba(68,45,21,.12); }",
+            "body { margin:0; color:var(--ink); background: radial-gradient(circle at top right, rgba(15,118,110,.16), transparent 32%), linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 240px); font-family: 'Trebuchet MS', 'Avenir Next', Verdana, sans-serif; }",
             "main { max-width: 1440px; margin: 0 auto; padding: 24px 16px 56px; }",
             "h1, h2, h3, h4, summary { letter-spacing: -0.02em; }",
             "h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 .35rem; }",
@@ -1140,8 +1220,8 @@ def render_html(data: DashboardData) -> str:
             "<div class='panel pad'>",
             "<div class='eyebrow'>Current State</div>",
             "<h1>MLAttributes Dashboard</h1>",
-            "<p class='lead'>This page is the current plain-language readout for the repo. It highlights what is done, what matters now, and what comes next without burying the user in stale snapshots.</p>",
-            "<p class='section-note'>Current Verdict: this dashboard is a current snapshot; treat 100% values as directional.</p>",
+            "<p class='lead'>This is the human-readable status page for MLAttributes. Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark.</p>",
+            "<p class='section-note'>Current Verdict: shippable as a project milestone; not yet a production accuracy claim. treat 100% values as directional.</p>",
             "<ul class='detail-list'>",
             "<li>The strongest numeric result is the ResolvePOI selective router.</li>",
             "<li>The strongest architecture is the claim-level EvidenceGraph resolver.</li>",
@@ -1156,6 +1236,23 @@ def render_html(data: DashboardData) -> str:
             f"<div><strong>Tests</strong><div class='muted'>{html.escape(_num(data.repo_comparison_tests))} tests passed</div></div>",
             "</div>",
             "</div>",
+            "</section>",
+            "<section>",
+            "<h2 class='section-title'>Plain-English Summary</h2>",
+            "<p class='section-note'>Use this section when explaining the repo to someone who does not live inside the codebase.</p>",
+            "<div class='summary-grid'>",
+            *[
+                f"<article class='stat-card'><div class='label'>Takeaway {idx + 1}</div><div class='detail'>{html.escape(line)}</div></article>"
+                for idx, line in enumerate(takeaways)
+            ],
+            "</div>",
+            "</section>",
+            "<section>",
+            "<h2 class='section-title'>What The 100% Numbers Mean</h2>",
+            "<p class='section-note'>These caveats keep the dashboard honest. A perfect curated replay result is useful, but it is not the same thing as production accuracy.</p>",
+            "<ul class='detail-list panel pad'>",
+            *[f"<li>{html.escape(line)}</li>" for line in limitations],
+            "</ul>",
             "</section>",
             "<section>",
             "<h2 class='section-title'>Completed Milestones</h2>",
@@ -1182,12 +1279,32 @@ def render_html(data: DashboardData) -> str:
             "</div>",
             "</section>",
             "<section>",
+            "<h2 class='section-title'>Demo Script</h2>",
+            "<p class='section-note'>Run this when you need to prove the repo is reproducible and explainable.</p>",
+            "<div class='step-grid'>",
+            *[
+                f"<article class='step'><div class='index'>{idx + 1}</div><p>{html.escape(line)}</p></article>"
+                for idx, line in enumerate(demo_steps)
+            ],
+            "</div>",
+            "</section>",
+            "<section>",
             "<h2 class='section-title'>Next Steps</h2>",
             "<p class='section-note'>These are the highest-ROI follow-ups. They keep the current architecture and make the proof stronger.</p>",
             "<div class='step-grid'>",
             *[
                 f"<article class='step'><div class='index'>{idx + 1}</div><h4>{html.escape(item['title'])}</h4><p>{html.escape(item['body'])}</p></article>"
                 for idx, item in enumerate(next_steps)
+            ],
+            "</div>",
+            "</section>",
+            "<section>",
+            "<h2 class='section-title'>Glossary</h2>",
+            "<p class='section-note'>Plain definitions for the terms used in the cards and reports.</p>",
+            "<div class='summary-grid'>",
+            *[
+                f"<article class='stat-card'><div class='detail'>{html.escape(line)}</div></article>"
+                for line in glossary
             ],
             "</div>",
             "</section>",

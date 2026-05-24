@@ -1,13 +1,35 @@
 # MLAttributes Dashboard
 
-MLAttributes now has a clear PAC spine: claim extraction -> identity scoring -> EvidenceGraph -> resolver_v2 -> benchmark_v2.
-The strongest numeric result is still the ResolvePOI selective router, while the strongest architecture is the claim-level v2 resolver.
+This is the human-readable status page for MLAttributes.
+Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark. It is shippable as a project milestone, but not yet a production accuracy claim.
 
 ## Current Read
 
 - Retrieval result is based on 1 replay case(s); treat 100% values as directional, not final.
 - Resolver metrics are based on 4 labeled cases; use them as a current snapshot, not a final verdict.
 - Working Prototype: ResolvePOI Baseline, Retrieval Arms, Website Authority, and Hard PAC Benchmark remain available in the deep dive below.
+- Current Verdict: the architecture is differentiated; the proof still needs broader replay coverage before anyone should call it production-ready.
+
+## Plain-English Summary
+
+- The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.
+- The Santa Cruz fixture is the clearest local demo: 50 replay cases, 100.0% expected behavior, 12.0% expected abstention, and 0.0% high-confidence wrong.
+- The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.
+- The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.
+
+## What The 100% Numbers Mean
+
+- A 100% expected-behavior score means the resolver matched the labels on a curated replay fixture. It does not mean production accuracy is 100%.
+- The retrieval replay is still tiny (1 case(s)).
+- Santa Cruz is one geography. It is useful because it has real authority-page ambiguity, but it does not prove nationwide generalization.
+- Several older starter fixtures are still smoke tests with formulaic page text. The dashboard treats them as supporting evidence, not the main proof.
+
+## Demo Script
+
+1. Run `python3 -m unittest discover -s tests -q` to prove the code and fixtures are reproducible.
+2. Run `python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions` to show claim-level PAC decisions and abstentions.
+3. Open `reports/dashboard/index.html` to show the executive readout, then expand the deep-dive panels only if someone asks for details.
+4. When explaining the project, say: MLAttributes verifies claims against replayable evidence; it does not merely choose current or base.
 
 ## At a Glance
 
@@ -32,7 +54,7 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 | --- | ---: | --- |
 | Selective router | 97.7% all-attribute / 97.1% core | Lift vs current baseline: 20.2 pts; high-confidence wrong: 1.2% |
 | Claim-level v2 hard cases | 88.9% accuracy / 20.0% abstention | High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json |
-| Santa Cruz challenge | 100.0% expected / 12.0% abstention | Raw resolver accuracy: 95.7%; high-confidence wrong: 0.0%; covers branch, government primary-phone, relay/fax/footer phone, department-location-vs-footer address, full-name/acronym, host-building name, tourism category, locator website, official-vs-social, title-cleaning, service-page category, program-tenant category, adjacent-facility category, branch-specific website, offsite-event address, multi-branch commercial location, branch-name, branch-website, and host-page ambiguity cases. |
+| Santa Cruz challenge | 100.0% expected / 12.0% abstention | Raw resolver accuracy: 95.7%; high-confidence wrong: 0.0%; 50 curated cases covering branch ambiguity, websites, stale/closed signals, social-only evidence, generic homepages, and wrong-entity tenant pages. |
 | PAC hard benchmark | 100.0% correct abstention / passed | Identity drift precision/recall: 100.0% / 100.0% |
 | PAC expected behavior | 100.0% expected-behavior accuracy | Expected abstention rate: 60.0%; claim-level benchmark captures the intended behavior on ambiguous cases. |
 | Retrieval proof | 100.0% targeted vs 0.0% fallback | Citation precision: 100.0% vs 0.0%; replay cases: 1 |
@@ -46,6 +68,15 @@ The strongest numeric result is still the ResolvePOI selective router, while the
 3. Unify the best paths: Make the selective router and EvidenceGraph benchmark the same reproducible path so the strongest numeric result and the strongest architecture are one system.
 4. Publish a public proof path: Ship a small public ResolvePOI fixture or artifact fetch command so the 97.7% selective result is reproducible without local-only inputs.
 5. Keep pruning historical clutter: Move old snapshots and exploratory outputs into a clearly historical area so the current repo surface stays easy to scan.
+
+## Glossary
+
+- PAC: Place Attribute Conflation, meaning choosing the right website, phone, address, category, or name for a place.
+- Claim: one extracted statement from evidence, such as a phone number on an official contact page.
+- EvidenceGraph: grouped claims for the same attribute, including contradictions and source strength.
+- Abstention: the resolver refuses to guess because evidence is weak, stale, generic, social-only, or about the wrong entity.
+- High-confidence wrong: the dangerous failure mode where the resolver is confident and incorrect.
+- Expected behavior: pass/fail against fixture labels, including cases where abstaining is the correct answer.
 
 ## Deep Dive
 
@@ -164,25 +195,25 @@ Successful live checks: 0/1
 ### Report Files
 
 - `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_hybrid_20260424_041858.json`
-- `benchmark_v2_hard_cases`: `reports/harness/benchmark_v2_hard_cases_current.json`
-- `benchmark_v2_pac_hard_cases`: `reports/harness/benchmark_v2_pac_hard_cases_current.json`
-- `benchmark_v2_santa_cruz_challenge`: `reports/harness/benchmark_v2_santa_cruz_challenge_current.json`
+- `benchmark_v2_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_hard_cases_current.json`
+- `benchmark_v2_pac_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_pac_hard_cases_current.json`
+- `benchmark_v2_santa_cruz_challenge`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_santa_cruz_challenge_current.json`
 - `combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_20260424_041858.json`
 - `compare`: `/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_20260516_190607_832714.json`
 - `conflict_dorks`: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_20260516_190554_511614.csv`
 - `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary_20260516_190558_333845.json`
-- `engineering_report`: `reports/harness/PAC_ENGINEERING_REPORT.md`
+- `engineering_report`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_ENGINEERING_REPORT.md`
 - `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260516_190609_850830.json`
 - `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260516_190605_420989.json`
 - `merged_replay`: `/home/anthony/Overture/MLAttributes/reports/replay/merged_20260516_190607_831012.json`
-- `pac_benchmark`: `reports/pac_benchmark/pac_benchmark_current.json`
+- `pac_benchmark`: `/home/anthony/Overture/MLAttributes/reports/pac_benchmark/pac_benchmark_current.json`
 - `replay_stats`: `/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260516_190607_832512.json`
-- `repo_comparison`: `reports/harness/PAC_REPO_COMPARISON.md`
+- `repo_comparison`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md`
 - `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_20260516_190608_093696.json`
-- `resolvepoi_selective`: `reports/resolvepoi_selective/resolvepoi_selective_current.json`
+- `resolvepoi_selective`: `/home/anthony/Overture/MLAttributes/reports/resolvepoi_selective/resolvepoi_selective_current.json`
 - `resolver_replay`: `/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_20260516_190607_832894.json`
 - `santa_cruz_challenge_corpus`: `/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_challenge_replay.json`
 - `santa_cruz_expanded_corpus`: `/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_replay_corpus_expanded.json`
 - `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_20260516_190609_234474.json`
-- `technical_summary`: `reports/harness/technical_summary.md`
+- `technical_summary`: `/home/anthony/Overture/MLAttributes/reports/harness/technical_summary.md`
 - `website_authority`: `/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_20260516_190610_137713.json`
