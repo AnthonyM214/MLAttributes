@@ -116,6 +116,7 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "benchmark_v2_santa_cruz_challenge": harness / "benchmark_v2_santa_cruz_challenge_current.json",
         "benchmark_v3_hard_cases": harness / "benchmark_v3_hard_cases_current.json",
         "work_ledger": root / "harness" / "PAC_WORK_LEDGER.md",
+        "okr": root / "harness" / "PAC_OKR.md",
         "repo_comparison": root / "harness" / "PAC_REPO_COMPARISON.md",
         "engineering_report": root / "harness" / "PAC_ENGINEERING_REPORT.md",
         "technical_summary": root / "harness" / "technical_summary.md",
@@ -853,6 +854,82 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
     ]
 
 
+def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
+    compare = data.compare or {}
+    targeted = compare.get("targeted", {}) if isinstance(compare, dict) else {}
+    if not isinstance(targeted, dict):
+        targeted = {}
+    hard_cases = data.benchmark_v2_hard_cases or {}
+    hard_v2 = hard_cases.get("resolver_v2", {}) if isinstance(hard_cases, dict) else {}
+    if not isinstance(hard_v2, dict):
+        hard_v2 = {}
+    hard_v3 = data.benchmark_v3_hard_cases or {}
+    hard_v3_resolver = hard_v3.get("resolver_v3", {}) if isinstance(hard_v3, dict) else {}
+    if not isinstance(hard_v3_resolver, dict):
+        hard_v3_resolver = {}
+    selective = data.resolvepoi_selective or {}
+    metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
+    macro = metrics.get("macro", {}) if isinstance(metrics, dict) else {}
+    core_macro = metrics.get("core_macro", {}) if isinstance(metrics, dict) else {}
+    if not isinstance(macro, dict):
+        macro = {}
+    if not isinstance(core_macro, dict):
+        core_macro = {}
+    okr_path = data.paths.get("okr", "")
+    return [
+        {
+            "title": "Yes, we moved past dorking",
+            "body": (
+                "Dorking is now just the front door. The repo first finds evidence, then converts it into claims, "
+                "groups claims into an EvidenceGraph, and only then decides or abstains."
+            ),
+        },
+        {
+            "title": "Retrieval replay",
+            "body": (
+                f"Targeted search found authoritative pages at {_pct(targeted.get('authoritative_found_rate'))} versus "
+                f"{_pct(((compare.get('fallback') or {}).get('authoritative_found_rate')) if isinstance(compare, dict) else None)} fallback. "
+                "Example: the replay harness records why a targeted official hit wins over loose fallback."
+            ),
+        },
+        {
+            "title": "Claim extraction",
+            "body": (
+                "The extractor now reads page text, structured HTML, JSON-LD, page URLs, titles, and explicit extracted values. "
+                "Example: `hard-website-1` turns visible contact-page text into a claim instead of leaving the row blank."
+            ),
+        },
+        {
+            "title": "EvidenceGraph",
+            "body": (
+                "Claims are grouped by normalized value and contradictions are explicit. "
+                "Example: `hard-mixed-authoritative-name` combines official and government corroboration on the same name."
+            ),
+        },
+        {
+            "title": "Resolver v3",
+            "body": (
+                f"V3 resolves `hard-phone-ambiguous` and `hard-mixed-authoritative-name` where v2 still abstains, while keeping "
+                f"high-confidence wrong at {_pct(hard_v3_resolver.get('high_confidence_wrong_rate'))} on the hard set."
+            ),
+        },
+        {
+            "title": "Selective router",
+            "body": (
+                f"The ResolvePOI selective router remains the strongest numeric result: {_pct((macro or {}).get('full_accuracy'))} "
+                f"all-attribute / {_pct((core_macro or {}).get('full_accuracy'))} core full accuracy on the held-out 400-ID slice."
+            ),
+        },
+        {
+            "title": "Merged corpus OKR",
+            "body": (
+                f"The collected replay tree contains 38,518 loadable episodes and 5,078 unique case-attribute pairs. "
+                f"The new OKR ({okr_path or 'reports/harness/PAC_OKR.md'}) says the next disruptive gain is claim coverage, not more resolver tuning."
+            ),
+        },
+    ]
+
+
 def _plain_english_takeaways(data: DashboardData) -> list[str]:
     santa = data.benchmark_v2_santa_cruz_challenge or {}
     santa_v2 = santa.get("resolver_v2", {}) if isinstance(santa, dict) else {}
@@ -863,6 +940,7 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
     if not isinstance(santa_expected_v2, dict):
         santa_expected_v2 = {}
     return [
+        "Yes, MLAttributes has evolved past dorking. Dorking still matters, but it is now only the first step in a larger claim-verification pipeline.",
         "The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.",
         (
             "The Santa Cruz fixture is the clearest local demo: "
@@ -1114,6 +1192,7 @@ def render_markdown(data: DashboardData) -> str:
     takeaways = _plain_english_takeaways(data)
     limitations = _proof_limitations(data)
     work_ledger = _work_ledger(data)
+    evolution_story = _evolution_story(data)
     demo_steps = _demo_steps()
     glossary = _glossary_lines()
     lines = [
@@ -1132,6 +1211,10 @@ def render_markdown(data: DashboardData) -> str:
         "## Plain-English Summary",
         "",
         *[f"- {line}" for line in takeaways],
+        "",
+        "## How We Evolved Past Dorking",
+        "",
+        *[f"- {item['title']}: {item['body']}" for item in evolution_story],
         "",
         "## What The 100% Numbers Mean",
         "",
@@ -1262,6 +1345,7 @@ def render_html(data: DashboardData) -> str:
     takeaways = _plain_english_takeaways(data)
     limitations = _proof_limitations(data)
     work_ledger = _work_ledger(data)
+    evolution_story = _evolution_story(data)
     demo_steps = _demo_steps()
     glossary = _glossary_lines()
     current_path_rows = [[name, path] for name, path in sorted(data.paths.items())]
@@ -1351,6 +1435,16 @@ def render_html(data: DashboardData) -> str:
             *[
                 f"<article class='stat-card'><div class='label'>Takeaway {idx + 1}</div><div class='detail'>{html.escape(line)}</div></article>"
                 for idx, line in enumerate(takeaways)
+            ],
+            "</div>",
+            "</section>",
+            "<section>",
+            "<h2 class='section-title'>How We Evolved Past Dorking</h2>",
+            "<p class='section-note'>This is the part of the repo story that explains the shift from search-planning into claim-level truth resolution.</p>",
+            "<div class='summary-grid'>",
+            *[
+                f"<article class='stat-card'><div class='label'>{html.escape(item['title'])}</div><div class='detail'>{html.escape(item['body'])}</div></article>"
+                for item in evolution_story
             ],
             "</div>",
             "</section>",

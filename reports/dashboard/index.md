@@ -12,10 +12,21 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 
 ## Plain-English Summary
 
+- Yes, MLAttributes has evolved past dorking. Dorking still matters, but it is now only the first step in a larger claim-verification pipeline.
 - The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.
 - The Santa Cruz fixture is the clearest local demo: 50 replay cases, 100.0% expected behavior, 12.0% expected abstention, and 0.0% high-confidence wrong.
 - The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.
 - The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.
+
+## How We Evolved Past Dorking
+
+- Yes, we moved past dorking: Dorking is now just the front door. The repo first finds evidence, then converts it into claims, groups claims into an EvidenceGraph, and only then decides or abstains.
+- Retrieval replay: Targeted search found authoritative pages at 100.0% versus 0.0% fallback. Example: the replay harness records why a targeted official hit wins over loose fallback.
+- Claim extraction: The extractor now reads page text, structured HTML, JSON-LD, page URLs, titles, and explicit extracted values. Example: `hard-website-1` turns visible contact-page text into a claim instead of leaving the row blank.
+- EvidenceGraph: Claims are grouped by normalized value and contradictions are explicit. Example: `hard-mixed-authoritative-name` combines official and government corroboration on the same name.
+- Resolver v3: V3 resolves `hard-phone-ambiguous` and `hard-mixed-authoritative-name` where v2 still abstains, while keeping high-confidence wrong at 0.0% on the hard set.
+- Selective router: The ResolvePOI selective router remains the strongest numeric result: 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.
+- Merged corpus OKR: The collected replay tree contains 38,518 loadable episodes and 5,078 unique case-attribute pairs. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.
 
 ## What The 100% Numbers Mean
 
@@ -228,6 +239,7 @@ Successful live checks: 0/1
 - `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260516_190609_850830.json`
 - `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260516_190605_420989.json`
 - `merged_replay`: `/home/anthony/Overture/MLAttributes/reports/replay/merged_20260516_190607_831012.json`
+- `okr`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md`
 - `pac_benchmark`: `/home/anthony/Overture/MLAttributes/reports/pac_benchmark/pac_benchmark_current.json`
 - `replay_stats`: `/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260516_190607_832512.json`
 - `repo_comparison`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md`

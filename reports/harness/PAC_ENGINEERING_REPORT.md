@@ -35,6 +35,17 @@ In replay hard cases, that learned path is still opt-in because it can regress o
 
 This is the first local path that clearly improves the hard-case benchmark without turning the resolver into a looser heuristic classifier.
 
+## What the large replay corpus changed
+
+The merged replay corpus turned out to be the best diagnosis tool:
+
+- `38,518` replay episodes are loadable from the collected artifacts.
+- `5,078` unique case-attribute pairs remain after deduping.
+- The current bottleneck is extraction coverage, not resolver scoring.
+- On the merged corpus, the claim extractor still leaves most phone, address, name, and category cases with no claims, and only a small fraction of website cases with usable claims.
+
+That means the next disruptive gain should come from broader deterministic claim construction and graph-guided noise control, not from another threshold tweak.
+
 ## What the hard-case benchmark shows
 
 On `tests/fixtures/hard_cases_replay.json`:

@@ -79,10 +79,24 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <h2 class='section-title'>Plain-English Summary</h2>
 <p class='section-note'>Use this section when explaining the repo to someone who does not live inside the codebase.</p>
 <div class='summary-grid'>
-<article class='stat-card'><div class='label'>Takeaway 1</div><div class='detail'>The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 2</div><div class='detail'>The Santa Cruz fixture is the clearest local demo: 50 replay cases, 100.0% expected behavior, 12.0% expected abstention, and 0.0% high-confidence wrong.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 3</div><div class='detail'>The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 4</div><div class='detail'>The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 1</div><div class='detail'>Yes, MLAttributes has evolved past dorking. Dorking still matters, but it is now only the first step in a larger claim-verification pipeline.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 2</div><div class='detail'>The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 3</div><div class='detail'>The Santa Cruz fixture is the clearest local demo: 50 replay cases, 100.0% expected behavior, 12.0% expected abstention, and 0.0% high-confidence wrong.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 4</div><div class='detail'>The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 5</div><div class='detail'>The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.</div></article>
+</div>
+</section>
+<section>
+<h2 class='section-title'>How We Evolved Past Dorking</h2>
+<p class='section-note'>This is the part of the repo story that explains the shift from search-planning into claim-level truth resolution.</p>
+<div class='summary-grid'>
+<article class='stat-card'><div class='label'>Yes, we moved past dorking</div><div class='detail'>Dorking is now just the front door. The repo first finds evidence, then converts it into claims, groups claims into an EvidenceGraph, and only then decides or abstains.</div></article>
+<article class='stat-card'><div class='label'>Retrieval replay</div><div class='detail'>Targeted search found authoritative pages at 100.0% versus 0.0% fallback. Example: the replay harness records why a targeted official hit wins over loose fallback.</div></article>
+<article class='stat-card'><div class='label'>Claim extraction</div><div class='detail'>The extractor now reads page text, structured HTML, JSON-LD, page URLs, titles, and explicit extracted values. Example: `hard-website-1` turns visible contact-page text into a claim instead of leaving the row blank.</div></article>
+<article class='stat-card'><div class='label'>EvidenceGraph</div><div class='detail'>Claims are grouped by normalized value and contradictions are explicit. Example: `hard-mixed-authoritative-name` combines official and government corroboration on the same name.</div></article>
+<article class='stat-card'><div class='label'>Resolver v3</div><div class='detail'>V3 resolves `hard-phone-ambiguous` and `hard-mixed-authoritative-name` where v2 still abstains, while keeping high-confidence wrong at 0.0% on the hard set.</div></article>
+<article class='stat-card'><div class='label'>Selective router</div><div class='detail'>The ResolvePOI selective router remains the strongest numeric result: 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.</div></article>
+<article class='stat-card'><div class='label'>Merged corpus OKR</div><div class='detail'>The collected replay tree contains 38,518 loadable episodes and 5,078 unique case-attribute pairs. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.</div></article>
 </div>
 </section>
 <section>
@@ -338,6 +352,7 @@ code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }
 <li><strong>evidence</strong>: <code>/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_20260516_190609_850830.json</code></li>
 <li><strong>golden</strong>: <code>/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_20260516_190605_420989.json</code></li>
 <li><strong>merged_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/replay/merged_20260516_190607_831012.json</code></li>
+<li><strong>okr</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md</code></li>
 <li><strong>pac_benchmark</strong>: <code>/home/anthony/Overture/MLAttributes/reports/pac_benchmark/pac_benchmark_current.json</code></li>
 <li><strong>replay_stats</strong>: <code>/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_20260516_190607_832512.json</code></li>
 <li><strong>repo_comparison</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md</code></li>
