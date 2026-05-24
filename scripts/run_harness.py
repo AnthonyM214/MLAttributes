@@ -72,6 +72,7 @@ from places_attr_conflation.golden import (
     write_label_csv,
 )
 from places_attr_conflation.benchmark_v2 import evaluate_benchmark_v2
+from places_attr_conflation.benchmark_v2 import build_learned_router as build_learned_router_v2
 from places_attr_conflation.benchmark_v3 import evaluate_benchmark_v3
 from places_attr_conflation.overture_context import (
     build_overture_context_replay,
@@ -414,7 +415,7 @@ def main() -> int:
     benchmark_v2.add_argument("--include-decisions", action="store_true")
     benchmark_v2.add_argument(
         "--learned-router",
-        choices=["none", "resolvepoi-selective"],
+        choices=["none", "resolvepoi-selective", "cross-corpus-selective"],
         default="none",
         help="Optional learned router to inject into resolver v2.",
     )
@@ -748,16 +749,16 @@ def main() -> int:
         if args.attributes:
             allowed = set(args.attributes)
             episodes = [episode for episode in episodes if episode.attribute in allowed]
-        learned_router = None
-        if args.learned_router == "resolvepoi-selective":
-            learned_router = train_resolvepoi_selective_router(
-                train_parquet=args.resolvepoi_train_parquet,
-                train_labels=args.resolvepoi_train_labels,
-                target_coverage=args.resolvepoi_target_coverage,
-                attributes=args.attributes or DEFAULT_RESOLVEPOI_ATTRIBUTES,
-            )
+        learned_router = build_learned_router_v2(
+            args.learned_router,
+            target_coverage=args.resolvepoi_target_coverage,
+            attributes=args.attributes,
+            resolvepoi_train_parquet=args.resolvepoi_train_parquet,
+            resolvepoi_train_labels=args.resolvepoi_train_labels,
+        )
         report = evaluate_benchmark_v2(episodes, include_decisions=args.include_decisions, learned_router=learned_router)
         report["input"] = str(args.replay)
+        report["learned_router"] = args.learned_router
     elif args.command == "benchmark-v3":
         episodes = load_retrieval_episodes(args.replay)
         if args.attributes:

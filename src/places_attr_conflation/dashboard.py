@@ -1118,6 +1118,17 @@ def _benchmark_v2_hard_case_lines(report: dict[str, object] | None) -> list[str]
         f"Resolver v1 accuracy: {_pct(resolver_v1.get('accuracy'))}",
         f"Resolver v1 abstention: {_pct(resolver_v1.get('abstention_rate'))}",
     ]
+    learned_router = report.get("learned_router")
+    if isinstance(learned_router, str) and learned_router:
+        lines.append(f"Learned router: {learned_router}")
+    elif isinstance(learned_router, dict) and learned_router:
+        router_type = str(learned_router.get("type", "unknown"))
+        attributes = learned_router.get("attributes", [])
+        if isinstance(attributes, list) and attributes:
+            attr_text = ", ".join(str(item) for item in attributes[:5])
+        else:
+            attr_text = "none"
+        lines.append(f"Learned router: {router_type} over {attr_text}")
     if isinstance(breakthroughs, list) and breakthroughs:
         lines.append("Breakthrough cases: " + "; ".join(str(case.get("case_id", "-")) for case in breakthroughs if isinstance(case, dict)))
     if isinstance(abstentions, list) and abstentions:

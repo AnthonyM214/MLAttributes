@@ -11,6 +11,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
   - `benchmark_v2.py`
 - Corroboration-aware `resolver_v3.py` is in place and now beats v2 on the hard-case replay corpus.
 - The selective ResolvePOI router is implemented and benchmarked on the 2k corpus / 400-ID holdout.
+- The cross-corpus selective router has been trained against ResolvePOI + David feature corpora and now serves as the learned-router baseline when we want safer abstention on hard cases.
 - The Santa Cruz replay corpus exists in both starter and expanded forms.
 - The hard-case PAC benchmark now includes:
   - abstentions
@@ -35,6 +36,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
 - Do not spend time on dashboard polish that does not change evidence quality, replay coverage, or abstention behavior.
 - Do not duplicate the curated Santa Cruz / PAC hard-case fixtures unless the new cases add a genuinely new failure mode.
 - Do not replace the selective router with another ad hoc heuristic router.
+- Do not redo the cross-corpus router unless a new corpus actually improves high-confidence error or claim coverage.
 
 ## Remaining High-Leverage Work
 
@@ -45,6 +47,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
 5. Calibrate claim scoring on a larger replay set instead of only hand-tuned fixture weights.
 6. Ship a public proof path so the strongest benchmark can be rerun without local-only artifacts.
 7. Keep pruning historical outputs into a clearly archival area so the current repo surface stays easy to scan.
+8. Grow the cross-corpus learned-router benchmark only if it improves safety without becoming another duplicate baseline.
 
 ## Research Anchors
 

@@ -9,6 +9,7 @@ Turn MLAttributes into a claim-construction-first PAC system that can operate on
 The current resolver improvements proved an important point:
 
 - `resolver_v3` beats `resolver_v2` on the curated hard-case benchmark.
+- The new cross-corpus selective router keeps the same hard-case accuracy as the ResolvePOI-only router while raising abstention and removing the high-confidence name error.
 - But on the merged replay corpus, the bottleneck is no longer the resolver.
 - The bottleneck is claim construction coverage.
 
@@ -45,6 +46,7 @@ The literature points the same way:
 2. Preserve abstention discipline while increasing usable evidence.
 3. Benchmark against the merged replay corpus, not just curated slices.
 4. Keep `resolver_v1`, `resolver_v2`, and `resolver_v3` as baselines, but make the new claim-construction pipeline the primary path.
+5. Keep the cross-corpus selective router as the current learned-router baseline only if it continues to reduce high-confidence wrong selections without sacrificing coverage.
 
 ## OKR Metrics
 
@@ -52,6 +54,7 @@ The literature points the same way:
 - Add measurable phone, address, and category claim coverage where coverage is currently near zero.
 - Improve authoritative_found_rate without increasing high-confidence wrong selections.
 - Keep the hard-case benchmark at or above current v3 behavior while broadening replay coverage.
+- Maintain or improve hard-case accuracy when switching from ResolvePOI-only to cross-corpus learned routing, with a lower high-confidence wrong rate as the primary safety metric.
 
 ## Current Baseline Status
 
