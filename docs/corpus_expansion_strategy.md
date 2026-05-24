@@ -121,24 +121,18 @@ New Santa Cruz cases should be accepted only when they add a new failure mode
 or strengthen coverage for an underrepresented attribute. Do not add more
 near-duplicate easy contact pages just to increase the count.
 
-Current checked-in Santa Cruz challenge status: 40 authority-page ambiguity
-episodes, with the next target at 50 reviewed cases before broadening beyond
-Santa Cruz. The newest slice adds official civic/facility category ambiguity:
-Civic Auditorium vs box-office pages, London Nelson Community Center vs tenant
-programs, Laurel Park vs adjacent community-center language, and government
-locator pages that expose a branch-specific website. It also adds commercial
-official-site ambiguity from Bookshop Santa Cruz, Rio Theatre, and Verve Coffee:
-service-page category conflicts, event-venue category wording, offsite-event
-addresses, and multi-branch phone/address selection. The newest slice addresses
-the previous weak spots by adding Landmark Del Mar Theatre, Kuumbwa Jazz,
-Downtown Santa Cruz Market, and Abbott Square host-page evidence: branded-name
-vs generic-alias conflicts, organization-name vs venue-suffix conflicts,
-branch-name vs parent-organization conflicts, branch website vs social profile,
-and an expected-abstain host-page phone ambiguity.
+Current checked-in Santa Cruz challenge status: 50 curated replay episodes.
+The fixture now has the first local 50-case gate covered before broadening
+beyond Santa Cruz. The latest slice adds multi-branch commercial location pages
+from The Penny Ice Creamery and Cat & Cloud, branch website vs social/root
+homepage conflicts, social-only website abstention, generic corporate homepage
+abstention, stale/closed phone abstention, and a government host-page tenant
+website abstention.
 
-Remaining Santa Cruz gaps before the 50-case gate:
+Remaining quality gaps before treating this as benchmark-grade:
 
-- at least 3 more expected-abstain cases,
-- at least 3 more website cases,
-- at least 2 stale/closed/moved cases,
-- at least 2 wrong-entity or new-tenant cases.
+- add real captured page excerpts for older formulaic starter/expanded fixtures,
+- add more distractor pages per Santa Cruz challenge case,
+- add cross-city validation with the same replay schema,
+- add more wrong-branch, same-address new tenant, stale, and social-only cases,
+- report corpus gates beside headline accuracy so 100% expected behavior is not mistaken for production readiness.

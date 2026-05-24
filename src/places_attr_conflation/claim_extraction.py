@@ -21,6 +21,7 @@ from .normalization import (
 )
 from .identity import identity_alignment_score
 from .replay import FetchedPage, ReplayEpisode, SearchAttempt
+from .website_evidence import domain_from_url, registered_domain
 
 
 _URL_PATTERN = re.compile(r"https?://[^\s<>'\")]+|www\.[^\s<>'\")]+", re.IGNORECASE)
@@ -895,6 +896,7 @@ def _claim(
     freshness_score: float = 0.0,
     stale_signal_score: float = 0.0,
     identity_signal_score: float = 0.0,
+    identity_signal_cap: float | None = None,
     notes: str = "",
 ) -> AttributeClaim:
     inferred_identity, inferred_stale = identity_alignment_score(
@@ -911,7 +913,7 @@ def _claim(
         inferred_stale = 0.0
         inferred_identity = max(inferred_identity, 0.9)
     elif source_type in {"official_site", "government"} and any(
-        token in lowered_context for token in ("moved", "relocated", "formerly", "new location")
+        token in lowered_context for token in ("we moved", "moved to", "relocated", "new location", "formerly known as")
     ):
         inferred_stale = 0.0
         inferred_identity = max(inferred_identity, 0.9)
@@ -924,9 +926,13 @@ def _claim(
     }.get(attribute, lambda raw: (raw or "").strip().lower())(value)
     final_stale_signal = max(stale_signal_score, inferred_stale)
     if "new_location" in extraction_method or (
-        source_type in {"official_site", "government"} and any(token in lowered_context for token in ("moved", "relocated", "formerly", "new location"))
+        source_type in {"official_site", "government"}
+        and any(token in lowered_context for token in ("we moved", "moved to", "relocated", "new location", "formerly known as"))
     ):
         final_stale_signal = min(final_stale_signal, 0.15)
+    final_identity_signal = max(identity_signal_score, inferred_identity)
+    if identity_signal_cap is not None:
+        final_identity_signal = min(final_identity_signal, identity_signal_cap)
 
     return AttributeClaim(
         claim_id=_claim_id(place_id, attribute, normalized, source_url, extraction_method, evidence_text[:200]),
@@ -948,9 +954,70 @@ def _claim(
         ),
         freshness_score=max(0.0, min(1.0, freshness_score)),
         stale_signal_score=max(0.0, min(1.0, final_stale_signal)),
-        identity_signal_score=max(0.0, min(1.0, max(identity_signal_score, inferred_identity))),
+        identity_signal_score=max(0.0, min(1.0, final_identity_signal)),
         notes=notes,
     )
+
+
+def _context_has_target_corroboration(text: str, place_context: dict[str, str] | None) -> bool:
+    if not place_context:
+        return False
+    normalized_text = normalize_name(text)
+    normalized_address_text = normalize_address(text)
+    phone_text = normalize_phone(text)
+
+    name = normalize_name(place_context.get("name", ""))
+    if name and len(name) >= 10 and name in normalized_text:
+        return True
+
+    for key in ("address", "current_address", "base_address"):
+        address = normalize_address(place_context.get(key, ""))
+        if address and address in normalized_address_text:
+            return True
+
+    for key in ("phone", "current_phone", "base_phone"):
+        phone = normalize_phone(place_context.get(key, ""))
+        if phone and phone in phone_text:
+            return True
+
+    return False
+
+
+def _website_claim_authority_score(
+    *,
+    value: str,
+    source_url: str,
+    evidence_text: str,
+    page_title: str,
+    place_context: dict[str, str] | None,
+    source_score: float,
+) -> float:
+    """Do not let a host page make an unrelated external website authoritative."""
+    claimed_domain = registered_domain(domain_from_url(normalize_website(value)))
+    source_domain = registered_domain(domain_from_url(normalize_website(source_url)))
+    if not claimed_domain or not source_domain or claimed_domain == source_domain:
+        return source_score
+
+    context = f"{page_title}\n{evidence_text}"
+    lowered_context = context.lower()
+    if _context_has_target_corroboration(context, place_context):
+        return source_score
+
+    explicit_official_link = any(
+        token in lowered_context
+        for token in (
+            "official website",
+            "primary website",
+            "canonical website",
+            "visit our website",
+            "website:",
+        )
+    )
+    if explicit_official_link:
+        return source_score
+
+    return min(source_score, SOURCE_RANK.get("aggregator", 0.35))
+
 
 def extract_claims_from_text(
     *,
@@ -962,6 +1029,9 @@ def extract_claims_from_text(
     page_title: str = "",
     query: str = "",
     place_context: dict[str, str] | None = None,
+    recency_days: float | None = None,
+    zombie_score: float = 0.0,
+    identity_change_score: float = 0.0,
 ) -> list[AttributeClaim]:
     text = (page_text or "").strip()
     if not text and not page_title.strip() and not source_url.strip():
@@ -980,8 +1050,9 @@ def extract_claims_from_text(
 
     relevance = _page_relevance(source_url, page_title, text, source_type)
     source_score = SOURCE_RANK.get(source_type, SOURCE_RANK["unknown"])
-    freshness = 0.0
-    stale = 0.0
+    freshness = freshness_bonus(recency_days)
+    stale = staleness_penalty(recency_days, zombie_score, identity_change_score)
+    page_identity = max(0.0, min(1.0, 1.0 - min(1.0, float(identity_change_score or 0.0))))
     identity, stale = identity_alignment_score(
         place_context=place_context,
         attribute=attribute,
@@ -991,6 +1062,8 @@ def extract_claims_from_text(
         page_title=page_title,
         source_type=source_type,
     )
+    identity = min(identity, page_identity)
+    stale = max(stale, staleness_penalty(recency_days, zombie_score, identity_change_score))
 
     claims: list[AttributeClaim] = []
     if attribute == "website":
@@ -1028,10 +1101,18 @@ def extract_claims_from_text(
                     query=query,
                     page_relevance=relevance,
                     extraction_confidence=0.95 if idx else 0.9,
-                    source_authority_score=source_score,
+                    source_authority_score=_website_claim_authority_score(
+                        value=value,
+                        source_url=source_url,
+                        evidence_text=text,
+                        page_title=page_title,
+                        place_context=place_context,
+                        source_score=source_score,
+                    ),
                     freshness_score=freshness,
                     stale_signal_score=stale,
                     identity_signal_score=identity,
+                    identity_signal_cap=page_identity if identity_change_score else None,
                 )
             )
     elif attribute == "phone":
@@ -1063,6 +1144,7 @@ def extract_claims_from_text(
                     freshness_score=freshness,
                     stale_signal_score=stale,
                     identity_signal_score=max(identity, claim_identity),
+                    identity_signal_cap=page_identity if identity_change_score else None,
                     notes=notes,
                 )
             )
@@ -1094,6 +1176,7 @@ def extract_claims_from_text(
                 freshness_score=freshness,
                 stale_signal_score=stale,
                 identity_signal_score=max(identity, claim_identity),
+                identity_signal_cap=page_identity if identity_change_score else None,
                 notes=notes,
             )
             explicit_context_claims.append(claim)
@@ -1126,6 +1209,7 @@ def extract_claims_from_text(
                     freshness_score=freshness,
                     stale_signal_score=stale,
                     identity_signal_score=identity,
+                    identity_signal_cap=page_identity if identity_change_score else None,
                 )
             )
     elif attribute == "name":
@@ -1157,6 +1241,7 @@ def extract_claims_from_text(
                     freshness_score=freshness,
                     stale_signal_score=stale,
                     identity_signal_score=max(identity, claim_identity),
+                    identity_signal_cap=page_identity if identity_change_score else None,
                     notes=notes,
                 )
             )
@@ -1188,6 +1273,7 @@ def extract_claims_from_text(
                     freshness_score=freshness,
                     stale_signal_score=stale,
                     identity_signal_score=identity,
+                    identity_signal_cap=page_identity if identity_change_score else None,
                 )
             )
     elif attribute == "category":
@@ -1217,6 +1303,7 @@ def extract_claims_from_text(
                     freshness_score=freshness,
                     stale_signal_score=stale,
                     identity_signal_score=identity,
+                    identity_signal_cap=page_identity if identity_change_score else None,
                 )
             )
 
@@ -1251,10 +1338,18 @@ def extract_claims_from_text(
                         query=query,
                         page_relevance=relevance,
                         extraction_confidence=0.88,
-                        source_authority_score=source_score,
+                        source_authority_score=_website_claim_authority_score(
+                            value=value,
+                            source_url=source_url,
+                            evidence_text="\n".join(jsonld_blocks),
+                            page_title=page_title,
+                            place_context=place_context,
+                            source_score=source_score,
+                        ),
                         freshness_score=freshness,
                         stale_signal_score=stale,
                         identity_signal_score=identity,
+                        identity_signal_cap=page_identity if identity_change_score else None,
                     )
                 )
             elif attribute == "phone" and normalize_phone(value):
@@ -1276,6 +1371,7 @@ def extract_claims_from_text(
                         freshness_score=freshness,
                         stale_signal_score=stale,
                         identity_signal_score=identity,
+                        identity_signal_cap=page_identity if identity_change_score else None,
                     )
                 )
             elif attribute == "address" and any(token in normalize_address(value) for token in ("st", "ave", "rd", "blvd", "lane", "dr", "way", "court")):
@@ -1297,6 +1393,7 @@ def extract_claims_from_text(
                         freshness_score=freshness,
                         stale_signal_score=stale,
                         identity_signal_score=identity,
+                        identity_signal_cap=page_identity if identity_change_score else None,
                     )
                 )
             elif attribute == "name" and normalize_name(value):
@@ -1318,6 +1415,7 @@ def extract_claims_from_text(
                         freshness_score=freshness,
                         stale_signal_score=stale,
                         identity_signal_score=identity,
+                        identity_signal_cap=page_identity if identity_change_score else None,
                     )
                 )
             elif attribute == "category" and normalize_category(value):
@@ -1339,6 +1437,7 @@ def extract_claims_from_text(
                         freshness_score=freshness,
                         stale_signal_score=stale,
                         identity_signal_score=identity,
+                        identity_signal_cap=page_identity if identity_change_score else None,
                     )
                 )
 
@@ -1380,6 +1479,7 @@ def extract_claims_from_evidence_item(
             freshness_score=freshness,
             stale_signal_score=stale,
             identity_signal_score=identity,
+            identity_signal_cap=identity if item.identity_change_score else None,
             notes=item.notes,
         )
     ]
@@ -1398,6 +1498,9 @@ def extract_claims_from_replay_episode(episode: ReplayEpisode) -> list[Attribute
                 page_title=page.title,
                 query=attempt.query,
                 place_context=episode.place,
+                recency_days=page.recency_days,
+                zombie_score=page.zombie_score,
+                identity_change_score=page.identity_change_score,
             )
             explicit_claim = None
             if page.extracted_values.get(episode.attribute):

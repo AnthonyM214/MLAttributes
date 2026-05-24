@@ -467,6 +467,39 @@ class ClaimExtractionTests(unittest.TestCase):
 
         self.assertTrue(any("example.com/contact" in claim.normalized_value for claim in claims))
 
+    def test_cross_domain_website_claim_is_capped_without_target_corroboration(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-10",
+            attribute="website",
+            page_text="Community center page. Tenant links: https://tenant.example",
+            source_url="https://city.example.gov/community-center",
+            source_type="government",
+            page_title="Community Center - City",
+            place_context={"name": "Different Tenant Program", "city": "Santa Cruz"},
+        )
+
+        by_value = {claim.normalized_value: claim for claim in claims}
+        self.assertIn("tenant.example", by_value)
+        self.assertLess(by_value["tenant.example"].source_authority_score, 0.7)
+
+    def test_identity_change_caps_extracted_claim_identity(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-11",
+            attribute="phone",
+            page_text="Saturn Cafe Santa Cruz is closed. Former business listing phone: 831-555-0101",
+            source_url="https://www.mapquest.com/us/california/saturn-cafe-12038812",
+            source_type="aggregator",
+            page_title="Saturn Cafe - Santa Cruz, CA",
+            place_context={"name": "Saturn Cafe Santa Cruz", "city": "Santa Cruz"},
+            identity_change_score=0.6,
+            zombie_score=0.9,
+            recency_days=900,
+        )
+
+        self.assertTrue(claims)
+        self.assertTrue(all(claim.identity_signal_score <= 0.4 for claim in claims))
+        self.assertTrue(all(claim.stale_signal_score > 0.45 for claim in claims))
+
 
 if __name__ == "__main__":
     unittest.main()

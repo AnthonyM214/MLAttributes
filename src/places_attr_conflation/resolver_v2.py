@@ -105,6 +105,13 @@ def _website_group_lacks_target_corroboration(best_group: ClaimGroup, place_cont
     return True
 
 
+def _website_group_lacks_authoritative_source(best_group: ClaimGroup) -> bool:
+    if best_group.attribute != "website":
+        return False
+    authoritative_sources = {"official_site", "government", "business_registry", "osm"}
+    return not any(claim.source_type in authoritative_sources for claim in best_group.claims)
+
+
 def _looks_like_generic_homepage_claim(claim: AttributeClaim) -> bool:
     text = normalize_name("\n".join([claim.evidence_text, claim.page_title, claim.notes]))
     if any(signal in text for signal in ("official current", "we moved", "moved", "formerly", "contact", "about")):
@@ -308,10 +315,11 @@ def _resolve_from_claims(
     else:
         confidence = max(0.0, min(1.0, evidence_confidence))
 
-    severe_identity_risk = best.identity_signal_score < 0.45 and best_ratio < (min_confidence + 0.05)
+    severe_identity_risk = best.identity_signal_score < 0.45 and (best.attribute == "website" or best_ratio < (min_confidence + 0.05))
     severe_stale_risk = best.stale_signal_score > 0.45 and (best_ratio < (min_support + 0.10) or best.max_support < 0.95)
     severe_contradiction_risk = best.contradiction_count > 0 and margin_ratio < (min_margin + 0.03)
     generic_website_risk = _website_group_lacks_target_corroboration(best, place_context)
+    non_authoritative_website_risk = _website_group_lacks_authoritative_source(best)
     learned_context = f" {learned_note}." if learned_note else ""
 
     if best.max_support < min_support:
@@ -323,7 +331,15 @@ def _resolve_from_claims(
             evidence=_supporting_evidence(best),
             abstained=True,
         )
-    if confidence < min_confidence or margin_ratio < min_margin or severe_identity_risk or severe_stale_risk or severe_contradiction_risk or generic_website_risk:
+    if (
+        confidence < min_confidence
+        or margin_ratio < min_margin
+        or severe_identity_risk
+        or severe_stale_risk
+        or severe_contradiction_risk
+        or generic_website_risk
+        or non_authoritative_website_risk
+    ):
         reasons = []
         if confidence < min_confidence:
             reasons.append("confidence too low")
@@ -337,6 +353,8 @@ def _resolve_from_claims(
             reasons.append("contradictory claims")
         if generic_website_risk:
             reasons.append("generic website lacks target corroboration")
+        if non_authoritative_website_risk:
+            reasons.append("website lacks authoritative source")
         reason = ", ".join(reasons) if reasons else "evidence is too weak or tied"
         return AttributeDecision(
             attribute=attribute,

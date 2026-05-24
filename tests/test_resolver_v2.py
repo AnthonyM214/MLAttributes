@@ -124,6 +124,51 @@ class ResolverV2Tests(unittest.TestCase):
         self.assertTrue(decision.abstained)
         self.assertIn("generic website", decision.reason)
 
+    def test_social_only_website_abstains(self) -> None:
+        evidence = [
+            EvidenceItem(
+                source_type="social",
+                url="https://instagram.com/example_santa_cruz",
+                attribute="website",
+                extracted_value="https://instagram.com/example_santa_cruz",
+                notes="Instagram profile for Example Santa Cruz.",
+            ),
+        ]
+
+        decision = resolve_attribute_v2(
+            place_id="case-social-only",
+            attribute="website",
+            candidates=["https://instagram.com/example_santa_cruz"],
+            evidence=evidence,
+            place_context={"name": "Example Santa Cruz", "city": "Santa Cruz"},
+        )
+
+        self.assertTrue(decision.abstained)
+        self.assertIn("authoritative source", decision.reason)
+
+    def test_low_identity_website_abstains_even_from_government_host_page(self) -> None:
+        evidence = [
+            EvidenceItem(
+                source_type="government",
+                url="https://city.example.gov/community-center",
+                attribute="website",
+                extracted_value="https://tenant.example",
+                identity_change_score=0.6,
+                notes="Host facility page lists a tenant website.",
+            ),
+        ]
+
+        decision = resolve_attribute_v2(
+            place_id="case-host-tenant",
+            attribute="website",
+            candidates=["https://tenant.example"],
+            evidence=evidence,
+            place_context={"name": "Different Tenant Program", "city": "Santa Cruz"},
+        )
+
+        self.assertTrue(decision.abstained)
+        self.assertTrue("identity risk" in decision.reason or "below the minimum threshold" in decision.reason)
+
     def test_phone_formatting_only_groups_correctly(self) -> None:
         evidence = [
             EvidenceItem(source_type="official_site", url="https://example.com/contact", attribute="phone", extracted_value="(415) 555-1212", notes="Formatted phone"),

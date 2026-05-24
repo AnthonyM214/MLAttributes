@@ -1695,6 +1695,376 @@
         }
       ],
       "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "penny-downtown-address-vs-pleasure-point",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "913 Cedar St, Santa Cruz, CA 95060",
+      "gold_value": "913 Cedar St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_address": "820 41st Ave, Santa Cruz, CA 95062",
+        "city": "Santa Cruz",
+        "current_address": "913 Cedar St, Santa Cruz, CA 95060",
+        "name": "The Penny Ice Creamery Downtown Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several branches; Downtown Santa Cruz address must be selected by branch context.",
+              "page_text": "Locations\nDowntown Santa Cruz\n913 Cedar St\nSanta Cruz, CA 95060\n(831) 204-2523\nPleasure Point\n820 41st Ave\nSanta Cruz, CA 95062\nCapitola\n1441 41st Ave\nCapitola, CA 95010",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "Locations - The Penny Ice Creamery",
+              "url": "https://www.thepennyicecreamery.com/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:thepennyicecreamery.com \"Downtown Santa Cruz\" \"913 Cedar\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "penny-pleasure-point-address-vs-downtown",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "820 41st Ave, Santa Cruz, CA 95062",
+      "gold_value": "820 41st Ave, Santa Cruz, CA 95062",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_address": "913 Cedar St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "820 41st Ave, Santa Cruz, CA 95062",
+        "name": "The Penny Ice Creamery Pleasure Point",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several branches; Pleasure Point address must be selected by branch context.",
+              "page_text": "Locations\nDowntown Santa Cruz\n913 Cedar St\nSanta Cruz, CA 95060\n(831) 204-2523\nPleasure Point\n820 41st Ave\nSanta Cruz, CA 95062\nCapitola\n1441 41st Ave\nCapitola, CA 95010",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "Locations - The Penny Ice Creamery",
+              "url": "https://www.thepennyicecreamery.com/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:thepennyicecreamery.com \"Pleasure Point\" \"820 41st Ave\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "cat-cloud-swift-address-vs-portola",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "1101 Swift St, Santa Cruz, CA 95060",
+      "gold_value": "1101 Swift St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_address": "3600 Portola Dr, Santa Cruz, CA 95062",
+        "city": "Santa Cruz",
+        "current_address": "1101 Swift St, Santa Cruz, CA 95060",
+        "name": "Cat & Cloud Coffee Swift Street",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several Santa Cruz cafes; Swift Street address must be selected by branch context.",
+              "page_text": "Locations\nSwift Street\n1101 Swift St\nSanta Cruz, CA 95060\nPortola\n3600 Portola Dr\nSanta Cruz, CA 95062\nAbbott Square\n725 Front St\nSanta Cruz, CA 95060",
+              "recency_days": 6,
+              "source_type": "official_site",
+              "title": "Locations - Cat & Cloud Coffee",
+              "url": "https://catandcloud.com/pages/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:catandcloud.com \"Swift Street\" \"1101 Swift\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "cat-cloud-abbott-address-vs-swift",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "725 Front St, Santa Cruz, CA 95060",
+      "gold_value": "725 Front St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_address": "1101 Swift St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "725 Front St, Santa Cruz, CA 95060",
+        "name": "Cat & Cloud Coffee Abbott Square",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several cafes; Abbott Square address must be selected by branch context.",
+              "page_text": "Locations\nSwift Street\n1101 Swift St\nSanta Cruz, CA 95060\nPortola\n3600 Portola Dr\nSanta Cruz, CA 95062\nAbbott Square\n725 Front St\nSanta Cruz, CA 95060",
+              "recency_days": 6,
+              "source_type": "official_site",
+              "title": "Locations - Cat & Cloud Coffee",
+              "url": "https://catandcloud.com/pages/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:catandcloud.com \"Abbott Square\" \"725 Front\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "penny-downtown-website-vs-social",
+      "case_type": "OFFICIAL_BRANCH_WEBSITE_VS_SOCIAL",
+      "expected_abstain": false,
+      "expected_decision": "https://www.thepennyicecreamery.com/locations",
+      "gold_value": "https://www.thepennyicecreamery.com/locations",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_website": "https://instagram.com/thepennyicecreamery",
+        "city": "Santa Cruz",
+        "current_website": "https://www.thepennyicecreamery.com/locations",
+        "name": "The Penny Ice Creamery Downtown Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations path is the branch-relevant website; social profile is only a fallback/distractor.",
+              "page_text": "The Penny Ice Creamery Locations\nDowntown Santa Cruz\n913 Cedar St\nSanta Cruz, CA 95060\nhttps://www.thepennyicecreamery.com/locations\nFollow us on Instagram for photos and updates.",
+              "recency_days": 5,
+              "source_type": "official_site",
+              "title": "Locations - The Penny Ice Creamery",
+              "url": "https://www.thepennyicecreamery.com/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:thepennyicecreamery.com/locations \"Downtown Santa Cruz\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "cat-cloud-swift-website-vs-root",
+      "case_type": "OFFICIAL_BRANCH_WEBSITE_VS_GENERIC_HOMEPAGE",
+      "expected_abstain": false,
+      "expected_decision": "https://catandcloud.com/pages/locations",
+      "gold_value": "https://catandcloud.com/pages/locations",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_website": "https://catandcloud.com",
+        "city": "Santa Cruz",
+        "current_website": "https://catandcloud.com/pages/locations",
+        "name": "Cat & Cloud Coffee Swift Street",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Specific official locations path has branch evidence; root homepage is too generic for the branch.",
+              "page_text": "Cat & Cloud Coffee Locations\nSwift Street\n1101 Swift St\nSanta Cruz, CA 95060\nhttps://catandcloud.com/pages/locations",
+              "recency_days": 6,
+              "source_type": "official_site",
+              "title": "Locations - Cat & Cloud Coffee",
+              "url": "https://catandcloud.com/pages/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:catandcloud.com/pages/locations \"Swift Street\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "social-only-website-abstain",
+      "case_type": "SOCIAL_ONLY_WEBSITE_ABSTAIN",
+      "expected_abstain": true,
+      "expected_decision": "",
+      "gold_value": "",
+      "identity_label": "INSUFFICIENT_EVIDENCE",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_website": "https://instagram.com/santacruzpopup",
+        "city": "Santa Cruz",
+        "current_website": "",
+        "name": "Santa Cruz Pop Up Market",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Social profile only; no official/domain evidence proves a canonical website.",
+              "page_text": "Instagram profile for Santa Cruz Pop Up Market. Photos, reels, and updates. https://instagram.com/santacruzpopup",
+              "recency_days": 20,
+              "source_type": "social",
+              "title": "Santa Cruz Pop Up Market Instagram",
+              "url": "https://instagram.com/santacruzpopup",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "\"Santa Cruz Pop Up Market\" Instagram website"
+        }
+      ],
+      "truth_source_type": "social"
+    },
+    {
+      "attribute": "website",
+      "case_id": "starbucks-branch-generic-root-abstain",
+      "case_type": "GENERIC_ROOT_HOMEPAGE_ABSTAIN",
+      "expected_abstain": true,
+      "expected_decision": "",
+      "gold_value": "",
+      "identity_label": "INSUFFICIENT_EVIDENCE",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_website": "https://www.starbucks.com/store-locator/store/1234/mission-st-santa-cruz",
+        "city": "Santa Cruz",
+        "current_website": "https://www.starbucks.com/",
+        "name": "Starbucks Mission Street Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Real official corporate homepage but no Santa Cruz Mission Street branch identity, address, or phone corroboration.",
+              "page_text": "Starbucks Coffee Company\nCoffee, beverages, and rewards.\nFind a store near you.\nhttps://www.starbucks.com/",
+              "recency_days": 3,
+              "source_type": "official_site",
+              "title": "Starbucks Coffee Company",
+              "url": "https://www.starbucks.com/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:starbucks.com Starbucks Mission Street Santa Cruz official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "saturn-cafe-closed-phone-abstain",
+      "case_type": "CLOSED_STATUS_PHONE_ABSTAIN",
+      "expected_abstain": true,
+      "expected_decision": "",
+      "gold_value": "",
+      "identity_label": "CLOSED_OR_STALE",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_phone": "831-555-0102",
+        "city": "Santa Cruz",
+        "current_phone": "831-555-0101",
+        "name": "Saturn Cafe Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.6,
+              "notes": "Aggregator closed-listing evidence should not produce a confident current phone decision.",
+              "page_text": "Saturn Cafe\nSanta Cruz, CA\nThis listing is closed or no longer active.\nFormer business listing phone: 831-555-0101",
+              "recency_days": 900,
+              "source_type": "aggregator",
+              "title": "Saturn Cafe - Santa Cruz, CA",
+              "url": "https://www.mapquest.com/us/california/saturn-cafe-12038812",
+              "zombie_score": 0.9
+            }
+          ],
+          "layer": "freshness",
+          "query": "\"Saturn Cafe\" \"Santa Cruz\" permanently closed phone"
+        }
+      ],
+      "truth_source_type": "aggregator"
+    },
+    {
+      "attribute": "website",
+      "case_id": "tenant-website-wrong-entity-abstain",
+      "case_type": "GOVERNMENT_TENANT_WEBSITE_WRONG_ENTITY",
+      "expected_abstain": true,
+      "expected_decision": "",
+      "gold_value": "",
+      "identity_label": "WRONG_ENTITY_RISK",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_website": "",
+        "city": "Santa Cruz",
+        "current_website": "",
+        "name": "London Nelson Senior Programs",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "extracted_values": {},
+              "identity_change_score": 0.6,
+              "notes": "Government host facility page lists the center website; it does not prove a separate tenant/program website.",
+              "page_text": "London Nelson Community Center\nThe Center is home to Downtown Senior Programs, Santa Cruz Teen Center, Community Bridges Meals on Wheels, and London Nelson Community School.\nContact Us\nLondon Nelson Community Center\n301 Center Street\nwww.nelsoncenter.com",
+              "recency_days": 14,
+              "source_type": "government",
+              "title": "London Nelson Community Center - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Community-Spaces/London-Nelson-Community-Center",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov \"London Nelson Senior Programs\" website"
+        }
+      ],
+      "truth_source_type": "government"
     }
   ]
 }
