@@ -55,7 +55,7 @@ This reuses the ResolvePOI current/base benchmark artifacts and runs them throug
 ### ResolvePOI selective router
 
 ```bash
-python3 scripts/run_harness.py resolvepoi-selective \
+pac-resolvepoi-selective \
   --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json \
   --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet \
   --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json \
@@ -118,11 +118,11 @@ python3 scripts/run_harness.py rerank --input tests/fixtures/retrieval_replay_sa
 ### Claim-level benchmark
 
 ```bash
-python3 scripts/run_harness.py benchmark-v2 \
+pac-benchmark-v2 \
   --replay tests/fixtures/hard_cases_replay.json \
   --include-decisions
 
-python3 scripts/run_harness.py benchmark-v2 \
+pac-benchmark-v2 \
   --replay tests/fixtures/pac_hard_cases_replay.json \
   --include-decisions
 ```
@@ -210,7 +210,7 @@ This decodes Project A Overture/H3-style IDs into local bounding boxes, pulls of
 ### User-friendly dashboard
 
 ```bash
-python3 scripts/run_harness.py dashboard
+pac-dashboard
 python3 scripts/run_harness.py gui
 ```
 
@@ -220,7 +220,7 @@ This writes:
 - `reports/dashboard/index.html`
 - `reports/dashboard/latest.json`
 
-The `gui` command writes the same files, but is the intended entrypoint for the small local benchmark viewer.
+The `gui` command writes the same files, but remains script-only for the small local benchmark viewer.
 
 ### Combined baseline + replay report
 

@@ -40,6 +40,7 @@ class ResolverV6Tests(unittest.TestCase):
                     "attribute": "phone",
                     "place": {"name": "Example Cafe Santa Cruz", "city": "Santa Cruz", "region": "CA"},
                     "gold_value": "",
+                    "expected_abstain": True,
                     "search_attempts": [
                         {
                             "layer": "official",

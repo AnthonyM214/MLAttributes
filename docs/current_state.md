@@ -16,7 +16,11 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 
 - `tests/fixtures/hard_cases_replay.json`
 - `tests/fixtures/pac_hard_cases_replay.json`
+- `tests/fixtures/santa_cruz_replay_corpus.json`
+- `tests/fixtures/santa_cruz_replay_corpus_expanded.json`
 - `tests/fixtures/santa_cruz_challenge_replay.json`
+- `tests/fixtures/santa_cruz_seed_batch.json`
+- `tests/fixtures/santa_cruz_seed_batch_2.json`
 - `docs/corpus_expansion_strategy.md`
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
 - `reports/harness/PAC_REPO_COMPARISON.md`
@@ -24,6 +28,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 
 ## Useful Supporting Modules
 
+- `src/places_attr_conflation/benchmark_common.py`
 - `src/places_attr_conflation/retrieval.py`
 - `src/places_attr_conflation/dorking.py`
 - `src/places_attr_conflation/freshness.py`
@@ -35,17 +40,21 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 
 These files are still part of the repository history and can be useful, but they are not the main shipping spine:
 
-- `docs/`
+- `docs/overture_places_attribute_conflation_master.md`
+- `docs/archive_index.md`
 - `reports/baseline_metrics/`
 - `reports/replay/`
-- `scripts/`
+- `scripts/` (secondary operational surface for a few legacy commands)
 
 ## Recommended Entry Points
 
 - Run tests: `python3 -m unittest discover -s tests -q`
-- Run the claim-level benchmark: `python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/hard_cases_replay.json --include-decisions`
-- Run the Santa Cruz challenge benchmark: `python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions`
-- Run the selective ResolvePOI benchmark: `python3 scripts/run_harness.py resolvepoi-selective --truth ... --train-parquet ... --train-labels ... --limit 400 --include-decisions`
+- Run the claim-level benchmark: `pac-benchmark-v2 --replay tests/fixtures/hard_cases_replay.json --include-decisions`
+- Run the v3/v4 benchmark family from the installed wheel: `pac-benchmark-v3 --replay ...`, `pac-benchmark-v4 --replay ...`
+- Run the full collected replay benchmark: `pac-benchmark-full-replay --replay-dir reports/replay_collected --include-decisions`
+- Run the pooled router benchmark: `pac-benchmark-pooled --resolvepoi-truth-path ... --resolvepoi-train-parquet ... --resolvepoi-train-labels ...`
+- Run the Santa Cruz challenge benchmark: `pac-benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions`
+- Run the selective ResolvePOI benchmark: `pac-resolvepoi-selective --truth ... --train-parquet ... --train-labels ... --limit 400 --include-decisions`
 - Verify the ResolvePOI split: `python3 scripts/run_harness.py resolvepoi-split-verify --truth ... --train-parquet ... --train-labels ...`
 
 The Santa Cruz challenge fixture currently contains 50 curated replay cases. It covers relay/fax/footer phone conflicts, department-location-vs-city-footer address conflicts, full-name-vs-acronym name conflicts, tourism category tag conflicts, government-locator website conflicts, official service-page category conflicts, program-tenant category conflicts, adjacent-facility category conflicts, offsite-event address conflicts, multi-branch phone/address conflicts, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, social-only website abstention, generic corporate homepage abstention, stale/closed phone abstention, and wrong-entity tenant website abstention.

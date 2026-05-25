@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "episodes": [
+    {
+      "case_id": "sc-seed2-libs-branch-phone",
+      "attribute": "phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "831-427-7707",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "address": "224 Church Street, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "base_phone": "831-427-7708",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "site:santacruzpl.org branches Downtown 224 Church Street phone",
+          "fetched_pages": [
+            {
+              "url": "https://www.santacruzpl.org/branches/",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "page_text": "Library Branches Downtown 224 Church Street Santa Cruz, CA 95060 831-427-7707 Felton 6121 Gushee St. Santa Cruz, CA 95018 831-427-7708 Garfield Park 705 Woodrow Avenue Santa Cruz, CA 95060 831-427-7709",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 14,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Branch directory lists multiple phones; abstain until stronger branch-specific context removes the ambiguity."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed2-libs-branch-website",
+      "attribute": "website",
+      "case_type": "BRANCH_LOCATOR",
+      "expected_abstain": false,
+      "expected_decision": "https://www.santacruzpl.org/branches/downtown/",
+      "gold_value": "https://www.santacruzpl.org/branches/downtown/",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "current_value": "https://www.santacruzpl.org/branches/",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA",
+        "website": "https://www.santacruzpl.org/branches/"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Santa Cruz Public Libraries Downtown Branch website",
+          "fetched_pages": [
+            {
+              "url": "https://www.santacruzpl.org/branches/downtown/",
+              "title": "Downtown Branch",
+              "page_text": "Downtown Branch page with hours and directions.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "website": "https://www.santacruzpl.org/branches/downtown/"
+              },
+              "recency_days": 14,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Locator page exposes the branch-specific URL."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed2-museum-address",
+      "attribute": "address",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "705 Front St, Santa Cruz, CA 95060",
+      "gold_value": "705 Front St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Museum of Art & History",
+        "region": "CA"
+      },
+      "truth_source_type": "government",
+      "search_attempts": [
+        {
+          "layer": "government",
+          "query": "Santa Cruz Museum of Art & History address",
+          "fetched_pages": [
+            {
+              "url": "https://cityofsantacruz.example.gov/museum/mah",
+              "title": "City Business Registry",
+              "page_text": "705 Front St, Santa Cruz, CA 95060",
+              "source_type": "government",
+              "extracted_values": {
+                "address": "705 Front St, Santa Cruz, CA 95060"
+              },
+              "recency_days": 9,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Government registry confirms the museum address."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed2-museum-name",
+      "attribute": "name",
+      "case_type": "OFFICIAL_ABOUT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "Santa Cruz Museum of Natural History",
+      "gold_value": "Santa Cruz Museum of Natural History",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Santa Cruz Museum of Natural History about",
+          "fetched_pages": [
+            {
+              "url": "https://www.santacruzmuseum.org/about/",
+              "title": "About the Museum",
+              "page_text": "Santa Cruz Museum of Natural History is our full name.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "name": "Santa Cruz Museum of Natural History"
+              },
+              "recency_days": 4,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full museum name."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed2-cafe-category",
+      "attribute": "category",
+      "case_type": "OFFICIAL_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "cafe",
+      "gold_value": "cafe",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Example Cafe Santa Cruz",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe Santa Cruz category",
+          "fetched_pages": [
+            {
+              "url": "https://www.examplecafe.com/menu",
+              "title": "Menu - Example Cafe",
+              "page_text": "Breakfast cafe serving espresso, pastries, and sandwiches.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "category": "cafe"
+              },
+              "recency_days": 5,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Official menu page supports the cafe category."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed2-social-only-abstain",
+      "attribute": "website",
+      "case_type": "SOCIAL_ONLY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "truth_source_type": "social",
+      "search_attempts": [
+        {
+          "layer": "social",
+          "query": "Santa Cruz Museum of Natural History instagram",
+          "fetched_pages": [
+            {
+              "url": "https://www.instagram.com/santacruzmuseum/",
+              "title": "Santa Cruz Museum",
+              "page_text": "Photos and event updates only.",
+              "source_type": "social",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should abstain."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed2-generic-homepage-abstain",
+      "attribute": "website",
+      "case_type": "GENERIC_HOME_PAGE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Example Cafe Santa Cruz",
+        "region": "CA",
+        "website": "https://www.examplecafe.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe Santa Cruz homepage",
+          "fetched_pages": [
+            {
+              "url": "https://www.examplecafe.com/",
+              "title": "Example Cafe",
+              "page_text": "Welcome to our home page.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 3,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Generic homepage should not prove the branch-specific website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed2-branch-ambiguity-phone",
+      "attribute": "phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "831-427-7707",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "address": "224 Church Street, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Santa Cruz Public Libraries Downtown Branch phone ambiguity",
+          "fetched_pages": [
+            {
+              "url": "https://www.santacruzpl.org/branches/",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "page_text": "Library Branches Downtown 224 Church Street Santa Cruz, CA 95060 831-427-7707 Felton 6121 Gushee St. Santa Cruz, CA 95018 831-427-7708 Garfield Park 705 Woodrow Avenue Santa Cruz, CA 95060 831-427-7709",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 14,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.35,
+              "notes": "Official branch directory lists several branches and phone numbers on the same page; abstention is correct without stronger context."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

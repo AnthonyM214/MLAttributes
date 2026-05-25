@@ -72,10 +72,137 @@ truth resolver.
    - high-confidence wrong does not increase,
    - the case improves corpus diversity.
 
+## 50 to 100 Case Build Plan
+
+The next milestone should be a 50-case corpus increase, then a 100-case public
+target. The point is not volume for its own sake. The point is to widen the
+failure surface so the resolver cannot look good by memorizing one city, one
+attribute, or one source family.
+
+### Batch 1: First 25 cases, Santa Cruz and nearby California
+
+Target mix:
+
+- 5 website cases
+- 5 phone cases
+- 5 address cases
+- 5 name cases
+- 5 category cases
+
+Required failure modes:
+
+- locator pages that prove a branch URL,
+- contact pages with canonical or meta-link conflicts,
+- primary vs fax vs relay vs direct lines,
+- mailing vs physical vs suite-level address ambiguity,
+- full-name vs acronym and tenant-vs-host building name conflicts,
+- official service-page category conflicts,
+- official vs social or generic-homepage website conflicts.
+
+### Batch 2: Next 25 cases, second California cluster
+
+Use a second city cluster so the corpus does not become Santa Cruz-shaped.
+
+Target mix:
+
+- 6 website cases
+- 6 phone cases
+- 5 address cases
+- 4 name cases
+- 4 category cases
+
+Required failure modes:
+
+- wrong branch,
+- wrong tenant,
+- stale official archive,
+- social-only evidence,
+- aggregator echo,
+- registry corroboration that disagrees with the stale source,
+- same-address new tenant,
+- moved or permanently closed business,
+- cross-branch category mismatch.
+
+### Batch 3: 25 negative and abstention-heavy cases
+
+This batch should be dominated by cases where abstention is the correct answer.
+
+Required mix:
+
+- at least 10 expected-abstain cases,
+- at least 5 wrong-entity or wrong-branch cases,
+- at least 5 stale/moved/closed cases,
+- at least 5 generic-homepage or social-only cases.
+
+### Batch 4: Final 25 cross-city generalization cases
+
+This batch should prove the system is not locked to California-specific or
+Santa Cruz-specific patterns.
+
+Target mix:
+
+- 5 website cases
+- 5 phone cases
+- 5 address cases
+- 5 name cases
+- 5 category cases
+
+Each case should, where practical, come from a different city or region than
+the earlier tranches.
+
+### What Each Case Must Carry
+
+Every promoted replay episode should preserve:
+
+- the source URL,
+- the search query used to find it,
+- the source type,
+- the page text snippet or excerpt,
+- a recency or staleness signal,
+- an identity or branch-ambiguity signal,
+- the expected decision or expected abstention,
+- the label origin and why it was accepted.
+
+## Detailed Acquisition Rules
+
+1. Prefer authoritative or registry truth first.
+2. Use OSM and business registry as corroboration unless the case is about
+   corroborated truth.
+3. Keep aggregators and social pages as distractors, not primary truth.
+4. Capture page text from the replayable source, not just the URL.
+5. Record whether the page is generic, branch-specific, locator-specific, or
+   stale.
+6. Label `expected_abstain=true` whenever the evidence is weak, contradictory,
+   stale, or clearly about another entity.
+
+## Promotion Checklist
+
+A candidate case becomes part of the replay corpus only when all of the
+following are true:
+
+- the replay is deterministic offline,
+- the evidence text is understandable without extra context,
+- the case introduces a new failure mode or strengthens an underrepresented one,
+- the expected behavior is explicit,
+- adding the case increases attribute and failure diversity instead of duplicating
+  an existing near-duplicate.
+
+## Reporting After Each Batch
+
+After each batch, update the dashboard and capture:
+
+- total episodes added,
+- attribute mix,
+- expected-abstain count,
+- stale or moved count,
+- wrong-branch or wrong-entity count,
+- social/aggregator/generic-homepage distractor count,
+- any high-confidence wrong selections introduced by the new cases.
+
 ## Corpus Mix Targets
 
 The first credible public corpus should contain at least 100 reviewed replay
-episodes:
+episodes. A practical way to get there is 50, then 75, then 100.
 
 - 25 website cases
 - 25 phone cases
@@ -86,6 +213,13 @@ episodes:
 - at least 15 stale/closed/moved cases
 - at least 15 wrong-branch or wrong-entity cases
 - at least 15 aggregator/social/generic-homepage distractor cases
+
+Suggested 100-case structure:
+
+- Batch 1: 25 Santa Cruz and nearby California cases
+- Batch 2: 25 second-cluster California cases
+- Batch 3: 25 abstention-heavy negative cases
+- Batch 4: 25 cross-city generalization cases
 
 The longer-term corpus gate in `corpus_gates.py` remains higher. This 100-case
 target is the practical next milestone for a repo demo.
@@ -122,12 +256,17 @@ or strengthen coverage for an underrepresented attribute. Do not add more
 near-duplicate easy contact pages just to increase the count.
 
 Current checked-in Santa Cruz challenge status: 50 curated replay episodes.
-The fixture now has the first local 50-case gate covered before broadening
-beyond Santa Cruz. The latest slice adds multi-branch commercial location pages
-from The Penny Ice Creamery and Cat & Cloud, branch website vs social/root
-homepage conflicts, social-only website abstention, generic corporate homepage
-abstention, stale/closed phone abstention, and a government host-page tenant
-website abstention.
+The first expansion seed is now checked in as `tests/fixtures/santa_cruz_seed_batch.json`
+so the next tranche can grow from a real Santa Cruz batch instead of only from
+the challenge set. The fixture now has the first local 50-case gate covered
+before broadening beyond Santa Cruz. The latest slice adds multi-branch
+commercial location pages from The Penny Ice Creamery and Cat & Cloud, branch
+website vs social/root homepage conflicts, social-only website abstention,
+generic corporate homepage abstention, stale/closed phone abstention, and a
+government host-page tenant website abstention.
+The second expansion seed is now checked in as `tests/fixtures/santa_cruz_seed_batch_2.json`
+to keep the replay expansion visible as a separate tranche instead of hiding it
+inside the older challenge corpus.
 
 Remaining quality gaps before treating this as benchmark-grade:
 

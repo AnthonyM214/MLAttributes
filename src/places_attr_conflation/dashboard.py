@@ -233,7 +233,7 @@ def _compare_caveat(compare: dict[str, object] | None) -> str:
     targeted = compare["targeted"]
     total = targeted.get("total")
     if isinstance(total, int) and total <= 5:
-        return f"Retrieval result is based on {total} replay case(s); treat 100% values as fixture-local signal, not final."
+        return f"Retrieval result is based on {total} replay case(s); treat 100% values as fixture-local signals, not final."
     if isinstance(total, int):
         return f"Retrieval result is based on {total} replay cases."
     return "Retrieval sample size is not available."
@@ -246,8 +246,8 @@ def _resolver_caveat(combined: dict[str, object] | None) -> str:
     if isinstance(decisions, dict) and isinstance(decisions.get("total"), int):
         total = decisions["total"]
         if total <= 10:
-            return f"Resolver metrics are based on {total} labeled cases; use them as fixture-local signal, not a final verdict."
-        return f"Resolver metrics are based on {total} labeled cases; they are fixture-local, not production proof."
+            return f"Resolver metrics are based on {total} labeled cases; use them as fixture-local signals, not a final verdict."
+        return f"Resolver metrics are based on {total} labeled cases; they are fixture-local signals, not production proof."
     return "Resolver sample size is not available."
 
 
@@ -877,8 +877,8 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
         {
             "title": "Already done: graph-guided v5 planner",
             "body": (
-                f"The new v5 planner keeps {_pct(v5_resolver.get('accuracy'))} accuracy on the hard replay, cuts abstention to "
-                f"{_pct(v5_resolver.get('abstention_rate'))}, and adds {_pct_points(v5_comparison.get('coverage_delta'))} coverage vs v4."
+                f"The new v5 planner keeps {_pct(v5_resolver.get('answerable_accuracy'))} answerable accuracy and {_pct(v5_resolver.get('expected_behavior_accuracy'))} expected behavior on the hard replay, "
+                f"keeps unsafe predictions to {_pct(v5_resolver.get('unsafe_prediction_rate'))}, and adds {_pct_points(v5_comparison.get('coverage_delta'))} coverage vs v4."
             ) if isinstance(v5, dict) and v5 else "The graph-guided planner report still needs to be surfaced in the dashboard."
         },
         {
@@ -1005,8 +1005,8 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
         {
             "title": "Graph-guided v5 planner",
             "body": (
-                f"V5 is the first truly disruptive baseline: on the hard-case replay it keeps {_pct(v5_resolver.get('accuracy'))} accuracy "
-                f"while cutting abstention to {_pct(v5_resolver.get('abstention_rate'))} from the v4 baseline by {_pct_points(v5_comparison.get('abstention_delta'))}, "
+                f"V5 is the first truly disruptive baseline: on the hard-case replay it keeps {_pct(v5_resolver.get('answerable_accuracy'))} answerable accuracy and {_pct(v5_resolver.get('expected_behavior_accuracy'))} expected behavior "
+                f"while keeping unsafe predictions to {_pct(v5_resolver.get('unsafe_prediction_rate'))} and reducing abstention by {_pct_points(v5_comparison.get('abstention_delta'))} vs v4, "
                 f"and the report shows {len(v5.get('failure_cases', [])) if isinstance(v5.get('failure_cases'), list) else 0} failure cases."
             ) if isinstance(v5, dict) and v5 else "The graph-guided planner exists as a new v5 baseline, but its report still needs to be generated."
         },
@@ -1033,6 +1033,13 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
                 f"({_pct(pooled_david_cross.get('accuracy'))} vs {_pct(pooled_david_pooled.get('accuracy'))}), and leaves hard cases tied at "
                 f"{_pct(pooled_hard_cross.get('accuracy'))} accuracy."
             ) if isinstance(pooled, dict) and pooled else "The pooled three-corpus router still needs a surfaced benchmark report."
+        },
+        {
+            "title": "Santa Cruz seed batch 2",
+            "body": (
+                "The second Santa Cruz seed tranche is now checked in as 8 episodes: 4 answerable and 4 explicit abstain, "
+                "so the next 50-to-100 case expansion stays visible instead of hiding inside the older challenge corpus."
+            ),
         },
         {
             "title": "Merged corpus OKR",
@@ -1114,8 +1121,8 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
         ),
         (
             "The graph-guided v5 planner is the first clear disruption: on the hard-case replay it keeps "
-            f"{_pct(v5_resolver.get('accuracy'))} accuracy while cutting abstention to {_pct(v5_resolver.get('abstention_rate'))} "
-            f"from v4's {_pct(v5_resolver_v4.get('abstention_rate'))}, with a {_pct_points(v5_comparison.get('coverage_delta'))} coverage gain."
+            f"{_pct(v5_resolver.get('answerable_accuracy'))} answerable accuracy and {_pct(v5_resolver.get('expected_behavior_accuracy'))} expected behavior while keeping unsafe predictions to {_pct(v5_resolver.get('unsafe_prediction_rate'))} "
+            f"and reducing abstention by {_pct_points(v5_comparison.get('abstention_delta'))} vs v4, with a {_pct_points(v5_comparison.get('coverage_delta'))} coverage gain."
         ),
         (
             "The identity-gated v6 planner is the safer headline: it keeps answerable accuracy at "
@@ -1145,7 +1152,7 @@ def _proof_limitations(data: DashboardData) -> list[str]:
     if isinstance(data.compare, dict) and isinstance(data.compare.get("targeted"), dict):
         compare_total = data.compare["targeted"].get("total")
     return [
-        "A 100% expected-behavior score means the resolver matched the labels on a curated replay fixture. It does not mean production accuracy is 100%.",
+        "A 100% expected-behavior score means the resolver matched the labels on a curated replay fixture, including explicit expected-abstain cases. It does not mean production accuracy is 100%.",
         "The retrieval replay is still tiny" + (f" ({compare_total} case(s))." if isinstance(compare_total, int) else "."),
         "Santa Cruz is one geography. It is useful because it has real authority-page ambiguity, but it does not prove nationwide generalization.",
         "Several older starter fixtures are still smoke tests with formulaic page text. The dashboard treats them as supporting evidence, not the main proof.",
@@ -1155,8 +1162,8 @@ def _proof_limitations(data: DashboardData) -> list[str]:
 def _demo_steps() -> list[str]:
     return [
         "Run `python3 -m unittest discover -s tests -q` to prove the code and fixtures are reproducible.",
-        "Run `python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions` to show claim-level PAC decisions and abstentions.",
-        "Open `reports/dashboard/index.html` to show the executive readout, then expand the deep-dive panels only if someone asks for details.",
+        "Run `pac-benchmark-v6 --replay tests/fixtures/hard_cases_replay.json --include-decisions` to show claim-level PAC decisions, identity gating, and abstentions.",
+        "Run `pac-dashboard --reports-root reports --output-dir reports/dashboard` to rebuild the executive readout, then open `reports/dashboard/index.html` if someone wants the rendered view.",
         "When explaining the project, say: MLAttributes verifies claims against replayable evidence; it does not merely choose current or base.",
     ]
 
@@ -1313,15 +1320,15 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
         },
         {
             "label": "Graph-guided v5 planner",
-            "value": f"{_pct(v5_resolver.get('accuracy'))} accuracy / {_pct(v5_resolver.get('abstention_rate'))} abstention",
-            "detail": f"Coverage gain vs v4: {_pct_points(v5_comparison.get('coverage_delta'))}; failure cases: {len(v5.get('failure_cases', [])) if isinstance(v5.get('failure_cases'), list) else 0}",
+            "value": f"{_pct(v5_resolver.get('answerable_accuracy'))} answerable / {_pct(v5_resolver.get('expected_behavior_accuracy'))} expected",
+            "detail": f"Abstention: {_pct(v5_resolver.get('abstention_rate'))}; unsafe prediction: {_pct(v5_resolver.get('unsafe_prediction_rate'))}; coverage gain vs v4: {_pct_points(v5_comparison.get('coverage_delta'))}; failure cases: {len(v5.get('failure_cases', [])) if isinstance(v5.get('failure_cases'), list) else 0}",
         },
         {
             "label": "Identity-gated v6",
-            "value": f"{_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('expected_behavior_accuracy') if isinstance(data.benchmark_v6, dict) else None)} expected-behavior / {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('unsafe_prediction_rate') if isinstance(data.benchmark_v6, dict) else None)} unsafe",
+            "value": f"{_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('answerable_accuracy') if isinstance(data.benchmark_v6, dict) else None)} answerable / {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('expected_behavior_accuracy') if isinstance(data.benchmark_v6, dict) else None)} expected",
             "detail": (
-                f"Answerable accuracy: {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('answerable_accuracy') if isinstance(data.benchmark_v6, dict) else None)}; "
-                f"hard cases improve expected behavior by {_pct_points((data.benchmark_v6 or {}).get('comparison', {}).get('expected_behavior_accuracy_delta') if isinstance(data.benchmark_v6, dict) else None)} over v5."
+                f"Unsafe predictions: {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('unsafe_prediction_rate') if isinstance(data.benchmark_v6, dict) else None)}; "
+                f"expected-behavior lift vs v5: {_pct_points((data.benchmark_v6 or {}).get('comparison', {}).get('expected_behavior_accuracy_delta') if isinstance(data.benchmark_v6, dict) else None)}."
             ),
         },
         {
@@ -1448,9 +1455,10 @@ def _benchmark_v5_lines(report: dict[str, object] | None) -> list[str]:
     failure_cases = report.get("failure_cases", [])
     abstention_cases = report.get("abstention_cases", [])
     lines = [
-        f"Graph-guided v5 accuracy: {_pct(resolver_v5.get('accuracy'))}",
-        f"Graph-guided v5 abstention: {_pct(resolver_v5.get('abstention_rate'))}",
-        f"Recovery-oriented v4 abstention: {_pct(resolver_v4.get('abstention_rate'))}",
+        f"Graph-guided v5 answerable accuracy: {_pct(resolver_v5.get('answerable_accuracy'))}",
+        f"Graph-guided v5 expected behavior: {_pct(resolver_v5.get('expected_behavior_accuracy'))}",
+        f"Graph-guided v5 unsafe predictions: {_pct(resolver_v5.get('unsafe_prediction_rate'))}",
+        f"Recovery-oriented v4 expected behavior: {_pct(resolver_v4.get('expected_behavior_accuracy'))}",
         f"Coverage gain vs v4: {_pct_points(comparison.get('coverage_delta'))}",
         f"Claim coverage on this replay: {_pct(claim_coverage.get('coverage'))}",
     ]
@@ -1476,7 +1484,7 @@ def _benchmark_v6_lines(report: dict[str, object] | None) -> list[str]:
     failure_cases = report.get("failure_cases", [])
     abstention_cases = report.get("abstention_cases", [])
     lines = [
-        f"Graph-guided v5 answerable accuracy: {_pct(resolver_v5.get('accuracy'))}",
+        f"Graph-guided v5 answerable accuracy: {_pct(resolver_v5.get('answerable_accuracy'))}",
         f"Identity-gated v6 answerable accuracy: {_pct(resolver_v6.get('answerable_accuracy'))}",
         f"Identity-gated v6 expected behavior: {_pct(resolver_v6.get('expected_behavior_accuracy'))}",
         f"Identity-gated v6 unsafe predictions: {_pct(resolver_v6.get('unsafe_prediction_rate'))}",
@@ -1599,7 +1607,7 @@ def render_markdown(data: DashboardData) -> str:
         "# MLAttributes Dashboard",
         "",
         "This is the human-readable status page for MLAttributes.",
-        "Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark. It is shippable as a project milestone, but not a production accuracy claim.",
+        "Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark. The hard-case metrics now honor explicit expected-abstain labels. It is shippable as a project milestone, but not a production accuracy claim.",
         "",
         "## Current Read",
         "",
@@ -1783,8 +1791,8 @@ def render_html(data: DashboardData) -> str:
             "<meta name='viewport' content='width=device-width, initial-scale=1'>",
             "<title>MLAttributes Dashboard</title>",
             "<style>",
-            ":root { --paper:#f7f1e5; --paper-2:#e9dbc3; --ink:#201812; --muted:#655744; --accent:#0f766e; --accent-2:#b45309; --good:#177245; --warn:#9f4f1b; --line:#ddceb5; --panel:rgba(255,252,245,.97); --shadow:0 14px 34px rgba(68,45,21,.12); }",
-            "body { margin:0; color:var(--ink); background: radial-gradient(circle at top right, rgba(15,118,110,.16), transparent 32%), linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 240px); font-family: 'Trebuchet MS', 'Avenir Next', Verdana, sans-serif; }",
+            ":root { --paper:#faf7ff; --paper-2:#ece3ff; --ink:#221636; --muted:#625178; --accent:#6d28d9; --accent-2:#8b5cf6; --good:#177245; --warn:#9f4f1b; --line:#dcc8ff; --panel:rgba(255,252,255,.98); --shadow:0 16px 38px rgba(109,40,217,.12); }",
+            "body { margin:0; color:var(--ink); background: radial-gradient(circle at top right, rgba(139,92,246,.24), transparent 30%), radial-gradient(circle at left top, rgba(109,40,217,.12), transparent 24%), linear-gradient(180deg, #f3ecff 0%, var(--paper) 260px); font-family: 'Trebuchet MS', 'Avenir Next', Verdana, sans-serif; }",
             "main { max-width: 1440px; margin: 0 auto; padding: 24px 16px 56px; }",
             "h1, h2, h3, h4, summary { letter-spacing: -0.02em; }",
             "h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 .35rem; }",
@@ -1795,17 +1803,18 @@ def render_html(data: DashboardData) -> str:
             ".panel.pad { padding: 16px; }",
             ".hero-side { display:grid; gap: 10px; }",
             ".hero-stats { display:grid; gap: 10px; }",
-            ".hero-chip { display:flex; gap:10px; align-items:flex-start; padding: 12px 14px; border:1px solid rgba(109,40,217,.18); border-radius: 14px; background: linear-gradient(135deg, rgba(109,40,217,.08), rgba(168,85,247,.04)); }",
+            ".hero-chip { display:flex; gap:10px; align-items:flex-start; padding: 12px 14px; border:1px solid rgba(109,40,217,.18); border-radius: 14px; background: linear-gradient(135deg, rgba(109,40,217,.10), rgba(168,85,247,.05)); }",
             ".hero-chip strong { display:block; }",
-            ".summary-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 14px 0 20px; }",
-            ".stat-card { border: 1px solid var(--line); border-radius: 16px; background: #fff; padding: 14px; box-shadow: 0 8px 18px rgba(109,40,217,.08); }",
-            ".stat-card .label { text-transform: uppercase; font-size: .74rem; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }",
-            ".stat-card .value { font-size: 1rem; font-weight: 700; color: var(--accent); line-height: 1.3; }",
-            ".stat-card .detail { margin-top: 8px; color: var(--muted); font-size: .92rem; line-height: 1.45; }",
+            ".summary-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 14px 0 20px; align-items: stretch; }",
+            ".stat-card { position: relative; overflow: hidden; border: 1px solid rgba(109,40,217,.16); border-radius: 16px; background: linear-gradient(180deg, #fff 0%, #faf5ff 100%); padding: 14px 14px 16px; box-shadow: 0 10px 26px rgba(109,40,217,.10); display:flex; flex-direction:column; min-height: 100%; }",
+            ".stat-card::before { content:''; position:absolute; inset:0 0 auto 0; height:4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }",
+            ".stat-card .label { text-transform: uppercase; font-size: .74rem; letter-spacing: .08em; color: var(--accent); font-weight: 800; margin-bottom: 8px; }",
+            ".stat-card .value { font-size: 1.16rem; font-weight: 800; color: #4c1d95; line-height: 1.35; }",
+            ".stat-card .detail { margin-top: 8px; color: var(--muted); font-size: .92rem; line-height: 1.5; flex: 1; }",
             ".section-title { margin: 0 0 10px; font-size: 1.25rem; }",
             ".section-note { color: var(--muted); margin: 0 0 12px; line-height: 1.5; }",
             ".milestone-grid, .step-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }",
-            ".milestone, .step { border:1px solid var(--line); border-radius: 16px; padding: 14px; background: #fff; }",
+            ".milestone, .step { border:1px solid var(--line); border-radius: 16px; padding: 14px; background: linear-gradient(180deg, #fff 0%, #faf5ff 100%); }",
             ".milestone .status, .step .index { font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--good); font-weight: 700; margin-bottom: 6px; }",
             ".milestone h4, .step h4 { margin: 0 0 8px; font-size: 1rem; }",
             ".milestone p, .step p { margin: 0; color: var(--muted); line-height: 1.45; }",
@@ -1817,10 +1826,11 @@ def render_html(data: DashboardData) -> str:
             "details.detail-panel > summary::-webkit-details-marker { display:none; }",
             "details.detail-panel[open] > summary { border-bottom: 1px solid var(--line); }",
             "details.detail-panel .panel-body { padding: 0 16px 16px; }",
-            "table { width:100%; border-collapse: collapse; background:#fff; margin: 10px 0 2px; }",
-            "th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align:left; vertical-align: top; }",
-            "th { background: #f2eaff; }",
-            "code { background: #f1e7ff; border-radius: 4px; padding: 2px 5px; }",
+            "table { width:100%; border-collapse: collapse; background:#fff; margin: 10px 0 2px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 8px 18px rgba(109,40,217,.06); }",
+            "th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align:left; vertical-align: top; line-height: 1.45; }",
+            "th { background: linear-gradient(180deg, #f1e8ff 0%, #e9dcff 100%); color: #4c1d95; font-weight: 800; }",
+            "tbody tr:nth-child(even) td { background: #fcf9ff; }",
+            "code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }",
             ".path-list { margin: 0; padding-left: 1.1rem; }",
             ".path-list li { margin-bottom: 6px; word-break: break-all; }",
             ".muted { color: var(--muted); }",
@@ -1836,8 +1846,8 @@ def render_html(data: DashboardData) -> str:
             "<div class='panel pad'>",
             "<div class='eyebrow'>Current State</div>",
             "<h1>MLAttributes Dashboard</h1>",
-            "<p class='lead'>This is the human-readable status page for MLAttributes. Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark.</p>",
-            "<p class='section-note'>Current Verdict: shippable as a project milestone; not yet a production accuracy claim. Treat 100% values as fixture-local signals.</p>",
+            "<p class='lead'>This is the human-readable status page for MLAttributes. Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark. The hard-case metrics now honor explicit expected-abstain labels.</p>",
+            "<p class='section-note'>Current Verdict: shippable as a project milestone; not yet a production accuracy claim. Treat 100% values as fixture-local signals, and read explicit expected-abstain labels separately.</p>",
             "<ul class='detail-list'>",
             "<li>The strongest numeric result is the ResolvePOI selective router.</li>",
             "<li>The strongest architecture is the claim-level EvidenceGraph resolver.</li>",
@@ -2099,3 +2109,19 @@ def write_dashboard(reports_root: str | Path, output_dir: str | Path) -> dict[st
         "html": str(html_path),
         "latest": str(json_path),
     }
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Render the MLAttributes dashboard from the latest report artifacts.")
+    parser.add_argument("--reports-root", default="reports", help="Root directory containing the report artifacts.")
+    parser.add_argument("--output-dir", default="reports/dashboard", help="Directory where the dashboard will be written.")
+    args = parser.parse_args(argv)
+    outputs = write_dashboard(args.reports_root, args.output_dir)
+    print(json.dumps(outputs, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -12,6 +12,13 @@ import json
 from pathlib import Path
 from typing import Any, Iterable
 
+from .benchmark_common import (
+    accumulate_attribute_stats,
+    expected_abstain_for_episode,
+    expected_decision_for_episode,
+    new_attribute_stats,
+    summarize_benchmark_counts,
+)
 from .benchmark_v5 import evaluate_benchmark_v5
 from .claim_extraction import extract_claims_from_replay_episode
 from .normalization import normalize_address, normalize_category, normalize_name, normalize_phone, normalize_website
@@ -96,20 +103,26 @@ def _evaluate_resolver_v6_on_replay(
         )
         gold = _normalize(episode.attribute, episode.gold_value)
         predicted = _normalize(episode.attribute, decision.decision)
+        expected_abstain = expected_abstain_for_episode(episode)
+        expected_decision = expected_decision_for_episode(episode)
+        answerable = not expected_abstain
         has_gold = bool(gold)
-        answerable_correct = has_gold and bool(predicted) and predicted == gold and not decision.abstained
-        expected_correct = answerable_correct if has_gold else bool(decision.abstained)
-        unsafe_prediction = (not has_gold) and not decision.abstained
-        high_conf_wrong = has_gold and not answerable_correct and not decision.abstained and decision.confidence >= high_confidence_threshold
+        answerable_correct = answerable and bool(predicted) and bool(expected_decision) and predicted == _normalize(episode.attribute, expected_decision) and not decision.abstained
+        expected_correct = bool(decision.abstained) if expected_abstain else answerable_correct
+        unsafe_prediction = expected_abstain and not decision.abstained
+        high_conf_wrong = answerable and not answerable_correct and not decision.abstained and decision.confidence >= high_confidence_threshold
         high_conf_unsafe = unsafe_prediction and decision.confidence >= high_confidence_threshold
         row = {
             "case_id": episode.case_id,
             "attribute": episode.attribute,
             "gold_value": episode.gold_value,
+            "expected_abstain": expected_abstain,
+            "expected_decision": expected_decision,
             "decision": decision.decision,
             "confidence": decision.confidence,
             "abstained": decision.abstained,
             "has_gold": has_gold,
+            "answerable": answerable,
             "answerable_correct": answerable_correct,
             "expected_correct": expected_correct,
             "unsafe_prediction": unsafe_prediction,
@@ -119,70 +132,28 @@ def _evaluate_resolver_v6_on_replay(
             "evidence_count": len(decision.evidence),
         }
         rows.append(row)
-        stats = by_attribute.setdefault(
-            episode.attribute,
-            {
-                "total": 0,
-                "answerable_total": 0,
-                "expected_abstain_total": 0,
-                "answerable_correct": 0,
-                "expected_correct": 0,
-                "abstained": 0,
-                "unsafe_prediction": 0,
-                "high_confidence_wrong": 0,
-                "high_confidence_unsafe": 0,
-            },
+        stats = by_attribute.setdefault(episode.attribute, new_attribute_stats())
+        accumulate_attribute_stats(
+            stats,
+            has_gold=has_gold,
+            answerable=answerable,
+            expected_abstain=expected_abstain,
+            answerable_correct=answerable_correct,
+            expected_correct=expected_correct,
+            abstained=decision.abstained,
+            unsafe_prediction=unsafe_prediction,
+            high_confidence_wrong=high_conf_wrong,
+            high_confidence_unsafe=high_conf_unsafe,
         )
-        stats["total"] += 1
-        stats["answerable_total"] += int(has_gold)
-        stats["expected_abstain_total"] += int(not has_gold)
-        stats["answerable_correct"] += int(answerable_correct)
-        stats["expected_correct"] += int(expected_correct)
-        stats["abstained"] += int(decision.abstained)
-        stats["unsafe_prediction"] += int(unsafe_prediction)
-        stats["high_confidence_wrong"] += int(high_conf_wrong)
-        stats["high_confidence_unsafe"] += int(high_conf_unsafe)
 
-    answerable_total = sum(stats["answerable_total"] for stats in by_attribute.values())
-    expected_abstain_total = sum(stats["expected_abstain_total"] for stats in by_attribute.values())
-    total_answerable_correct = sum(stats["answerable_correct"] for stats in by_attribute.values())
-    total_expected_correct = sum(stats["expected_correct"] for stats in by_attribute.values())
-    total_abstained = sum(stats["abstained"] for stats in by_attribute.values())
-    total_unsafe_prediction = sum(stats["unsafe_prediction"] for stats in by_attribute.values())
-    total_hc_wrong = sum(stats["high_confidence_wrong"] for stats in by_attribute.values())
-    total_hc_unsafe = sum(stats["high_confidence_unsafe"] for stats in by_attribute.values())
-
-    per_attribute: dict[str, dict[str, object]] = {}
-    for attribute, stats in sorted(by_attribute.items()):
-        answerable_total_attr = stats["answerable_total"]
-        expected_abstain_total_attr = stats["expected_abstain_total"]
-        total_attr = stats["total"]
-        per_attribute[attribute] = {
-            **stats,
-            "answerable_accuracy": stats["answerable_correct"] / answerable_total_attr if answerable_total_attr else 0.0,
-            "expected_behavior_accuracy": stats["expected_correct"] / total_attr if total_attr else 0.0,
-            "abstention_rate": stats["abstained"] / total_attr if total_attr else 0.0,
-            "abstention_accuracy": stats["abstained"] / expected_abstain_total_attr if expected_abstain_total_attr else 0.0,
-            "unsafe_prediction_rate": stats["unsafe_prediction"] / expected_abstain_total_attr if expected_abstain_total_attr else 0.0,
-            "high_confidence_wrong_rate": stats["high_confidence_wrong"] / answerable_total_attr if answerable_total_attr else 0.0,
-            "high_confidence_unsafe_rate": stats["high_confidence_unsafe"] / expected_abstain_total_attr if expected_abstain_total_attr else 0.0,
-        }
-
-    return {
-        "resolver": "v6_identity_gated_graph",
-        "episodes_total": len(episodes),
-        "answerable_total": answerable_total,
-        "expected_abstain_total": expected_abstain_total,
-        "answerable_accuracy": total_answerable_correct / answerable_total if answerable_total else 0.0,
-        "expected_behavior_accuracy": total_expected_correct / len(episodes) if episodes else 0.0,
-        "abstention_rate": total_abstained / len(episodes) if episodes else 0.0,
-        "abstention_accuracy": total_abstained / expected_abstain_total if expected_abstain_total else 0.0,
-        "unsafe_prediction_rate": total_unsafe_prediction / expected_abstain_total if expected_abstain_total else 0.0,
-        "high_confidence_wrong_rate": total_hc_wrong / answerable_total if answerable_total else 0.0,
-        "high_confidence_unsafe_rate": total_hc_unsafe / expected_abstain_total if expected_abstain_total else 0.0,
-        "per_attribute": per_attribute,
-        "decisions": rows,
-    }
+    summary = summarize_benchmark_counts(
+        by_attribute,
+        episodes_total=len(episodes),
+        resolver_name="v6_identity_gated_graph",
+        include_f1_proxy=False,
+    )
+    summary["decisions"] = rows
+    return summary
 
 
 def evaluate_benchmark_v6(
@@ -191,10 +162,10 @@ def evaluate_benchmark_v6(
     include_decisions: bool = False,
 ) -> dict[str, object]:
     episodes = list(episodes)
-    v5_report = evaluate_benchmark_v5(episodes, include_decisions=include_decisions)
+    v5_report = evaluate_benchmark_v5(episodes, include_decisions=True)
     v5 = v5_report.get("resolver_v5", {})
     v6 = _evaluate_resolver_v6_on_replay(episodes)
-    v5_decisions = list(v5_report.get("resolver_v5", {}).get("decisions", [])) if include_decisions else []
+    v5_decisions = list(v5.get("decisions", []))
     v6_decisions = list(v6.get("decisions", []))
     if not include_decisions:
         v6.pop("decisions", None)
@@ -240,37 +211,18 @@ def evaluate_benchmark_v6(
                 }
             )
 
-    v5_expected = {
-        "answerable_accuracy": float(v5.get("accuracy", 0.0)),
-        "expected_behavior_accuracy": float(v5.get("accuracy", 0.0)) * float(v5.get("gold_episodes_total", 0) or 0) / float(v5.get("episodes_total", 1) or 1)
-        + (1.0 - float(v5.get("abstention_rate", 0.0))) * float(v5.get("episodes_total", 0) - v5.get("gold_episodes_total", 0)) / float(v5.get("episodes_total", 1) or 1),
-        "abstention_rate": float(v5.get("abstention_rate", 0.0)),
-        "unsafe_prediction_rate": 0.0,
-        "high_confidence_wrong_rate": float(v5.get("high_confidence_wrong_rate", 0.0)),
-    }
-    # The v5 report does not score abstention-only cases. Recompute expected-behavior
-    # metrics from the saved decisions when they are included, otherwise fall back to
-    # the answerable-only snapshot.
-    if include_decisions and v5_decisions:
-        answerable_total = sum(1 for row in v5_decisions if isinstance(row, dict) and bool(row.get("has_gold")))
-        expected_abstain_total = sum(1 for row in v5_decisions if isinstance(row, dict) and not bool(row.get("has_gold")))
-        answerable_correct = sum(1 for row in v5_decisions if isinstance(row, dict) and bool(row.get("has_gold")) and bool(row.get("correct")))
-        expected_correct = sum(
-            1
-            for row in v5_decisions
-            if isinstance(row, dict)
-            and (
-                (bool(row.get("has_gold")) and bool(row.get("correct")))
-                or (not bool(row.get("has_gold")) and bool(row.get("abstained")))
-            )
-        )
-        unsafe_prediction = sum(1 for row in v5_decisions if isinstance(row, dict) and not bool(row.get("has_gold")) and not bool(row.get("abstained")))
+    v5_expected = v5_report.get("resolver_v5_expected")
+    if not isinstance(v5_expected, dict):
         v5_expected = {
-            "answerable_accuracy": answerable_correct / answerable_total if answerable_total else 0.0,
-            "expected_behavior_accuracy": expected_correct / len(v5_decisions) if v5_decisions else 0.0,
-            "abstention_rate": sum(1 for row in v5_decisions if isinstance(row, dict) and bool(row.get("abstained"))) / len(v5_decisions) if v5_decisions else 0.0,
-            "unsafe_prediction_rate": unsafe_prediction / expected_abstain_total if expected_abstain_total else 0.0,
-            "high_confidence_wrong_rate": sum(1 for row in v5_decisions if isinstance(row, dict) and bool(row.get("high_confidence_wrong"))) / answerable_total if answerable_total else 0.0,
+            "answerable_total": v5.get("answerable_total", 0),
+            "expected_abstain_total": v5.get("expected_abstain_total", 0),
+            "answerable_accuracy": v5.get("answerable_accuracy", 0.0),
+            "expected_behavior_accuracy": v5.get("expected_behavior_accuracy", 0.0),
+            "abstention_rate": v5.get("abstention_rate", 0.0),
+            "abstention_accuracy": v5.get("abstention_accuracy", 0.0),
+            "unsafe_prediction_rate": v5.get("unsafe_prediction_rate", 0.0),
+            "high_confidence_wrong_rate": v5.get("high_confidence_wrong_rate", 0.0),
+            "high_confidence_unsafe_rate": v5.get("high_confidence_unsafe_rate", 0.0),
         }
 
     comparison = {
@@ -279,6 +231,7 @@ def evaluate_benchmark_v6(
         "abstention_delta": float(v6.get("abstention_rate", 0.0)) - float(v5_expected.get("abstention_rate", 0.0)),
         "unsafe_prediction_rate_delta": float(v6.get("unsafe_prediction_rate", 0.0)) - float(v5_expected.get("unsafe_prediction_rate", 0.0)),
         "high_confidence_wrong_delta": float(v6.get("high_confidence_wrong_rate", 0.0)) - float(v5_expected.get("high_confidence_wrong_rate", 0.0)),
+        "high_confidence_unsafe_delta": float(v6.get("high_confidence_unsafe_rate", 0.0)) - float(v5_expected.get("high_confidence_unsafe_rate", 0.0)),
         "coverage_delta": (1.0 - float(v6.get("abstention_rate", 0.0))) - (1.0 - float(v5_expected.get("abstention_rate", 0.0))),
     }
 

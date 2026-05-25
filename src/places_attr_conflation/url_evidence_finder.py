@@ -356,9 +356,16 @@ def _path_has_local_hint(url: str) -> bool:
 
 
 def _wrong_city_signal(text: str, city: str) -> bool:
-    city = city.lower()
-    known = {"san jose", "los angeles", "san francisco", "oakland", "watsonville", "monterey", "scotts valley"}
-    return bool(city and city not in text.lower() and any(other in text.lower() for other in known if other != city))
+    normalized = text.lower()
+    city = city.lower().strip()
+    if not city or city in normalized:
+        return False
+    return bool(
+        re.search(
+            r"\b(?:in|at|near|located in|branch|location|office|store)\s+[A-Z][A-Za-z]*(?:\s+[A-Z][A-Za-z]*)*",
+            text,
+        )
+    )
 
 
 def _evidence_role(source_type: str, search_layer: str, detected_status: str, identity_claims: str, url: str) -> str:

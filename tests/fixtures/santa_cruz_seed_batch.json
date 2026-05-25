@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "episodes": [
+    {
+      "case_id": "sc-seed-website-locator",
+      "attribute": "website",
+      "case_type": "branch_locator",
+      "expected_abstain": false,
+      "expected_decision": "https://www.examplecafe.com/locations/santa-cruz",
+      "gold_value": "https://www.examplecafe.com/locations/santa-cruz",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v1",
+      "place": {
+        "name": "Example Cafe Santa Cruz",
+        "city": "Santa Cruz",
+        "region": "CA",
+        "website": "https://www.examplecafe.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe Santa Cruz locations",
+          "fetched_pages": [
+            {
+              "url": "https://www.examplecafe.com/locations/santa-cruz",
+              "title": "Example Cafe Santa Cruz",
+              "page_text": "Find the Santa Cruz location and directions.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "website": "https://www.examplecafe.com/locations/santa-cruz"
+              },
+              "recency_days": 3,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Branch locator page for the Santa Cruz location."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed-phone-direct",
+      "attribute": "phone",
+      "case_type": "contact_page",
+      "expected_abstain": false,
+      "expected_decision": "8315551212",
+      "gold_value": "8315551212",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v1",
+      "place": {
+        "name": "Example Cafe Santa Cruz",
+        "city": "Santa Cruz",
+        "region": "CA",
+        "phone": "8315551212"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe Santa Cruz phone",
+          "fetched_pages": [
+            {
+              "url": "https://www.examplecafe.com/contact",
+              "title": "Contact Example Cafe",
+              "page_text": "Call us at (831) 555-1212.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "phone": "8315551212"
+              },
+              "recency_days": 4,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed-address-registry",
+      "attribute": "address",
+      "case_type": "registry_page",
+      "expected_abstain": false,
+      "expected_decision": "100 Pacific Ave, Santa Cruz, CA 95060",
+      "gold_value": "100 Pacific Ave, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v1",
+      "place": {
+        "name": "Example Cafe Santa Cruz",
+        "city": "Santa Cruz",
+        "region": "CA",
+        "address": "100 Pacific Ave, Santa Cruz, CA 95060"
+      },
+      "truth_source_type": "government",
+      "search_attempts": [
+        {
+          "layer": "government",
+          "query": "Example Cafe Santa Cruz registry",
+          "fetched_pages": [
+            {
+              "url": "https://cityofsantacruz.example.gov/business/example-cafe",
+              "title": "Business Registry",
+              "page_text": "100 Pacific Ave, Santa Cruz, CA 95060",
+              "source_type": "government",
+              "extracted_values": {
+                "address": "100 Pacific Ave, Santa Cruz, CA 95060"
+              },
+              "recency_days": 11,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed-name-official",
+      "attribute": "name",
+      "case_type": "about_page",
+      "expected_abstain": false,
+      "expected_decision": "Example Cafe Santa Cruz",
+      "gold_value": "Example Cafe Santa Cruz",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v1",
+      "place": {
+        "name": "Example Cafe Santa Cruz",
+        "city": "Santa Cruz",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Example Cafe Santa Cruz about",
+          "fetched_pages": [
+            {
+              "url": "https://www.examplecafe.com/about",
+              "title": "About Example Cafe Santa Cruz",
+              "page_text": "Example Cafe Santa Cruz is our full location name.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "name": "Example Cafe Santa Cruz"
+              },
+              "recency_days": 6,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full place name."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "sc-seed-social-abstain",
+      "attribute": "website",
+      "case_type": "social_only",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "santa_cruz_seed_batch_v1",
+      "place": {
+        "name": "Example Cafe Santa Cruz",
+        "city": "Santa Cruz",
+        "region": "CA",
+        "website": "https://www.examplecafe.com"
+      },
+      "truth_source_type": "social",
+      "search_attempts": [
+        {
+          "layer": "social",
+          "query": "Example Cafe Santa Cruz instagram",
+          "fetched_pages": [
+            {
+              "url": "https://www.instagram.com/examplecafe/",
+              "title": "Example Cafe",
+              "page_text": "Follow us for photos and updates.",
+              "source_type": "social",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should not prove the website."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

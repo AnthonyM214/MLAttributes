@@ -39,17 +39,17 @@ python3 -m unittest discover -s tests -q
 Run the claim-level benchmark:
 
 ```bash
-python3 scripts/run_harness.py benchmark-v2 \
+pac-benchmark-v2 \
   --replay tests/fixtures/hard_cases_replay.json \
   --include-decisions
 ```
 
-The installed wheel also exposes `pac-benchmark-v2`.
+The installed wheel also exposes `pac-benchmark-v2`, `pac-benchmark-v3`, `pac-benchmark-v4`, `pac-benchmark-v5`, `pac-benchmark-v6`, `pac-benchmark-full-replay`, `pac-benchmark-pooled`, and `pac-dashboard`.
 
 To benchmark the learned selective router inside `resolver_v2`, add:
 
 ```bash
-python3 scripts/run_harness.py benchmark-v2 \
+pac-benchmark-v2 \
   --replay tests/fixtures/hard_cases_replay.json \
   --learned-router resolvepoi-selective \
   --resolvepoi-train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet \
@@ -57,14 +57,14 @@ python3 scripts/run_harness.py benchmark-v2 \
   --include-decisions
 ```
 
-The installed wheel also exposes `pac-benchmark-v2` with the same flags.
+The same flags are available on the installed wheel.
 
 This path is experimental and opt-in. It can improve close structured cases, but it is not guaranteed to outperform plain `resolver_v2` on every replay set.
 
 Run the selective ResolvePOI benchmark:
 
 ```bash
-python3 scripts/run_harness.py resolvepoi-selective \
+pac-resolvepoi-selective \
   --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json \
   --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet \
   --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json \
@@ -73,6 +73,12 @@ python3 scripts/run_harness.py resolvepoi-selective \
 ```
 
 An installed wheel also exposes `pac-resolvepoi-selective` with the same arguments.
+
+Render the current dashboard from the latest report artifacts:
+
+```bash
+pac-dashboard --reports-root reports --output-dir reports/dashboard
+```
 
 ## Current shape
 

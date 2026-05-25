@@ -13,6 +13,13 @@ import json
 from pathlib import Path
 from typing import Any, Iterable
 
+from .benchmark_common import (
+    accumulate_attribute_stats,
+    expected_abstain_for_episode,
+    expected_decision_for_episode,
+    new_attribute_stats,
+    summarize_benchmark_counts,
+)
 from .claim_extraction import extract_claims_from_replay_episode
 from .evidence_graph import ClaimGroup, build_evidence_graph, score_claim
 from .normalization import normalize_address, normalize_category, normalize_name, normalize_phone, normalize_website
@@ -197,55 +204,58 @@ def _evaluate_resolver_v4_on_replay(episodes: Iterable[ReplayEpisode], high_conf
         )
         gold = _normalize(episode.attribute, episode.gold_value)
         predicted = _normalize(episode.attribute, decision.decision)
+        expected_abstain = expected_abstain_for_episode(episode)
+        expected_decision = expected_decision_for_episode(episode)
+        answerable = not expected_abstain
         has_gold = bool(gold)
-        correct = has_gold and bool(predicted) and predicted == gold and not decision.abstained
-        high_conf_wrong = has_gold and not correct and not decision.abstained and decision.confidence >= high_confidence_threshold
+        answerable_correct = answerable and bool(predicted) and bool(expected_decision) and predicted == _normalize(episode.attribute, expected_decision) and not decision.abstained
+        expected_correct = bool(decision.abstained) if expected_abstain else answerable_correct
+        unsafe_prediction = expected_abstain and not decision.abstained
+        high_conf_wrong = answerable and not answerable_correct and not decision.abstained and decision.confidence >= high_confidence_threshold
+        high_conf_unsafe = unsafe_prediction and decision.confidence >= high_confidence_threshold
         row = {
             "case_id": episode.case_id,
             "attribute": episode.attribute,
             "gold_value": episode.gold_value,
+            "expected_abstain": expected_abstain,
+            "expected_decision": expected_decision,
             "decision": decision.decision,
             "confidence": decision.confidence,
             "abstained": decision.abstained,
             "has_gold": has_gold,
-            "correct": correct,
+            "answerable": answerable,
+            "answerable_correct": answerable_correct,
+            "correct": answerable_correct,
+            "expected_correct": expected_correct,
+            "unsafe_prediction": unsafe_prediction,
             "high_confidence_wrong": high_conf_wrong,
+            "high_confidence_unsafe": high_conf_unsafe,
             "reason": decision.reason,
             "evidence_count": len(decision.evidence),
         }
         rows.append(row)
-        stats = by_attribute.setdefault(episode.attribute, {"total": 0, "gold_total": 0, "correct": 0, "abstained": 0, "high_confidence_wrong": 0})
-        stats["total"] += 1
-        stats["gold_total"] += int(has_gold)
-        stats["correct"] += int(correct)
-        stats["abstained"] += int(decision.abstained)
-        stats["high_confidence_wrong"] += int(high_conf_wrong)
+        stats = by_attribute.setdefault(episode.attribute, new_attribute_stats())
+        accumulate_attribute_stats(
+            stats,
+            has_gold=has_gold,
+            answerable=answerable,
+            expected_abstain=expected_abstain,
+            answerable_correct=answerable_correct,
+            expected_correct=expected_correct,
+            abstained=decision.abstained,
+            unsafe_prediction=unsafe_prediction,
+            high_confidence_wrong=high_conf_wrong,
+            high_confidence_unsafe=high_conf_unsafe,
+        )
 
-    total_gold = sum(stats["gold_total"] for stats in by_attribute.values())
-    total_correct = sum(stats["correct"] for stats in by_attribute.values())
-    total_abstained = sum(stats["abstained"] for stats in by_attribute.values())
-    total_hc_wrong = sum(stats["high_confidence_wrong"] for stats in by_attribute.values())
-    per_attribute: dict[str, dict[str, object]] = {}
-    for attribute, stats in sorted(by_attribute.items()):
-        gold_total = stats["gold_total"]
-        per_attribute[attribute] = {
-            **stats,
-            "accuracy": stats["correct"] / gold_total if gold_total else 0.0,
-            "f1_proxy": stats["correct"] / gold_total if gold_total else 0.0,
-            "abstention_rate": stats["abstained"] / stats["total"] if stats["total"] else 0.0,
-            "high_confidence_wrong_rate": stats["high_confidence_wrong"] / gold_total if gold_total else 0.0,
-        }
-    return {
-        "resolver": "v4_evidence_graph_recovery",
-        "episodes_total": len(episodes),
-        "gold_episodes_total": total_gold,
-        "accuracy": total_correct / total_gold if total_gold else 0.0,
-        "f1_proxy": total_correct / total_gold if total_gold else 0.0,
-        "abstention_rate": total_abstained / len(episodes) if episodes else 0.0,
-        "high_confidence_wrong_rate": total_hc_wrong / total_gold if total_gold else 0.0,
-        "per_attribute": per_attribute,
-        "decisions": rows,
-    }
+    summary = summarize_benchmark_counts(
+        by_attribute,
+        episodes_total=len(episodes),
+        resolver_name="v4_evidence_graph_recovery",
+        include_f1_proxy=True,
+    )
+    summary["decisions"] = rows
+    return summary
 
 
 def _evaluate_resolver_v5_on_replay(
@@ -269,24 +279,52 @@ def _evaluate_resolver_v5_on_replay(
             place_context=episode.place,
         )
         if not graph.groups:
+            expected_abstain = expected_abstain_for_episode(episode)
+            expected_decision = expected_decision_for_episode(episode)
+            answerable = not expected_abstain
+            has_gold = bool(episode.gold_value)
             row = {
                 "case_id": episode.case_id,
                 "attribute": episode.attribute,
                 "gold_value": episode.gold_value,
+                "expected_abstain": expected_abstain,
+                "expected_decision": expected_decision,
                 "decision": "",
                 "confidence": 0.0,
                 "abstained": True,
-                "has_gold": bool(episode.gold_value),
+                "has_gold": has_gold,
+                "answerable": answerable,
+                "answerable_correct": False,
                 "correct": False,
+                "expected_correct": bool(expected_abstain),
+                "unsafe_prediction": False,
                 "high_confidence_wrong": False,
+                "high_confidence_unsafe": False,
                 "reason": "No claims extracted from evidence.",
                 "evidence_count": 0,
             }
             rows.append(row)
-            stats = by_attribute.setdefault(episode.attribute, {"total": 0, "gold_total": 0, "correct": 0, "abstained": 0, "high_confidence_wrong": 0})
+            stats = by_attribute.setdefault(
+                episode.attribute,
+                {
+                    "total": 0,
+                    "gold_total": 0,
+                    "answerable_total": 0,
+                    "expected_abstain_total": 0,
+                    "answerable_correct": 0,
+                    "expected_correct": 0,
+                    "abstained": 0,
+                    "unsafe_prediction": 0,
+                    "high_confidence_wrong": 0,
+                    "high_confidence_unsafe": 0,
+                },
+            )
             stats["total"] += 1
-            stats["gold_total"] += int(bool(episode.gold_value))
+            stats["gold_total"] += int(has_gold)
+            stats["answerable_total"] += int(answerable)
+            stats["expected_abstain_total"] += int(expected_abstain)
             stats["abstained"] += 1
+            stats["expected_correct"] += int(expected_abstain)
             continue
 
         best, second, best_score, second_score = _select_group(list(graph.groups))
@@ -308,21 +346,33 @@ def _evaluate_resolver_v5_on_replay(
         abstained = not (score_ok and margin_ok and risk_ok)
         decision = "" if abstained else best.display_value
 
-        gold = _normalize(episode.attribute, episode.gold_value)
         predicted = _normalize(episode.attribute, decision)
-        has_gold = bool(gold)
-        correct = has_gold and bool(predicted) and predicted == gold and not abstained
-        high_conf_wrong = has_gold and not correct and not abstained and confidence >= high_confidence_threshold
+        expected_abstain = expected_abstain_for_episode(episode)
+        expected_decision = expected_decision_for_episode(episode)
+        answerable = not expected_abstain
+        has_gold = bool(episode.gold_value)
+        answerable_correct = answerable and bool(predicted) and bool(expected_decision) and predicted == _normalize(episode.attribute, expected_decision) and not abstained
+        expected_correct = bool(abstained) if expected_abstain else answerable_correct
+        unsafe_prediction = expected_abstain and not abstained
+        high_conf_wrong = answerable and not answerable_correct and not abstained and confidence >= high_confidence_threshold
+        high_conf_unsafe = unsafe_prediction and confidence >= high_confidence_threshold
         row = {
             "case_id": episode.case_id,
             "attribute": episode.attribute,
             "gold_value": episode.gold_value,
+            "expected_abstain": expected_abstain,
+            "expected_decision": expected_decision,
             "decision": decision,
             "confidence": confidence,
             "abstained": abstained,
             "has_gold": has_gold,
-            "correct": correct,
+            "answerable": answerable,
+            "answerable_correct": answerable_correct,
+            "correct": answerable_correct,
+            "expected_correct": expected_correct,
+            "unsafe_prediction": unsafe_prediction,
             "high_confidence_wrong": high_conf_wrong,
+            "high_confidence_unsafe": high_conf_unsafe,
             "reason": (
                 f"Selected by graph-guided planner from {', '.join(sorted(best.source_types))}"
                 if not abstained
@@ -331,38 +381,28 @@ def _evaluate_resolver_v5_on_replay(
             "evidence_count": len(best.claims),
         }
         rows.append(row)
-        stats = by_attribute.setdefault(episode.attribute, {"total": 0, "gold_total": 0, "correct": 0, "abstained": 0, "high_confidence_wrong": 0})
-        stats["total"] += 1
-        stats["gold_total"] += int(has_gold)
-        stats["correct"] += int(correct)
-        stats["abstained"] += int(abstained)
-        stats["high_confidence_wrong"] += int(high_conf_wrong)
+        stats = by_attribute.setdefault(episode.attribute, new_attribute_stats())
+        accumulate_attribute_stats(
+            stats,
+            has_gold=has_gold,
+            answerable=answerable,
+            expected_abstain=expected_abstain,
+            answerable_correct=answerable_correct,
+            expected_correct=expected_correct,
+            abstained=abstained,
+            unsafe_prediction=unsafe_prediction,
+            high_confidence_wrong=high_conf_wrong,
+            high_confidence_unsafe=high_conf_unsafe,
+        )
 
-    total_gold = sum(stats["gold_total"] for stats in by_attribute.values())
-    total_correct = sum(stats["correct"] for stats in by_attribute.values())
-    total_abstained = sum(stats["abstained"] for stats in by_attribute.values())
-    total_hc_wrong = sum(stats["high_confidence_wrong"] for stats in by_attribute.values())
-    per_attribute: dict[str, dict[str, object]] = {}
-    for attribute, stats in sorted(by_attribute.items()):
-        gold_total = stats["gold_total"]
-        per_attribute[attribute] = {
-            **stats,
-            "accuracy": stats["correct"] / gold_total if gold_total else 0.0,
-            "f1_proxy": stats["correct"] / gold_total if gold_total else 0.0,
-            "abstention_rate": stats["abstained"] / stats["total"] if stats["total"] else 0.0,
-            "high_confidence_wrong_rate": stats["high_confidence_wrong"] / gold_total if gold_total else 0.0,
-        }
-    return {
-        "resolver": "v5_graph_guided_retrieval",
-        "episodes_total": len(episodes),
-        "gold_episodes_total": total_gold,
-        "accuracy": total_correct / total_gold if total_gold else 0.0,
-        "f1_proxy": total_correct / total_gold if total_gold else 0.0,
-        "abstention_rate": total_abstained / len(episodes) if episodes else 0.0,
-        "high_confidence_wrong_rate": total_hc_wrong / total_gold if total_gold else 0.0,
-        "per_attribute": per_attribute,
-        "decisions": rows,
-    }
+    summary = summarize_benchmark_counts(
+        by_attribute,
+        episodes_total=len(episodes),
+        resolver_name="v5_graph_guided_retrieval",
+        include_f1_proxy=True,
+    )
+    summary["decisions"] = rows
+    return summary
 
 
 def evaluate_benchmark_v5(
@@ -422,10 +462,36 @@ def evaluate_benchmark_v5(
 
     comparison = {
         "accuracy_delta": float(v5.get("accuracy", 0.0)) - float(v4.get("accuracy", 0.0)),
+        "expected_behavior_accuracy_delta": float(v5.get("expected_behavior_accuracy", 0.0)) - float(v4.get("expected_behavior_accuracy", 0.0)),
         "abstention_delta": float(v5.get("abstention_rate", 0.0)) - float(v4.get("abstention_rate", 0.0)),
+        "unsafe_prediction_rate_delta": float(v5.get("unsafe_prediction_rate", 0.0)) - float(v4.get("unsafe_prediction_rate", 0.0)),
         "high_confidence_wrong_delta": float(v5.get("high_confidence_wrong_rate", 0.0)) - float(v4.get("high_confidence_wrong_rate", 0.0)),
+        "high_confidence_unsafe_delta": float(v5.get("high_confidence_unsafe_rate", 0.0)) - float(v4.get("high_confidence_unsafe_rate", 0.0)),
         "coverage_delta": (1.0 - float(v5.get("abstention_rate", 0.0))) - (1.0 - float(v4.get("abstention_rate", 0.0))),
         "recovery_rate": len(recovery_cases) / max(1, len([row for row in v4_decisions if isinstance(row, dict) and row.get("abstained")])),
+    }
+
+    v4_expected = {
+        "answerable_total": v4.get("answerable_total", 0),
+        "expected_abstain_total": v4.get("expected_abstain_total", 0),
+        "answerable_accuracy": v4.get("answerable_accuracy", 0.0),
+        "expected_behavior_accuracy": v4.get("expected_behavior_accuracy", 0.0),
+        "abstention_rate": v4.get("abstention_rate", 0.0),
+        "abstention_accuracy": v4.get("abstention_accuracy", 0.0),
+        "unsafe_prediction_rate": v4.get("unsafe_prediction_rate", 0.0),
+        "high_confidence_wrong_rate": v4.get("high_confidence_wrong_rate", 0.0),
+        "high_confidence_unsafe_rate": v4.get("high_confidence_unsafe_rate", 0.0),
+    }
+    v5_expected = {
+        "answerable_total": v5.get("answerable_total", 0),
+        "expected_abstain_total": v5.get("expected_abstain_total", 0),
+        "answerable_accuracy": v5.get("answerable_accuracy", 0.0),
+        "expected_behavior_accuracy": v5.get("expected_behavior_accuracy", 0.0),
+        "abstention_rate": v5.get("abstention_rate", 0.0),
+        "abstention_accuracy": v5.get("abstention_accuracy", 0.0),
+        "unsafe_prediction_rate": v5.get("unsafe_prediction_rate", 0.0),
+        "high_confidence_wrong_rate": v5.get("high_confidence_wrong_rate", 0.0),
+        "high_confidence_unsafe_rate": v5.get("high_confidence_unsafe_rate", 0.0),
     }
 
     report: dict[str, object] = {
@@ -433,6 +499,12 @@ def evaluate_benchmark_v5(
         "claim_coverage": claim_coverage,
         "resolver_v4": v4,
         "resolver_v5": v5,
+        "resolver_v4_expected": v4_expected,
+        "resolver_v5_expected": v5_expected,
+        "expected_behavior": {
+            "resolver_v4": v4_expected,
+            "resolver_v5": v5_expected,
+        },
         "comparison": comparison,
         "failure_cases": failure_cases,
         "abstention_cases": abstention_cases,

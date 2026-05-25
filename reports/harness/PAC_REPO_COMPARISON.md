@@ -11,12 +11,12 @@ python3 -m unittest discover -s tests -q
 python3 scripts/run_harness.py compare --input tests/fixtures/retrieval_replay_sample.json
 python3 scripts/run_harness.py replay-stats --input tests/fixtures/retrieval_replay_sample.json
 python3 scripts/run_harness.py website-authority --input tests/fixtures/retrieval_replay_sample.json
-python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/hard_cases_replay.json --include-decisions --output reports/harness/benchmark_v2_hard_cases_current.json
-python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/pac_hard_cases_replay.json --include-decisions --output reports/harness/benchmark_v2_pac_hard_cases_current.json
-python3 scripts/run_harness.py benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions --output reports/harness/benchmark_v2_santa_cruz_challenge_current.json
+pac-benchmark-v2 --replay tests/fixtures/hard_cases_replay.json --include-decisions --output reports/harness/benchmark_v2_hard_cases_current.json
+pac-benchmark-v2 --replay tests/fixtures/pac_hard_cases_replay.json --include-decisions --output reports/harness/benchmark_v2_pac_hard_cases_current.json
+pac-benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions --output reports/harness/benchmark_v2_santa_cruz_challenge_current.json
 python3 scripts/run_harness.py resolvepoi-v2 --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --limit 400 --output reports/resolvepoi_v2/resolvepoi_v2_400.json
 python3 scripts/run_harness.py resolvepoi-v2 --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --limit 200 --output reports/resolvepoi_v2/resolvepoi_v2_200.json
-python3 scripts/run_harness.py resolvepoi-selective --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json --limit 400 --include-decisions --output reports/resolvepoi_selective/resolvepoi_selective_current.json
+pac-resolvepoi-selective --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json --limit 400 --include-decisions --output reports/resolvepoi_selective/resolvepoi_selective_current.json
 python3 scripts/run_harness.py resolvepoi-split-verify --truth /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json --train-parquet /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet --train-labels /home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json --output reports/resolvepoi_selective/resolvepoi_split_verify_current.json
 ```
 
@@ -24,9 +24,11 @@ Current outputs:
 
 | Artifact | Result |
 | --- | --- |
-| Unit tests | `241` tests passed |
+| Unit tests | `247` tests passed |
 | Santa Cruz expanded corpus | `24` episodes; targeted authoritative found rate `1.0`, fallback `0.0`; final accuracy `1.0` |
 | Santa Cruz challenge corpus | `50` curated replay episodes across website, phone, address, category, and name; resolver v2 expected-behavior accuracy `1.0`, raw accuracy `0.9565`, abstention rate `0.1200`, high-confidence-wrong rate `0.0`; v2 adds branch-context phone/address, office-vs-mailing address, official-vs-social website, official-vs-directory category, title-cleaned name, full-name-vs-acronym, place-name-vs-host-building, official-category-vs-tourism tags, government locator website, relay/fax/footer phone rejection, department-location-vs-city-footer address selection, official phone-vs-fax cases, official service-page category conflicts, program-tenant category conflicts, adjacent-facility category conflicts, branch-specific government-locator website extraction, offsite-event address conflict handling, multi-branch commercial location selection, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, social-only website abstention, generic homepage abstention, stale/closed phone abstention, and wrong-entity tenant website abstention without prefilled extraction |
+| Santa Cruz seed batch | `5` episodes; expected-behavior accuracy `1.0`, abstention rate `0.2`, high-confidence-wrong rate `0.0`; first seed batch for the next 50-100 case expansion |
+| Santa Cruz seed batch 2 | `8` episodes; expected-behavior accuracy `1.0`, abstention rate `0.5`, high-confidence-wrong rate `0.0`; second seed tranche with branch ambiguity, social-only abstention, generic-homepage abstention, and additional branch/address/name/category coverage |
 | Retrieval compare | targeted authoritative found `0.75`, fallback `0.0`; targeted citation precision `0.75`; citation precision proxy delta `+1.0` |
 | Replay stats | `4` episodes, `8` attempts, `9` pages, authoritative pages rate `0.3333` |
 | Website authority | authoritative found rate `1.0`, false official rate `0.0` |

@@ -19,4 +19,11 @@ dependencies = [
 [project.scripts]
 mlattributes-eval = "places_attr_conflation.cli:main"
 pac-benchmark-v2 = "places_attr_conflation.benchmark_v2:main"
+pac-benchmark-v3 = "places_attr_conflation.benchmark_v3:main"
+pac-benchmark-v4 = "places_attr_conflation.benchmark_v4:main"
+pac-benchmark-v5 = "places_attr_conflation.benchmark_v5:main"
+pac-benchmark-v6 = "places_attr_conflation.benchmark_v6:main"
+pac-benchmark-full-replay = "places_attr_conflation.benchmark_full_replay:main"
+pac-benchmark-pooled = "places_attr_conflation.benchmark_pooled:main"
+pac-dashboard = "places_attr_conflation.dashboard:main"
 pac-resolvepoi-selective = "places_attr_conflation.resolvepoi_selective:main"

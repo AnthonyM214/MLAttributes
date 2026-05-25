@@ -188,10 +188,6 @@ def _branch_or_location_mismatch(group: ClaimGroup, place_context: dict[str, Any
         return False
     if any(term in text for term in ("branch", "store", "location", "locator", "office", "site", "campus")):
         return True
-    # A different city or branch header with no corroborating context is a strong
-    # wrong-entity signal for place attributes like phone and website.
-    if any(token in text for token in ("oakland", "berkeley", "los angeles", "san jose", "monterey", "sacramento", "watsonville")):
-        return True
     return False
 
 
