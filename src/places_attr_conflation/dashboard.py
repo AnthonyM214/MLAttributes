@@ -28,6 +28,10 @@ class DashboardData:
     benchmark_v2_pac_hard_cases: dict[str, object] | None
     benchmark_v2_santa_cruz_challenge: dict[str, object] | None
     benchmark_v3_hard_cases: dict[str, object] | None
+    benchmark_v4: dict[str, object] | None
+    benchmark_v5: dict[str, object] | None
+    benchmark_v6: dict[str, object] | None
+    benchmark_full_replay: dict[str, object] | None
     repo_comparison_tests: int | None
     paths: dict[str, str]
     batch_progress_rows: list[list[str]]
@@ -117,6 +121,10 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "benchmark_v2_pac_hard_cases": harness / "benchmark_v2_pac_hard_cases_current.json",
         "benchmark_v2_santa_cruz_challenge": harness / "benchmark_v2_santa_cruz_challenge_current.json",
         "benchmark_v3_hard_cases": harness / "benchmark_v3_hard_cases_current.json",
+        "benchmark_v4": harness / "benchmark_v4_current.json",
+        "benchmark_v5": harness / "benchmark_v5_current.json",
+        "benchmark_v6": harness / "benchmark_v6_current.json",
+        "benchmark_full_replay": harness / "benchmark_full_replay_current.json",
         "work_ledger": root / "harness" / "PAC_WORK_LEDGER.md",
         "okr": root / "harness" / "PAC_OKR.md",
         "repo_comparison": root / "harness" / "PAC_REPO_COMPARISON.md",
@@ -156,6 +164,10 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         benchmark_v2_pac_hard_cases=_load_json(_resolve_path(root, paths["benchmark_v2_pac_hard_cases"])) if "benchmark_v2_pac_hard_cases" in paths else None,
         benchmark_v2_santa_cruz_challenge=_load_json(_resolve_path(root, paths["benchmark_v2_santa_cruz_challenge"])) if "benchmark_v2_santa_cruz_challenge" in paths else None,
         benchmark_v3_hard_cases=_load_json(_resolve_path(root, paths["benchmark_v3_hard_cases"])) if "benchmark_v3_hard_cases" in paths else None,
+        benchmark_v4=_load_json(_resolve_path(root, paths["benchmark_v4"])) if "benchmark_v4" in paths else None,
+        benchmark_v5=_load_json(_resolve_path(root, paths["benchmark_v5"])) if "benchmark_v5" in paths else None,
+        benchmark_v6=_load_json(_resolve_path(root, paths["benchmark_v6"])) if "benchmark_v6" in paths else None,
+        benchmark_full_replay=_load_json(_resolve_path(root, paths["benchmark_full_replay"])) if "benchmark_full_replay" in paths else None,
         repo_comparison_tests=_load_repo_comparison_tests(root),
         paths=paths,
         batch_progress_rows=_batch_progress_rows(root),
@@ -815,6 +827,20 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
     hard_resolver = hard_cases.get("resolver_v2", {}) if isinstance(hard_cases, dict) else {}
     if not isinstance(hard_resolver, dict):
         hard_resolver = {}
+    v5 = data.benchmark_v5 or {}
+    v5_resolver = v5.get("resolver_v5", {}) if isinstance(v5, dict) else {}
+    v5_comparison = v5.get("comparison", {}) if isinstance(v5, dict) else {}
+    if not isinstance(v5_resolver, dict):
+        v5_resolver = {}
+    if not isinstance(v5_comparison, dict):
+        v5_comparison = {}
+    full = data.benchmark_full_replay or {}
+    full_merge = full.get("merge_report", {}) if isinstance(full, dict) else {}
+    full_claim_coverage = full.get("full_claim_coverage", {}) if isinstance(full, dict) else {}
+    if not isinstance(full_merge, dict):
+        full_merge = {}
+    if not isinstance(full_claim_coverage, dict):
+        full_claim_coverage = {}
     pooled = data.benchmark_pooled or {}
     pooled_resolvepoi = pooled.get("resolvepoi_holdout", {}) if isinstance(pooled, dict) else {}
     pooled_david = pooled.get("david_test", {}) if isinstance(pooled, dict) else {}
@@ -847,6 +873,20 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
         {
             "title": "Already done: PAC benchmark expected behavior",
             "body": "The PAC hard benchmark now includes explicit expected-abstain labels and mixed authoritative sources instead of only positive examples.",
+        },
+        {
+            "title": "Already done: graph-guided v5 planner",
+            "body": (
+                f"The new v5 planner keeps {_pct(v5_resolver.get('accuracy'))} accuracy on the hard replay, cuts abstention to "
+                f"{_pct(v5_resolver.get('abstention_rate'))}, and adds {_pct_points(v5_comparison.get('coverage_delta'))} coverage vs v4."
+            ) if isinstance(v5, dict) and v5 else "The graph-guided planner report still needs to be surfaced in the dashboard."
+        },
+        {
+            "title": "Already done: full collected replay benchmark",
+            "body": (
+                f"The collected replay benchmark merges {_num((full_merge or {}).get('input_files'))} files into {_num((full_merge or {}).get('merged_episodes'))} episodes and {_num((full_merge or {}).get('merged_pages'))} pages, "
+                f"with {_pct((full_claim_coverage or {}).get('coverage'))} overall claim coverage and {_pct((full_claim_coverage or {}).get('website_coverage'))} website coverage."
+            ) if isinstance(full, dict) and full else "The collected replay benchmark still needs the current coverage report surfaced in the dashboard."
         },
         {
             "title": "Already done: pooled three-corpus diagnostic",
@@ -883,6 +923,20 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
     hard_v3_resolver = hard_v3.get("resolver_v3", {}) if isinstance(hard_v3, dict) else {}
     if not isinstance(hard_v3_resolver, dict):
         hard_v3_resolver = {}
+    v5 = data.benchmark_v5 or {}
+    v5_resolver = v5.get("resolver_v5", {}) if isinstance(v5, dict) else {}
+    if not isinstance(v5_resolver, dict):
+        v5_resolver = {}
+    v5_comparison = v5.get("comparison", {}) if isinstance(v5, dict) else {}
+    if not isinstance(v5_comparison, dict):
+        v5_comparison = {}
+    full = data.benchmark_full_replay or {}
+    full_merge = full.get("merge_report", {}) if isinstance(full, dict) else {}
+    full_claim = full.get("full_claim_coverage", {}) if isinstance(full, dict) else {}
+    if not isinstance(full_merge, dict):
+        full_merge = {}
+    if not isinstance(full_claim, dict):
+        full_claim = {}
     selective = data.resolvepoi_selective or {}
     metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
     macro = metrics.get("macro", {}) if isinstance(metrics, dict) else {}
@@ -940,6 +994,31 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
             ),
         },
         {
+            "title": "Recovery v4 diagnostic",
+            "body": (
+                f"V4 adds a post-abstention retry stage, but on the 5,078-case merged replay it matches v3 at "
+                f"{_pct((data.benchmark_v4 or {}).get('resolver_v4', {}).get('accuracy') if isinstance(data.benchmark_v4, dict) else None)} accuracy "
+                f"and {_pct((data.benchmark_v4 or {}).get('resolver_v4', {}).get('abstention_rate') if isinstance(data.benchmark_v4, dict) else None)} abstention "
+                f"with no recovery lift. That makes it a useful negative result, not the next headline."
+            ),
+        },
+        {
+            "title": "Graph-guided v5 planner",
+            "body": (
+                f"V5 is the first truly disruptive baseline: on the hard-case replay it keeps {_pct(v5_resolver.get('accuracy'))} accuracy "
+                f"while cutting abstention to {_pct(v5_resolver.get('abstention_rate'))} from the v4 baseline by {_pct_points(v5_comparison.get('abstention_delta'))}, "
+                f"and the report shows {len(v5.get('failure_cases', [])) if isinstance(v5.get('failure_cases'), list) else 0} failure cases."
+            ) if isinstance(v5, dict) and v5 else "The graph-guided planner exists as a new v5 baseline, but its report still needs to be generated."
+        },
+        {
+            "title": "Identity-gated v6 planner",
+            "body": (
+                f"V6 keeps answerable accuracy at {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('answerable_accuracy') if isinstance(data.benchmark_v6, dict) else None)} "
+                f"while lifting expected-behavior accuracy to {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('expected_behavior_accuracy') if isinstance(data.benchmark_v6, dict) else None)} "
+                f"and driving unsafe prediction rate to {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('unsafe_prediction_rate') if isinstance(data.benchmark_v6, dict) else None)} on the hard replay."
+            ) if isinstance(data.benchmark_v6, dict) else "The identity-gated v6 planner exists, but its report still needs to be generated."
+        },
+        {
             "title": "Selective router",
             "body": (
                 f"The ResolvePOI selective router remains the strongest numeric result: {_pct((macro or {}).get('full_accuracy'))} "
@@ -958,7 +1037,8 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
         {
             "title": "Merged corpus OKR",
             "body": (
-                f"The collected replay tree contains 38,518 loadable episodes and 5,078 unique case-attribute pairs. "
+                f"The collected replay tree now loads from {_num(full_merge.get('input_files'))} files into {_num(full_merge.get('merged_episodes'))} episodes and {_num(full_merge.get('merged_pages'))} pages, "
+                f"with {_pct(full_claim.get('coverage'))} overall claim coverage and {_pct(full_claim.get('website_coverage'))} website coverage. "
                 f"The new OKR ({okr_path or 'reports/harness/PAC_OKR.md'}) says the next disruptive gain is claim coverage, not more resolver tuning."
             ),
         },
@@ -992,6 +1072,23 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
         santa_v2 = {}
     if not isinstance(santa_expected_v2, dict):
         santa_expected_v2 = {}
+    v5 = data.benchmark_v5 or {}
+    v5_resolver = v5.get("resolver_v5", {}) if isinstance(v5, dict) else {}
+    v5_comparison = v5.get("comparison", {}) if isinstance(v5, dict) else {}
+    v5_resolver_v4 = v5.get("resolver_v4", {}) if isinstance(v5, dict) else {}
+    if not isinstance(v5_resolver, dict):
+        v5_resolver = {}
+    if not isinstance(v5_comparison, dict):
+        v5_comparison = {}
+    if not isinstance(v5_resolver_v4, dict):
+        v5_resolver_v4 = {}
+    full = data.benchmark_full_replay or {}
+    full_claim = full.get("full_claim_coverage", {}) if isinstance(full, dict) else {}
+    full_merge = full.get("merge_report", {}) if isinstance(full, dict) else {}
+    if not isinstance(full_claim, dict):
+        full_claim = {}
+    if not isinstance(full_merge, dict):
+        full_merge = {}
     pooled = data.benchmark_pooled or {}
     pooled_resolvepoi = pooled.get("resolvepoi_holdout", {}) if isinstance(pooled, dict) else {}
     pooled_david = pooled.get("david_test", {}) if isinstance(pooled, dict) else {}
@@ -1009,6 +1106,28 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
             f"{_pct(santa_expected_v2.get('accuracy'))} expected behavior, "
             f"{_pct(santa_expected_v2.get('abstention_rate'))} expected abstention, "
             f"and {_pct(santa_v2.get('high_confidence_wrong_rate'))} high-confidence wrong."
+        ),
+        (
+            "The merged replay is the reality check: claim coverage is still only "
+            f"{_pct((data.benchmark_v4 or {}).get('claim_coverage', {}).get('coverage') if isinstance(data.benchmark_v4, dict) else None)} "
+            "and v4 does not recover extra cases there, so the next gain is extraction coverage, not more abstention tuning."
+        ),
+        (
+            "The graph-guided v5 planner is the first clear disruption: on the hard-case replay it keeps "
+            f"{_pct(v5_resolver.get('accuracy'))} accuracy while cutting abstention to {_pct(v5_resolver.get('abstention_rate'))} "
+            f"from v4's {_pct(v5_resolver_v4.get('abstention_rate'))}, with a {_pct_points(v5_comparison.get('coverage_delta'))} coverage gain."
+        ),
+        (
+            "The identity-gated v6 planner is the safer headline: it keeps answerable accuracy at "
+            f"{_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('answerable_accuracy') if isinstance(data.benchmark_v6, dict) else None)} "
+            f"and lifts expected-behavior accuracy to {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('expected_behavior_accuracy') if isinstance(data.benchmark_v6, dict) else None)} "
+            f"with {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('unsafe_prediction_rate') if isinstance(data.benchmark_v6, dict) else None)} unsafe predictions."
+        ),
+        (
+            "The broader collected replay is the disruptive baseline: "
+            f"{_pct(full_claim.get('coverage'))} claim coverage and {_pct(full_claim.get('website_coverage'))} website coverage "
+            f"across {_num(full_merge.get('input_files'))} replay files merged into {_num(full_merge.get('merged_episodes'))} episodes and {_num(full_merge.get('merged_pages'))} pages, "
+            "which is several times richer than the narrow canonical replay."
         ),
         "The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.",
         (
@@ -1075,6 +1194,34 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
     hard_v3_resolver = hard_v3.get("resolver_v3", {}) if isinstance(hard_v3, dict) else {}
     if not isinstance(hard_v3_resolver, dict):
         hard_v3_resolver = {}
+    v4 = data.benchmark_v4 or {}
+    v4_resolver = v4.get("resolver_v4", {}) if isinstance(v4, dict) else {}
+    if not isinstance(v4_resolver, dict):
+        v4_resolver = {}
+    v4_coverage = v4.get("claim_coverage", {}) if isinstance(v4, dict) else {}
+    if not isinstance(v4_coverage, dict):
+        v4_coverage = {}
+    v4_recovery_count = len(v4.get("recovery_cases", [])) if isinstance(v4, dict) and isinstance(v4.get("recovery_cases"), list) else 0
+    v5 = data.benchmark_v5 or {}
+    v5_resolver = v5.get("resolver_v5", {}) if isinstance(v5, dict) else {}
+    v5_comparison = v5.get("comparison", {}) if isinstance(v5, dict) else {}
+    if not isinstance(v5_resolver, dict):
+        v5_resolver = {}
+    if not isinstance(v5_comparison, dict):
+        v5_comparison = {}
+    full = data.benchmark_full_replay or {}
+    full_benchmark = full.get("benchmark", {}) if isinstance(full, dict) else {}
+    if not isinstance(full_benchmark, dict):
+        full_benchmark = {}
+    full_claim_coverage = full.get("full_claim_coverage", {}) if isinstance(full, dict) else {}
+    if not isinstance(full_claim_coverage, dict):
+        full_claim_coverage = {}
+    full_merge = full.get("merge_report", {}) if isinstance(full, dict) else {}
+    if not isinstance(full_merge, dict):
+        full_merge = {}
+    full_comparison = full.get("comparison_to_reference", {}) if isinstance(full, dict) else {}
+    if not isinstance(full_comparison, dict):
+        full_comparison = {}
     santa = data.benchmark_v2_santa_cruz_challenge or {}
     santa_v2 = santa.get("resolver_v2", {}) if isinstance(santa, dict) else {}
     if not isinstance(santa_v2, dict):
@@ -1108,6 +1255,13 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
     pooled_david_pooled = pooled_david.get("pooled", {}) if isinstance(pooled_david, dict) else {}
     pooled_david_cross = pooled_david.get("cross_corpus", {}) if isinstance(pooled_david, dict) else {}
     pooled_hard_cross = pooled_hard.get("cross_corpus", {}) if isinstance(pooled_hard, dict) else {}
+    v4 = data.benchmark_v4 or {}
+    v4_resolver = v4.get("resolver_v4", {}) if isinstance(v4, dict) else {}
+    if not isinstance(v4_resolver, dict):
+        v4_resolver = {}
+    v4_coverage = v4.get("claim_coverage", {}) if isinstance(v4, dict) else {}
+    if not isinstance(v4_coverage, dict):
+        v4_coverage = {}
     return [
         {
             "label": "Selective router",
@@ -1125,6 +1279,19 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
             "detail": f"Corroboration-aware graph scoring; high-confidence wrong: {_pct(hard_v3_resolver.get('high_confidence_wrong_rate'))}",
         },
         {
+            "label": "Merged replay coverage",
+            "value": f"{_pct(v4_coverage.get('coverage'))} episodes with claims",
+            "detail": f"{_num(v4_coverage.get('claims_per_episode'))} claims/episode and {_num(v4_coverage.get('authoritative_claims_per_episode'))} authoritative claims/episode on the 5,078-case merged replay.",
+        },
+        {
+            "label": "Full collected replay",
+            "value": f"{_pct(full_claim_coverage.get('coverage'))} episodes with claims",
+            "detail": (
+                f"{_num(full_merge.get('input_files'))} replay files merged into {_num(full_merge.get('merged_episodes'))} episodes and {_num(full_merge.get('merged_pages'))} pages; "
+                f"website coverage lifted to {_pct(full_claim_coverage.get('website_coverage'))} with {_num(full_claim_coverage.get('authoritative_claims_per_episode'))} authoritative claims/episode."
+            ),
+        },
+        {
             "label": "Santa Cruz challenge",
             "value": f"{_pct(santa_expected_v2.get('accuracy'))} expected / {_pct(santa_expected_v2.get('abstention_rate'))} abstention",
             "detail": f"Raw resolver accuracy: {_pct(santa_v2.get('accuracy'))}; high-confidence wrong: {_pct(santa_v2.get('high_confidence_wrong_rate'))}; 50 curated cases covering branch ambiguity, websites, stale/closed signals, social-only evidence, generic homepages, and wrong-entity tenant pages.",
@@ -1138,6 +1305,24 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
             "label": "PAC expected behavior",
             "value": f"{_pct(pac_expected_v2.get('accuracy'))} expected-behavior accuracy",
             "detail": f"Expected abstention rate: {_pct(pac_expected_v2.get('abstention_rate'))}; claim-level benchmark captures the intended behavior on ambiguous cases.",
+        },
+        {
+            "label": "Recovery v4",
+            "value": f"{_pct(v4_resolver.get('accuracy'))} accuracy / {_pct(v4_resolver.get('abstention_rate'))} abstention",
+            "detail": f"Recovery cases: {v4_recovery_count}; on the broad merged replay v4 matched v3, confirming claim coverage is still the bottleneck.",
+        },
+        {
+            "label": "Graph-guided v5 planner",
+            "value": f"{_pct(v5_resolver.get('accuracy'))} accuracy / {_pct(v5_resolver.get('abstention_rate'))} abstention",
+            "detail": f"Coverage gain vs v4: {_pct_points(v5_comparison.get('coverage_delta'))}; failure cases: {len(v5.get('failure_cases', [])) if isinstance(v5.get('failure_cases'), list) else 0}",
+        },
+        {
+            "label": "Identity-gated v6",
+            "value": f"{_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('expected_behavior_accuracy') if isinstance(data.benchmark_v6, dict) else None)} expected-behavior / {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('unsafe_prediction_rate') if isinstance(data.benchmark_v6, dict) else None)} unsafe",
+            "detail": (
+                f"Answerable accuracy: {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('answerable_accuracy') if isinstance(data.benchmark_v6, dict) else None)}; "
+                f"hard cases improve expected behavior by {_pct_points((data.benchmark_v6 or {}).get('comparison', {}).get('expected_behavior_accuracy_delta') if isinstance(data.benchmark_v6, dict) else None)} over v5."
+            ),
         },
         {
             "label": "Retrieval proof",
@@ -1225,6 +1410,125 @@ def _benchmark_v3_hard_case_lines(report: dict[str, object] | None) -> list[str]
     return lines
 
 
+def _benchmark_v4_lines(report: dict[str, object] | None) -> list[str]:
+    if not report:
+        return ["No benchmark-v4 report found."]
+    resolver_v3 = report.get("resolver_v3", {})
+    resolver_v4 = report.get("resolver_v4", {})
+    claim_coverage = report.get("claim_coverage", {})
+    if not isinstance(resolver_v3, dict) or not isinstance(resolver_v4, dict) or not isinstance(claim_coverage, dict):
+        return ["benchmark-v4 report is incomplete."]
+    recovery_cases = report.get("recovery_cases", [])
+    failure_cases = report.get("failure_cases", [])
+    lines = [
+        f"Resolver v3 accuracy: {_pct(resolver_v3.get('accuracy'))}",
+        f"Resolver v4 accuracy: {_pct(resolver_v4.get('accuracy'))}",
+        f"Resolver v4 abstention: {_pct(resolver_v4.get('abstention_rate'))}",
+        f"Recovery lift: {_num(report.get('comparison', {}).get('recovery_rate'))} recovery rate",
+        f"Claim coverage: {_pct(claim_coverage.get('coverage'))} of episodes with extracted claims",
+        f"Claims per episode: {_num(claim_coverage.get('claims_per_episode'))}",
+    ]
+    if isinstance(recovery_cases, list) and recovery_cases:
+        lines.append("Recovery cases: " + "; ".join(str(case.get("case_id", "-")) for case in recovery_cases if isinstance(case, dict)))
+    if isinstance(failure_cases, list) and failure_cases:
+        lines.append("Failure cases: " + "; ".join(str(case.get("case_id", "-")) for case in failure_cases if isinstance(case, dict)))
+    return lines
+
+
+def _benchmark_v5_lines(report: dict[str, object] | None) -> list[str]:
+    if not report:
+        return ["No benchmark-v5 report found."]
+    resolver_v4 = report.get("resolver_v4", {})
+    resolver_v5 = report.get("resolver_v5", {})
+    comparison = report.get("comparison", {})
+    claim_coverage = report.get("claim_coverage", {})
+    if not isinstance(resolver_v4, dict) or not isinstance(resolver_v5, dict) or not isinstance(comparison, dict) or not isinstance(claim_coverage, dict):
+        return ["benchmark-v5 report is incomplete."]
+    recovery_cases = report.get("recovery_cases", [])
+    failure_cases = report.get("failure_cases", [])
+    abstention_cases = report.get("abstention_cases", [])
+    lines = [
+        f"Graph-guided v5 accuracy: {_pct(resolver_v5.get('accuracy'))}",
+        f"Graph-guided v5 abstention: {_pct(resolver_v5.get('abstention_rate'))}",
+        f"Recovery-oriented v4 abstention: {_pct(resolver_v4.get('abstention_rate'))}",
+        f"Coverage gain vs v4: {_pct_points(comparison.get('coverage_delta'))}",
+        f"Claim coverage on this replay: {_pct(claim_coverage.get('coverage'))}",
+    ]
+    if isinstance(recovery_cases, list):
+        lines.append(f"Recovery cases: {len(recovery_cases)}")
+    if isinstance(abstention_cases, list) and abstention_cases:
+        lines.append("Abstention cases: " + "; ".join(str(case.get("case_id", "-")) for case in abstention_cases if isinstance(case, dict)))
+    if isinstance(failure_cases, list) and failure_cases:
+        lines.append("Failure cases: " + "; ".join(str(case.get("case_id", "-")) for case in failure_cases if isinstance(case, dict)))
+    return lines
+
+
+def _benchmark_v6_lines(report: dict[str, object] | None) -> list[str]:
+    if not report:
+        return ["No benchmark-v6 report found."]
+    resolver_v5 = report.get("resolver_v5", {})
+    resolver_v6 = report.get("resolver_v6", {})
+    comparison = report.get("comparison", {})
+    claim_coverage = report.get("claim_coverage", {})
+    if not isinstance(resolver_v5, dict) or not isinstance(resolver_v6, dict) or not isinstance(comparison, dict) or not isinstance(claim_coverage, dict):
+        return ["benchmark-v6 report is incomplete."]
+    breakthrough_cases = report.get("breakthrough_cases", [])
+    failure_cases = report.get("failure_cases", [])
+    abstention_cases = report.get("abstention_cases", [])
+    lines = [
+        f"Graph-guided v5 answerable accuracy: {_pct(resolver_v5.get('accuracy'))}",
+        f"Identity-gated v6 answerable accuracy: {_pct(resolver_v6.get('answerable_accuracy'))}",
+        f"Identity-gated v6 expected behavior: {_pct(resolver_v6.get('expected_behavior_accuracy'))}",
+        f"Identity-gated v6 unsafe predictions: {_pct(resolver_v6.get('unsafe_prediction_rate'))}",
+        f"Identity-gated v6 abstention: {_pct(resolver_v6.get('abstention_rate'))}",
+        f"Expected behavior lift vs v5: {_pct_points(comparison.get('expected_behavior_accuracy_delta'))}",
+        f"Claim coverage on this replay: {_pct(claim_coverage.get('coverage'))}",
+    ]
+    if isinstance(breakthrough_cases, list):
+        lines.append(f"Breakthrough cases: {len(breakthrough_cases)}")
+    if isinstance(abstention_cases, list) and abstention_cases:
+        lines.append("Abstention cases: " + "; ".join(str(case.get("case_id", "-")) for case in abstention_cases if isinstance(case, dict)))
+    if isinstance(failure_cases, list) and failure_cases:
+        lines.append("Failure cases: " + "; ".join(str(case.get("case_id", "-")) for case in failure_cases if isinstance(case, dict)))
+    return lines
+
+
+def _benchmark_full_replay_lines(report: dict[str, object] | None) -> list[str]:
+    if not report:
+        return ["No full-replay benchmark report found."]
+    merge_report = report.get("merge_report", {})
+    benchmark = report.get("benchmark", {})
+    comparison = report.get("comparison_to_reference", {})
+    full_claim = report.get("full_claim_coverage", {})
+    reference = report.get("reference_report", {})
+    if not isinstance(merge_report, dict) or not isinstance(benchmark, dict) or not isinstance(full_claim, dict):
+        return ["Full-replay benchmark report is incomplete."]
+    resolver_v4 = benchmark.get("resolver_v4", {}) if isinstance(benchmark.get("resolver_v4"), dict) else {}
+    resolver_v3 = benchmark.get("resolver_v3", {}) if isinstance(benchmark.get("resolver_v3"), dict) else {}
+    lines = [
+        f"Replay inputs: {_num(merge_report.get('input_files'))} files -> {_num(merge_report.get('merged_episodes'))} merged episodes",
+        f"Pages merged: {_num(merge_report.get('merged_pages'))}; pages with claims: {_num(full_claim.get('episodes_with_claims'))}/{_num(full_claim.get('episodes_total'))}",
+        f"Claim coverage: {_pct(full_claim.get('coverage'))}",
+        f"Website claim coverage: {_pct(full_claim.get('website_coverage'))}",
+        f"Authoritative claims/episode: {_num(full_claim.get('authoritative_claims_per_episode'))}",
+        f"Resolver v4 on full replay: {_pct(resolver_v4.get('accuracy'))} accuracy / {_pct(resolver_v4.get('abstention_rate'))} abstention",
+        f"Resolver v3 on full replay: {_pct(resolver_v3.get('accuracy'))} accuracy / {_pct(resolver_v3.get('abstention_rate'))} abstention",
+    ]
+    if isinstance(reference, dict) and reference:
+        ref_claim = reference.get("claim_coverage", {})
+        if isinstance(ref_claim, dict):
+            lines.append(
+                "Reference narrow corpus: "
+                f"{_pct(ref_claim.get('coverage'))} claim coverage; {_pct(ref_claim.get('website_coverage'))} website coverage"
+            )
+    if isinstance(comparison, dict) and comparison:
+        lines.append(
+            "Coverage lift vs reference: "
+            f"{_num(comparison.get('coverage_ratio'))}x overall / {_num(comparison.get('website_coverage_ratio'))}x website"
+        )
+    return lines
+
+
 def _benchmark_v2_pac_lines(report: dict[str, object] | None) -> list[str]:
     if not report:
         return ["No PAC benchmark-v2 report found."]
@@ -1277,6 +1581,10 @@ def render_markdown(data: DashboardData) -> str:
     pac_cases = data.benchmark_v2_pac_hard_cases or {}
     santa_cases = data.benchmark_v2_santa_cruz_challenge or {}
     v3_cases = data.benchmark_v3_hard_cases or {}
+    v4_cases = data.benchmark_v4 or {}
+    v5_cases = data.benchmark_v5 or {}
+    v6_cases = data.benchmark_v6 or {}
+    full_replay = data.benchmark_full_replay or {}
     selective_metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
     if not isinstance(selective_metrics, dict):
         selective_metrics = {}
@@ -1324,6 +1632,7 @@ def render_markdown(data: DashboardData) -> str:
         "",
         f"- Selective router: {_pct((selective_metrics.get('macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('macro'), dict) else None)} all-attribute / {_pct((selective_metrics.get('core_macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('core_macro'), dict) else None)} core.",
         f"- Claim-level hard cases: {_pct(((hard_cases.get('resolver_v2') or {}).get('accuracy')) if isinstance(hard_cases, dict) else None)} accuracy / {_pct(((hard_cases.get('resolver_v2') or {}).get('abstention_rate')) if isinstance(hard_cases, dict) else None)} abstention.",
+        f"- Identity-gated v6: {_pct((((data.benchmark_v6 or {}).get('resolver_v6') or {}).get('answerable_accuracy')) if isinstance(data.benchmark_v6, dict) else None)} answerable / {_pct((((data.benchmark_v6 or {}).get('resolver_v6') or {}).get('expected_behavior_accuracy')) if isinstance(data.benchmark_v6, dict) else None)} expected behavior.",
         f"- Santa Cruz challenge: {_pct((((santa_cases.get('expected_behavior') or {}).get('resolver_v2') or {}).get('accuracy')) if isinstance(santa_cases, dict) else None)} expected-behavior accuracy on authority-page ambiguity.",
         f"- PAC hard benchmark: {_pct(((data.pac_benchmark or {}).get('abstention') or {}).get('correct_abstention_rate') if isinstance(data.pac_benchmark, dict) else None)} correct abstention; identity drift precision/recall {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_precision') if isinstance(data.pac_benchmark, dict) else None)} / {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_recall') if isinstance(data.pac_benchmark, dict) else None)}.",
         f"- Retrieval replay: {_pct(((data.compare or {}).get('targeted') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} targeted vs {_pct(((data.compare or {}).get('fallback') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} fallback.",
@@ -1365,6 +1674,18 @@ def render_markdown(data: DashboardData) -> str:
         "",
         *[f"- {line}" for line in _benchmark_v3_hard_case_lines(v3_cases)],
         "",
+        "### Recovery v4",
+        "",
+        *[f"- {line}" for line in _benchmark_v4_lines(v4_cases)],
+        "",
+        "### Graph-guided v5 planner",
+        "",
+        *[f"- {line}" for line in _benchmark_v5_lines(v5_cases)],
+        "",
+        "### Identity-gated v6",
+        "",
+        *[f"- {line}" for line in _benchmark_v6_lines(v6_cases)],
+        "",
         "### Santa Cruz Challenge",
         "",
         *[f"- {line}" for line in _benchmark_v2_pac_lines(santa_cases)],
@@ -1372,6 +1693,10 @@ def render_markdown(data: DashboardData) -> str:
         "### PAC Benchmark-v2",
         "",
         *[f"- {line}" for line in _benchmark_v2_pac_lines(pac_cases)],
+        "",
+        "### Full Collected Replay",
+        "",
+        *[f"- {line}" for line in _benchmark_full_replay_lines(full_replay)],
         "",
         "### Baseline Context",
         "",
@@ -1420,6 +1745,10 @@ def render_html(data: DashboardData) -> str:
     pac_cases = data.benchmark_v2_pac_hard_cases or {}
     santa_cases = data.benchmark_v2_santa_cruz_challenge or {}
     v3_cases = data.benchmark_v3_hard_cases or {}
+    v4_cases = data.benchmark_v4 or {}
+    v5_cases = data.benchmark_v5 or {}
+    v6_cases = data.benchmark_v6 or {}
+    full_replay = data.benchmark_full_replay or {}
     selective_metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
     if not isinstance(selective_metrics, dict):
         selective_metrics = {}
@@ -1653,6 +1982,30 @@ def render_html(data: DashboardData) -> str:
             "</div>",
             "</details>",
             "<details class='panel detail-panel'>",
+            "<summary>Recovery v4</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _benchmark_v4_lines(v4_cases)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Graph-guided v5 planner</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _benchmark_v5_lines(v5_cases)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Identity-gated v6</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _benchmark_v6_lines(v6_cases)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
             "<summary>Santa Cruz challenge</summary>",
             "<div class='panel-body'>",
             "<ul class='detail-list'>",
@@ -1665,6 +2018,14 @@ def render_html(data: DashboardData) -> str:
             "<div class='panel-body'>",
             "<ul class='detail-list'>",
             *[f"<li>{html.escape(line)}</li>" for line in _benchmark_v2_pac_lines(pac_cases)],
+            "</ul>",
+            "</div>",
+            "</details>",
+            "<details class='panel detail-panel'>",
+            "<summary>Full collected replay</summary>",
+            "<div class='panel-body'>",
+            "<ul class='detail-list'>",
+            *[f"<li>{html.escape(line)}</li>" for line in _benchmark_full_replay_lines(full_replay)],
             "</ul>",
             "</div>",
             "</details>",

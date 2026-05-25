@@ -10,9 +10,11 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
   - `resolver_v2.py`
   - `benchmark_v2.py`
 - Corroboration-aware `resolver_v3.py` is in place and now beats v2 on the hard-case replay corpus.
+- Post-abstention recovery `resolver_v4.py` is in place as a diagnostic retry layer, but it does not improve the broad merged replay benchmark.
 - The selective ResolvePOI router is implemented and benchmarked on the 2k corpus / 400-ID holdout.
 - The cross-corpus selective router has been trained against ResolvePOI + David feature corpora and now serves as the learned-router baseline when we want safer abstention on hard cases.
 - The three-corpus pooled router now loads James labels correctly, but it remains diagnostic rather than breakthrough: it nudges ResolvePOI holdout a little, does not improve David over cross-corpus, and leaves hard cases tied.
+- The identity-gated `resolver_v6.py` planner is now in place and gives the repo its cleanest safe-abstention headline so far: hard-case answerable accuracy stays at `100.0%`, expected-behavior accuracy reaches `100.0%`, and unsafe predictions drop to `0.0%`.
 - The Santa Cruz replay corpus exists in both starter and expanded forms.
 - The hard-case PAC benchmark now includes:
   - abstentions
@@ -21,6 +23,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
   - mixed-authoritative corroboration
   - identity drift labels
 - The large replay corpus diagnosis shows the next bottleneck is claim coverage, not more resolver tuning.
+- The large replay corpus plus the v4 recovery diagnostic both point to the same conclusion: coverage is the bottleneck, not another abstention pass.
 - The new OKR in `PAC_OKR.md` formalizes the pivot toward claim-construction coverage and graph-guided noise control.
 - The research alignment note in `PAC_RESEARCH_ALIGNMENT.md` explains why current PAC research points to claim graphs, simplified retrieval, noise suppression, and abstention.
 - The dashboard has been cleaned up and made human-readable.
@@ -33,7 +36,9 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
 - Do not rebuild the repo as a pure current-vs-base classifier.
 - Do not rewrite the claim graph into a flat row-scoring baseline.
 - Do not rebuild the claim graph without place context or corroboration handling; that is already covered by v3.
+- Do not expect the recovery stage to carry the project unless claim coverage improves first.
 - Do not keep tuning resolver thresholds when claim extraction coverage on the merged replay corpus is still sparse.
+- Do not rebuild the v6 identity gate unless a new benchmark demonstrates a clearly better safe-abstention tradeoff.
 - Do not spend time on dashboard polish that does not change evidence quality, replay coverage, or abstention behavior.
 - Do not duplicate the curated Santa Cruz / PAC hard-case fixtures unless the new cases add a genuinely new failure mode.
 - Do not replace the selective router with another ad hoc heuristic router.

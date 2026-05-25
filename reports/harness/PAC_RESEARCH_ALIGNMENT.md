@@ -10,6 +10,7 @@ This note records the paper-backed direction for MLAttributes so the repo does n
 | [Multi-source Knowledge Enhanced Graph Attention Networks for Multimodal Fact Verification](https://arxiv.org/abs/2407.10474) | It explicitly constructs heterogeneous evidence graphs and removes inconsistencies/noise from redundant entities. | The next gain is noise control inside the evidence graph, not another threshold tweak. |
 | [Fact or Fiction? Improving Fact Verification with Knowledge Graphs through Simplified Subgraph Retrievals](https://arxiv.org/abs/2408.07453) | It shows that simpler logical/subgraph retrieval can improve accuracy while using fewer resources. | Retrieval planning should be simple, replayable, and coverage-driven. |
 | [Learning-to-Defer for Extractive Question Answering](https://arxiv.org/abs/2410.15761) | It formalizes selective deferral in ambiguous QA settings, which is the right abstraction for PAC abstention. | Abstention should remain a first-class output, not a post-hoc threshold hack. |
+| [Selective "Selective Prediction": Reducing Unnecessary Abstention in Vision-Language Reasoning](https://arxiv.org/abs/2402.15610) | It introduces a post-abstention recovery pass that gathers more evidence before giving up. | A second-stage retry is worth testing, but only if it does not raise the wrong-answer rate. |
 
 ## What our own evaluation says
 
@@ -35,11 +36,13 @@ The best next baseline is:
 1. claim-construction coverage on the merged replay corpus,
 2. graph-guided retrieval planning for official and corroborating pages,
 3. noise-aware claim grouping and contradiction handling,
-4. calibrated abstention when evidence stays weak or ambiguous.
+4. calibrated abstention when evidence stays weak or ambiguous,
+5. post-abstention recovery only where the evidence graph already has authoritative support.
+
+The current v6 benchmark supports this direction: an identity-gated graph planner can keep answerable accuracy at the hard-case ceiling while eliminating unsafe predictions on branch-ambiguous examples.
 
 ## What not to duplicate
 
 - Do not rebuild a flat row-scoring baseline.
 - Do not spend the next cycle only on dorking operators without measuring claim coverage.
 - Do not optimize curated hard cases while the merged corpus stays under-covered.
-

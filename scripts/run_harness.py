@@ -74,6 +74,10 @@ from places_attr_conflation.golden import (
 from places_attr_conflation.benchmark_v2 import evaluate_benchmark_v2
 from places_attr_conflation.benchmark_v2 import build_learned_router as build_learned_router_v2
 from places_attr_conflation.benchmark_v3 import evaluate_benchmark_v3
+from places_attr_conflation.benchmark_full_replay import evaluate_full_replay_benchmark
+from places_attr_conflation.benchmark_v4 import evaluate_benchmark_v4
+from places_attr_conflation.benchmark_v5 import evaluate_benchmark_v5
+from places_attr_conflation.benchmark_v6 import evaluate_benchmark_v6
 from places_attr_conflation.benchmark_pooled import evaluate_pooled_benchmark
 from places_attr_conflation.overture_context import (
     build_overture_context_replay,
@@ -133,6 +137,16 @@ def _default_output_path(command: str) -> Path:
         return ROOT / "reports" / "retrieval_compare" / f"compare_{_timestamp()}.json"
     if command == "benchmark-v2":
         return ROOT / "reports" / "harness" / f"benchmark_v2_{_timestamp()}.json"
+    if command == "benchmark-v3":
+        return ROOT / "reports" / "harness" / f"benchmark_v3_{_timestamp()}.json"
+    if command == "benchmark-v4":
+        return ROOT / "reports" / "harness" / f"benchmark_v4_{_timestamp()}.json"
+    if command == "benchmark-v5":
+        return ROOT / "reports" / "harness" / f"benchmark_v5_{_timestamp()}.json"
+    if command == "benchmark-v6":
+        return ROOT / "reports" / "harness" / f"benchmark_v6_{_timestamp()}.json"
+    if command == "benchmark-full-replay":
+        return ROOT / "reports" / "harness" / f"benchmark_full_replay_{_timestamp()}.json"
     if command == "website-authority":
         return ROOT / "reports" / "website_authority" / f"website_authority_{_timestamp()}.json"
     if command == "pac-benchmark":
@@ -429,6 +443,39 @@ def main() -> int:
     benchmark_v3.add_argument("--output")
     benchmark_v3.add_argument("--attributes", nargs="+")
     benchmark_v3.add_argument("--include-decisions", action="store_true")
+
+    benchmark_v4 = subparsers.add_parser("benchmark-v4", help="Compare corroboration-aware v3 with recovery resolver v4.")
+    benchmark_v4.add_argument("--replay", required=True)
+    benchmark_v4.add_argument("--output")
+    benchmark_v4.add_argument("--attributes", nargs="+")
+    benchmark_v4.add_argument("--include-decisions", action="store_true")
+
+    benchmark_v5 = subparsers.add_parser(
+        "benchmark-v5",
+        help="Compare recovery-oriented v4 with graph-guided retrieval v5 on the same replay corpus.",
+    )
+    benchmark_v5.add_argument("--replay", required=True)
+    benchmark_v5.add_argument("--output")
+    benchmark_v5.add_argument("--include-decisions", action="store_true")
+
+    benchmark_v6 = subparsers.add_parser(
+        "benchmark-v6",
+        help="Compare graph-guided v5 with the identity-gated graph v6 on the same replay corpus.",
+    )
+    benchmark_v6.add_argument("--replay", required=True)
+    benchmark_v6.add_argument("--output")
+    benchmark_v6.add_argument("--include-decisions", action="store_true")
+
+    benchmark_full_replay = subparsers.add_parser(
+        "benchmark-full-replay",
+        help="Merge the full collected replay tree and evaluate the claim-level v4 resolver on the broader corpus.",
+    )
+    benchmark_full_replay.add_argument("--replay-dir", default=str(ROOT / "reports" / "replay_collected"))
+    benchmark_full_replay.add_argument("--merged-output")
+    benchmark_full_replay.add_argument("--reference-report")
+    benchmark_full_replay.add_argument("--include-decisions", action="store_true")
+    benchmark_full_replay.add_argument("--output")
+
     benchmark_v2.add_argument("--output", help="Optional JSON report output path.")
 
     benchmark_pooled = subparsers.add_parser(
@@ -785,6 +832,29 @@ def main() -> int:
             episodes = [episode for episode in episodes if episode.attribute in allowed]
         report = evaluate_benchmark_v3(episodes, include_decisions=args.include_decisions)
         report["input"] = str(args.replay)
+    elif args.command == "benchmark-v4":
+        episodes = load_retrieval_episodes(args.replay)
+        if args.attributes:
+            allowed = set(args.attributes)
+            episodes = [episode for episode in episodes if episode.attribute in allowed]
+        report = evaluate_benchmark_v4(episodes, include_decisions=args.include_decisions)
+        report["input"] = str(args.replay)
+    elif args.command == "benchmark-v5":
+        episodes = load_retrieval_episodes(args.replay)
+        report = evaluate_benchmark_v5(episodes, include_decisions=args.include_decisions)
+        report["input"] = str(args.replay)
+    elif args.command == "benchmark-v6":
+        episodes = load_retrieval_episodes(args.replay)
+        report = evaluate_benchmark_v6(episodes, include_decisions=args.include_decisions)
+        report["input"] = str(args.replay)
+    elif args.command == "benchmark-full-replay":
+        report = evaluate_full_replay_benchmark(
+            replay_dir=args.replay_dir,
+            merged_output=args.merged_output,
+            reference_report=args.reference_report,
+            include_decisions=args.include_decisions,
+        )
+        report["input_dir"] = str(args.replay_dir)
     elif args.command == "benchmark-pooled":
         report = evaluate_pooled_benchmark(
             resolvepoi_truth_path=args.resolvepoi_truth_path,

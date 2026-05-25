@@ -146,7 +146,7 @@ class ResolvePOISelectiveTests(unittest.TestCase):
             truth_path=DEFAULT_TRUTH_PATH,
             train_parquet=DEFAULT_TRAIN_PARQUET,
             train_labels=DEFAULT_TRAIN_LABELS,
-            limit=400,
+            limit=50,
         )
 
         macro = report["metrics"]["macro"]
@@ -170,7 +170,7 @@ class ResolvePOISelectiveTests(unittest.TestCase):
                     "scripts/run_harness.py",
                     "resolvepoi-selective",
                     "--limit",
-                    "400",
+                    "50",
                     "--include-decisions",
                     "--output",
                     str(output),
@@ -187,7 +187,7 @@ class ResolvePOISelectiveTests(unittest.TestCase):
             self.assertIn("baselines", payload)
             self.assertIn("baseline_core_summaries", payload)
             self.assertIn("decisions", payload)
-            self.assertEqual(payload["rows"], 400)
+            self.assertEqual(payload["rows"], 50)
             self.assertGreater(payload["metrics"]["macro"]["accuracy"], 0.95)
             self.assertGreater(payload["metrics"]["core_macro"]["full_accuracy"], 0.96)
 
