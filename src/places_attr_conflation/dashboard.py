@@ -233,7 +233,7 @@ def _compare_caveat(compare: dict[str, object] | None) -> str:
     targeted = compare["targeted"]
     total = targeted.get("total")
     if isinstance(total, int) and total <= 5:
-        return f"Retrieval result is based on {total} replay case(s); treat 100% values as directional, not final."
+        return f"Retrieval result is based on {total} replay case(s); treat 100% values as fixture-local signal, not final."
     if isinstance(total, int):
         return f"Retrieval result is based on {total} replay cases."
     return "Retrieval sample size is not available."
@@ -246,8 +246,8 @@ def _resolver_caveat(combined: dict[str, object] | None) -> str:
     if isinstance(decisions, dict) and isinstance(decisions.get("total"), int):
         total = decisions["total"]
         if total <= 10:
-            return f"Resolver metrics are based on {total} labeled cases; use them as a current snapshot, not a final verdict."
-        return f"Resolver metrics are based on {total} labeled cases."
+            return f"Resolver metrics are based on {total} labeled cases; use them as fixture-local signal, not a final verdict."
+        return f"Resolver metrics are based on {total} labeled cases; they are fixture-local, not production proof."
     return "Resolver sample size is not available."
 
 
@@ -773,7 +773,7 @@ def _selective_milestones(selective: dict[str, object] | None, tests_passed: int
         {
             "status": "done",
             "title": "Dashboard and comparison docs cleaned up",
-            "body": f"Current artifacts are surfaced from reports/dashboard/latest.json and the current test suite is documented as {tests_passed or 'unknown'} tests passed.",
+            "body": f"Current artifacts are surfaced from the generated dashboard manifest and the repo comparison document records {tests_passed or 'unknown'} tests passed.",
         },
     ]
 
@@ -1599,14 +1599,14 @@ def render_markdown(data: DashboardData) -> str:
         "# MLAttributes Dashboard",
         "",
         "This is the human-readable status page for MLAttributes.",
-        "Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark. It is shippable as a project milestone, but not yet a production accuracy claim.",
+        "Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark. It is shippable as a project milestone, but not a production accuracy claim.",
         "",
         "## Current Read",
         "",
         f"- {_compare_caveat(data.compare)}",
         f"- {_resolver_caveat(data.combined)}",
         "- Working Prototype: ResolvePOI Baseline, Retrieval Arms, Website Authority, and Hard PAC Benchmark remain available in the deep dive below.",
-        "- Current Verdict: the architecture is differentiated; the proof still needs broader replay coverage before anyone should call it production-ready.",
+        "- Current Verdict: the architecture is differentiated; the proof still needs broader replay coverage and more abstain cases before anyone should call it production-ready.",
         "",
         "## Plain-English Summary",
         "",
@@ -1632,9 +1632,9 @@ def render_markdown(data: DashboardData) -> str:
         "",
         f"- Selective router: {_pct((selective_metrics.get('macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('macro'), dict) else None)} all-attribute / {_pct((selective_metrics.get('core_macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('core_macro'), dict) else None)} core.",
         f"- Claim-level hard cases: {_pct(((hard_cases.get('resolver_v2') or {}).get('accuracy')) if isinstance(hard_cases, dict) else None)} accuracy / {_pct(((hard_cases.get('resolver_v2') or {}).get('abstention_rate')) if isinstance(hard_cases, dict) else None)} abstention.",
-        f"- Identity-gated v6: {_pct((((data.benchmark_v6 or {}).get('resolver_v6') or {}).get('answerable_accuracy')) if isinstance(data.benchmark_v6, dict) else None)} answerable / {_pct((((data.benchmark_v6 or {}).get('resolver_v6') or {}).get('expected_behavior_accuracy')) if isinstance(data.benchmark_v6, dict) else None)} expected behavior.",
+        f"- Identity-gated v6: {_pct((((data.benchmark_v6 or {}).get('resolver_v6') or {}).get('answerable_accuracy')) if isinstance(data.benchmark_v6, dict) else None)} answerable / {_pct((((data.benchmark_v6 or {}).get('resolver_v6') or {}).get('expected_behavior_accuracy')) if isinstance(data.benchmark_v6, dict) else None)} expected behavior on the hard fixture.",
         f"- Santa Cruz challenge: {_pct((((santa_cases.get('expected_behavior') or {}).get('resolver_v2') or {}).get('accuracy')) if isinstance(santa_cases, dict) else None)} expected-behavior accuracy on authority-page ambiguity.",
-        f"- PAC hard benchmark: {_pct(((data.pac_benchmark or {}).get('abstention') or {}).get('correct_abstention_rate') if isinstance(data.pac_benchmark, dict) else None)} correct abstention; identity drift precision/recall {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_precision') if isinstance(data.pac_benchmark, dict) else None)} / {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_recall') if isinstance(data.pac_benchmark, dict) else None)}.",
+        f"- PAC hard benchmark: {_pct(((data.pac_benchmark or {}).get('abstention') or {}).get('correct_abstention_rate') if isinstance(data.pac_benchmark, dict) else None)} correct abstention on the curated abstain set; identity drift precision/recall {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_precision') if isinstance(data.pac_benchmark, dict) else None)} / {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_recall') if isinstance(data.pac_benchmark, dict) else None)}.",
         f"- Retrieval replay: {_pct(((data.compare or {}).get('targeted') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} targeted vs {_pct(((data.compare or {}).get('fallback') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} fallback.",
         f"- Test suite: {_num(data.repo_comparison_tests)} tests passed.",
         "",
@@ -1837,7 +1837,7 @@ def render_html(data: DashboardData) -> str:
             "<div class='eyebrow'>Current State</div>",
             "<h1>MLAttributes Dashboard</h1>",
             "<p class='lead'>This is the human-readable status page for MLAttributes. Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz replay challenge, and a selective ResolvePOI benchmark.</p>",
-            "<p class='section-note'>Current Verdict: shippable as a project milestone; not yet a production accuracy claim. treat 100% values as directional.</p>",
+            "<p class='section-note'>Current Verdict: shippable as a project milestone; not yet a production accuracy claim. Treat 100% values as fixture-local signals.</p>",
             "<ul class='detail-list'>",
             "<li>The strongest numeric result is the ResolvePOI selective router.</li>",
             "<li>The strongest architecture is the claim-level EvidenceGraph resolver.</li>",
@@ -1849,7 +1849,7 @@ def render_html(data: DashboardData) -> str:
             "<div class='panel pad hero-stats'>",
             f"<div><strong>Selective router</strong><div class='muted'>{html.escape(_pct((selective_metrics.get('macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('macro'), dict) else None))} all-attribute / {html.escape(_pct((selective_metrics.get('core_macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('core_macro'), dict) else None))} core</div></div>",
             f"<div><strong>PAC hard benchmark</strong><div class='muted'>{html.escape(_pct(((data.pac_benchmark or {}).get('abstention') or {}).get('correct_abstention_rate') if isinstance(data.pac_benchmark, dict) else None))} correct abstention</div></div>",
-            f"<div><strong>Tests</strong><div class='muted'>{html.escape(_num(data.repo_comparison_tests))} tests passed</div></div>",
+            f"<div><strong>Tests</strong><div class='muted'>{html.escape(_num(data.repo_comparison_tests))} tests passed in the repo comparison report</div></div>",
             "</div>",
             "</div>",
             "</section>",

@@ -255,7 +255,7 @@ class DashboardTests(unittest.TestCase):
             self.assertEqual(data.paths["compare"], str(current_compare))
             self.assertNotIn(str(stale_baseline), data.paths.values())
             self.assertIn("## Current Read", markdown)
-            self.assertIn("treat 100% values as directional", markdown)
+            self.assertIn("treat 100% values as fixture-local signal", markdown)
             self.assertIn("Resolver metrics are based on 4 labeled cases", markdown)
             self.assertIn("ResolvePOI Baseline", markdown)
             self.assertIn("Retrieval Arms", markdown)
@@ -273,7 +273,7 @@ class DashboardTests(unittest.TestCase):
             self.assertIn("Hard PAC Readiness", html)
             self.assertIn("data-view='pac'", html)
             self.assertIn("data-view='baseline'", html)
-            self.assertIn("treat 100% values as directional", html)
+            self.assertIn("Treat 100% values as fixture-local signals", html)
 
     def test_dashboard_html_renders_when_reports_are_missing(self):
         with tempfile.TemporaryDirectory() as tmpdir:
