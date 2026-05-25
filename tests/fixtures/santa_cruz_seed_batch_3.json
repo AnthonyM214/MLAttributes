@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "episodes": [
+    {
+      "case_id": "ca-seed3-locator-website",
+      "attribute": "website",
+      "case_type": "BRANCH_LOCATOR",
+      "expected_abstain": false,
+      "expected_decision": "https://www.harborcafe.example.com/locations/monterey",
+      "gold_value": "https://www.harborcafe.example.com/locations/monterey",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "name": "Harbor Cafe Monterey",
+        "region": "CA",
+        "website": "https://www.harborcafe.example.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Harbor Cafe Monterey locations website",
+          "fetched_pages": [
+            {
+              "url": "https://www.harborcafe.example.com/locations/monterey",
+              "title": "Harbor Cafe Monterey",
+              "page_text": "Find the Monterey location and directions.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "website": "https://www.harborcafe.example.com/locations/monterey"
+              },
+              "recency_days": 4,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Branch locator page exposes the Monterey branch URL."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed3-phone-direct",
+      "attribute": "phone",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "8315554400",
+      "gold_value": "8315554400",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Carmel-by-the-Sea",
+        "current_phone": "8315554400",
+        "name": "Carmel Coffee Co.",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Carmel Coffee Co phone",
+          "fetched_pages": [
+            {
+              "url": "https://www.carmelcoffee.example.com/contact",
+              "title": "Contact Carmel Coffee Co.",
+              "page_text": "Call us at (831) 555-4400.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "phone": "8315554400"
+              },
+              "recency_days": 3,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed3-address-registry",
+      "attribute": "address",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "211 Alvarado St, Monterey, CA 93940",
+      "gold_value": "211 Alvarado St, Monterey, CA 93940",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "name": "Monterey Arts Annex",
+        "region": "CA"
+      },
+      "truth_source_type": "government",
+      "search_attempts": [
+        {
+          "layer": "government",
+          "query": "Monterey Arts Annex address registry",
+          "fetched_pages": [
+            {
+              "url": "https://monterey.example.gov/business/arts-annex",
+              "title": "Business Registry",
+              "page_text": "211 Alvarado St, Monterey, CA 93940",
+              "source_type": "government",
+              "extracted_values": {
+                "address": "211 Alvarado St, Monterey, CA 93940"
+              },
+              "recency_days": 10,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed3-name-official",
+      "attribute": "name",
+      "case_type": "ABOUT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "Pacific Grove Natural History Museum",
+      "gold_value": "Pacific Grove Natural History Museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Pacific Grove",
+        "name": "Pacific Grove Natural History Museum",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Pacific Grove Natural History Museum about",
+          "fetched_pages": [
+            {
+              "url": "https://www.pacificgrovemuseum.example.org/about",
+              "title": "About the Museum",
+              "page_text": "Pacific Grove Natural History Museum is our full name.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "name": "Pacific Grove Natural History Museum"
+              },
+              "recency_days": 5,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full museum name."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed3-category-official",
+      "attribute": "category",
+      "case_type": "OFFICIAL_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "aquarium",
+      "gold_value": "aquarium",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "name": "Monterey Bay Aquarium",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Monterey Bay Aquarium category",
+          "fetched_pages": [
+            {
+              "url": "https://www.montereybayaquarium.org/visit",
+              "title": "Visit Monterey Bay Aquarium",
+              "page_text": "World-class aquarium exhibits, tickets, and visitor information.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "category": "aquarium"
+              },
+              "recency_days": 6,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Official visitor page supports the aquarium category."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed3-social-only-abstain",
+      "attribute": "website",
+      "case_type": "SOCIAL_ONLY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Salinas",
+        "name": "Salinas Art House",
+        "region": "CA"
+      },
+      "truth_source_type": "social",
+      "search_attempts": [
+        {
+          "layer": "social",
+          "query": "Salinas Art House instagram",
+          "fetched_pages": [
+            {
+              "url": "https://www.instagram.com/salinasarthouse/",
+              "title": "Salinas Art House",
+              "page_text": "Photos and events only; no official website listed.",
+              "source_type": "social",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should not prove the website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed3-generic-homepage-abstain",
+      "attribute": "website",
+      "case_type": "GENERIC_HOMEPAGE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Carmel-by-the-Sea",
+        "name": "Carmel Harbor Music Hall",
+        "region": "CA",
+        "website": "https://www.carmelharmonica.example.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Carmel Harbor Music Hall website",
+          "fetched_pages": [
+            {
+              "url": "https://www.carmelharmonica.example.com",
+              "title": "Carmel Harbor Music Hall",
+              "page_text": "Welcome to our homepage. Event listings, directions, and tickets.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 8,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Generic homepage does not prove the branch-specific website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed3-branch-ambiguity-phone",
+      "attribute": "phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "current_phone": "8315557700",
+        "name": "Monterey Bay Library Downtown Branch",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Monterey Bay Library branch phones",
+          "fetched_pages": [
+            {
+              "url": "https://www.montereylibrary.example.org/branches/",
+              "title": "Branch Libraries - Monterey Bay Library",
+              "page_text": "Downtown branch\nSeaside branch\nDel Rey Oaks branch",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 7,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branch phones on the same page; branch selection should abstain without stronger context."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed3-stale-archive-abstain",
+      "attribute": "website",
+      "case_type": "STALE_ARCHIVE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Salinas",
+        "name": "Salinas Art House",
+        "region": "CA",
+        "website": "https://www.salinasarthouse.example.org"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Salinas Art House old archive website",
+          "fetched_pages": [
+            {
+              "url": "https://archive.salinasarthouse.example.org/2018/",
+              "title": "Salinas Art House Archive",
+              "page_text": "Archived location page from the old site. The current website moved.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 1200,
+              "zombie_score": 0.9,
+              "identity_change_score": 0.4,
+              "notes": "Stale archive page should not prove the current website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed3-wrong-entity-phone-abstain",
+      "attribute": "phone",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "name": "Monterey Harbor Office",
+        "region": "CA",
+        "current_phone": "8315558800"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Monterey Harbor Office wrong tenant phone",
+          "fetched_pages": [
+            {
+              "url": "https://www.montereyharbor.example.com/tenant-directory",
+              "title": "Tenant Directory",
+              "page_text": "Harbor Office, wrong tenant, suite B only.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 12,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.8,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

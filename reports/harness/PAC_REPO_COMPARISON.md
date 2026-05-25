@@ -24,11 +24,12 @@ Current outputs:
 
 | Artifact | Result |
 | --- | --- |
-| Unit tests | `247` tests passed |
+| Unit tests | `248` tests passed |
 | Santa Cruz expanded corpus | `24` episodes; targeted authoritative found rate `1.0`, fallback `0.0`; final accuracy `1.0` |
 | Santa Cruz challenge corpus | `50` curated replay episodes across website, phone, address, category, and name; resolver v2 expected-behavior accuracy `1.0`, raw accuracy `0.9565`, abstention rate `0.1200`, high-confidence-wrong rate `0.0`; v2 adds branch-context phone/address, office-vs-mailing address, official-vs-social website, official-vs-directory category, title-cleaned name, full-name-vs-acronym, place-name-vs-host-building, official-category-vs-tourism tags, government locator website, relay/fax/footer phone rejection, department-location-vs-city-footer address selection, official phone-vs-fax cases, official service-page category conflicts, program-tenant category conflicts, adjacent-facility category conflicts, branch-specific government-locator website extraction, offsite-event address conflict handling, multi-branch commercial location selection, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, social-only website abstention, generic homepage abstention, stale/closed phone abstention, and wrong-entity tenant website abstention without prefilled extraction |
 | Santa Cruz seed batch | `5` episodes; expected-behavior accuracy `1.0`, abstention rate `0.2`, high-confidence-wrong rate `0.0`; first seed batch for the next 50-100 case expansion |
 | Santa Cruz seed batch 2 | `8` episodes; expected-behavior accuracy `1.0`, abstention rate `0.5`, high-confidence-wrong rate `0.0`; second seed tranche with branch ambiguity, social-only abstention, generic-homepage abstention, and additional branch/address/name/category coverage |
+| Santa Cruz seed batch 3 | `10` episodes; expected-behavior accuracy `1.0`, abstention rate `0.5`, high-confidence-wrong rate `0.0`; third seed tranche with Monterey/Salinas/Carmel cases that keep the replay expansion abstention-heavy |
 | Retrieval compare | targeted authoritative found `0.75`, fallback `0.0`; targeted citation precision `0.75`; citation precision proxy delta `+1.0` |
 | Replay stats | `4` episodes, `8` attempts, `9` pages, authoritative pages rate `0.3333` |
 | Website authority | authoritative found rate `1.0`, false official rate `0.0` |

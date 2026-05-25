@@ -21,6 +21,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `tests/fixtures/santa_cruz_challenge_replay.json`
 - `tests/fixtures/santa_cruz_seed_batch.json`
 - `tests/fixtures/santa_cruz_seed_batch_2.json`
+- `tests/fixtures/santa_cruz_seed_batch_3.json`
 - `docs/corpus_expansion_strategy.md`
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
 - `reports/harness/PAC_REPO_COMPARISON.md`

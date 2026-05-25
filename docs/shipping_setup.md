@@ -2,6 +2,8 @@
 
 This repo is ready for reproducible benchmark work when these pieces are enabled:
 
+The primary shipped path is the installed entry-point set (`mlattributes-eval`, `pac-benchmark-v2`, `pac-benchmark-v3`, `pac-benchmark-v4`, `pac-benchmark-v5`, `pac-benchmark-v6`, `pac-benchmark-full-replay`, `pac-benchmark-pooled`, `pac-dashboard`, and `pac-resolvepoi-selective`). The `scripts/run_harness.py` flows below remain available for secondary or legacy operational workflows that do not yet have a first-class installed alias.
+
 ## Codex-side settings
 
 - `multi_agent` enabled for parallel repo survey, retrieval, baseline, and resolver work.

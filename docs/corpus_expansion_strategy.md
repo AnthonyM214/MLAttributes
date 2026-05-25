@@ -267,6 +267,10 @@ government host-page tenant website abstention.
 The second expansion seed is now checked in as `tests/fixtures/santa_cruz_seed_batch_2.json`
 to keep the replay expansion visible as a separate tranche instead of hiding it
 inside the older challenge corpus.
+The third expansion seed is now checked in as `tests/fixtures/santa_cruz_seed_batch_3.json`;
+it shifts the second-cluster California tranche toward the abstention-heavy mix
+so the corpus growth stays balanced instead of turning into another easy-positive
+set.
 
 Remaining quality gaps before treating this as benchmark-grade:
 

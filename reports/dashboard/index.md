@@ -36,6 +36,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Selective router: The ResolvePOI selective router remains the strongest numeric result: 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.
 - Three-corpus pooled router: James labels are now loaded too, but the pooled router is only a diagnostic: it nudges ResolvePOI holdout from 75.0% to 75.3%, does not beat cross-corpus on David (67.4% vs 66.0%), and leaves hard cases tied at 84.6% accuracy.
 - Santa Cruz seed batch 2: The second Santa Cruz seed tranche is now checked in as 8 episodes: 4 answerable and 4 explicit abstain, so the next 50-to-100 case expansion stays visible instead of hiding inside the older challenge corpus.
+- Santa Cruz seed batch 3: The third seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, which keeps the California expansion honest instead of drifting back toward easy positives.
 - Merged corpus OKR: The collected replay tree now loads from 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.
 - Research alignment: The research note (/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.
 
@@ -67,7 +68,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Santa Cruz challenge: 100.0% expected-behavior accuracy on authority-page ambiguity.
 - PAC hard benchmark: 100.0% correct abstention on the curated abstain set; identity drift precision/recall 100.0% / 100.0%.
 - Retrieval replay: 100.0% targeted vs 0.0% fallback.
-- Test suite: 247 tests passed.
+- Test suite: 248 tests passed.
 
 ## Completed Milestones
 
@@ -75,7 +76,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - [x] Identity scoring split out - Place identity signals now live in identity.py and are used by claim extraction instead of being buried in the resolver.
 - [x] Selective router integrated - The ResolvePOI router is exposed as an opt-in learned reranker. Holdout full accuracy is 97.1% with 20.2 pts lift over the current baseline.
 - [x] Split verification made explicit - Holdout/train separation is inspectable and leak-checked instead of being implied by filenames.
-- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from the generated dashboard manifest and the repo comparison document records 247 tests passed.
+- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from the generated dashboard manifest and the repo comparison document records 248 tests passed.
 
 ## Work Ledger
 
@@ -86,7 +87,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Already done: graph-guided v5 planner: The new v5 planner keeps 100.0% answerable accuracy and 88.9% expected behavior on the hard replay, keeps unsafe predictions to 40.0%, and adds 11.1 pts coverage vs v4.
 - Already done: full collected replay benchmark: The collected replay benchmark merges 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage.
 - Already done: pooled three-corpus diagnostic: James CSV labels now load correctly, but the pooled router only nudges ResolvePOI holdout, does not beat cross-corpus on David, and leaves hard cases tied at 84.6% accuracy / 27.8% abstention.
-- Already done: repo comparison and dashboard cleanup: The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with 247 passing tests as the reproducibility proof.
+- Already done: repo comparison and dashboard cleanup: The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with 248 passing tests as the reproducibility proof.
 - Do not duplicate: Do not spend time on another pure current-vs-base classifier, a fixture-only one-off proof, or dashboard polish that does not add replay coverage, abstention quality, or evidence structure.
 - Work forward: The next real leverage is a larger replay corpus, better public proof paths, calibrated claim scoring, and unifying the selective router with the EvidenceGraph path.
 
@@ -108,7 +109,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 | Retrieval proof | 100.0% targeted vs 0.0% fallback | Citation precision: 100.0% vs 0.0%; replay cases: 1 |
 | Pooled router | 75.3% ResolvePOI / 66.0% David | Vs cross-corpus: 75.0% / 67.4%; hard cases tied at 84.6% |
 | Website authority | 100.0% authoritative / 0.0% false official | Selected official: 100.0%; place-relevant official: 100.0% |
-| Test suite | 247 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
+| Test suite | 248 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
 
 ## Next Steps
 
