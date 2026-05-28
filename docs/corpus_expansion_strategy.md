@@ -278,6 +278,8 @@ The fifth expansion seed is now checked in as `tests/fixtures/santa_cruz_seed_ba
 it widens the corpus into a cross-city national tranche while keeping the same
 answerable-vs-abstain balance so the benchmark story does not regress back to
 easy positives.
+The sixth expansion seed is now checked in as `tests/fixtures/santa_cruz_seed_batch_6.json`;
+it pushes the replay expansion past the +50-case mark with another abstention-heavy cross-city tranche so the corpus target is met without collapsing into easy positives.
 
 Remaining quality gaps before treating this as benchmark-grade:
 

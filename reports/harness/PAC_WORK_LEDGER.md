@@ -26,6 +26,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
 - The new OKR and research alignment notes capture the claim-coverage pivot and the supporting graph/noise-control rationale.
 - Seed batch 4 extends the replay expansion into a cross-city, abstention-heavy California tranche.
 - Seed batch 5 extends the replay expansion into a cross-city national tranche while keeping the answerable/abstain balance visible.
+- Seed batch 6 pushes the replay expansion past the +50-case mark with another abstention-heavy cross-city tranche.
 - The dashboard is cleaned up and human-readable.
 - The repo comparison doc preserves the public ProjectTerra PAC timeline.
 - The CI determinism issue around the evidence workplan test has already been fixed.

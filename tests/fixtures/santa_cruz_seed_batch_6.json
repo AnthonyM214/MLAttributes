@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "episodes": [
+    {
+      "case_id": "us-seed6-locator-website",
+      "attribute": "website",
+      "case_type": "BRANCH_LOCATOR",
+      "expected_abstain": false,
+      "expected_decision": "https://www.crescentbooks.example.com/locations/miami",
+      "gold_value": "https://www.crescentbooks.example.com/locations/miami",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Miami",
+        "name": "Crescent Books Miami",
+        "region": "FL",
+        "website": "https://www.crescentbooks.example.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Crescent Books Miami locations website",
+          "fetched_pages": [
+            {
+              "url": "https://www.crescentbooks.example.com/locations/miami",
+              "title": "Crescent Books Miami",
+              "page_text": "Find the Miami location and directions.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "website": "https://www.crescentbooks.example.com/locations/miami"
+              },
+              "recency_days": 4,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Branch locator page exposes the Miami branch URL."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed6-phone-direct",
+      "attribute": "phone",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "4045550188",
+      "gold_value": "4045550188",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Atlanta",
+        "current_phone": "4045550188",
+        "name": "Pine Row Café Atlanta",
+        "region": "GA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Pine Row Café Atlanta phone",
+          "fetched_pages": [
+            {
+              "url": "https://www.pinerowcafe.example.com/contact",
+              "title": "Contact Pine Row Café Atlanta",
+              "page_text": "Call us at (404) 555-0188.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "phone": "4045550188"
+              },
+              "recency_days": 5,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed6-address-registry",
+      "attribute": "address",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "88 Elm St, Houston, TX 77002",
+      "gold_value": "88 Elm St, Houston, TX 77002",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Houston",
+        "name": "Bayside Print Houston",
+        "region": "TX"
+      },
+      "truth_source_type": "government",
+      "search_attempts": [
+        {
+          "layer": "government",
+          "query": "Bayside Print Houston address registry",
+          "fetched_pages": [
+            {
+              "url": "https://houston.example.gov/business/bayside-print",
+              "title": "Business Registry",
+              "page_text": "88 Elm St, Houston, TX 77002",
+              "source_type": "government",
+              "extracted_values": {
+                "address": "88 Elm St, Houston, TX 77002"
+              },
+              "recency_days": 11,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed6-name-official",
+      "attribute": "name",
+      "case_type": "ABOUT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "Hudson Children's Theater",
+      "gold_value": "Hudson Children's Theater",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Brooklyn",
+        "name": "Hudson Children's Theater",
+        "region": "NY"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Hudson Children's Theater about",
+          "fetched_pages": [
+            {
+              "url": "https://www.hudsontheater.example.org/about",
+              "title": "About the Theater",
+              "page_text": "Hudson Children's Theater is our full name.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "name": "Hudson Children's Theater"
+              },
+              "recency_days": 6,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full theater name."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed6-category-official",
+      "attribute": "category",
+      "case_type": "OFFICIAL_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "children's museum",
+      "gold_value": "children's museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Albuquerque",
+        "name": "Desert Light Museum",
+        "region": "NM"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Desert Light Museum category",
+          "fetched_pages": [
+            {
+              "url": "https://www.desertlightmuseum.example.com/visit",
+              "title": "Visit Desert Light Museum",
+              "page_text": "Interactive children's museum exhibits, tickets, and visitor information.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "category": "children's museum"
+              },
+              "recency_days": 7,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Official visitor page supports the children's museum category."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed6-social-only-abstain",
+      "attribute": "website",
+      "case_type": "SOCIAL_ONLY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Tampa",
+        "name": "Tampa Makers Loft",
+        "region": "FL"
+      },
+      "truth_source_type": "social",
+      "search_attempts": [
+        {
+          "layer": "social",
+          "query": "Tampa Makers Loft instagram",
+          "fetched_pages": [
+            {
+              "url": "https://www.instagram.com/tampamakersloft/",
+              "title": "Tampa Makers Loft",
+              "page_text": "Photos and events only; no official website listed.",
+              "source_type": "social",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should not prove the website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed6-generic-homepage-abstain",
+      "attribute": "website",
+      "case_type": "GENERIC_HOMEPAGE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Salt Lake City",
+        "name": "Canyon Arts Hall",
+        "region": "UT",
+        "website": "https://www.canyonartshall.example.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Canyon Arts Hall website",
+          "fetched_pages": [
+            {
+              "url": "https://www.canyonartshall.example.com",
+              "title": "Canyon Arts Hall",
+              "page_text": "Welcome to our homepage. Events, tickets, and directions.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 7,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Generic homepage does not prove the branch-specific website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed6-stale-archive-abstain",
+      "attribute": "website",
+      "case_type": "STALE_ARCHIVE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "San Antonio",
+        "name": "San Antonio Lantern Theater",
+        "region": "TX",
+        "website": "https://www.sanantoniolantern.example.org"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "San Antonio Lantern Theater archive website",
+          "fetched_pages": [
+            {
+              "url": "https://archive.sanantoniolantern.example.org/2019/",
+              "title": "San Antonio Lantern Theater Archive",
+              "page_text": "Archived location page from the old site. The current website moved.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 1600,
+              "zombie_score": 0.94,
+              "identity_change_score": 0.5,
+              "notes": "Stale archive page should not prove the current website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed6-wrong-entity-phone-abstain",
+      "attribute": "phone",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Orlando",
+        "current_phone": "4075556600",
+        "name": "Lakeview Office",
+        "region": "FL"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Lakeview Office wrong tenant phone",
+          "fetched_pages": [
+            {
+              "url": "https://www.lakeview.example.com/tenant-directory",
+              "title": "Tenant Directory",
+              "page_text": "Lakeview Office, wrong tenant, suite B only.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 10,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.86,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed6-branch-ambiguity-phone",
+      "attribute": "phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Charlotte",
+        "current_phone": "7045557700",
+        "name": "Charlotte Library Branch",
+        "region": "NC"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Charlotte Library branch phones",
+          "fetched_pages": [
+            {
+              "url": "https://www.charlottelibrary.example.org/branches/",
+              "title": "Branch Libraries - Charlotte Library",
+              "page_text": "North branch\nSouth branch\nEast branch",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 8,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branches without exposing a unique phone in the text."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

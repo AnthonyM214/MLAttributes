@@ -1063,6 +1063,13 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
             ),
         },
         {
+            "title": "Santa Cruz seed batch 6",
+            "body": (
+                "The sixth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, "
+                "so the corpus growth now clears the +50-case target with another cross-city national tranche."
+            ),
+        },
+        {
             "title": "Merged corpus OKR",
             "body": (
                 f"The collected replay tree now loads from {_num(full_merge.get('input_files'))} files into {_num(full_merge.get('merged_episodes'))} episodes and {_num(full_merge.get('merged_pages'))} pages, "
