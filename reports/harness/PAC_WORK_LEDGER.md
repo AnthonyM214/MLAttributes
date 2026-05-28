@@ -15,7 +15,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
 - The cross-corpus selective router has been trained against ResolvePOI + David feature corpora and now serves as the learned-router baseline when we want safer abstention on hard cases.
 - The three-corpus pooled router now loads James labels correctly, but it remains diagnostic rather than breakthrough: it nudges ResolvePOI holdout a little, does not improve David over cross-corpus, and leaves hard cases tied.
 - The identity-gated `resolver_v6.py` planner is now in place and gives the repo its cleanest safe-abstention headline so far: hard-case answerable accuracy stays at `100.0%`, expected-behavior accuracy reaches `100.0%`, and unsafe predictions drop to `0.0%`.
-- The Santa Cruz replay corpus exists in both starter and expanded forms.
+- The Santa Cruz replay corpus exists in starter, expanded, and seed-batch tranches.
 - The hard-case PAC benchmark now includes:
   - abstentions
   - business registry evidence
@@ -23,11 +23,9 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
   - mixed-authoritative corroboration
   - identity drift labels
 - The large replay corpus diagnosis shows the next bottleneck is claim coverage, not more resolver tuning.
-- The large replay corpus plus the v4 recovery diagnostic both point to the same conclusion: coverage is the bottleneck, not another abstention pass.
-- The new OKR in `PAC_OKR.md` formalizes the pivot toward claim-construction coverage and graph-guided noise control.
-- The research alignment note in `PAC_RESEARCH_ALIGNMENT.md` explains why current PAC research points to claim graphs, simplified retrieval, noise suppression, and abstention.
-- The dashboard has been cleaned up and made human-readable.
-- The repo comparison doc covers the public ProjectTerra PAC repos and preserves the timeline of work.
+- The new OKR and research alignment notes capture the claim-coverage pivot and the supporting graph/noise-control rationale.
+- The dashboard is cleaned up and human-readable.
+- The repo comparison doc preserves the public ProjectTerra PAC timeline.
 - The CI determinism issue around the evidence workplan test has already been fixed.
 - The full test suite passes on this checkout.
 

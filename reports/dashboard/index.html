@@ -109,8 +109,8 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>Three-corpus pooled router</div><div class='detail'>James labels are now loaded too, but the pooled router is only a diagnostic: it nudges ResolvePOI holdout from 75.0% to 75.3%, does not beat cross-corpus on David (67.4% vs 66.0%), and leaves hard cases tied at 84.6% accuracy.</div></article>
 <article class='stat-card'><div class='label'>Santa Cruz seed batch 2</div><div class='detail'>The second Santa Cruz seed tranche is now checked in as 8 episodes: 4 answerable and 4 explicit abstain, so the next 50-to-100 case expansion stays visible instead of hiding inside the older challenge corpus.</div></article>
 <article class='stat-card'><div class='label'>Santa Cruz seed batch 3</div><div class='detail'>The third seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, which keeps the California expansion honest instead of drifting back toward easy positives.</div></article>
-<article class='stat-card'><div class='label'>Merged corpus OKR</div><div class='detail'>The collected replay tree now loads from 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.</div></article>
-<article class='stat-card'><div class='label'>Research alignment</div><div class='detail'>The research note (/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.</div></article>
+<article class='stat-card'><div class='label'>Merged corpus OKR</div><div class='detail'>The collected replay tree now loads from 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage. The new OKR (reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.</div></article>
+<article class='stat-card'><div class='label'>Research alignment</div><div class='detail'>The research note (reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.</div></article>
 </div>
 </section>
 <section>
@@ -118,7 +118,7 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <p class='section-note'>The repo’s current direction matches recent fact-verification and selective-decision research: claim graphs, simpler retrieval, noise control, and explicit abstention.</p>
 <ul class='detail-list panel pad'>
 <li>Paper-backed direction: claim graphs, graph-guided retrieval planning, noise suppression, and calibrated abstention.</li>
-<li>Research note: /home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md</li>
+<li>Research note: reports/harness/PAC_RESEARCH_ALIGNMENT.md</li>
 <li>Why it matters: the merged corpus shows claim coverage is the bottleneck, so the next gain comes from better evidence construction rather than another scorer.</li>
 </ul>
 </section>
@@ -400,7 +400,7 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <li>Attempts: 1</li>
 <li>Pages: 1</li>
 <li>Authoritative pages rate: 100.0%</li>
-<li>Last merged replay: /home/anthony/Overture/MLAttributes/reports/replay/merged_current.json</li>
+<li>Last merged replay: reports/replay/merged_current.json</li>
 </ul>
 </div>
 </details>
@@ -432,38 +432,38 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <summary>Report files</summary>
 <div class='panel-body'>
 <ul class='path-list'>
-<li><strong>baseline</strong>: <code>/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_current.json</code></li>
-<li><strong>benchmark_full_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_full_replay_current.json</code></li>
-<li><strong>benchmark_pooled</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_pooled_current.json</code></li>
-<li><strong>benchmark_v2_hard_cases</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_hard_cases_current.json</code></li>
-<li><strong>benchmark_v2_pac_hard_cases</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_pac_hard_cases_current.json</code></li>
-<li><strong>benchmark_v2_santa_cruz_challenge</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_santa_cruz_challenge_current.json</code></li>
-<li><strong>benchmark_v3_hard_cases</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v3_hard_cases_current.json</code></li>
-<li><strong>benchmark_v4</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v4_current.json</code></li>
-<li><strong>benchmark_v5</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v5_current.json</code></li>
-<li><strong>benchmark_v6</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v6_current.json</code></li>
-<li><strong>combined</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/all_current.json</code></li>
-<li><strong>compare</strong>: <code>/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_current.json</code></li>
-<li><strong>conflict_dorks</strong>: <code>/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_current.csv</code></li>
-<li><strong>dataset</strong>: <code>/home/anthony/Overture/MLAttributes/reports/data/project_a_summary.json</code></li>
-<li><strong>engineering_report</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_ENGINEERING_REPORT.md</code></li>
-<li><strong>evidence</strong>: <code>/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_current.json</code></li>
-<li><strong>golden</strong>: <code>/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_current.json</code></li>
-<li><strong>merged_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/replay/merged_current.json</code></li>
-<li><strong>okr</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md</code></li>
-<li><strong>pac_benchmark</strong>: <code>/home/anthony/Overture/MLAttributes/reports/pac_benchmark/pac_benchmark_current.json</code></li>
-<li><strong>replay_stats</strong>: <code>/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_current.json</code></li>
-<li><strong>repo_comparison</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md</code></li>
-<li><strong>rerank</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/rerank_current.json</code></li>
-<li><strong>research_alignment</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md</code></li>
-<li><strong>resolvepoi_selective</strong>: <code>/home/anthony/Overture/MLAttributes/reports/resolvepoi_selective/resolvepoi_selective_current.json</code></li>
-<li><strong>resolver_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_current.json</code></li>
+<li><strong>baseline</strong>: <code>reports/baseline_metrics/resolvepoi_current.json</code></li>
+<li><strong>benchmark_full_replay</strong>: <code>reports/harness/benchmark_full_replay_current.json</code></li>
+<li><strong>benchmark_pooled</strong>: <code>reports/harness/benchmark_pooled_current.json</code></li>
+<li><strong>benchmark_v2_hard_cases</strong>: <code>reports/harness/benchmark_v2_hard_cases_current.json</code></li>
+<li><strong>benchmark_v2_pac_hard_cases</strong>: <code>reports/harness/benchmark_v2_pac_hard_cases_current.json</code></li>
+<li><strong>benchmark_v2_santa_cruz_challenge</strong>: <code>reports/harness/benchmark_v2_santa_cruz_challenge_current.json</code></li>
+<li><strong>benchmark_v3_hard_cases</strong>: <code>reports/harness/benchmark_v3_hard_cases_current.json</code></li>
+<li><strong>benchmark_v4</strong>: <code>reports/harness/benchmark_v4_current.json</code></li>
+<li><strong>benchmark_v5</strong>: <code>reports/harness/benchmark_v5_current.json</code></li>
+<li><strong>benchmark_v6</strong>: <code>reports/harness/benchmark_v6_current.json</code></li>
+<li><strong>combined</strong>: <code>reports/harness/all_current.json</code></li>
+<li><strong>compare</strong>: <code>reports/retrieval_compare/compare_current.json</code></li>
+<li><strong>conflict_dorks</strong>: <code>reports/ranker/conflict_dorks_current.csv</code></li>
+<li><strong>dataset</strong>: <code>reports/data/project_a_summary.json</code></li>
+<li><strong>engineering_report</strong>: <code>reports/harness/PAC_ENGINEERING_REPORT.md</code></li>
+<li><strong>evidence</strong>: <code>reports/evidence/evidence-eval_current.json</code></li>
+<li><strong>golden</strong>: <code>reports/golden/project_a_golden_current.json</code></li>
+<li><strong>merged_replay</strong>: <code>reports/replay/merged_current.json</code></li>
+<li><strong>okr</strong>: <code>reports/harness/PAC_OKR.md</code></li>
+<li><strong>pac_benchmark</strong>: <code>reports/pac_benchmark/pac_benchmark_current.json</code></li>
+<li><strong>replay_stats</strong>: <code>reports/replay_stats/replay_stats_current.json</code></li>
+<li><strong>repo_comparison</strong>: <code>reports/harness/PAC_REPO_COMPARISON.md</code></li>
+<li><strong>rerank</strong>: <code>reports/harness/rerank_current.json</code></li>
+<li><strong>research_alignment</strong>: <code>reports/harness/PAC_RESEARCH_ALIGNMENT.md</code></li>
+<li><strong>resolvepoi_selective</strong>: <code>reports/resolvepoi_selective/resolvepoi_selective_current.json</code></li>
+<li><strong>resolver_replay</strong>: <code>reports/resolver_replay/resolver_on_replay_current.json</code></li>
 <li><strong>santa_cruz_challenge_corpus</strong>: <code>/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_challenge_replay.json</code></li>
 <li><strong>santa_cruz_expanded_corpus</strong>: <code>/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_replay_corpus_expanded.json</code></li>
-<li><strong>smoke</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/smoke_current.json</code></li>
-<li><strong>technical_summary</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/technical_summary.md</code></li>
-<li><strong>website_authority</strong>: <code>/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_current.json</code></li>
-<li><strong>work_ledger</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_WORK_LEDGER.md</code></li>
+<li><strong>smoke</strong>: <code>reports/harness/smoke_current.json</code></li>
+<li><strong>technical_summary</strong>: <code>reports/harness/technical_summary.md</code></li>
+<li><strong>website_authority</strong>: <code>reports/website_authority/website_authority_current.json</code></li>
+<li><strong>work_ledger</strong>: <code>reports/harness/PAC_WORK_LEDGER.md</code></li>
 </ul>
 </div>
 </details>
