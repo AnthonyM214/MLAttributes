@@ -40,13 +40,13 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Santa Cruz seed batch 4: The fourth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, so the California expansion now shows cross-city generalization instead of only Santa Cruz-shaped evidence.
 - Santa Cruz seed batch 5: The fifth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, so the replay corpus now shows a cross-city national tranche without losing the safe-abstain balance.
 - Santa Cruz seed batch 6: The sixth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, so the corpus growth now clears the +50-case target with another cross-city national tranche.
-- Merged corpus OKR: The collected replay tree now loads from 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage. The new OKR (reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.
-- Research alignment: The research note (reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.
+- Merged corpus OKR: The collected replay tree now loads from 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.
+- Research alignment: The research note (/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.
 
 ## Research Alignment
 
 - Paper-backed direction: claim graphs, graph-guided retrieval planning, noise suppression, and calibrated abstention.
-- Research note: reports/harness/PAC_RESEARCH_ALIGNMENT.md
+- Research note: /home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md
 - Why it matters: the merged corpus shows claim coverage is the bottleneck, so the next gain comes from better evidence construction rather than another scorer.
 
 ## What The 100% Numbers Mean
@@ -259,7 +259,7 @@ Episodes: 1
 Attempts: 1
 Pages: 1
 Authoritative pages rate: 100.0%
-Last merged replay: reports/replay/merged_current.json
+Last merged replay: /home/anthony/Overture/MLAttributes/reports/replay/merged_current.json
 
 ### PAC Hard Benchmark
 
@@ -303,35 +303,35 @@ Successful live checks: 0/1
 
 ### Report Files
 
-- `baseline`: `reports/baseline_metrics/resolvepoi_current.json`
-- `benchmark_full_replay`: `reports/harness/benchmark_full_replay_current.json`
-- `benchmark_pooled`: `reports/harness/benchmark_pooled_current.json`
-- `benchmark_v2_hard_cases`: `reports/harness/benchmark_v2_hard_cases_current.json`
-- `benchmark_v2_pac_hard_cases`: `reports/harness/benchmark_v2_pac_hard_cases_current.json`
-- `benchmark_v2_santa_cruz_challenge`: `reports/harness/benchmark_v2_santa_cruz_challenge_current.json`
-- `benchmark_v3_hard_cases`: `reports/harness/benchmark_v3_hard_cases_current.json`
-- `benchmark_v4`: `reports/harness/benchmark_v4_current.json`
-- `benchmark_v5`: `reports/harness/benchmark_v5_current.json`
-- `benchmark_v6`: `reports/harness/benchmark_v6_current.json`
-- `combined`: `reports/harness/all_current.json`
-- `compare`: `reports/retrieval_compare/compare_current.json`
-- `conflict_dorks`: `reports/ranker/conflict_dorks_current.csv`
-- `dataset`: `reports/data/project_a_summary.json`
-- `engineering_report`: `reports/harness/PAC_ENGINEERING_REPORT.md`
-- `evidence`: `reports/evidence/evidence-eval_current.json`
-- `golden`: `reports/golden/project_a_golden_current.json`
-- `merged_replay`: `reports/replay/merged_current.json`
-- `okr`: `reports/harness/PAC_OKR.md`
-- `pac_benchmark`: `reports/pac_benchmark/pac_benchmark_current.json`
-- `replay_stats`: `reports/replay_stats/replay_stats_current.json`
-- `repo_comparison`: `reports/harness/PAC_REPO_COMPARISON.md`
-- `rerank`: `reports/harness/rerank_current.json`
-- `research_alignment`: `reports/harness/PAC_RESEARCH_ALIGNMENT.md`
-- `resolvepoi_selective`: `reports/resolvepoi_selective/resolvepoi_selective_current.json`
-- `resolver_replay`: `reports/resolver_replay/resolver_on_replay_current.json`
+- `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_current.json`
+- `benchmark_full_replay`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_full_replay_current.json`
+- `benchmark_pooled`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_pooled_current.json`
+- `benchmark_v2_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_hard_cases_current.json`
+- `benchmark_v2_pac_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_pac_hard_cases_current.json`
+- `benchmark_v2_santa_cruz_challenge`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_santa_cruz_challenge_current.json`
+- `benchmark_v3_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v3_hard_cases_current.json`
+- `benchmark_v4`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v4_current.json`
+- `benchmark_v5`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v5_current.json`
+- `benchmark_v6`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v6_current.json`
+- `combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_current.json`
+- `compare`: `/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_current.json`
+- `conflict_dorks`: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_current.csv`
+- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary.json`
+- `engineering_report`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_ENGINEERING_REPORT.md`
+- `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_current.json`
+- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_current.json`
+- `merged_replay`: `/home/anthony/Overture/MLAttributes/reports/replay/merged_current.json`
+- `okr`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md`
+- `pac_benchmark`: `/home/anthony/Overture/MLAttributes/reports/pac_benchmark/pac_benchmark_current.json`
+- `replay_stats`: `/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_current.json`
+- `repo_comparison`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md`
+- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_current.json`
+- `research_alignment`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md`
+- `resolvepoi_selective`: `/home/anthony/Overture/MLAttributes/reports/resolvepoi_selective/resolvepoi_selective_current.json`
+- `resolver_replay`: `/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_current.json`
 - `santa_cruz_challenge_corpus`: `/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_challenge_replay.json`
 - `santa_cruz_expanded_corpus`: `/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_replay_corpus_expanded.json`
-- `smoke`: `reports/harness/smoke_current.json`
-- `technical_summary`: `reports/harness/technical_summary.md`
-- `website_authority`: `reports/website_authority/website_authority_current.json`
-- `work_ledger`: `reports/harness/PAC_WORK_LEDGER.md`
+- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_current.json`
+- `technical_summary`: `/home/anthony/Overture/MLAttributes/reports/harness/technical_summary.md`
+- `website_authority`: `/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_current.json`
+- `work_ledger`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_WORK_LEDGER.md`
