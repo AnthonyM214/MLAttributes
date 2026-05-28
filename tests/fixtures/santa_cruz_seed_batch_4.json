@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "episodes": [
+    {
+      "case_id": "ca-seed4-locator-website",
+      "attribute": "website",
+      "case_type": "BRANCH_LOCATOR",
+      "expected_abstain": false,
+      "expected_decision": "https://www.sunsetbooks.example.com/locations/los-angeles",
+      "gold_value": "https://www.sunsetbooks.example.com/locations/los-angeles",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Los Angeles",
+        "name": "Sunset Books Los Angeles",
+        "region": "CA",
+        "website": "https://www.sunsetbooks.example.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Sunset Books Los Angeles locations website",
+          "fetched_pages": [
+            {
+              "url": "https://www.sunsetbooks.example.com/locations/los-angeles",
+              "title": "Sunset Books Los Angeles",
+              "page_text": "Find the Los Angeles location and directions.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "website": "https://www.sunsetbooks.example.com/locations/los-angeles"
+              },
+              "recency_days": 4,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Branch locator page exposes the Los Angeles branch URL."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed4-phone-direct",
+      "attribute": "phone",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "6195551234",
+      "gold_value": "6195551234",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "San Diego",
+        "current_phone": "6195551234",
+        "name": "Mission Coffee Roasters",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Mission Coffee Roasters phone San Diego",
+          "fetched_pages": [
+            {
+              "url": "https://www.missioncoffee.example.com/contact",
+              "title": "Contact Mission Coffee Roasters",
+              "page_text": "Call us at (619) 555-1234.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "phone": "6195551234"
+              },
+              "recency_days": 5,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed4-address-registry",
+      "attribute": "address",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "400 Capitol Mall, Sacramento, CA 95814",
+      "gold_value": "400 Capitol Mall, Sacramento, CA 95814",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Sacramento",
+        "name": "Capitol Theater Sacramento",
+        "region": "CA"
+      },
+      "truth_source_type": "government",
+      "search_attempts": [
+        {
+          "layer": "government",
+          "query": "Capitol Theater Sacramento address registry",
+          "fetched_pages": [
+            {
+              "url": "https://sacramento.example.gov/business/capitol-theater",
+              "title": "Business Registry",
+              "page_text": "400 Capitol Mall, Sacramento, CA 95814",
+              "source_type": "government",
+              "extracted_values": {
+                "address": "400 Capitol Mall, Sacramento, CA 95814"
+              },
+              "recency_days": 9,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the venue address."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed4-name-official",
+      "attribute": "name",
+      "case_type": "ABOUT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "Bayview Natural History Museum",
+      "gold_value": "Bayview Natural History Museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "San Francisco",
+        "name": "Bayview Natural History Museum",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Bayview Natural History Museum about",
+          "fetched_pages": [
+            {
+              "url": "https://www.bayviewmuseum.example.org/about",
+              "title": "About the Museum",
+              "page_text": "Bayview Natural History Museum is our full name.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "name": "Bayview Natural History Museum"
+              },
+              "recency_days": 6,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full museum name."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed4-category-official",
+      "attribute": "category",
+      "case_type": "OFFICIAL_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "aquarium",
+      "gold_value": "aquarium",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "San Diego",
+        "name": "Pacific Tide Aquarium",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Pacific Tide Aquarium category",
+          "fetched_pages": [
+            {
+              "url": "https://www.pacifictide.example.com/visit",
+              "title": "Visit Pacific Tide Aquarium",
+              "page_text": "Aquarium exhibits, tickets, and visitor information.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "category": "aquarium"
+              },
+              "recency_days": 7,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Official visitor page supports the aquarium category."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed4-social-only-abstain",
+      "attribute": "website",
+      "case_type": "SOCIAL_ONLY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Oakland",
+        "name": "Oakland Public Studio",
+        "region": "CA"
+      },
+      "truth_source_type": "social",
+      "search_attempts": [
+        {
+          "layer": "social",
+          "query": "Oakland Public Studio instagram",
+          "fetched_pages": [
+            {
+              "url": "https://www.instagram.com/oaklandpublicstudio/",
+              "title": "Oakland Public Studio",
+              "page_text": "Photos and events only; no official website listed.",
+              "source_type": "social",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should not prove the website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed4-generic-homepage-abstain",
+      "attribute": "website",
+      "case_type": "GENERIC_HOMEPAGE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Riverside",
+        "name": "Riverside Arts Hall",
+        "region": "CA",
+        "website": "https://www.riversideartshall.example.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Riverside Arts Hall website",
+          "fetched_pages": [
+            {
+              "url": "https://www.riversideartshall.example.com",
+              "title": "Riverside Arts Hall",
+              "page_text": "Welcome to our homepage. Event listings, directions, and tickets.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 8,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Generic homepage does not prove the branch-specific website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed4-stale-archive-abstain",
+      "attribute": "website",
+      "case_type": "STALE_ARCHIVE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Berkeley",
+        "name": "Berkeley Lantern Theater",
+        "region": "CA",
+        "website": "https://www.berkeleylantern.example.org"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Berkeley Lantern Theater archive website",
+          "fetched_pages": [
+            {
+              "url": "https://archive.berkeleylantern.example.org/2017/",
+              "title": "Berkeley Lantern Theater Archive",
+              "page_text": "Archived location page from the old site. The current website moved.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 1400,
+              "zombie_score": 0.9,
+              "identity_change_score": 0.4,
+              "notes": "Stale archive page should not prove the current website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed4-wrong-entity-phone-abstain",
+      "attribute": "phone",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Anaheim",
+        "name": "Anaheim Harbor Office",
+        "region": "CA",
+        "current_phone": "7145556600"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Anaheim Harbor Office wrong tenant phone",
+          "fetched_pages": [
+            {
+              "url": "https://www.anaheimharbor.example.com/tenant-directory",
+              "title": "Tenant Directory",
+              "page_text": "Harbor Office, wrong tenant, suite B only.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 12,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.8,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "ca-seed4-branch-ambiguity-phone",
+      "attribute": "phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Los Angeles",
+        "current_phone": "2135557700",
+        "name": "Los Angeles Downtown Library Branch",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Los Angeles Downtown Library branch phones",
+          "fetched_pages": [
+            {
+              "url": "https://www.lalibrary.example.org/branches/",
+              "title": "Branch Libraries - Los Angeles Library",
+              "page_text": "Downtown branch\nWestwood branch\nHollywood branch",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 7,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branches without exposing a unique phone in the text."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

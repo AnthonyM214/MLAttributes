@@ -1049,6 +1049,13 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
             ),
         },
         {
+            "title": "Santa Cruz seed batch 4",
+            "body": (
+                "The fourth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, "
+                "so the California expansion now shows cross-city generalization instead of only Santa Cruz-shaped evidence."
+            ),
+        },
+        {
             "title": "Merged corpus OKR",
             "body": (
                 f"The collected replay tree now loads from {_num(full_merge.get('input_files'))} files into {_num(full_merge.get('merged_episodes'))} episodes and {_num(full_merge.get('merged_pages'))} pages, "
