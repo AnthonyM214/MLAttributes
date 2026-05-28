@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Iterable
 
-from .baselines import agreement_only_baseline, base_baseline, completeness_baseline, confidence_baseline, current_baseline, quality_baseline
+from .baselines import agreement_only_baseline, base_baseline, completeness_baseline, confidence_baseline, current_baseline, quality_baseline, sure_style_baseline
 from .benchmark_v2 import _decision_index, _evaluate_expected_behavior, _pair_from_episode
 from .claim_extraction import extract_claims_from_replay_episode
 from .harness import evaluate_resolver_v2_on_replay, load_retrieval_episodes, replay_stats
@@ -184,6 +184,7 @@ def _pair_baselines(episodes: Iterable[ReplayEpisode]) -> dict[str, object]:
         "confidence": confidence_baseline,
         "quality": quality_baseline,
         "agreement_only": agreement_only_baseline,
+        "sure_style": sure_style_baseline,
     }.items():
         total = correct = abstained = high_confidence_wrong = gold_total = 0
         for episode in episodes:

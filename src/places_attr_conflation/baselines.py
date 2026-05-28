@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from difflib import SequenceMatcher
+
 from .normalization import normalize_address, normalize_category, normalize_name, normalize_phone, normalize_website
 
 
@@ -72,3 +74,37 @@ def agreement_only_baseline(pair: dict, attribute: str) -> tuple[str, float]:
     if current and base and _normalize(attribute, current) == _normalize(attribute, base):
         return current, 0.95
     return "", 0.0
+
+
+def sure_style_baseline(pair: dict, attribute: str) -> tuple[str, float]:
+    """Blend the Sure-style name heuristic into the current benchmark table.
+
+    The external repo is effectively a name-only heuristic baseline:
+    - choose the longest name when the two names are similar
+    - otherwise keep the current record
+
+    We keep the same behavior shape here so we can compare it against the
+    PAC replay corpus without importing another duplicate code path.
+    """
+
+    current = str(pair.get("current_value") or pair.get(attribute) or "")
+    base = str(pair.get("base_value") or pair.get(f"base_{attribute}") or "")
+    if attribute != "name":
+        return current, 0.5 if current else 0.0
+    if not current and not base:
+        return "", 0.0
+    if not current:
+        return base, 0.5
+    if not base:
+        return current, 0.5
+
+    current_norm = _normalize(attribute, current)
+    base_norm = _normalize(attribute, base)
+    if not current_norm or not base_norm:
+        return current, 0.5
+
+    similarity = SequenceMatcher(None, current_norm, base_norm).ratio()
+    if similarity >= 0.7:
+        choice = current if len(current_norm) >= len(base_norm) else base
+        return choice, 0.6
+    return current, 0.45

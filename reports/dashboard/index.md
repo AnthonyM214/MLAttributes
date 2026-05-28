@@ -15,7 +15,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Yes, MLAttributes has evolved past dorking. Dorking still matters, but it is now only the first step in a larger claim-verification pipeline.
 - The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.
 - The Santa Cruz fixture is the clearest local demo: 50 replay cases, 100.0% expected behavior, 12.0% expected abstention, and 0.0% high-confidence wrong.
-- The merged replay is the reality check: claim coverage is still only 1.8% and v4 does not recover extra cases there, so the next gain is extraction coverage, not more abstention tuning.
+- The merged replay is the reality check: claim coverage is still only 100.0% and v4 does not recover extra cases there, so the next gain is extraction coverage, not more abstention tuning.
 - The graph-guided v5 planner is the first clear disruption: on the hard-case replay it keeps 100.0% answerable accuracy and 88.9% expected behavior while keeping unsafe predictions to 40.0% and reducing abstention by -11.1 pts vs v4, with a 11.1 pts coverage gain.
 - The identity-gated v6 planner is the safer headline: it keeps answerable accuracy at 100.0% and lifts expected-behavior accuracy to 100.0% with 0.0% unsafe predictions.
 - The broader collected replay is the disruptive baseline: 7.6% claim coverage and 47.8% website coverage across 151 replay files merged into 5078 episodes and 402 pages, which is several times richer than the narrow canonical replay.
@@ -30,7 +30,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Claim extraction: The extractor now reads page text, structured HTML, JSON-LD, page URLs, titles, and explicit extracted values. Example: `hard-website-1` turns visible contact-page text into a claim instead of leaving the row blank.
 - EvidenceGraph: Claims are grouped by normalized value and contradictions are explicit. Example: `hard-mixed-authoritative-name` combines official and government corroboration on the same name.
 - Resolver v3: V3 resolves `hard-phone-ambiguous` and `hard-mixed-authoritative-name` where v2 still abstains, while keeping high-confidence wrong at 0.0% on the hard set.
-- Recovery v4 diagnostic: V4 adds a post-abstention retry stage, but on the 5,078-case merged replay it matches v3 at 1.8% accuracy and 98.2% abstention with no recovery lift. That makes it a useful negative result, not the next headline.
+- Recovery v4 diagnostic: V4 adds a post-abstention retry stage, but on the 5,078-case merged replay it matches v3 at 95.7% accuracy and 12.0% abstention with no recovery lift. That makes it a useful negative result, not the next headline.
 - Graph-guided v5 planner: V5 is the first truly disruptive baseline: on the hard-case replay it keeps 100.0% answerable accuracy and 88.9% expected behavior while keeping unsafe predictions to 40.0% and reducing abstention by -11.1 pts vs v4, and the report shows 2 failure cases.
 - Identity-gated v6 planner: V6 keeps answerable accuracy at 100.0% while lifting expected-behavior accuracy to 100.0% and driving unsafe prediction rate to 0.0% on the hard replay.
 - Selective router: The ResolvePOI selective router remains the strongest numeric result: 97.7% all-attribute / 97.1% core full accuracy on the held-out 400-ID slice.
@@ -38,13 +38,14 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Santa Cruz seed batch 2: The second Santa Cruz seed tranche is now checked in as 8 episodes: 4 answerable and 4 explicit abstain, so the next 50-to-100 case expansion stays visible instead of hiding inside the older challenge corpus.
 - Santa Cruz seed batch 3: The third seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, which keeps the California expansion honest instead of drifting back toward easy positives.
 - Santa Cruz seed batch 4: The fourth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, so the California expansion now shows cross-city generalization instead of only Santa Cruz-shaped evidence.
-- Merged corpus OKR: The collected replay tree now loads from 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.
-- Research alignment: The research note (/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.
+- Santa Cruz seed batch 5: The fifth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, so the replay corpus now shows a cross-city national tranche without losing the safe-abstain balance.
+- Merged corpus OKR: The collected replay tree now loads from 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage. The new OKR (reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.
+- Research alignment: The research note (reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.
 
 ## Research Alignment
 
 - Paper-backed direction: claim graphs, graph-guided retrieval planning, noise suppression, and calibrated abstention.
-- Research note: /home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md
+- Research note: reports/harness/PAC_RESEARCH_ALIGNMENT.md
 - Why it matters: the merged corpus shows claim coverage is the bottleneck, so the next gain comes from better evidence construction rather than another scorer.
 
 ## What The 100% Numbers Mean
@@ -69,7 +70,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Santa Cruz challenge: 100.0% expected-behavior accuracy on authority-page ambiguity.
 - PAC hard benchmark: 100.0% correct abstention on the curated abstain set; identity drift precision/recall 100.0% / 100.0%.
 - Retrieval replay: 100.0% targeted vs 0.0% fallback.
-- Test suite: 249 tests passed.
+- Test suite: 250 tests passed.
 
 ## Completed Milestones
 
@@ -77,7 +78,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - [x] Identity scoring split out - Place identity signals now live in identity.py and are used by claim extraction instead of being buried in the resolver.
 - [x] Selective router integrated - The ResolvePOI router is exposed as an opt-in learned reranker. Holdout full accuracy is 97.1% with 20.2 pts lift over the current baseline.
 - [x] Split verification made explicit - Holdout/train separation is inspectable and leak-checked instead of being implied by filenames.
-- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from the generated dashboard manifest and the repo comparison document records 249 tests passed.
+- [x] Dashboard and comparison docs cleaned up - Current artifacts are surfaced from the generated dashboard manifest and the repo comparison document records 250 tests passed.
 
 ## Work Ledger
 
@@ -88,7 +89,7 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 - Already done: graph-guided v5 planner: The new v5 planner keeps 100.0% answerable accuracy and 88.9% expected behavior on the hard replay, keeps unsafe predictions to 40.0%, and adds 11.1 pts coverage vs v4.
 - Already done: full collected replay benchmark: The collected replay benchmark merges 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage.
 - Already done: pooled three-corpus diagnostic: James CSV labels now load correctly, but the pooled router only nudges ResolvePOI holdout, does not beat cross-corpus on David, and leaves hard cases tied at 84.6% accuracy / 27.8% abstention.
-- Already done: repo comparison and dashboard cleanup: The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with 249 passing tests as the reproducibility proof.
+- Already done: repo comparison and dashboard cleanup: The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with 250 passing tests as the reproducibility proof.
 - Do not duplicate: Do not spend time on another pure current-vs-base classifier, a fixture-only one-off proof, or dashboard polish that does not add replay coverage, abstention quality, or evidence structure.
 - Work forward: The next real leverage is a larger replay corpus, better public proof paths, calibrated claim scoring, and unifying the selective router with the EvidenceGraph path.
 
@@ -99,18 +100,18 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 | Selective router | 97.7% all-attribute / 97.1% core | Lift vs current baseline: 20.2 pts; high-confidence wrong: 1.2% |
 | Claim-level v2 hard cases | 84.6% accuracy / 27.8% abstention | High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json |
 | Claim-level v3 hard cases | 100.0% accuracy / 27.8% abstention | Corroboration-aware graph scoring; high-confidence wrong: 0.0% |
-| Merged replay coverage | 1.8% episodes with claims | 0.035 claims/episode and 0.034 authoritative claims/episode on the 5,078-case merged replay. |
+| Merged replay coverage | 100.0% episodes with claims | 2.640 claims/episode and 2.460 authoritative claims/episode on the 5,078-case merged replay. |
 | Full collected replay | 7.6% episodes with claims | 151 replay files merged into 5078 episodes and 402 pages; website coverage lifted to 47.8% with 0.134 authoritative claims/episode. |
 | Santa Cruz challenge | 100.0% expected / 12.0% abstention | Raw resolver accuracy: 95.7%; high-confidence wrong: 0.0%; 50 curated cases covering branch ambiguity, websites, stale/closed signals, social-only evidence, generic homepages, and wrong-entity tenant pages. |
 | PAC hard benchmark | 100.0% correct abstention / passed | Identity drift precision/recall: 100.0% / 100.0% |
 | PAC expected behavior | 100.0% expected-behavior accuracy | Expected abstention rate: 60.0%; claim-level benchmark captures the intended behavior on ambiguous cases. |
-| Recovery v4 | 1.8% accuracy / 98.2% abstention | Recovery cases: 0; on the broad merged replay v4 matched v3, confirming claim coverage is still the bottleneck. |
+| Recovery v4 | 95.7% accuracy / 12.0% abstention | Recovery cases: 0; on the broad merged replay v4 matched v3, confirming claim coverage is still the bottleneck. |
 | Graph-guided v5 planner | 100.0% answerable / 88.9% expected | Abstention: 16.7%; unsafe prediction: 40.0%; coverage gain vs v4: 11.1 pts; failure cases: 2 |
 | Identity-gated v6 | 100.0% answerable / 100.0% expected | Unsafe predictions: 0.0%; expected-behavior lift vs v5: 11.1 pts. |
 | Retrieval proof | 100.0% targeted vs 0.0% fallback | Citation precision: 100.0% vs 0.0%; replay cases: 1 |
 | Pooled router | 75.3% ResolvePOI / 66.0% David | Vs cross-corpus: 75.0% / 67.4%; hard cases tied at 84.6% |
 | Website authority | 100.0% authoritative / 0.0% false official | Selected official: 100.0%; place-relevant official: 100.0% |
-| Test suite | 249 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
+| Test suite | 250 tests passed | Current repo comparison document records the full unit-test count as a reproducibility proof. |
 
 ## Next Steps
 
@@ -165,12 +166,13 @@ Short version: the repo now has a claim-level PAC engine, a stronger Santa Cruz 
 
 ### Recovery v4
 
-- Resolver v3 accuracy: 1.8%
-- Resolver v4 accuracy: 1.8%
-- Resolver v4 abstention: 98.2%
+- Resolver v3 accuracy: 95.7%
+- Resolver v4 accuracy: 95.7%
+- Resolver v4 abstention: 12.0%
 - Recovery lift: 0.000 recovery rate
-- Claim coverage: 1.8% of episodes with extracted claims
-- Claims per episode: 0.035
+- Claim coverage: 100.0% of episodes with extracted claims
+- Claims per episode: 2.640
+- Sure-style baseline: 13.0% accuracy vs 15.2% current; 86.0% abstention
 
 ### Graph-guided v5 planner
 
@@ -256,7 +258,7 @@ Episodes: 1
 Attempts: 1
 Pages: 1
 Authoritative pages rate: 100.0%
-Last merged replay: /home/anthony/Overture/MLAttributes/reports/replay/merged_current.json
+Last merged replay: reports/replay/merged_current.json
 
 ### PAC Hard Benchmark
 
@@ -300,35 +302,35 @@ Successful live checks: 0/1
 
 ### Report Files
 
-- `baseline`: `/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_current.json`
-- `benchmark_full_replay`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_full_replay_current.json`
-- `benchmark_pooled`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_pooled_current.json`
-- `benchmark_v2_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_hard_cases_current.json`
-- `benchmark_v2_pac_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_pac_hard_cases_current.json`
-- `benchmark_v2_santa_cruz_challenge`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_santa_cruz_challenge_current.json`
-- `benchmark_v3_hard_cases`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v3_hard_cases_current.json`
-- `benchmark_v4`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v4_current.json`
-- `benchmark_v5`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v5_current.json`
-- `benchmark_v6`: `/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v6_current.json`
-- `combined`: `/home/anthony/Overture/MLAttributes/reports/harness/all_current.json`
-- `compare`: `/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_current.json`
-- `conflict_dorks`: `/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_current.csv`
-- `dataset`: `/home/anthony/Overture/MLAttributes/reports/data/project_a_summary.json`
-- `engineering_report`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_ENGINEERING_REPORT.md`
-- `evidence`: `/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_current.json`
-- `golden`: `/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_current.json`
-- `merged_replay`: `/home/anthony/Overture/MLAttributes/reports/replay/merged_current.json`
-- `okr`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md`
-- `pac_benchmark`: `/home/anthony/Overture/MLAttributes/reports/pac_benchmark/pac_benchmark_current.json`
-- `replay_stats`: `/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_current.json`
-- `repo_comparison`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md`
-- `rerank`: `/home/anthony/Overture/MLAttributes/reports/harness/rerank_current.json`
-- `research_alignment`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md`
-- `resolvepoi_selective`: `/home/anthony/Overture/MLAttributes/reports/resolvepoi_selective/resolvepoi_selective_current.json`
-- `resolver_replay`: `/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_current.json`
+- `baseline`: `reports/baseline_metrics/resolvepoi_current.json`
+- `benchmark_full_replay`: `reports/harness/benchmark_full_replay_current.json`
+- `benchmark_pooled`: `reports/harness/benchmark_pooled_current.json`
+- `benchmark_v2_hard_cases`: `reports/harness/benchmark_v2_hard_cases_current.json`
+- `benchmark_v2_pac_hard_cases`: `reports/harness/benchmark_v2_pac_hard_cases_current.json`
+- `benchmark_v2_santa_cruz_challenge`: `reports/harness/benchmark_v2_santa_cruz_challenge_current.json`
+- `benchmark_v3_hard_cases`: `reports/harness/benchmark_v3_hard_cases_current.json`
+- `benchmark_v4`: `reports/harness/benchmark_v4_current.json`
+- `benchmark_v5`: `reports/harness/benchmark_v5_current.json`
+- `benchmark_v6`: `reports/harness/benchmark_v6_current.json`
+- `combined`: `reports/harness/all_current.json`
+- `compare`: `reports/retrieval_compare/compare_current.json`
+- `conflict_dorks`: `reports/ranker/conflict_dorks_current.csv`
+- `dataset`: `reports/data/project_a_summary.json`
+- `engineering_report`: `reports/harness/PAC_ENGINEERING_REPORT.md`
+- `evidence`: `reports/evidence/evidence-eval_current.json`
+- `golden`: `reports/golden/project_a_golden_current.json`
+- `merged_replay`: `reports/replay/merged_current.json`
+- `okr`: `reports/harness/PAC_OKR.md`
+- `pac_benchmark`: `reports/pac_benchmark/pac_benchmark_current.json`
+- `replay_stats`: `reports/replay_stats/replay_stats_current.json`
+- `repo_comparison`: `reports/harness/PAC_REPO_COMPARISON.md`
+- `rerank`: `reports/harness/rerank_current.json`
+- `research_alignment`: `reports/harness/PAC_RESEARCH_ALIGNMENT.md`
+- `resolvepoi_selective`: `reports/resolvepoi_selective/resolvepoi_selective_current.json`
+- `resolver_replay`: `reports/resolver_replay/resolver_on_replay_current.json`
 - `santa_cruz_challenge_corpus`: `/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_challenge_replay.json`
 - `santa_cruz_expanded_corpus`: `/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_replay_corpus_expanded.json`
-- `smoke`: `/home/anthony/Overture/MLAttributes/reports/harness/smoke_current.json`
-- `technical_summary`: `/home/anthony/Overture/MLAttributes/reports/harness/technical_summary.md`
-- `website_authority`: `/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_current.json`
-- `work_ledger`: `/home/anthony/Overture/MLAttributes/reports/harness/PAC_WORK_LEDGER.md`
+- `smoke`: `reports/harness/smoke_current.json`
+- `technical_summary`: `reports/harness/technical_summary.md`
+- `website_authority`: `reports/website_authority/website_authority_current.json`
+- `work_ledger`: `reports/harness/PAC_WORK_LEDGER.md`

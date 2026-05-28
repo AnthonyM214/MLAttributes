@@ -274,6 +274,10 @@ set.
 The fourth expansion seed is now checked in as `tests/fixtures/santa_cruz_seed_batch_4.json`;
 it keeps the second-cluster California tranche cross-city and abstention-heavy
 so the public growth path remains broader than the Santa Cruz core.
+The fifth expansion seed is now checked in as `tests/fixtures/santa_cruz_seed_batch_5.json`;
+it widens the corpus into a cross-city national tranche while keeping the same
+answerable-vs-abstain balance so the benchmark story does not regress back to
+easy positives.
 
 Remaining quality gaps before treating this as benchmark-grade:
 

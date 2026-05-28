@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "episodes": [
+    {
+      "case_id": "us-seed5-locator-website",
+      "attribute": "website",
+      "case_type": "BRANCH_LOCATOR",
+      "expected_abstain": false,
+      "expected_decision": "https://www.northlightbooks.example.com/locations/portland",
+      "gold_value": "https://www.northlightbooks.example.com/locations/portland",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Portland",
+        "name": "Northlight Books Portland",
+        "region": "OR",
+        "website": "https://www.northlightbooks.example.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Northlight Books Portland locations website",
+          "fetched_pages": [
+            {
+              "url": "https://www.northlightbooks.example.com/locations/portland",
+              "title": "Northlight Books Portland",
+              "page_text": "Find the Portland location and directions.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "website": "https://www.northlightbooks.example.com/locations/portland"
+              },
+              "recency_days": 4,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Branch locator page exposes the Portland branch URL."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed5-phone-direct",
+      "attribute": "phone",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "2065558123",
+      "gold_value": "2065558123",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Seattle",
+        "current_phone": "2065558123",
+        "name": "Rainline Coffee Seattle",
+        "region": "WA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Rainline Coffee Seattle phone",
+          "fetched_pages": [
+            {
+              "url": "https://www.rainlinecoffee.example.com/contact",
+              "title": "Contact Rainline Coffee Seattle",
+              "page_text": "Call us at (206) 555-8123.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "phone": "2065558123"
+              },
+              "recency_days": 3,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed5-address-registry",
+      "attribute": "address",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "1414 Market St, Denver, CO 80202",
+      "gold_value": "1414 Market St, Denver, CO 80202",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Denver",
+        "name": "Civic Glass Denver",
+        "region": "CO"
+      },
+      "truth_source_type": "government",
+      "search_attempts": [
+        {
+          "layer": "government",
+          "query": "Civic Glass Denver address registry",
+          "fetched_pages": [
+            {
+              "url": "https://denver.example.gov/business/civic-glass",
+              "title": "Business Registry",
+              "page_text": "1414 Market St, Denver, CO 80202",
+              "source_type": "government",
+              "extracted_values": {
+                "address": "1414 Market St, Denver, CO 80202"
+              },
+              "recency_days": 8,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed5-name-official",
+      "attribute": "name",
+      "case_type": "ABOUT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "Sonoran Children's Theater",
+      "gold_value": "Sonoran Children's Theater",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Phoenix",
+        "name": "Sonoran Children's Theater",
+        "region": "AZ"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Sonoran Children's Theater about",
+          "fetched_pages": [
+            {
+              "url": "https://www.sonorantheater.example.org/about",
+              "title": "About the Theater",
+              "page_text": "Sonoran Children's Theater is our full name.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "name": "Sonoran Children's Theater"
+              },
+              "recency_days": 5,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full theater name."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed5-category-official",
+      "attribute": "category",
+      "case_type": "OFFICIAL_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "science museum",
+      "gold_value": "science museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Chicago",
+        "name": "Lakefront Science Center",
+        "region": "IL"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Lakefront Science Center category",
+          "fetched_pages": [
+            {
+              "url": "https://www.lakefrontscience.example.com/visit",
+              "title": "Visit Lakefront Science Center",
+              "page_text": "Interactive science museum exhibits, tickets, and visitor information.",
+              "source_type": "official_site",
+              "extracted_values": {
+                "category": "science museum"
+              },
+              "recency_days": 6,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Official visitor page supports the science museum category."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed5-social-only-abstain",
+      "attribute": "website",
+      "case_type": "SOCIAL_ONLY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Austin",
+        "name": "Austin Print Studio",
+        "region": "TX"
+      },
+      "truth_source_type": "social",
+      "search_attempts": [
+        {
+          "layer": "social",
+          "query": "Austin Print Studio instagram",
+          "fetched_pages": [
+            {
+              "url": "https://www.instagram.com/austinprintstudio/",
+              "title": "Austin Print Studio",
+              "page_text": "Photos and events only; no official website listed.",
+              "source_type": "social",
+              "extracted_values": {},
+              "recency_days": 2,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should not prove the website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed5-generic-homepage-abstain",
+      "attribute": "website",
+      "case_type": "GENERIC_HOMEPAGE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "New York",
+        "name": "Metro Gallery New York",
+        "region": "NY",
+        "website": "https://www.metrogallery.example.com"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Metro Gallery New York website",
+          "fetched_pages": [
+            {
+              "url": "https://www.metrogallery.example.com",
+              "title": "Metro Gallery",
+              "page_text": "Welcome to our homepage. Exhibitions, hours, and tickets.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 7,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.0,
+              "notes": "Generic homepage does not prove the branch-specific website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed5-stale-archive-abstain",
+      "attribute": "website",
+      "case_type": "STALE_ARCHIVE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "San Jose",
+        "name": "San Jose Lantern Theater",
+        "region": "CA",
+        "website": "https://www.sanjoselantern.example.org"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "San Jose Lantern Theater archive website",
+          "fetched_pages": [
+            {
+              "url": "https://archive.sanjoselantern.example.org/2018/",
+              "title": "San Jose Lantern Theater Archive",
+              "page_text": "Archived location page from the old site. The current website moved.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 1500,
+              "zombie_score": 0.92,
+              "identity_change_score": 0.4,
+              "notes": "Stale archive page should not prove the current website."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed5-wrong-entity-phone-abstain",
+      "attribute": "phone",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "San Francisco",
+        "current_phone": "4155556600",
+        "name": "Bay Harbor Office",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Bay Harbor Office wrong tenant phone",
+          "fetched_pages": [
+            {
+              "url": "https://www.bayharbor.example.com/tenant-directory",
+              "title": "Tenant Directory",
+              "page_text": "Bay Harbor Office, wrong tenant, suite B only.",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 11,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.84,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "us-seed5-branch-ambiguity-phone",
+      "attribute": "phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Sacramento",
+        "current_phone": "9165557700",
+        "name": "Sacramento Library Branch",
+        "region": "CA"
+      },
+      "truth_source_type": "official_site",
+      "search_attempts": [
+        {
+          "layer": "official",
+          "query": "Sacramento Library branch phones",
+          "fetched_pages": [
+            {
+              "url": "https://www.saclibrary.example.org/branches/",
+              "title": "Branch Libraries - Sacramento Library",
+              "page_text": "North branch\nSouth branch\nCentral branch",
+              "source_type": "official_site",
+              "extracted_values": {},
+              "recency_days": 9,
+              "zombie_score": 0.0,
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branches without exposing a unique phone in the text."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

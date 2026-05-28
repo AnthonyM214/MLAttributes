@@ -24,13 +24,15 @@ Current outputs:
 
 | Artifact | Result |
 | --- | --- |
-| Unit tests | `249` tests passed |
+| Unit tests | `250` tests passed |
 | Santa Cruz expanded corpus | `24` episodes; targeted authoritative found rate `1.0`, fallback `0.0`; final accuracy `1.0` |
 | Santa Cruz challenge corpus | `50` curated replay episodes across website, phone, address, category, and name; resolver v2 expected-behavior accuracy `1.0`, raw accuracy `0.9565`, abstention rate `0.1200`, high-confidence-wrong rate `0.0`; v2 adds branch-context phone/address, office-vs-mailing address, official-vs-social website, official-vs-directory category, title-cleaned name, full-name-vs-acronym, place-name-vs-host-building, official-category-vs-tourism tags, government locator website, relay/fax/footer phone rejection, department-location-vs-city-footer address selection, official phone-vs-fax cases, official service-page category conflicts, program-tenant category conflicts, adjacent-facility category conflicts, branch-specific government-locator website extraction, offsite-event address conflict handling, multi-branch commercial location selection, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, social-only website abstention, generic homepage abstention, stale/closed phone abstention, and wrong-entity tenant website abstention without prefilled extraction |
 | Santa Cruz seed batch | `5` episodes; expected-behavior accuracy `1.0`, abstention rate `0.2`, high-confidence-wrong rate `0.0`; first seed batch for the next 50-100 case expansion |
 | Santa Cruz seed batch 2 | `8` episodes; expected-behavior accuracy `1.0`, abstention rate `0.5`, high-confidence-wrong rate `0.0`; second seed tranche with branch ambiguity, social-only abstention, generic-homepage abstention, and additional branch/address/name/category coverage |
 | Santa Cruz seed batch 3 | `10` episodes; expected-behavior accuracy `1.0`, abstention rate `0.5`, high-confidence-wrong rate `0.0`; third seed tranche with Monterey/Salinas/Carmel cases that keep the replay expansion abstention-heavy |
 | Santa Cruz seed batch 4 | `10` episodes; expected-behavior accuracy `1.0`, abstention rate `0.5`, high-confidence-wrong rate `0.0`; fourth seed tranche with cross-city California coverage and abstention-heavy generalization cases |
+| Santa Cruz seed batch 5 | `10` episodes; expected-behavior accuracy `1.0`, abstention rate `0.5`, high-confidence-wrong rate `0.0`; fifth seed tranche with cross-city national coverage and the same balanced positive/abstain mix |
+| Sure-style baseline (Santa Cruz challenge) | `13.0%` accuracy vs `15.2%` current baseline, `86.0%` abstention; the imported name-similarity heuristic does not improve the replay baseline |
 | Retrieval compare | targeted authoritative found `0.75`, fallback `0.0`; targeted citation precision `0.75`; citation precision proxy delta `+1.0` |
 | Replay stats | `4` episodes, `8` attempts, `9` pages, authoritative pages rate `0.3333` |
 | Website authority | authoritative found rate `1.0`, false official rate `0.0` |
@@ -105,6 +107,8 @@ Based on the public README evidence, `ResolvePOI-Attribute-Conflation` still hol
 That makes it a stronger truth-verification system than the older row-scoring adapter path, and the new selective router gives it a real signal-bearing benchmark on the ResolvePOI corpus rather than only a README-level comparison.
 
 The new `resolvepoi-v2` adapter still serves as the legacy row-label proxy benchmark, but the selective router is now the stronger ResolvePOI result in this checkout and is callable from the EvidenceGraph resolver. The claim-graph v3 benchmark is now the strongest local hard-case proof because it resolves the two remaining ambiguous cases that v2 still abstains on.
+
+The imported Sure-style baseline is intentionally kept as a diagnostic comparator. On the Santa Cruz challenge replay it lands below the current baseline rather than improving it, which is useful because it proves we are not hiding duplicate heuristic work behind a new repo name.
 
 ## Reproducibility Notes
 

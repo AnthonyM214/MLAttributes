@@ -23,6 +23,8 @@ The selective ResolvePOI path now also emits an explicit split-verification mani
 The learned router is deliberately constrained: it can rerank close EvidenceGraph claim groups, but it cannot invent or select a value that has no extracted claim. This keeps the high-scoring structured benchmark path connected to the evidence-backed truth-resolution architecture.
 In replay hard cases, that learned path is still opt-in because it can regress on ambiguous branch-level evidence; the report should therefore treat it as an experimental benchmark mode rather than the default resolver.
 
+The imported Sure-style baseline now lives only as a named comparator in the benchmark table. It is a name-similarity heuristic, not a new PAC path, and on the Santa Cruz challenge replay it underperforms the current baseline rather than improving it. That is useful because it gives us a measured negative result instead of another duplicate model path.
+
 ## What v3 adds
 
 `resolver_v3.py` makes the claim graph context-aware and corroboration-aware:

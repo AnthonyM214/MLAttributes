@@ -1056,6 +1056,13 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
             ),
         },
         {
+            "title": "Santa Cruz seed batch 5",
+            "body": (
+                "The fifth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, "
+                "so the replay corpus now shows a cross-city national tranche without losing the safe-abstain balance."
+            ),
+        },
+        {
             "title": "Merged corpus OKR",
             "body": (
                 f"The collected replay tree now loads from {_num(full_merge.get('input_files'))} files into {_num(full_merge.get('merged_episodes'))} episodes and {_num(full_merge.get('merged_pages'))} pages, "
@@ -1437,6 +1444,7 @@ def _benchmark_v4_lines(report: dict[str, object] | None) -> list[str]:
     resolver_v3 = report.get("resolver_v3", {})
     resolver_v4 = report.get("resolver_v4", {})
     claim_coverage = report.get("claim_coverage", {})
+    baselines = report.get("baselines", {})
     if not isinstance(resolver_v3, dict) or not isinstance(resolver_v4, dict) or not isinstance(claim_coverage, dict):
         return ["benchmark-v4 report is incomplete."]
     recovery_cases = report.get("recovery_cases", [])
@@ -1449,6 +1457,14 @@ def _benchmark_v4_lines(report: dict[str, object] | None) -> list[str]:
         f"Claim coverage: {_pct(claim_coverage.get('coverage'))} of episodes with extracted claims",
         f"Claims per episode: {_num(claim_coverage.get('claims_per_episode'))}",
     ]
+    if isinstance(baselines, dict) and isinstance(baselines.get("sure_style"), dict):
+        sure = baselines["sure_style"]
+        current = baselines.get("current", {})
+        if isinstance(current, dict):
+            lines.append(
+                f"Sure-style baseline: {_pct(sure.get('accuracy'))} accuracy vs {_pct(current.get('accuracy'))} current; "
+                f"{_pct(sure.get('abstention_rate'))} abstention"
+            )
     if isinstance(recovery_cases, list) and recovery_cases:
         lines.append("Recovery cases: " + "; ".join(str(case.get("case_id", "-")) for case in recovery_cases if isinstance(case, dict)))
     if isinstance(failure_cases, list) and failure_cases:
