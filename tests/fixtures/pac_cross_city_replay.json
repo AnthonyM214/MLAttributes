@@ -1,0 +1,2963 @@
+{
+  "episodes": [
+    {
+      "attribute": "website",
+      "case_id": "business-registry-current",
+      "case_type": "BUSINESS_REGISTRY_CORROBORATION",
+      "expected_abstain": false,
+      "expected_decision": "https://registry.example/current",
+      "gold_value": "https://registry.example/current",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC business-registry-current",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://registry.example/current"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Business registry current website.",
+              "recency_days": 20,
+              "source_family_id": "business_registry:registry.example",
+              "source_type": "business_registry",
+              "title": "registry current",
+              "url": "https://registry.example/current",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC business-registry-current\" business registry website"
+        }
+      ],
+      "truth_source_type": "business_registry"
+    },
+    {
+      "attribute": "address",
+      "case_id": "ca-seed3-address-registry",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "211 Alvarado St, Monterey, CA 93940",
+      "gold_value": "211 Alvarado St, Monterey, CA 93940",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "name": "Monterey Arts Annex",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "211 Alvarado St, Monterey, CA 93940"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address.",
+              "page_text": "211 Alvarado St, Monterey, CA 93940",
+              "recency_days": 10,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://monterey.example.gov/business/arts-annex",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Monterey Arts Annex address registry"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed3-branch-ambiguity-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "current_phone": "8315557700",
+        "name": "Monterey Bay Library Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branch phones on the same page; branch selection should abstain without stronger context.",
+              "page_text": "Downtown branch\nSeaside branch\nDel Rey Oaks branch",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Monterey Bay Library",
+              "url": "https://www.montereylibrary.example.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Monterey Bay Library branch phones"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "category",
+      "case_id": "ca-seed3-category-official",
+      "case_type": "OFFICIAL_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "aquarium",
+      "gold_value": "aquarium",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "name": "Monterey Bay Aquarium",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "category": "aquarium"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official visitor page supports the aquarium category.",
+              "page_text": "World-class aquarium exhibits, tickets, and visitor information.",
+              "recency_days": 6,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Visit Monterey Bay Aquarium",
+              "url": "https://www.montereybayaquarium.org/visit",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Monterey Bay Aquarium category"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "ca-seed3-generic-homepage-abstain",
+      "case_type": "GENERIC_HOMEPAGE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Carmel-by-the-Sea",
+        "name": "Carmel Harbor Music Hall",
+        "region": "CA",
+        "website": "https://www.carmelharmonica.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Generic homepage does not prove the branch-specific website.",
+              "page_text": "Welcome to our homepage. Event listings, directions, and tickets.",
+              "recency_days": 8,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Carmel Harbor Music Hall",
+              "url": "https://www.carmelharmonica.example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Carmel Harbor Music Hall website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "ca-seed3-locator-website",
+      "case_type": "BRANCH_LOCATOR",
+      "expected_abstain": false,
+      "expected_decision": "https://www.harborcafe.example.com/locations/monterey",
+      "gold_value": "https://www.harborcafe.example.com/locations/monterey",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "name": "Harbor Cafe Monterey",
+        "region": "CA",
+        "website": "https://www.harborcafe.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "website": "https://www.harborcafe.example.com/locations/monterey"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Branch locator page exposes the Monterey branch URL.",
+              "page_text": "Find the Monterey location and directions.",
+              "recency_days": 4,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Harbor Cafe Monterey",
+              "url": "https://www.harborcafe.example.com/locations/monterey",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Harbor Cafe Monterey locations website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "name",
+      "case_id": "ca-seed3-name-official",
+      "case_type": "ABOUT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "Pacific Grove Natural History Museum",
+      "gold_value": "Pacific Grove Natural History Museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Pacific Grove",
+        "name": "Pacific Grove Natural History Museum",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "name": "Pacific Grove Natural History Museum"
+              },
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full museum name.",
+              "page_text": "Pacific Grove Natural History Museum is our full name.",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "About the Museum",
+              "url": "https://www.pacificgrovemuseum.example.org/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Pacific Grove Natural History Museum about"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed3-phone-direct",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "8315554400",
+      "gold_value": "8315554400",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Carmel-by-the-Sea",
+        "current_phone": "8315554400",
+        "name": "Carmel Coffee Co.",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "8315554400"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line.",
+              "page_text": "Call us at (831) 555-4400.",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Carmel Coffee Co.",
+              "url": "https://www.carmelcoffee.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Carmel Coffee Co phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "ca-seed3-social-only-abstain",
+      "case_type": "SOCIAL_ONLY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Salinas",
+        "name": "Salinas Art House",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should not prove the website.",
+              "page_text": "Photos and events only; no official website listed.",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "social",
+              "title": "Salinas Art House",
+              "url": "https://www.instagram.com/salinasarthouse/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "social",
+          "query": "Salinas Art House instagram"
+        }
+      ],
+      "truth_source_type": "social"
+    },
+    {
+      "attribute": "website",
+      "case_id": "ca-seed3-stale-archive-abstain",
+      "case_type": "STALE_ARCHIVE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Salinas",
+        "name": "Salinas Art House",
+        "region": "CA",
+        "website": "https://www.salinasarthouse.example.org"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.4,
+              "notes": "Stale archive page should not prove the current website.",
+              "page_text": "Archived location page from the old site. The current website moved.",
+              "recency_days": 1200,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Salinas Art House Archive",
+              "url": "https://archive.salinasarthouse.example.org/2018/",
+              "zombie_score": 0.9
+            }
+          ],
+          "layer": "official",
+          "query": "Salinas Art House old archive website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed3-wrong-entity-phone-abstain",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "current_phone": "8315558800",
+        "name": "Monterey Harbor Office",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.8,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone.",
+              "page_text": "Harbor Office, wrong tenant, suite B only.",
+              "recency_days": 12,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Tenant Directory",
+              "url": "https://www.montereyharbor.example.com/tenant-directory",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Monterey Harbor Office wrong tenant phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "ca-seed4-address-registry",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "400 Capitol Mall, Sacramento, CA 95814",
+      "gold_value": "400 Capitol Mall, Sacramento, CA 95814",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Sacramento",
+        "name": "Capitol Theater Sacramento",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "400 Capitol Mall, Sacramento, CA 95814"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the venue address.",
+              "page_text": "400 Capitol Mall, Sacramento, CA 95814",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://sacramento.example.gov/business/capitol-theater",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Capitol Theater Sacramento address registry"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed4-branch-ambiguity-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Los Angeles",
+        "current_phone": "2135557700",
+        "name": "Los Angeles Downtown Library Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branches without exposing a unique phone in the text.",
+              "page_text": "Downtown branch\nWestwood branch\nHollywood branch",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Los Angeles Library",
+              "url": "https://www.lalibrary.example.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Los Angeles Downtown Library branch phones"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "category",
+      "case_id": "ca-seed4-category-official",
+      "case_type": "OFFICIAL_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "aquarium",
+      "gold_value": "aquarium",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "San Diego",
+        "name": "Pacific Tide Aquarium",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "category": "aquarium"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official visitor page supports the aquarium category.",
+              "page_text": "Aquarium exhibits, tickets, and visitor information.",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Visit Pacific Tide Aquarium",
+              "url": "https://www.pacifictide.example.com/visit",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Pacific Tide Aquarium category"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "ca-seed4-generic-homepage-abstain",
+      "case_type": "GENERIC_HOMEPAGE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Riverside",
+        "name": "Riverside Arts Hall",
+        "region": "CA",
+        "website": "https://www.riversideartshall.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Generic homepage does not prove the branch-specific website.",
+              "page_text": "Welcome to our homepage. Event listings, directions, and tickets.",
+              "recency_days": 8,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Riverside Arts Hall",
+              "url": "https://www.riversideartshall.example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Riverside Arts Hall website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "ca-seed4-locator-website",
+      "case_type": "BRANCH_LOCATOR",
+      "expected_abstain": false,
+      "expected_decision": "https://www.sunsetbooks.example.com/locations/los-angeles",
+      "gold_value": "https://www.sunsetbooks.example.com/locations/los-angeles",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Los Angeles",
+        "name": "Sunset Books Los Angeles",
+        "region": "CA",
+        "website": "https://www.sunsetbooks.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "website": "https://www.sunsetbooks.example.com/locations/los-angeles"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Branch locator page exposes the Los Angeles branch URL.",
+              "page_text": "Find the Los Angeles location and directions.",
+              "recency_days": 4,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Sunset Books Los Angeles",
+              "url": "https://www.sunsetbooks.example.com/locations/los-angeles",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Sunset Books Los Angeles locations website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "name",
+      "case_id": "ca-seed4-name-official",
+      "case_type": "ABOUT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "Bayview Natural History Museum",
+      "gold_value": "Bayview Natural History Museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "San Francisco",
+        "name": "Bayview Natural History Museum",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "name": "Bayview Natural History Museum"
+              },
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full museum name.",
+              "page_text": "Bayview Natural History Museum is our full name.",
+              "recency_days": 6,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "About the Museum",
+              "url": "https://www.bayviewmuseum.example.org/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Bayview Natural History Museum about"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed4-phone-direct",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "6195551234",
+      "gold_value": "6195551234",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "San Diego",
+        "current_phone": "6195551234",
+        "name": "Mission Coffee Roasters",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "6195551234"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line.",
+              "page_text": "Call us at (619) 555-1234.",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Mission Coffee Roasters",
+              "url": "https://www.missioncoffee.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Mission Coffee Roasters phone San Diego"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "ca-seed4-social-only-abstain",
+      "case_type": "SOCIAL_ONLY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Oakland",
+        "name": "Oakland Public Studio",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should not prove the website.",
+              "page_text": "Photos and events only; no official website listed.",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "social",
+              "title": "Oakland Public Studio",
+              "url": "https://www.instagram.com/oaklandpublicstudio/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "social",
+          "query": "Oakland Public Studio instagram"
+        }
+      ],
+      "truth_source_type": "social"
+    },
+    {
+      "attribute": "website",
+      "case_id": "ca-seed4-stale-archive-abstain",
+      "case_type": "STALE_ARCHIVE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Berkeley",
+        "name": "Berkeley Lantern Theater",
+        "region": "CA",
+        "website": "https://www.berkeleylantern.example.org"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.4,
+              "notes": "Stale archive page should not prove the current website.",
+              "page_text": "Archived location page from the old site. The current website moved.",
+              "recency_days": 1400,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Berkeley Lantern Theater Archive",
+              "url": "https://archive.berkeleylantern.example.org/2017/",
+              "zombie_score": 0.9
+            }
+          ],
+          "layer": "official",
+          "query": "Berkeley Lantern Theater archive website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed4-wrong-entity-phone-abstain",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Anaheim",
+        "current_phone": "7145556600",
+        "name": "Anaheim Harbor Office",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.8,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone.",
+              "page_text": "Harbor Office, wrong tenant, suite B only.",
+              "recency_days": 12,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Tenant Directory",
+              "url": "https://www.anaheimharbor.example.com/tenant-directory",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Anaheim Harbor Office wrong tenant phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "category",
+      "case_id": "closure",
+      "case_type": "CLOSURE_AMBIGUITY",
+      "expected_abstain": true,
+      "expected_decision": "temporarily_closed",
+      "gold_value": "temporarily_closed",
+      "identity_label": "TEMPORARY_CLOSURE",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC closure",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "category": "permanently_closed"
+              },
+              "identity_change_score": 0.7,
+              "notes": "closure ambiguity",
+              "page_text": "Permanently closed.",
+              "recency_days": 10,
+              "source_family_id": "official:closure.example",
+              "source_type": "official_site",
+              "title": "closure archive",
+              "url": "https://closure.example/archive",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC closure category"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "category": "temporarily_closed"
+              },
+              "identity_change_score": 0.7,
+              "notes": "closure ambiguity",
+              "page_text": "Temporarily closed.",
+              "recency_days": 10,
+              "source_family_id": "official:closure.example",
+              "source_type": "official_site",
+              "title": "closure status",
+              "url": "https://closure.example/status",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC closure\" official category"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "echo",
+      "case_type": "AGGREGATOR_ECHO",
+      "expected_abstain": false,
+      "expected_decision": "https://echo-current.example",
+      "gold_value": "https://echo-current.example",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC echo",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "corroboration",
+              "extracted_values": {
+                "website": "https://echo-old.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Stale aggregator echo.",
+              "recency_days": 500,
+              "source_family_id": "aggregator:echo-cluster",
+              "source_type": "aggregator",
+              "title": "echo directory two",
+              "url": "https://directorylike.example/echo",
+              "zombie_score": 0.8
+            },
+            {
+              "evidence_role": "corroboration",
+              "extracted_values": {
+                "website": "https://echo-old.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Stale aggregator echo.",
+              "recency_days": 500,
+              "source_family_id": "aggregator:echo-cluster",
+              "source_type": "aggregator",
+              "title": "echo directory one",
+              "url": "https://yelplike.example/echo",
+              "zombie_score": 0.8
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC echo website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://echo-current.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Official current website.",
+              "recency_days": 10,
+              "source_family_id": "official:echo-current.example",
+              "source_type": "official_site",
+              "title": "echo current",
+              "url": "https://echo-current.example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC echo\" official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "hard-address-1",
+      "gold_value": "123 Main St, Santa Cruz, CA 95060",
+      "place": {
+        "address": "99 Old Rd, Santa Cruz, CA",
+        "base_value": "88 Base Rd, Santa Cruz, CA",
+        "current_value": "99 Old Rd, Santa Cruz, CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Registry page lists the new address.",
+              "page_text": "123 Main St, Santa Cruz, CA 95060",
+              "recency_days": 20,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://city.example.gov/business/shop-example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Shop Example address"
+        }
+      ]
+    },
+    {
+      "attribute": "phone",
+      "case_id": "hard-branch-ambiguity",
+      "expected_abstain": true,
+      "gold_value": "",
+      "place": {
+        "base_value": "510-555-3434",
+        "current_value": "510-555-1212",
+        "phone": "510-555-1212"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Berkeley branch contact page.",
+              "page_text": "Berkeley branch: (510) 555-3434",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Berkeley Shop Example",
+              "url": "https://chain.example/berkeley/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example Berkeley branch phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Oakland branch contact page.",
+              "page_text": "Oakland branch: (510) 555-1212",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Oakland Shop Example",
+              "url": "https://chain.example/oakland/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example Oakland branch phone"
+        }
+      ]
+    },
+    {
+      "attribute": "phone",
+      "case_id": "hard-branch-ambiguity-phone",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "place": {
+        "base_value": "510-555-3434",
+        "current_value": "510-555-1212",
+        "phone": "510-555-1212"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Berkeley branch contact page.",
+              "page_text": "Berkeley branch: (510) 555-3434",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Berkeley Shop Example",
+              "url": "https://chain.example/berkeley/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example Berkeley branch phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Oakland branch contact page.",
+              "page_text": "Oakland branch: (510) 555-1212",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Oakland Shop Example",
+              "url": "https://chain.example/oakland/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example Oakland branch phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-business-registry-website",
+      "gold_value": "https://shop.example.com/contact",
+      "identity_label": "SAME_ENTITY",
+      "place": {
+        "base_value": "https://old.example.com",
+        "current_value": "https://shop.example.com",
+        "website": "https://shop.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "website": "https://shop.example.com/contact"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry confirms the contact URL.",
+              "page_text": "Business registry contact page lists https://shop.example.com/contact.",
+              "recency_days": 30,
+              "source_family_id": "",
+              "source_type": "business_registry",
+              "title": "Shop Example Registry",
+              "url": "https://registry.example/shop-example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example business registry website"
+        }
+      ],
+      "truth_source_type": "business_registry"
+    },
+    {
+      "attribute": "category",
+      "case_id": "hard-category-government-corroboration",
+      "gold_value": "cafe",
+      "identity_label": "SAME_ENTITY",
+      "place": {
+        "base_value": "coffee shop",
+        "category": "cafe",
+        "current_value": "cafe"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "category": "cafe"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Government license corroborates the category.",
+              "page_text": "Business license category: cafe.",
+              "recency_days": 18,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Example Cafe License",
+              "url": "https://example.gov/licenses/example-cafe",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Example Cafe government category"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-generic-homepage-abstain",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "INSUFFICIENT_EVIDENCE",
+      "place": {
+        "base_value": "https://www.starbucks.com/store-locator/store/1234/mission-st-santa-cruz",
+        "current_value": "https://www.starbucks.com/",
+        "website": "https://www.starbucks.com/"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Generic official homepage without branch identity.",
+              "page_text": "Coffee, beverages, and rewards. Find a store near you.",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Starbucks Coffee Company",
+              "url": "https://www.starbucks.com/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "Starbucks Mission Street Santa Cruz official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-html-jsonld",
+      "gold_value": "https://example.com/contact",
+      "place": {
+        "base_value": "https://old.example.com",
+        "current_value": "https://example.com",
+        "website": "https://example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "HTML page with JSON-LD structured contact data.",
+              "page_text": "<html><head><title>Example Cafe</title><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"CafeOrCoffeeShop\",\"name\":\"Example Cafe\",\"url\":\"https://example.com/contact\",\"telephone\":\"(415) 555-1212\",\"address\":{\"streetAddress\":\"123 Main St\",\"addressLocality\":\"Santa Cruz\",\"addressRegion\":\"CA\",\"postalCode\":\"95060\"}}</script></head><body><h1>Example Cafe</h1><p>Visit us for coffee and breakfast.</p></body></html>",
+              "recency_days": 1,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Example Cafe",
+              "url": "https://example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Example Cafe contact"
+        }
+      ]
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-link-canonical",
+      "gold_value": "https://example.com/contact",
+      "place": {
+        "base_value": "https://old.example.com",
+        "current_value": "https://example.com",
+        "website": "https://example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Canonical link points to the contact page.",
+              "page_text": "<html><head><title>Example Cafe</title><link rel=\"canonical\" href=\"https://example.com/contact\"><meta name=\"description\" content=\"Contact Example Cafe\"></head><body><h1>Example Cafe</h1><p>Welcome to Example Cafe.</p></body></html>",
+              "recency_days": 1,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Example Cafe",
+              "url": "https://example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Example Cafe canonical link"
+        }
+      ]
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-locator-page",
+      "gold_value": "https://shop.example.com/locations/santa-cruz",
+      "place": {
+        "base_value": "https://old-shop.example.com",
+        "current_value": "https://shop.example.com",
+        "website": "https://shop.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Locator page exposes the branch-specific URL.",
+              "page_text": "Find a store\nSanta Cruz location: https://shop.example.com/locations/santa-cruz",
+              "recency_days": 1,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Shop Example Store Locator",
+              "url": "https://shop.example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example Santa Cruz locator"
+        }
+      ]
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-meta-canonical",
+      "gold_value": "https://example.com/contact",
+      "place": {
+        "base_value": "https://old.example.com",
+        "current_value": "https://example.com",
+        "website": "https://example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Meta canonical URL points to the contact page.",
+              "page_text": "<html><head><title>Example Cafe</title><meta property=\"og:url\" content=\"https://example.com/contact\"><meta name=\"description\" content=\"Contact Example Cafe\"></head><body><h1>Example Cafe</h1><p>Welcome to Example Cafe.</p></body></html>",
+              "recency_days": 1,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Example Cafe",
+              "url": "https://example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Example Cafe contact canonical meta"
+        }
+      ]
+    },
+    {
+      "attribute": "name",
+      "case_id": "hard-mixed-authoritative-name",
+      "gold_value": "Example Cafe Santa Cruz",
+      "identity_label": "SAME_ENTITY",
+      "place": {
+        "base_value": "Example Coffee",
+        "current_value": "Example Cafe",
+        "name": "Example Cafe"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "name": "Example Cafe Santa Cruz"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry corroborates the name.",
+              "page_text": "Government registry confirms Example Cafe Santa Cruz.",
+              "recency_days": 20,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Example Cafe Registry",
+              "url": "https://registry.example/example-cafe",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "Example Cafe government registry name"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "name": "Example Cafe Santa Cruz"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official page names the business.",
+              "page_text": "Official name: Example Cafe Santa Cruz.",
+              "recency_days": 4,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Example Cafe",
+              "url": "https://example.com/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Example Cafe official name"
+        }
+      ],
+      "truth_source_type": "mixed_authoritative_corroboration"
+    },
+    {
+      "attribute": "address",
+      "case_id": "hard-osm-address",
+      "gold_value": "120 Main St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "place": {
+        "address": "120 Main St",
+        "base_value": "118 Main St",
+        "current_value": "120 Main St"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "120 Main St, Santa Cruz, CA 95060"
+              },
+              "identity_change_score": 0.0,
+              "notes": "OSM corroborates the street address.",
+              "page_text": "OpenStreetMap lists 120 Main St, Santa Cruz, CA 95060.",
+              "recency_days": 12,
+              "source_family_id": "",
+              "source_type": "osm",
+              "title": "OpenStreetMap Shop Example",
+              "url": "https://www.openstreetmap.org/node/123",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example OSM address"
+        }
+      ],
+      "truth_source_type": "osm"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "hard-phone-1",
+      "gold_value": "+1 (415) 555-1212",
+      "place": {
+        "base_value": "415-555-8888",
+        "current_value": "415-555-9999",
+        "phone": "415-555-9999"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Contact page lists phone in text.",
+              "page_text": "Call us at (415) 555-1212.",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Shop Example",
+              "url": "https://shop.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example phone"
+        }
+      ]
+    },
+    {
+      "attribute": "phone",
+      "case_id": "hard-phone-ambiguous",
+      "gold_value": "4155551212",
+      "place": {
+        "base_value": "415-555-6666",
+        "current_value": "415-555-7777",
+        "phone": "415-555-7777"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Branch page conflicts with contact page.",
+              "page_text": "Branch line: (415) 555-3434",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Shop Example Branch",
+              "url": "https://shop.example.com/branch",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example branch phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official contact page lists one phone.",
+              "page_text": "Call us at (415) 555-1212.",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Shop Example",
+              "url": "https://shop.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example phone"
+        }
+      ]
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-social-only-abstain",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "INSUFFICIENT_EVIDENCE",
+      "place": {
+        "base_value": "https://old.example.com",
+        "current_value": "https://old.example.com",
+        "website": "https://old.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Social profile only; no canonical website.",
+              "page_text": "Shop Example Instagram profile only.",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "social",
+              "title": "Shop Example Instagram",
+              "url": "https://instagram.com/shopexample",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "Shop Example social website"
+        }
+      ],
+      "truth_source_type": "social"
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-stale-official",
+      "gold_value": "https://example.com/contact",
+      "place": {
+        "base_value": "https://legacy.example.com",
+        "current_value": "https://old.example.com",
+        "website": "https://old.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Permanently closed and moved to a new contact page.",
+              "page_text": "Permanently closed. New location: https://example.com/contact",
+              "recency_days": 400,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Example Cafe",
+              "url": "https://old.example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Example Cafe permanently closed"
+        }
+      ]
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-website-1",
+      "gold_value": "https://shop.example.com/contact",
+      "place": {
+        "base_value": "https://old.example.com",
+        "current_value": "https://shop.example.com",
+        "website": "https://shop.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official homepage mentions contact page.",
+              "page_text": "Contact us at https://shop.example.com/contact for store hours.",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Shop Example",
+              "url": "https://shop.example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example contact"
+        }
+      ]
+    },
+    {
+      "attribute": "website",
+      "case_id": "hard-wrong-tenant-abstain",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "WRONG_ENTITY_RISK",
+      "place": {
+        "base_value": "",
+        "current_value": "",
+        "website": ""
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.65,
+              "notes": "Government host page lists the center, not the tenant.",
+              "page_text": "London Nelson Community Center is home to multiple tenant programs. The government host page is not a separate tenant website.",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "London Nelson Community Center - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation/Community-Spaces/London-Nelson-Community-Center",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "London Nelson Senior Programs website"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "name",
+      "case_id": "mixed-authoritative-name",
+      "case_type": "MIXED_AUTHORITATIVE_CORROBORATION",
+      "expected_abstain": false,
+      "expected_decision": "PAC Mixed Authoritative Name",
+      "gold_value": "PAC Mixed Authoritative Name",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC mixed-authoritative-name",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "name": "PAC Mixed Authoritative Name"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Government registry confirms PAC Mixed Authoritative Name.",
+              "recency_days": 12,
+              "source_family_id": "government:data.example",
+              "source_type": "government",
+              "title": "government name",
+              "url": "https://data.example/name",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "\"PAC mixed-authoritative-name\" government name"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "name": "PAC Mixed Authoritative Name"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Official name PAC Mixed Authoritative Name.",
+              "recency_days": 8,
+              "source_family_id": "official:official.example",
+              "source_type": "official_site",
+              "title": "official name",
+              "url": "https://official.example/name",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC mixed-authoritative-name\" official name"
+        }
+      ],
+      "truth_source_type": "mixed_authoritative_corroboration"
+    },
+    {
+      "attribute": "website",
+      "case_id": "moved",
+      "case_type": "MOVED_ENTITY",
+      "expected_abstain": false,
+      "expected_decision": "https://moved.example",
+      "gold_value": "https://moved.example",
+      "identity_label": "MOVED_ENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC moved",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "corroboration",
+              "extracted_values": {
+                "website": "https://old-moved.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Old stale website.",
+              "recency_days": 700,
+              "source_family_id": "aggregator:old-dir.example",
+              "source_type": "aggregator",
+              "title": "old directory",
+              "url": "https://old-dir.example/moved",
+              "zombie_score": 1.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC moved website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://moved.example"
+              },
+              "identity_change_score": 0.9,
+              "notes": "we moved",
+              "page_text": "We moved.",
+              "recency_days": 10,
+              "source_family_id": "official:moved.example",
+              "source_type": "official_site",
+              "title": "moved",
+              "url": "https://moved.example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC moved\" official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "new-same-address",
+      "case_type": "NEW_ENTITY_SAME_ADDRESS",
+      "expected_abstain": true,
+      "expected_decision": "https://new-tenant.example",
+      "gold_value": "https://new-tenant.example",
+      "identity_label": "NEW_ENTITY_SAME_ADDRESS",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC new-same-address",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "corroboration",
+              "extracted_values": {
+                "website": "https://new-tenant.example"
+              },
+              "identity_change_score": 0.8,
+              "notes": "",
+              "page_text": "New tenant social page.",
+              "recency_days": 8,
+              "source_family_id": "social:new-tenant-social.example",
+              "source_type": "social",
+              "title": "new social",
+              "url": "https://new-tenant-social.example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC new-same-address website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://old-tenant.example"
+              },
+              "identity_change_score": 0.9,
+              "notes": "",
+              "page_text": "Old tenant at address.",
+              "recency_days": 800,
+              "source_family_id": "official:old-tenant.example",
+              "source_type": "official_site",
+              "title": "old tenant",
+              "url": "https://old-tenant.example",
+              "zombie_score": 1.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC new-same-address\" official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "official-current",
+      "case_type": "OFFICIAL_CORRECT_DIRECTORY_STALE",
+      "expected_abstain": false,
+      "expected_decision": "https://current.example",
+      "gold_value": "https://current.example",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC official-current",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "corroboration",
+              "extracted_values": {
+                "website": "https://old.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Stale directory echo.",
+              "recency_days": 900,
+              "source_family_id": "aggregator:directory.example",
+              "source_type": "aggregator",
+              "title": "directory",
+              "url": "https://directory.example/current",
+              "zombie_score": 0.9
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC official-current website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://current.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Official current website.",
+              "recency_days": 10,
+              "source_family_id": "official:current.example",
+              "source_type": "official_site",
+              "title": "current",
+              "url": "https://current.example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC official-current\" official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "official-stale",
+      "case_type": "OFFICIAL_STALE_DIRECTORY_CURRENT",
+      "expected_abstain": true,
+      "expected_decision": "https://new-social.example",
+      "gold_value": "https://new-social.example",
+      "identity_label": "STALE_OFFICIAL_SITE",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC official-stale",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "corroboration",
+              "extracted_values": {
+                "website": "https://new-social.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Fresh social page shows new website.",
+              "recency_days": 5,
+              "source_family_id": "social:social.example",
+              "source_type": "social",
+              "title": "social",
+              "url": "https://social.example/new",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC official-stale website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://old-official.example"
+              },
+              "identity_change_score": 0.9,
+              "notes": "stale official site after moved notice",
+              "page_text": "Stale official site after moved notice.",
+              "recency_days": 900,
+              "source_family_id": "official:old-official.example",
+              "source_type": "official_site",
+              "title": "old official",
+              "url": "https://old-official.example",
+              "zombie_score": 1.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC official-stale\" official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "osm-corroborated-address",
+      "case_type": "OSM_CORROBORATION",
+      "expected_abstain": false,
+      "expected_decision": "123 Main St, Oakland, CA 94607",
+      "gold_value": "123 Main St, Oakland, CA 94607",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC osm-corroborated-address",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "address": "123 Main St, Oakland, CA 94607"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "OpenStreetMap lists 123 Main St, Oakland, CA 94607.",
+              "recency_days": 14,
+              "source_family_id": "osm:openstreetmap.org",
+              "source_type": "osm",
+              "title": "osm address",
+              "url": "https://www.openstreetmap.org/node/42",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC osm-corroborated-address\" osm address"
+        }
+      ],
+      "truth_source_type": "osm"
+    },
+    {
+      "attribute": "website",
+      "case_id": "renamed",
+      "case_type": "RENAMED_ENTITY",
+      "expected_abstain": false,
+      "expected_decision": "https://renamed.example",
+      "gold_value": "https://renamed.example",
+      "identity_label": "RENAMED_ENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC renamed",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "corroboration",
+              "extracted_values": {
+                "website": "https://old-name.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Old name directory.",
+              "recency_days": 600,
+              "source_family_id": "aggregator:directory.example",
+              "source_type": "aggregator",
+              "title": "old directory",
+              "url": "https://directory.example/old-name",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC renamed website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://renamed.example"
+              },
+              "identity_change_score": 0.8,
+              "notes": "formerly known as Old Name",
+              "page_text": "Formerly known as Old Name.",
+              "recency_days": 10,
+              "source_family_id": "official:renamed.example",
+              "source_type": "official_site",
+              "title": "renamed",
+              "url": "https://renamed.example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC renamed\" official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "social-only-abstain",
+      "case_type": "SOCIAL_ONLY_ABSTAIN",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "UNKNOWN_IDENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC social-only-abstain",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "corroboration",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Instagram profile only. No canonical website.",
+              "recency_days": 5,
+              "source_family_id": "social:instagram.com",
+              "source_type": "social",
+              "title": "social only",
+              "url": "https://instagram.com/pac-social-only",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "\"PAC social-only-abstain\" website"
+        }
+      ],
+      "truth_source_type": "social"
+    },
+    {
+      "attribute": "website",
+      "case_id": "tied",
+      "case_type": "TIED_AUTHORITY_ABSTAIN",
+      "expected_abstain": true,
+      "expected_decision": "https://tie-a.example",
+      "gold_value": "https://tie-a.example",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC tied",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://tie-b.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Authority B.",
+              "recency_days": 10,
+              "source_family_id": "official:tie-b.example",
+              "source_type": "official_site",
+              "title": "tie b",
+              "url": "https://tie-b.example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC tied website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://tie-a.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Authority A.",
+              "recency_days": 10,
+              "source_family_id": "official:tie-a.example",
+              "source_type": "official_site",
+              "title": "tie a",
+              "url": "https://tie-a.example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC tied\" official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "us-seed5-address-registry",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "1414 Market St, Denver, CO 80202",
+      "gold_value": "1414 Market St, Denver, CO 80202",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Denver",
+        "name": "Civic Glass Denver",
+        "region": "CO"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "1414 Market St, Denver, CO 80202"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address.",
+              "page_text": "1414 Market St, Denver, CO 80202",
+              "recency_days": 8,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://denver.example.gov/business/civic-glass",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Civic Glass Denver address registry"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed5-branch-ambiguity-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Sacramento",
+        "current_phone": "9165557700",
+        "name": "Sacramento Library Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branches without exposing a unique phone in the text.",
+              "page_text": "North branch\nSouth branch\nCentral branch",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Sacramento Library",
+              "url": "https://www.saclibrary.example.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Sacramento Library branch phones"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "category",
+      "case_id": "us-seed5-category-official",
+      "case_type": "OFFICIAL_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "science museum",
+      "gold_value": "science museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Chicago",
+        "name": "Lakefront Science Center",
+        "region": "IL"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "category": "science museum"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official visitor page supports the science museum category.",
+              "page_text": "Interactive science museum exhibits, tickets, and visitor information.",
+              "recency_days": 6,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Visit Lakefront Science Center",
+              "url": "https://www.lakefrontscience.example.com/visit",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Lakefront Science Center category"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "us-seed5-generic-homepage-abstain",
+      "case_type": "GENERIC_HOMEPAGE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "New York",
+        "name": "Metro Gallery New York",
+        "region": "NY",
+        "website": "https://www.metrogallery.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Generic homepage does not prove the branch-specific website.",
+              "page_text": "Welcome to our homepage. Exhibitions, hours, and tickets.",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Metro Gallery",
+              "url": "https://www.metrogallery.example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Metro Gallery New York website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "us-seed5-locator-website",
+      "case_type": "BRANCH_LOCATOR",
+      "expected_abstain": false,
+      "expected_decision": "https://www.northlightbooks.example.com/locations/portland",
+      "gold_value": "https://www.northlightbooks.example.com/locations/portland",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Portland",
+        "name": "Northlight Books Portland",
+        "region": "OR",
+        "website": "https://www.northlightbooks.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "website": "https://www.northlightbooks.example.com/locations/portland"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Branch locator page exposes the Portland branch URL.",
+              "page_text": "Find the Portland location and directions.",
+              "recency_days": 4,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Northlight Books Portland",
+              "url": "https://www.northlightbooks.example.com/locations/portland",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Northlight Books Portland locations website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "name",
+      "case_id": "us-seed5-name-official",
+      "case_type": "ABOUT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "Sonoran Children's Theater",
+      "gold_value": "Sonoran Children's Theater",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Phoenix",
+        "name": "Sonoran Children's Theater",
+        "region": "AZ"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "name": "Sonoran Children's Theater"
+              },
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full theater name.",
+              "page_text": "Sonoran Children's Theater is our full name.",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "About the Theater",
+              "url": "https://www.sonorantheater.example.org/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Sonoran Children's Theater about"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed5-phone-direct",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "2065558123",
+      "gold_value": "2065558123",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Seattle",
+        "current_phone": "2065558123",
+        "name": "Rainline Coffee Seattle",
+        "region": "WA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "2065558123"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line.",
+              "page_text": "Call us at (206) 555-8123.",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Rainline Coffee Seattle",
+              "url": "https://www.rainlinecoffee.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Rainline Coffee Seattle phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "us-seed5-social-only-abstain",
+      "case_type": "SOCIAL_ONLY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Austin",
+        "name": "Austin Print Studio",
+        "region": "TX"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should not prove the website.",
+              "page_text": "Photos and events only; no official website listed.",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "social",
+              "title": "Austin Print Studio",
+              "url": "https://www.instagram.com/austinprintstudio/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "social",
+          "query": "Austin Print Studio instagram"
+        }
+      ],
+      "truth_source_type": "social"
+    },
+    {
+      "attribute": "website",
+      "case_id": "us-seed5-stale-archive-abstain",
+      "case_type": "STALE_ARCHIVE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "San Jose",
+        "name": "San Jose Lantern Theater",
+        "region": "CA",
+        "website": "https://www.sanjoselantern.example.org"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.4,
+              "notes": "Stale archive page should not prove the current website.",
+              "page_text": "Archived location page from the old site. The current website moved.",
+              "recency_days": 1500,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "San Jose Lantern Theater Archive",
+              "url": "https://archive.sanjoselantern.example.org/2018/",
+              "zombie_score": 0.92
+            }
+          ],
+          "layer": "official",
+          "query": "San Jose Lantern Theater archive website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed5-wrong-entity-phone-abstain",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "San Francisco",
+        "current_phone": "4155556600",
+        "name": "Bay Harbor Office",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.84,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone.",
+              "page_text": "Bay Harbor Office, wrong tenant, suite B only.",
+              "recency_days": 11,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Tenant Directory",
+              "url": "https://www.bayharbor.example.com/tenant-directory",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Bay Harbor Office wrong tenant phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "us-seed6-address-registry",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "88 Elm St, Houston, TX 77002",
+      "gold_value": "88 Elm St, Houston, TX 77002",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Houston",
+        "name": "Bayside Print Houston",
+        "region": "TX"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "88 Elm St, Houston, TX 77002"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address.",
+              "page_text": "88 Elm St, Houston, TX 77002",
+              "recency_days": 11,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://houston.example.gov/business/bayside-print",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Bayside Print Houston address registry"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed6-branch-ambiguity-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Charlotte",
+        "current_phone": "7045557700",
+        "name": "Charlotte Library Branch",
+        "region": "NC"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branches without exposing a unique phone in the text.",
+              "page_text": "North branch\nSouth branch\nEast branch",
+              "recency_days": 8,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Charlotte Library",
+              "url": "https://www.charlottelibrary.example.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Charlotte Library branch phones"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "category",
+      "case_id": "us-seed6-category-official",
+      "case_type": "OFFICIAL_SERVICE_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "children's museum",
+      "gold_value": "children's museum",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Albuquerque",
+        "name": "Desert Light Museum",
+        "region": "NM"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "category": "children's museum"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official visitor page supports the children's museum category.",
+              "page_text": "Interactive children's museum exhibits, tickets, and visitor information.",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Visit Desert Light Museum",
+              "url": "https://www.desertlightmuseum.example.com/visit",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Desert Light Museum category"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "us-seed6-generic-homepage-abstain",
+      "case_type": "GENERIC_HOMEPAGE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Salt Lake City",
+        "name": "Canyon Arts Hall",
+        "region": "UT",
+        "website": "https://www.canyonartshall.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Generic homepage does not prove the branch-specific website.",
+              "page_text": "Welcome to our homepage. Events, tickets, and directions.",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Canyon Arts Hall",
+              "url": "https://www.canyonartshall.example.com",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Canyon Arts Hall website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "us-seed6-locator-website",
+      "case_type": "BRANCH_LOCATOR",
+      "expected_abstain": false,
+      "expected_decision": "https://www.crescentbooks.example.com/locations/miami",
+      "gold_value": "https://www.crescentbooks.example.com/locations/miami",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Miami",
+        "name": "Crescent Books Miami",
+        "region": "FL",
+        "website": "https://www.crescentbooks.example.com"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "website": "https://www.crescentbooks.example.com/locations/miami"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Branch locator page exposes the Miami branch URL.",
+              "page_text": "Find the Miami location and directions.",
+              "recency_days": 4,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Crescent Books Miami",
+              "url": "https://www.crescentbooks.example.com/locations/miami",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Crescent Books Miami locations website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "name",
+      "case_id": "us-seed6-name-official",
+      "case_type": "ABOUT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "Hudson Children's Theater",
+      "gold_value": "Hudson Children's Theater",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Brooklyn",
+        "name": "Hudson Children's Theater",
+        "region": "NY"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "name": "Hudson Children's Theater"
+              },
+              "identity_change_score": 0.0,
+              "notes": "About page uses the full theater name.",
+              "page_text": "Hudson Children's Theater is our full name.",
+              "recency_days": 6,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "About the Theater",
+              "url": "https://www.hudsontheater.example.org/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Hudson Children's Theater about"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed6-phone-direct",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "4045550188",
+      "gold_value": "4045550188",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Atlanta",
+        "current_phone": "4045550188",
+        "name": "Pine Row Caf\u00e9 Atlanta",
+        "region": "GA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "4045550188"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line.",
+              "page_text": "Call us at (404) 555-0188.",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Pine Row Caf\u00e9 Atlanta",
+              "url": "https://www.pinerowcafe.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Pine Row Caf\u00e9 Atlanta phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "us-seed6-social-only-abstain",
+      "case_type": "SOCIAL_ONLY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Tampa",
+        "name": "Tampa Makers Loft",
+        "region": "FL"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Social-only evidence should not prove the website.",
+              "page_text": "Photos and events only; no official website listed.",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "social",
+              "title": "Tampa Makers Loft",
+              "url": "https://www.instagram.com/tampamakersloft/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "social",
+          "query": "Tampa Makers Loft instagram"
+        }
+      ],
+      "truth_source_type": "social"
+    },
+    {
+      "attribute": "website",
+      "case_id": "us-seed6-stale-archive-abstain",
+      "case_type": "STALE_ARCHIVE",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "San Antonio",
+        "name": "San Antonio Lantern Theater",
+        "region": "TX",
+        "website": "https://www.sanantoniolantern.example.org"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.5,
+              "notes": "Stale archive page should not prove the current website.",
+              "page_text": "Archived location page from the old site. The current website moved.",
+              "recency_days": 1600,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "San Antonio Lantern Theater Archive",
+              "url": "https://archive.sanantoniolantern.example.org/2019/",
+              "zombie_score": 0.94
+            }
+          ],
+          "layer": "official",
+          "query": "San Antonio Lantern Theater archive website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed6-wrong-entity-phone-abstain",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Orlando",
+        "current_phone": "4075556600",
+        "name": "Lakeview Office",
+        "region": "FL"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.86,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone.",
+              "page_text": "Lakeview Office, wrong tenant, suite B only.",
+              "recency_days": 10,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Tenant Directory",
+              "url": "https://www.lakeview.example.com/tenant-directory",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Lakeview Office wrong tenant phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "weak",
+      "case_type": "WEAK_EVIDENCE_ABSTAIN",
+      "expected_abstain": true,
+      "expected_decision": "https://weak.example",
+      "gold_value": "https://weak.example",
+      "identity_label": "UNKNOWN_IDENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC weak",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "corroboration",
+              "extracted_values": {
+                "website": "https://weak.example"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "Weak social-only claim.",
+              "recency_days": 10,
+              "source_family_id": "social:social.example",
+              "source_type": "social",
+              "title": "weak social",
+              "url": "https://social.example/weak",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC weak website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "website",
+      "case_id": "wrong-branch",
+      "case_type": "WRONG_BRANCH",
+      "expected_abstain": true,
+      "expected_decision": "https://chain.example/oakland",
+      "gold_value": "https://chain.example/oakland",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC wrong-branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://chain.example/berkeley"
+              },
+              "identity_change_score": 0.7,
+              "notes": "branch ambiguity",
+              "page_text": "Berkeley branch.",
+              "recency_days": 10,
+              "source_family_id": "official:chain.example",
+              "source_type": "official_site",
+              "title": "berkeley",
+              "url": "https://chain.example/berkeley",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "PAC wrong-branch website"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "website": "https://chain.example/oakland"
+              },
+              "identity_change_score": 0.7,
+              "notes": "branch ambiguity",
+              "page_text": "Oakland branch.",
+              "recency_days": 10,
+              "source_family_id": "official:chain.example",
+              "source_type": "official_site",
+              "title": "oakland",
+              "url": "https://chain.example/oakland",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC wrong-branch\" official website"
+        }
+      ],
+      "truth_source_type": "official_site"
+    }
+  ],
+  "generated_at": "2026-05-30T07:26:42.847951+00:00",
+  "schema_version": 1
+}

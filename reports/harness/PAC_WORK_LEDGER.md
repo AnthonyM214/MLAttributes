@@ -23,10 +23,16 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
   - mixed-authoritative corroboration
   - identity drift labels
 - The large replay corpus diagnosis shows the next bottleneck is claim coverage, not more resolver tuning.
+- The replay-corpus diagnostic now identifies the most useful corpora: `pac_hard_cases_replay.json` for abstention-heavy noise, `hard_cases_replay.json` for mixed hard-case coverage, and `santa_cruz_challenge_replay.json` for dense curated proof.
+- The promoted mixed replay corpus is now checked in at `tests/fixtures/pac_promoted_replay.json`; it combines the useful hard fixtures and Santa Cruz tranches into a 159-episode mixed proof surface with 83.0% claim coverage and 43 explicit abstain cases.
+- The promoted mixed replay benchmark is now materialized as `reports/harness/benchmark_promoted_current.json` so the dashboard can load it as a first-class current artifact.
+- The cross-city replay slice is now checked in at `tests/fixtures/pac_cross_city_replay.json`; it gives the repo a 72-episode non-Santa-Cruz validation set with 66.7% claim coverage, 32 explicit abstain cases, and 27 identity-drift cases.
+- The cross-city replay benchmark is now materialized as `reports/harness/benchmark_cross_city_current.json` so the dashboard can surface a broader geography proof alongside the Santa Cruz challenge.
 - The new OKR and research alignment notes capture the claim-coverage pivot and the supporting graph/noise-control rationale.
 - Seed batch 4 extends the replay expansion into a cross-city, abstention-heavy California tranche.
 - Seed batch 5 extends the replay expansion into a cross-city national tranche while keeping the answerable/abstain balance visible.
 - Seed batch 6 pushes the replay expansion past the +50-case mark with another abstention-heavy cross-city tranche.
+- The cross-city replay slice is the first compact non-Santa-Cruz validation set, and it now shows the identity-gated v6 path staying safe on a broader geography mix.
 - The dashboard is cleaned up and human-readable.
 - The repo comparison doc preserves the public ProjectTerra PAC timeline.
 - The CI determinism issue around the evidence workplan test has already been fixed.

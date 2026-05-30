@@ -25,10 +25,17 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `tests/fixtures/santa_cruz_seed_batch_4.json`
 - `tests/fixtures/santa_cruz_seed_batch_5.json`
 - `tests/fixtures/santa_cruz_seed_batch_6.json`
+- `tests/fixtures/pac_promoted_replay.json`
+- `tests/fixtures/pac_cross_city_replay.json`
 - `docs/corpus_expansion_strategy.md`
 - `reports/harness/PAC_WORK_LEDGER.md`
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
 - `reports/harness/PAC_SHIP_BENCHMARKS.md`
+- `reports/harness/PAC_REPLAY_CORPUS_DIAGNOSTIC.md`
+- `reports/harness/PAC_PROMOTED_REPLAY_BENCHMARK.md`
+- `reports/harness/PAC_CROSS_CITY_REPLAY_BENCHMARK.md`
+- `reports/harness/benchmark_promoted_current.json`
+- `reports/harness/benchmark_cross_city_current.json`
 - `reports/harness/PAC_REPO_COMPARISON.md`
 - `reports/harness/SELECTIVE_BASELINE_NOTE.md`
 
@@ -65,6 +72,6 @@ These files are still part of the repository history and can be useful, but they
 
 The Santa Cruz challenge fixture currently contains 50 curated replay cases. It covers relay/fax/footer phone conflicts, department-location-vs-city-footer address conflicts, full-name-vs-acronym name conflicts, tourism category tag conflicts, government-locator website conflicts, official service-page category conflicts, program-tenant category conflicts, adjacent-facility category conflicts, offsite-event address conflicts, multi-branch phone/address conflicts, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, social-only website abstention, generic corporate homepage abstention, stale/closed phone abstention, and wrong-entity tenant website abstention.
 
-Treat the Santa Cruz numbers as a replayable challenge proof, not a production generalization claim. The next quality gate is cross-city validation with the same evidence schema and more negative cases.
+Treat the Santa Cruz numbers as a replayable challenge proof, not a production generalization claim. The cross-city replay slice is now the next layer of evidence: it keeps the claim schema intact while showing the repo is not limited to one geography.
 
 The point of this map is visibility: a cold reader should find the core resolver and benchmarks first, then follow the supporting or historical material only if needed.

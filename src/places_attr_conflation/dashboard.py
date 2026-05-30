@@ -32,6 +32,8 @@ class DashboardData:
     benchmark_v5: dict[str, object] | None
     benchmark_v6: dict[str, object] | None
     benchmark_full_replay: dict[str, object] | None
+    benchmark_promoted: dict[str, object] | None
+    benchmark_cross_city: dict[str, object] | None
     repo_comparison_tests: int | None
     paths: dict[str, str]
     batch_progress_rows: list[list[str]]
@@ -125,6 +127,8 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "benchmark_v5": harness / "benchmark_v5_current.json",
         "benchmark_v6": harness / "benchmark_v6_current.json",
         "benchmark_full_replay": harness / "benchmark_full_replay_current.json",
+        "benchmark_promoted": harness / "benchmark_promoted_current.json",
+        "benchmark_cross_city": harness / "benchmark_cross_city_current.json",
         "work_ledger": root / "harness" / "PAC_WORK_LEDGER.md",
         "okr": root / "harness" / "PAC_OKR.md",
         "repo_comparison": root / "harness" / "PAC_REPO_COMPARISON.md",
@@ -168,6 +172,8 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         benchmark_v5=_load_json(_resolve_path(root, paths["benchmark_v5"])) if "benchmark_v5" in paths else None,
         benchmark_v6=_load_json(_resolve_path(root, paths["benchmark_v6"])) if "benchmark_v6" in paths else None,
         benchmark_full_replay=_load_json(_resolve_path(root, paths["benchmark_full_replay"])) if "benchmark_full_replay" in paths else None,
+        benchmark_promoted=_load_json(_resolve_path(root, paths["benchmark_promoted"])) if "benchmark_promoted" in paths else None,
+        benchmark_cross_city=_load_json(_resolve_path(root, paths["benchmark_cross_city"])) if "benchmark_cross_city" in paths else None,
         repo_comparison_tests=_load_repo_comparison_tests(root),
         paths=paths,
         batch_progress_rows=_batch_progress_rows(root),
@@ -834,6 +840,16 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
         v5_resolver = {}
     if not isinstance(v5_comparison, dict):
         v5_comparison = {}
+    cross_city = data.benchmark_cross_city or {}
+    cross_city_claim = cross_city.get("claim_coverage", {}) if isinstance(cross_city, dict) else {}
+    cross_city_stats = cross_city.get("replay_stats", {}) if isinstance(cross_city, dict) else {}
+    cross_city_v6 = cross_city.get("resolver_v6", {}) if isinstance(cross_city, dict) else {}
+    if not isinstance(cross_city_claim, dict):
+        cross_city_claim = {}
+    if not isinstance(cross_city_stats, dict):
+        cross_city_stats = {}
+    if not isinstance(cross_city_v6, dict):
+        cross_city_v6 = {}
     full = data.benchmark_full_replay or {}
     full_merge = full.get("merge_report", {}) if isinstance(full, dict) else {}
     full_claim_coverage = full.get("full_claim_coverage", {}) if isinstance(full, dict) else {}
@@ -841,6 +857,19 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
         full_merge = {}
     if not isinstance(full_claim_coverage, dict):
         full_claim_coverage = {}
+    promoted = data.benchmark_promoted or {}
+    promoted_claim = promoted.get("claim_coverage", {}) if isinstance(promoted, dict) else {}
+    promoted_stats = promoted.get("replay_stats", {}) if isinstance(promoted, dict) else {}
+    promoted_v5 = promoted.get("resolver_v5", {}) if isinstance(promoted, dict) else {}
+    promoted_v6 = promoted.get("resolver_v6", {}) if isinstance(promoted, dict) else {}
+    if not isinstance(promoted_claim, dict):
+        promoted_claim = {}
+    if not isinstance(promoted_stats, dict):
+        promoted_stats = {}
+    if not isinstance(promoted_v5, dict):
+        promoted_v5 = {}
+    if not isinstance(promoted_v6, dict):
+        promoted_v6 = {}
     pooled = data.benchmark_pooled or {}
     pooled_resolvepoi = pooled.get("resolvepoi_holdout", {}) if isinstance(pooled, dict) else {}
     pooled_david = pooled.get("david_test", {}) if isinstance(pooled, dict) else {}
@@ -887,6 +916,14 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
                 f"The collected replay benchmark merges {_num((full_merge or {}).get('input_files'))} files into {_num((full_merge or {}).get('merged_episodes'))} episodes and {_num((full_merge or {}).get('merged_pages'))} pages, "
                 f"with {_pct((full_claim_coverage or {}).get('coverage'))} overall claim coverage and {_pct((full_claim_coverage or {}).get('website_coverage'))} website coverage."
             ) if isinstance(full, dict) and full else "The collected replay benchmark still needs the current coverage report surfaced in the dashboard."
+        },
+        {
+            "title": "Already done: cross-city replay validation",
+            "body": (
+                f"The cross-city replay slice covers {_num(cross_city_stats.get('episodes_total'))} episodes with {_pct(cross_city_claim.get('coverage'))} claim coverage, "
+                f"{_num(cross_city_stats.get('abstention_expected_count'))} explicit abstain cases, and {_num(cross_city_stats.get('identity_drift_count'))} identity-drift cases. "
+                f"On that slice, v6 keeps {_pct(cross_city_v6.get('expected_behavior_accuracy'))} expected-behavior accuracy with {_pct(cross_city_v6.get('unsafe_prediction_rate'))} unsafe predictions."
+            ) if isinstance(cross_city, dict) and cross_city else "The cross-city replay benchmark still needs the current coverage report surfaced in the dashboard."
         },
         {
             "title": "Already done: pooled three-corpus diagnostic",
@@ -1078,6 +1115,13 @@ def _evolution_story(data: DashboardData) -> list[dict[str, str]]:
             ),
         },
         {
+            "title": "Promoted mixed replay",
+            "body": (
+                "The useful replay surface is now explicit: the promoted mixed corpus combines the hard fixtures and Santa Cruz tranches into a 159-episode "
+                "claim-rich benchmark with abstention-heavy cases, wrong-branch cases, and cross-attribute phone/address coverage."
+            ),
+        },
+        {
             "title": "Research alignment",
             "body": (
                 f"The research note ({research_path or 'reports/harness/PAC_RESEARCH_ALIGNMENT.md'}) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, "
@@ -1107,6 +1151,29 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
         santa_v2 = {}
     if not isinstance(santa_expected_v2, dict):
         santa_expected_v2 = {}
+    promoted = data.benchmark_promoted or {}
+    promoted_claim = promoted.get("claim_coverage", {}) if isinstance(promoted, dict) else {}
+    promoted_stats = promoted.get("replay_stats", {}) if isinstance(promoted, dict) else {}
+    promoted_v5 = promoted.get("resolver_v5", {}) if isinstance(promoted, dict) else {}
+    promoted_v6 = promoted.get("resolver_v6", {}) if isinstance(promoted, dict) else {}
+    if not isinstance(promoted_claim, dict):
+        promoted_claim = {}
+    if not isinstance(promoted_stats, dict):
+        promoted_stats = {}
+    if not isinstance(promoted_v5, dict):
+        promoted_v5 = {}
+    if not isinstance(promoted_v6, dict):
+        promoted_v6 = {}
+    cross_city = data.benchmark_cross_city or {}
+    cross_city_claim = cross_city.get("claim_coverage", {}) if isinstance(cross_city, dict) else {}
+    cross_city_stats = cross_city.get("replay_stats", {}) if isinstance(cross_city, dict) else {}
+    cross_city_v6 = cross_city.get("resolver_v6", {}) if isinstance(cross_city, dict) else {}
+    if not isinstance(cross_city_claim, dict):
+        cross_city_claim = {}
+    if not isinstance(cross_city_stats, dict):
+        cross_city_stats = {}
+    if not isinstance(cross_city_v6, dict):
+        cross_city_v6 = {}
     v5 = data.benchmark_v5 or {}
     v5_resolver = v5.get("resolver_v5", {}) if isinstance(v5, dict) else {}
     v5_comparison = v5.get("comparison", {}) if isinstance(v5, dict) else {}
@@ -1146,6 +1213,20 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
             "The merged replay is the reality check: claim coverage is still only "
             f"{_pct((data.benchmark_v4 or {}).get('claim_coverage', {}).get('coverage') if isinstance(data.benchmark_v4, dict) else None)} "
             "and v4 does not recover extra cases there, so the next gain is extraction coverage, not more abstention tuning."
+        ),
+        (
+            "The promoted mixed replay corpus is the useful middle ground: it combines the hard fixtures and Santa Cruz tranches into "
+            f"{_num(promoted_stats.get('episodes_total'))} episodes with {_pct(promoted_claim.get('coverage'))} claim coverage, "
+            f"{_num(promoted_stats.get('abstention_expected_count'))} explicit abstain cases, and enough phone/address evidence to be more representative "
+            "than the curated hard cases alone. "
+            f"On that promoted set, v5 reaches {_pct(promoted_v5.get('answerable_accuracy'))} answerable accuracy and "
+            f"v6 keeps {_pct(promoted_v6.get('expected_behavior_accuracy'))} expected-behavior accuracy with {_pct(promoted_v6.get('unsafe_prediction_rate'))} unsafe predictions."
+        ),
+        (
+            "The cross-city replay slice is the stronger non-Santa-Cruz check: "
+            f"{_num(cross_city_stats.get('episodes_total'))} episodes with {_pct(cross_city_claim.get('coverage'))} claim coverage, "
+            f"{_num(cross_city_stats.get('abstention_expected_count'))} explicit abstain cases, and {_num(cross_city_stats.get('identity_drift_count'))} identity-drift cases. "
+            f"On that slice, v6 keeps {_pct(cross_city_v6.get('expected_behavior_accuracy'))} expected-behavior accuracy with {_pct(cross_city_v6.get('unsafe_prediction_rate'))} unsafe predictions."
         ),
         (
             "The graph-guided v5 planner is the first clear disruption: on the hard-case replay it keeps "
@@ -1244,6 +1325,16 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
         v5_resolver = {}
     if not isinstance(v5_comparison, dict):
         v5_comparison = {}
+    cross_city = data.benchmark_cross_city or {}
+    cross_city_claim = cross_city.get("claim_coverage", {}) if isinstance(cross_city, dict) else {}
+    cross_city_stats = cross_city.get("replay_stats", {}) if isinstance(cross_city, dict) else {}
+    cross_city_v6 = cross_city.get("resolver_v6", {}) if isinstance(cross_city, dict) else {}
+    if not isinstance(cross_city_claim, dict):
+        cross_city_claim = {}
+    if not isinstance(cross_city_stats, dict):
+        cross_city_stats = {}
+    if not isinstance(cross_city_v6, dict):
+        cross_city_v6 = {}
     full = data.benchmark_full_replay or {}
     full_benchmark = full.get("benchmark", {}) if isinstance(full, dict) else {}
     if not isinstance(full_benchmark, dict):
@@ -1357,6 +1448,14 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
             "detail": (
                 f"Unsafe predictions: {_pct((data.benchmark_v6 or {}).get('resolver_v6', {}).get('unsafe_prediction_rate') if isinstance(data.benchmark_v6, dict) else None)}; "
                 f"expected-behavior lift vs v5: {_pct_points((data.benchmark_v6 or {}).get('comparison', {}).get('expected_behavior_accuracy_delta') if isinstance(data.benchmark_v6, dict) else None)}."
+            ),
+        },
+        {
+            "label": "Cross-city replay",
+            "value": f"{_pct(cross_city_v6.get('expected_behavior_accuracy'))} expected / {_pct(cross_city_v6.get('abstention_rate'))} abstention",
+            "detail": (
+                f"{_num(cross_city_stats.get('episodes_total'))} episodes with {_pct(cross_city_claim.get('coverage'))} claim coverage, "
+                f"{_num(cross_city_stats.get('identity_drift_count'))} identity-drift cases, and unsafe predictions at {_pct(cross_city_v6.get('unsafe_prediction_rate'))}."
             ),
         },
         {

@@ -50,6 +50,7 @@ class DashboardTests(unittest.TestCase):
             current_merged = replay / "merged_current.json"
             current_resolver_replay = root / "resolver_replay" / "resolver_on_replay_current.json"
             current_resolver_replay.parent.mkdir(parents=True)
+            current_cross_city = harness / "benchmark_cross_city_current.json"
             current_conflict_dorks = ranker / "conflict_dorks_current.csv"
             current_batches = ranker / "conflict_dorks_current_batches"
             current_batches.mkdir(parents=True)
@@ -193,6 +194,17 @@ class DashboardTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            current_cross_city.write_text(
+                json.dumps(
+                    {
+                        "claim_coverage": {"coverage": 0.6666666666666666},
+                        "replay_stats": {"episodes_total": 72, "abstention_expected_count": 32, "identity_drift_count": 27},
+                        "resolver_v5": {"answerable_accuracy": 1.0, "expected_behavior_accuracy": 1.0, "unsafe_prediction_rate": 0.0},
+                        "resolver_v6": {"expected_behavior_accuracy": 1.0, "unsafe_prediction_rate": 0.0, "abstention_rate": 0.4444444444444444},
+                    }
+                ),
+                encoding="utf-8",
+            )
             current_replay_stats.write_text(json.dumps({"episodes_total": 1, "attempts_total": 1, "pages_total": 1, "authoritative_pages_rate": 1.0}), encoding="utf-8")
             current_merged.write_text(json.dumps({"episodes": []}), encoding="utf-8")
             current_resolver_replay.write_text(json.dumps({"episodes": []}), encoding="utf-8")
@@ -221,6 +233,7 @@ class DashboardTests(unittest.TestCase):
                 "replay_stats": str(current_replay_stats),
                 "merged_replay": str(current_merged),
                 "resolver_replay": str(current_resolver_replay),
+                "benchmark_cross_city": str(current_cross_city),
                 "conflict_dorks": str(current_conflict_dorks),
             }
             (dashboard / "latest.json").write_text(json.dumps(manifest), encoding="utf-8")
@@ -262,6 +275,7 @@ class DashboardTests(unittest.TestCase):
             self.assertIn("Website Authority", markdown)
             self.assertIn("Hard PAC Benchmark", markdown)
             self.assertIn("Working Prototype", markdown)
+            self.assertIn("Cross-city replay", markdown)
             self.assertTrue(Path(outputs["markdown"]).exists())
             self.assertTrue(Path(outputs["html"]).exists())
             self.assertTrue(Path(outputs["latest"]).exists())
@@ -271,6 +285,7 @@ class DashboardTests(unittest.TestCase):
             self.assertIn("Working Prototype", html)
             self.assertIn("Current Verdict", html)
             self.assertIn("Hard PAC Readiness", html)
+            self.assertIn("Cross-city replay", html)
             self.assertIn("data-view='pac'", html)
             self.assertIn("data-view='baseline'", html)
             self.assertIn("--paper:#faf7ff", html)
@@ -367,6 +382,51 @@ class DashboardTests(unittest.TestCase):
                 self.assertEqual(data.benchmark_v2_hard_cases["resolver_v2"]["accuracy"], 0.5)
             finally:
                 os.chdir(old_cwd)
+
+    def test_dashboard_loads_promoted_replay_benchmark(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "reports"
+            promoted = root / "harness" / "benchmark_promoted_current.json"
+            promoted.parent.mkdir(parents=True)
+            promoted.write_text(
+                json.dumps(
+                    {
+                        "claim_coverage": {"coverage": 0.83},
+                        "replay_stats": {"episodes_total": 159, "abstention_expected_count": 43},
+                        "resolver_v5": {"answerable_accuracy": 1.0, "expected_behavior_accuracy": 0.97, "unsafe_prediction_rate": 0.09},
+                        "resolver_v6": {"expected_behavior_accuracy": 0.96, "unsafe_prediction_rate": 0.0},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            data = build_dashboard_data(root)
+
+            self.assertIsNotNone(data.benchmark_promoted)
+            self.assertEqual(data.benchmark_promoted["claim_coverage"]["coverage"], 0.83)
+            self.assertEqual(data.benchmark_promoted["replay_stats"]["episodes_total"], 159)
+
+    def test_dashboard_loads_cross_city_replay_benchmark(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "reports"
+            cross_city = root / "harness" / "benchmark_cross_city_current.json"
+            cross_city.parent.mkdir(parents=True)
+            cross_city.write_text(
+                json.dumps(
+                    {
+                        "claim_coverage": {"coverage": 0.6666666666666666},
+                        "replay_stats": {"episodes_total": 72, "abstention_expected_count": 32, "identity_drift_count": 27},
+                        "resolver_v6": {"expected_behavior_accuracy": 1.0, "unsafe_prediction_rate": 0.0, "abstention_rate": 0.4444444444444444},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            data = build_dashboard_data(root)
+
+            self.assertIsNotNone(data.benchmark_cross_city)
+            self.assertEqual(data.benchmark_cross_city["claim_coverage"]["coverage"], 2 / 3)
+            self.assertEqual(data.benchmark_cross_city["replay_stats"]["episodes_total"], 72)
 
 
 if __name__ == "__main__":
