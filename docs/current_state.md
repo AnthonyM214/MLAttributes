@@ -28,6 +28,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `docs/corpus_expansion_strategy.md`
 - `reports/harness/PAC_WORK_LEDGER.md`
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
+- `reports/harness/PAC_SHIP_BENCHMARKS.md`
 - `reports/harness/PAC_REPO_COMPARISON.md`
 - `reports/harness/SELECTIVE_BASELINE_NOTE.md`
 
