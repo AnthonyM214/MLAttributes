@@ -499,10 +499,10 @@ class DashboardTests(unittest.TestCase):
                 json.dumps(
                     {
                         "combined": {
-                            "claim_coverage": {"coverage": 0.9125874125874126, "website_coverage": 0.9314516129032258},
-                            "replay_stats": {"episodes_total": 286, "abstention_expected_count": 39, "identity_drift_count": 33},
-                            "resolver_v5": {"expected_behavior_accuracy": 0.9230769230769231, "unsafe_prediction_rate": 0.10256410256410256},
-                            "resolver_v6": {"expected_behavior_accuracy": 0.6538461538461539, "unsafe_prediction_rate": 0.0},
+                            "claim_coverage": {"coverage": 0.9352331606217616, "website_coverage": 0.9511494252873564},
+                            "replay_stats": {"episodes_total": 386, "abstention_expected_count": 39, "identity_drift_count": 33},
+                            "resolver_v5": {"expected_behavior_accuracy": 0.9404145077720207, "unsafe_prediction_rate": 0.10256410256410256},
+                            "resolver_v6": {"expected_behavior_accuracy": 0.7253886010362695, "unsafe_prediction_rate": 0.0},
                         }
                     }
                 ),
@@ -512,8 +512,8 @@ class DashboardTests(unittest.TestCase):
             data = build_dashboard_data(root)
 
             self.assertIsNotNone(data.benchmark_collected_mixed_generalization)
-            self.assertEqual(data.benchmark_collected_mixed_generalization["combined"]["replay_stats"]["episodes_total"], 286)
-            self.assertAlmostEqual(data.benchmark_collected_mixed_generalization["combined"]["claim_coverage"]["coverage"], 0.9125874125874126)
+            self.assertEqual(data.benchmark_collected_mixed_generalization["combined"]["replay_stats"]["episodes_total"], 386)
+            self.assertAlmostEqual(data.benchmark_collected_mixed_generalization["combined"]["claim_coverage"]["coverage"], 0.9352331606217616)
 
 
 if __name__ == "__main__":

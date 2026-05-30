@@ -30,7 +30,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `tests/fixtures/authoritative_website_place_path_replay.json`
 - `tests/fixtures/collected_generalization_replay.json`
 - `tests/fixtures/collected_overdata_generalization_replay.json`
-- `tests/fixtures/collected_mixed_generalization_replay.json`
+- `tests/fixtures/collected_mixed_generalization_replay.json` (now folds in the place-specific cycle 004 replay to raise claim coverage)
 - `docs/corpus_expansion_strategy.md`
 - `reports/harness/PAC_WORK_LEDGER.md`
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
@@ -44,7 +44,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `reports/harness/benchmark_cross_city_current.json`
 - `reports/harness/benchmark_collected_generalization_current.json`
 - `reports/harness/benchmark_collected_overdata_generalization_current.json`
-- `reports/harness/benchmark_collected_mixed_generalization_current.json`
+- `reports/harness/benchmark_collected_mixed_generalization_current.json` (386 episodes, 93.5% claim coverage)
 - `reports/harness/PAC_COLLECTED_MIXED_GENERALIZATION_BENCHMARK.md`
 - `reports/harness/PAC_REPO_COMPARISON.md`
 - `reports/harness/SELECTIVE_BASELINE_NOTE.md`

@@ -1,13 +1,13 @@
 {
   "combined": {
     "claim_coverage": {
-      "authoritative_claims_per_episode": 1.4335664335664335,
-      "authoritative_claims_total": 410,
-      "claims_per_episode": 1.5104895104895104,
-      "claims_total": 432,
-      "coverage": 0.9125874125874126,
-      "episodes_total": 286,
-      "episodes_with_claims": 261,
+      "authoritative_claims_per_episode": 1.5699481865284974,
+      "authoritative_claims_total": 606,
+      "claims_per_episode": 1.6269430051813472,
+      "claims_total": 628,
+      "coverage": 0.9352331606217616,
+      "episodes_total": 386,
+      "episodes_with_claims": 361,
       "per_attribute": {
         "address": {
           "authoritative_claims": 15,
@@ -46,22 +46,22 @@
           "episodes_with_claims": 8
         },
         "website": {
-          "authoritative_claims": 346,
-          "authoritative_claims_per_episode": 1.3951612903225807,
-          "claims": 368,
-          "claims_per_episode": 1.4838709677419355,
-          "coverage": 0.9314516129032258,
-          "episodes": 248,
-          "episodes_with_claims": 231
+          "authoritative_claims": 542,
+          "authoritative_claims_per_episode": 1.5574712643678161,
+          "claims": 564,
+          "claims_per_episode": 1.6206896551724137,
+          "coverage": 0.9511494252873564,
+          "episodes": 348,
+          "episodes_with_claims": 331
         }
       },
-      "website_coverage": 0.9314516129032258
+      "website_coverage": 0.9511494252873564
     },
     "comparison": {
-      "abstention_rate_delta": 0.32867132867132864,
-      "answerable_accuracy_delta": -0.32793522267206476,
-      "expected_behavior_accuracy_delta": -0.2692307692307693,
-      "high_confidence_wrong_rate_delta": -0.03643724696356275,
+      "abstention_rate_delta": 0.25906735751295334,
+      "answerable_accuracy_delta": -0.25072046109510093,
+      "expected_behavior_accuracy_delta": -0.21502590673575128,
+      "high_confidence_wrong_rate_delta": -0.025936599423631124,
       "unsafe_prediction_rate_delta": -0.10256410256410256
     },
     "replay_stats": {
@@ -106,7 +106,7 @@
       },
       "episodes_by_review_status": {},
       "episodes_by_website_label": {},
-      "episodes_total": 286,
+      "episodes_total": 386,
       "episodes_with_case_type": 68,
       "episodes_with_expected_abstain": 73,
       "episodes_with_identity_label": 76,
@@ -115,21 +115,21 @@
       "hard_case_count": 73,
       "identity_drift_count": 33,
       "reviewed_count": 0,
-      "website_heavy_count": 248
+      "website_heavy_count": 348
     },
     "resolver_v5": {
-      "abstention_accuracy": 1.0512820512820513,
-      "abstention_rate": 0.14335664335664336,
-      "accuracy": 0.9271255060728745,
-      "answerable_accuracy": 0.9271255060728745,
-      "answerable_total": 247,
-      "episodes_total": 286,
+      "abstention_accuracy": 1.0769230769230769,
+      "abstention_rate": 0.10880829015544041,
+      "accuracy": 0.9452449567723343,
+      "answerable_accuracy": 0.9452449567723343,
+      "answerable_total": 347,
+      "episodes_total": 386,
       "expected_abstain_total": 39,
-      "expected_behavior_accuracy": 0.9230769230769231,
-      "f1_proxy": 0.9271255060728745,
-      "gold_episodes_total": 259,
+      "expected_behavior_accuracy": 0.9404145077720207,
+      "f1_proxy": 0.9452449567723343,
+      "gold_episodes_total": 359,
       "high_confidence_unsafe_rate": 0.10256410256410256,
-      "high_confidence_wrong_rate": 0.044534412955465584,
+      "high_confidence_wrong_rate": 0.03170028818443804,
       "per_attribute": {
         "address": {
           "abstained": 0,
@@ -216,23 +216,23 @@
           "unsafe_prediction_rate": 0.2
         },
         "website": {
-          "abstained": 31,
-          "abstention_accuracy": 1.1481481481481481,
-          "abstention_rate": 0.125,
-          "accuracy": 0.918552036199095,
-          "answerable_accuracy": 0.918552036199095,
-          "answerable_correct": 203,
-          "answerable_total": 221,
+          "abstained": 32,
+          "abstention_accuracy": 1.1851851851851851,
+          "abstention_rate": 0.09195402298850575,
+          "accuracy": 0.940809968847352,
+          "answerable_accuracy": 0.940809968847352,
+          "answerable_correct": 302,
+          "answerable_total": 321,
           "expected_abstain_total": 27,
-          "expected_behavior_accuracy": 0.9193548387096774,
-          "expected_correct": 228,
-          "f1_proxy": 0.918552036199095,
-          "gold_total": 231,
+          "expected_behavior_accuracy": 0.9396551724137931,
+          "expected_correct": 327,
+          "f1_proxy": 0.940809968847352,
+          "gold_total": 331,
           "high_confidence_unsafe": 2,
           "high_confidence_unsafe_rate": 0.07407407407407407,
           "high_confidence_wrong": 11,
-          "high_confidence_wrong_rate": 0.049773755656108594,
-          "total": 248,
+          "high_confidence_wrong_rate": 0.03426791277258567,
+          "total": 348,
           "unsafe_prediction": 2,
           "unsafe_prediction_rate": 0.07407407407407407
         }
@@ -241,17 +241,17 @@
       "unsafe_prediction_rate": 0.10256410256410256
     },
     "resolver_v6": {
-      "abstention_accuracy": 3.4615384615384617,
-      "abstention_rate": 0.47202797202797203,
-      "accuracy": 0.5991902834008097,
-      "answerable_accuracy": 0.5991902834008097,
-      "answerable_total": 247,
-      "episodes_total": 286,
+      "abstention_accuracy": 3.641025641025641,
+      "abstention_rate": 0.36787564766839376,
+      "accuracy": 0.6945244956772334,
+      "answerable_accuracy": 0.6945244956772334,
+      "answerable_total": 347,
+      "episodes_total": 386,
       "expected_abstain_total": 39,
-      "expected_behavior_accuracy": 0.6538461538461539,
-      "gold_episodes_total": 259,
+      "expected_behavior_accuracy": 0.7253886010362695,
+      "gold_episodes_total": 359,
       "high_confidence_unsafe_rate": 0.0,
-      "high_confidence_wrong_rate": 0.008097165991902834,
+      "high_confidence_wrong_rate": 0.005763688760806916,
       "per_attribute": {
         "address": {
           "abstained": 0,
@@ -334,22 +334,22 @@
           "unsafe_prediction_rate": 0.0
         },
         "website": {
-          "abstained": 123,
-          "abstention_accuracy": 4.555555555555555,
-          "abstention_rate": 0.4959677419354839,
-          "accuracy": 0.5520361990950227,
-          "answerable_accuracy": 0.5520361990950227,
-          "answerable_correct": 122,
-          "answerable_total": 221,
+          "abstained": 130,
+          "abstention_accuracy": 4.814814814814815,
+          "abstention_rate": 0.3735632183908046,
+          "accuracy": 0.6697819314641744,
+          "answerable_accuracy": 0.6697819314641744,
+          "answerable_correct": 215,
+          "answerable_total": 321,
           "expected_abstain_total": 27,
-          "expected_behavior_accuracy": 0.6008064516129032,
-          "expected_correct": 149,
-          "gold_total": 231,
+          "expected_behavior_accuracy": 0.6954022988505747,
+          "expected_correct": 242,
+          "gold_total": 331,
           "high_confidence_unsafe": 0,
           "high_confidence_unsafe_rate": 0.0,
           "high_confidence_wrong": 2,
-          "high_confidence_wrong_rate": 0.00904977375565611,
-          "total": 248,
+          "high_confidence_wrong_rate": 0.006230529595015576,
+          "total": 348,
           "unsafe_prediction": 0,
           "unsafe_prediction_rate": 0.0
         }
@@ -364,6 +364,8 @@
     "reports/replay_collected/authoritative_website_batches_20260516_032000_overdata_gold_cycles_002_003/evidence_002.csv",
     "reports/replay_collected/authoritative_website_batches_20260516_032000_overdata_gold_cycles_002_003/batch_003.csv",
     "reports/replay_collected/authoritative_website_batches_20260516_032000_overdata_gold_cycles_002_003/evidence_003.csv",
+    "reports/replay_collected/authoritative_website_batches_20260516_032100_place_specific_cycle_004/batch_004.csv",
+    "reports/replay_collected/authoritative_website_batches_20260516_032100_place_specific_cycle_004/evidence_004.csv",
     "tests/fixtures/pac_cross_city_replay.json",
     "tests/fixtures/pac_hard_cases_replay.json"
   ]

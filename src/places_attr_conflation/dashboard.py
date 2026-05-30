@@ -1377,7 +1377,7 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
             f"{_pct(collected_overdata_v5.get('expected_behavior_accuracy'))} v5 vs {_pct(collected_overdata_v6.get('expected_behavior_accuracy'))} v6 expected-behavior accuracy."
         ),
         (
-            "The mixed collected generalization corpus is the strongest collected proof surface: it combines the overdata website batch, the cross-city slice, and the hard cases into "
+            "The mixed collected generalization corpus is the strongest collected proof surface: it combines the overdata website batch, the place-specific website cycle, the cross-city slice, and the hard cases into "
             f"{_num(collected_mixed_stats.get('episodes_total'))} episodes, keeps {_pct(collected_mixed_claim.get('coverage'))} claim coverage, and shows "
             f"{_pct(collected_mixed_v5.get('expected_behavior_accuracy'))} v5 vs {_pct(collected_mixed_v6.get('expected_behavior_accuracy'))} v6 expected-behavior accuracy."
         ),
@@ -1649,7 +1649,7 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
             "label": "Collected mixed generalization",
             "value": f"{_pct(collected_mixed_v5.get('expected_behavior_accuracy'))} v5 / {_pct(collected_mixed_v6.get('expected_behavior_accuracy'))} v6",
             "detail": (
-                f"{_num(collected_mixed_stats.get('episodes_total'))} episodes combining the overdata website slice, cross-city slice, and hard cases; "
+                f"{_num(collected_mixed_stats.get('episodes_total'))} episodes combining the overdata website slice, place-specific website cycle, cross-city slice, and hard cases; "
                 f"claim coverage {_pct(collected_mixed_claim.get('coverage'))}, website coverage {_pct(collected_mixed_claim.get('website_coverage'))}, "
                 f"v5 expected-behavior {_pct(collected_mixed_v5.get('expected_behavior_accuracy'))}, v6 expected-behavior {_pct(collected_mixed_v6.get('expected_behavior_accuracy'))}, "
                 f"unsafe predictions {_pct(collected_mixed_v6.get('unsafe_prediction_rate'))}."

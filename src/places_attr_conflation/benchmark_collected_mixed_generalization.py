@@ -2,9 +2,9 @@
 
 This benchmark is the current strongest collected proof surface in the repo:
 it combines the authoritative website overdata batches, the cross-city slice,
-and the hard-case replay into one larger collected corpus so the dashboard can
-show a more representative replay mix than the curated Santa Cruz fixtures
-alone.
+the hard-case replay, and the place-specific collected cycle into one larger
+collected corpus so the dashboard can show a more representative replay mix
+than the curated Santa Cruz fixtures alone.
 """
 
 from __future__ import annotations
@@ -29,6 +29,8 @@ SOURCE_CORPORA = [
     "reports/replay_collected/authoritative_website_batches_20260516_032000_overdata_gold_cycles_002_003/evidence_002.csv",
     "reports/replay_collected/authoritative_website_batches_20260516_032000_overdata_gold_cycles_002_003/batch_003.csv",
     "reports/replay_collected/authoritative_website_batches_20260516_032000_overdata_gold_cycles_002_003/evidence_003.csv",
+    "reports/replay_collected/authoritative_website_batches_20260516_032100_place_specific_cycle_004/batch_004.csv",
+    "reports/replay_collected/authoritative_website_batches_20260516_032100_place_specific_cycle_004/evidence_004.csv",
     "tests/fixtures/pac_cross_city_replay.json",
     "tests/fixtures/pac_hard_cases_replay.json",
 ]
