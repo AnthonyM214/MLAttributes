@@ -35,6 +35,7 @@ class DashboardData:
     benchmark_promoted: dict[str, object] | None
     benchmark_cross_city: dict[str, object] | None
     benchmark_collected_generalization: dict[str, object] | None
+    benchmark_collected_overdata_generalization: dict[str, object] | None
     repo_comparison_tests: int | None
     paths: dict[str, str]
     batch_progress_rows: list[list[str]]
@@ -132,6 +133,8 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "benchmark_cross_city": harness / "benchmark_cross_city_current.json",
         "benchmark_collected_generalization": harness / "benchmark_collected_generalization_current.json",
         "benchmark_collected_generalization_report": harness / "PAC_COLLECTED_GENERALIZATION_BENCHMARK.md",
+        "benchmark_collected_overdata_generalization": harness / "benchmark_collected_overdata_generalization_current.json",
+        "benchmark_collected_overdata_generalization_report": harness / "PAC_COLLECTED_OVERDATA_GENERALIZATION_BENCHMARK.md",
         "work_ledger": root / "harness" / "PAC_WORK_LEDGER.md",
         "okr": root / "harness" / "PAC_OKR.md",
         "repo_comparison": root / "harness" / "PAC_REPO_COMPARISON.md",
@@ -178,6 +181,7 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         benchmark_promoted=_load_json(_resolve_path(root, paths["benchmark_promoted"])) if "benchmark_promoted" in paths else None,
         benchmark_cross_city=_load_json(_resolve_path(root, paths["benchmark_cross_city"])) if "benchmark_cross_city" in paths else None,
         benchmark_collected_generalization=_load_json(_resolve_path(root, paths["benchmark_collected_generalization"])) if "benchmark_collected_generalization" in paths else None,
+        benchmark_collected_overdata_generalization=_load_json(_resolve_path(root, paths["benchmark_collected_overdata_generalization"])) if "benchmark_collected_overdata_generalization" in paths else None,
         repo_comparison_tests=_load_repo_comparison_tests(root),
         paths=paths,
         batch_progress_rows=_batch_progress_rows(root),
@@ -901,6 +905,20 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
         collected_combined_v5 = {}
     if not isinstance(collected_combined_v6, dict):
         collected_combined_v6 = {}
+    collected_overdata = data.benchmark_collected_overdata_generalization or {}
+    collected_overdata_combined = collected_overdata.get("combined", {}) if isinstance(collected_overdata, dict) else {}
+    collected_overdata_claim = collected_overdata_combined.get("claim_coverage", {}) if isinstance(collected_overdata_combined, dict) else {}
+    collected_overdata_stats = collected_overdata_combined.get("replay_stats", {}) if isinstance(collected_overdata_combined, dict) else {}
+    collected_overdata_v5 = collected_overdata_combined.get("resolver_v5", {}) if isinstance(collected_overdata_combined, dict) else {}
+    collected_overdata_v6 = collected_overdata_combined.get("resolver_v6", {}) if isinstance(collected_overdata_combined, dict) else {}
+    if not isinstance(collected_overdata_claim, dict):
+        collected_overdata_claim = {}
+    if not isinstance(collected_overdata_stats, dict):
+        collected_overdata_stats = {}
+    if not isinstance(collected_overdata_v5, dict):
+        collected_overdata_v5 = {}
+    if not isinstance(collected_overdata_v6, dict):
+        collected_overdata_v6 = {}
     pooled = data.benchmark_pooled or {}
     pooled_resolvepoi = pooled.get("resolvepoi_holdout", {}) if isinstance(pooled, dict) else {}
     pooled_david = pooled.get("david_test", {}) if isinstance(pooled, dict) else {}
@@ -963,6 +981,14 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
                 f"{_pct(collected_combined_claim.get('coverage'))} claim coverage, and {_num(collected_combined_stats.get('abstention_expected_count'))} explicit abstain cases. "
                 f"That makes it the current best collected proof surface, with v5 at {_pct(collected_combined_v5.get('expected_behavior_accuracy'))} expected behavior and v6 at {_pct(collected_combined_v6.get('expected_behavior_accuracy'))} expected behavior."
             ) if isinstance(collected, dict) and collected else "The collected generalization benchmark still needs the current coverage report surfaced in the dashboard."
+        },
+        {
+            "title": "Already done: collected overdata generalization",
+            "body": (
+                f"The overdata collected benchmark combines the 200-episode authoritative website batch with the cross-city slice into {_num(collected_overdata_stats.get('episodes_total'))} episodes, "
+                f"{_pct(collected_overdata_claim.get('coverage'))} claim coverage, and {_pct(collected_overdata_claim.get('website_coverage'))} website coverage. "
+                f"It is the largest collected proof surface, and it makes the coverage gap between collected data and the merged replay harder to ignore."
+            ) if isinstance(collected_overdata, dict) and collected_overdata else "The collected overdata benchmark still needs the current coverage report surfaced in the dashboard."
         },
         {
             "title": "Already done: pooled three-corpus diagnostic",
@@ -1240,6 +1266,20 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
         collected_combined_v5 = {}
     if not isinstance(collected_combined_v6, dict):
         collected_combined_v6 = {}
+    collected_overdata = data.benchmark_collected_overdata_generalization or {}
+    collected_overdata_combined = collected_overdata.get("combined", {}) if isinstance(collected_overdata, dict) else {}
+    collected_overdata_claim = collected_overdata_combined.get("claim_coverage", {}) if isinstance(collected_overdata_combined, dict) else {}
+    collected_overdata_stats = collected_overdata_combined.get("replay_stats", {}) if isinstance(collected_overdata_combined, dict) else {}
+    collected_overdata_v5 = collected_overdata_combined.get("resolver_v5", {}) if isinstance(collected_overdata_combined, dict) else {}
+    collected_overdata_v6 = collected_overdata_combined.get("resolver_v6", {}) if isinstance(collected_overdata_combined, dict) else {}
+    if not isinstance(collected_overdata_claim, dict):
+        collected_overdata_claim = {}
+    if not isinstance(collected_overdata_stats, dict):
+        collected_overdata_stats = {}
+    if not isinstance(collected_overdata_v5, dict):
+        collected_overdata_v5 = {}
+    if not isinstance(collected_overdata_v6, dict):
+        collected_overdata_v6 = {}
     v5 = data.benchmark_v5 or {}
     v5_resolver = v5.get("resolver_v5", {}) if isinstance(v5, dict) else {}
     v5_comparison = v5.get("comparison", {}) if isinstance(v5, dict) else {}
@@ -1298,6 +1338,11 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
             "The collected generalization corpus is the first large collected mix: it combines the 100-case place-path website batch with the cross-city slice into "
             f"{_num(collected_combined_stats.get('episodes_total'))} episodes, keeps {_pct(collected_combined_claim.get('coverage'))} claim coverage, and shows "
             f"{_pct(collected_combined_v5.get('expected_behavior_accuracy'))} v5 vs {_pct(collected_combined_v6.get('expected_behavior_accuracy'))} v6 expected-behavior accuracy."
+        ),
+        (
+            "The overdata collected generalization corpus is the larger collected mix: it combines the 200-episode authoritative website batch with the cross-city slice into "
+            f"{_num(collected_overdata_stats.get('episodes_total'))} episodes, keeps {_pct(collected_overdata_claim.get('coverage'))} claim coverage, and shows "
+            f"{_pct(collected_overdata_v5.get('expected_behavior_accuracy'))} v5 vs {_pct(collected_overdata_v6.get('expected_behavior_accuracy'))} v6 expected-behavior accuracy."
         ),
         (
             "The graph-guided v5 planner is the first clear disruption: on the hard-case replay it keeps "
@@ -1433,6 +1478,20 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
         collected_combined_v5 = {}
     if not isinstance(collected_combined_v6, dict):
         collected_combined_v6 = {}
+    collected_overdata = data.benchmark_collected_overdata_generalization or {}
+    collected_overdata_combined = collected_overdata.get("combined", {}) if isinstance(collected_overdata, dict) else {}
+    collected_overdata_claim = collected_overdata_combined.get("claim_coverage", {}) if isinstance(collected_overdata_combined, dict) else {}
+    collected_overdata_stats = collected_overdata_combined.get("replay_stats", {}) if isinstance(collected_overdata_combined, dict) else {}
+    collected_overdata_v5 = collected_overdata_combined.get("resolver_v5", {}) if isinstance(collected_overdata_combined, dict) else {}
+    collected_overdata_v6 = collected_overdata_combined.get("resolver_v6", {}) if isinstance(collected_overdata_combined, dict) else {}
+    if not isinstance(collected_overdata_claim, dict):
+        collected_overdata_claim = {}
+    if not isinstance(collected_overdata_stats, dict):
+        collected_overdata_stats = {}
+    if not isinstance(collected_overdata_v5, dict):
+        collected_overdata_v5 = {}
+    if not isinstance(collected_overdata_v6, dict):
+        collected_overdata_v6 = {}
     full = data.benchmark_full_replay or {}
     full_benchmark = full.get("benchmark", {}) if isinstance(full, dict) else {}
     if not isinstance(full_benchmark, dict):
@@ -1523,6 +1582,16 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
                 f"{_num(cross_city_stats.get('episodes_total'))} cross-city mixed cases; claim coverage {_pct(collected_combined_claim.get('coverage'))}, "
                 f"place-path coverage {_pct(collected_place_claim.get('coverage'))}, v5 expected-behavior {_pct(collected_combined_v5.get('expected_behavior_accuracy'))}, "
                 f"v6 expected-behavior {_pct(collected_combined_v6.get('expected_behavior_accuracy'))}, unsafe predictions {_pct(collected_combined_v6.get('unsafe_prediction_rate'))}."
+            ),
+        },
+        {
+            "label": "Collected overdata generalization",
+            "value": f"{_pct(collected_overdata_v5.get('expected_behavior_accuracy'))} v5 / {_pct(collected_overdata_v6.get('expected_behavior_accuracy'))} v6",
+            "detail": (
+                f"{_num(collected_overdata_stats.get('episodes_total'))} episodes combining the 200-episode overdata website slice with the cross-city mixed cases; "
+                f"claim coverage {_pct(collected_overdata_claim.get('coverage'))}, website coverage {_pct(collected_overdata_claim.get('website_coverage'))}, "
+                f"v5 expected-behavior {_pct(collected_overdata_v5.get('expected_behavior_accuracy'))}, v6 expected-behavior {_pct(collected_overdata_v6.get('expected_behavior_accuracy'))}, "
+                f"unsafe predictions {_pct(collected_overdata_v6.get('unsafe_prediction_rate'))}."
             ),
         },
         {

@@ -29,6 +29,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `tests/fixtures/pac_cross_city_replay.json`
 - `tests/fixtures/authoritative_website_place_path_replay.json`
 - `tests/fixtures/collected_generalization_replay.json`
+- `tests/fixtures/collected_overdata_generalization_replay.json`
 - `docs/corpus_expansion_strategy.md`
 - `reports/harness/PAC_WORK_LEDGER.md`
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
@@ -37,9 +38,11 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `reports/harness/PAC_PROMOTED_REPLAY_BENCHMARK.md`
 - `reports/harness/PAC_CROSS_CITY_REPLAY_BENCHMARK.md`
 - `reports/harness/PAC_COLLECTED_GENERALIZATION_BENCHMARK.md`
+- `reports/harness/PAC_COLLECTED_OVERDATA_GENERALIZATION_BENCHMARK.md`
 - `reports/harness/benchmark_promoted_current.json`
 - `reports/harness/benchmark_cross_city_current.json`
 - `reports/harness/benchmark_collected_generalization_current.json`
+- `reports/harness/benchmark_collected_overdata_generalization_current.json`
 - `reports/harness/PAC_REPO_COMPARISON.md`
 - `reports/harness/SELECTIVE_BASELINE_NOTE.md`
 

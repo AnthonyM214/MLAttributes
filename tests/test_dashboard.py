@@ -459,6 +459,37 @@ class DashboardTests(unittest.TestCase):
             self.assertEqual(data.benchmark_collected_generalization["place_path"]["replay_stats"]["episodes_total"], 100)
             self.assertEqual(data.benchmark_collected_generalization["combined"]["replay_stats"]["episodes_total"], 172)
 
+    def test_dashboard_loads_collected_overdata_generalization_benchmark(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "reports"
+            overdata = root / "harness" / "benchmark_collected_overdata_generalization_current.json"
+            overdata.parent.mkdir(parents=True)
+            overdata.write_text(
+                json.dumps(
+                    {
+                        "overdata": {
+                            "claim_coverage": {"coverage": 1.0, "website_coverage": 1.0},
+                            "replay_stats": {"episodes_total": 200},
+                            "resolver_v5": {"expected_behavior_accuracy": 0.91, "unsafe_prediction_rate": 0.0},
+                            "resolver_v6": {"expected_behavior_accuracy": 0.505, "unsafe_prediction_rate": 0.0},
+                        },
+                        "combined": {
+                            "claim_coverage": {"coverage": 0.9117647058823529, "website_coverage": 0.9324894514767933},
+                            "replay_stats": {"episodes_total": 272, "abstention_expected_count": 32, "identity_drift_count": 27},
+                            "resolver_v5": {"expected_behavior_accuracy": 0.9227941176470589, "unsafe_prediction_rate": 0.09375},
+                            "resolver_v6": {"expected_behavior_accuracy": 0.6360294117647058, "unsafe_prediction_rate": 0.0},
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            data = build_dashboard_data(root)
+
+            self.assertIsNotNone(data.benchmark_collected_overdata_generalization)
+            self.assertEqual(data.benchmark_collected_overdata_generalization["overdata"]["replay_stats"]["episodes_total"], 200)
+            self.assertEqual(data.benchmark_collected_overdata_generalization["combined"]["replay_stats"]["episodes_total"], 272)
+
 
 if __name__ == "__main__":
     unittest.main()

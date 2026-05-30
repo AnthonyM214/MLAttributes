@@ -30,6 +30,8 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
 - The cross-city replay benchmark is now materialized as `reports/harness/benchmark_cross_city_current.json` so the dashboard can surface a broader geography proof alongside the Santa Cruz challenge.
 - The collected generalization replay corpus is now checked in at `tests/fixtures/collected_generalization_replay.json`; it combines the 100-episode place-path website batch with the cross-city slice into a 172-episode mixed surface with 86.0% claim coverage and 32 explicit abstain cases.
 - The collected generalization benchmark is now materialized as `reports/harness/benchmark_collected_generalization_current.json` so the dashboard can surface the strongest collected proof surface next to the curated challenge corpora.
+- The collected overdata replay corpus is now checked in at `tests/fixtures/collected_overdata_generalization_replay.json`; it combines the 200-episode overdata website slice with the cross-city slice into a 272-episode collected surface with 91.2% claim coverage and 32 explicit abstain cases.
+- The collected overdata benchmark is now materialized as `reports/harness/benchmark_collected_overdata_generalization_current.json` so the dashboard can surface the largest collected proof surface next to the curated challenge corpora.
 - The new OKR and research alignment notes capture the claim-coverage pivot and the supporting graph/noise-control rationale.
 - Seed batch 4 extends the replay expansion into a cross-city, abstention-heavy California tranche.
 - Seed batch 5 extends the replay expansion into a cross-city national tranche while keeping the answerable/abstain balance visible.
