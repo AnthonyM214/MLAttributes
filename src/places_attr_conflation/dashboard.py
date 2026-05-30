@@ -34,6 +34,7 @@ class DashboardData:
     benchmark_full_replay: dict[str, object] | None
     benchmark_promoted: dict[str, object] | None
     benchmark_cross_city: dict[str, object] | None
+    benchmark_collected_generalization: dict[str, object] | None
     repo_comparison_tests: int | None
     paths: dict[str, str]
     batch_progress_rows: list[list[str]]
@@ -129,6 +130,8 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "benchmark_full_replay": harness / "benchmark_full_replay_current.json",
         "benchmark_promoted": harness / "benchmark_promoted_current.json",
         "benchmark_cross_city": harness / "benchmark_cross_city_current.json",
+        "benchmark_collected_generalization": harness / "benchmark_collected_generalization_current.json",
+        "benchmark_collected_generalization_report": harness / "PAC_COLLECTED_GENERALIZATION_BENCHMARK.md",
         "work_ledger": root / "harness" / "PAC_WORK_LEDGER.md",
         "okr": root / "harness" / "PAC_OKR.md",
         "repo_comparison": root / "harness" / "PAC_REPO_COMPARISON.md",
@@ -174,6 +177,7 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         benchmark_full_replay=_load_json(_resolve_path(root, paths["benchmark_full_replay"])) if "benchmark_full_replay" in paths else None,
         benchmark_promoted=_load_json(_resolve_path(root, paths["benchmark_promoted"])) if "benchmark_promoted" in paths else None,
         benchmark_cross_city=_load_json(_resolve_path(root, paths["benchmark_cross_city"])) if "benchmark_cross_city" in paths else None,
+        benchmark_collected_generalization=_load_json(_resolve_path(root, paths["benchmark_collected_generalization"])) if "benchmark_collected_generalization" in paths else None,
         repo_comparison_tests=_load_repo_comparison_tests(root),
         paths=paths,
         batch_progress_rows=_batch_progress_rows(root),
@@ -870,6 +874,33 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
         promoted_v5 = {}
     if not isinstance(promoted_v6, dict):
         promoted_v6 = {}
+    collected = data.benchmark_collected_generalization or {}
+    collected_place = collected.get("place_path", {}) if isinstance(collected, dict) else {}
+    collected_combined = collected.get("combined", {}) if isinstance(collected, dict) else {}
+    collected_place_claim = collected_place.get("claim_coverage", {}) if isinstance(collected_place, dict) else {}
+    collected_place_stats = collected_place.get("replay_stats", {}) if isinstance(collected_place, dict) else {}
+    collected_place_v5 = collected_place.get("resolver_v5", {}) if isinstance(collected_place, dict) else {}
+    collected_place_v6 = collected_place.get("resolver_v6", {}) if isinstance(collected_place, dict) else {}
+    collected_combined_claim = collected_combined.get("claim_coverage", {}) if isinstance(collected_combined, dict) else {}
+    collected_combined_stats = collected_combined.get("replay_stats", {}) if isinstance(collected_combined, dict) else {}
+    collected_combined_v5 = collected_combined.get("resolver_v5", {}) if isinstance(collected_combined, dict) else {}
+    collected_combined_v6 = collected_combined.get("resolver_v6", {}) if isinstance(collected_combined, dict) else {}
+    if not isinstance(collected_place_claim, dict):
+        collected_place_claim = {}
+    if not isinstance(collected_place_stats, dict):
+        collected_place_stats = {}
+    if not isinstance(collected_place_v5, dict):
+        collected_place_v5 = {}
+    if not isinstance(collected_place_v6, dict):
+        collected_place_v6 = {}
+    if not isinstance(collected_combined_claim, dict):
+        collected_combined_claim = {}
+    if not isinstance(collected_combined_stats, dict):
+        collected_combined_stats = {}
+    if not isinstance(collected_combined_v5, dict):
+        collected_combined_v5 = {}
+    if not isinstance(collected_combined_v6, dict):
+        collected_combined_v6 = {}
     pooled = data.benchmark_pooled or {}
     pooled_resolvepoi = pooled.get("resolvepoi_holdout", {}) if isinstance(pooled, dict) else {}
     pooled_david = pooled.get("david_test", {}) if isinstance(pooled, dict) else {}
@@ -924,6 +955,14 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
                 f"{_num(cross_city_stats.get('abstention_expected_count'))} explicit abstain cases, and {_num(cross_city_stats.get('identity_drift_count'))} identity-drift cases. "
                 f"On that slice, v6 keeps {_pct(cross_city_v6.get('expected_behavior_accuracy'))} expected-behavior accuracy with {_pct(cross_city_v6.get('unsafe_prediction_rate'))} unsafe predictions."
             ) if isinstance(cross_city, dict) and cross_city else "The cross-city replay benchmark still needs the current coverage report surfaced in the dashboard."
+        },
+        {
+            "title": "Already done: collected generalization benchmark",
+            "body": (
+                f"The collected generalization corpus combines the 100-episode place-path website batch with the cross-city slice into {_num(collected_combined_stats.get('episodes_total'))} episodes, "
+                f"{_pct(collected_combined_claim.get('coverage'))} claim coverage, and {_num(collected_combined_stats.get('abstention_expected_count'))} explicit abstain cases. "
+                f"That makes it the current best collected proof surface, with v5 at {_pct(collected_combined_v5.get('expected_behavior_accuracy'))} expected behavior and v6 at {_pct(collected_combined_v6.get('expected_behavior_accuracy'))} expected behavior."
+            ) if isinstance(collected, dict) and collected else "The collected generalization benchmark still needs the current coverage report surfaced in the dashboard."
         },
         {
             "title": "Already done: pooled three-corpus diagnostic",
@@ -1174,6 +1213,33 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
         cross_city_stats = {}
     if not isinstance(cross_city_v6, dict):
         cross_city_v6 = {}
+    collected = data.benchmark_collected_generalization or {}
+    collected_place = collected.get("place_path", {}) if isinstance(collected, dict) else {}
+    collected_combined = collected.get("combined", {}) if isinstance(collected, dict) else {}
+    collected_place_claim = collected_place.get("claim_coverage", {}) if isinstance(collected_place, dict) else {}
+    collected_place_stats = collected_place.get("replay_stats", {}) if isinstance(collected_place, dict) else {}
+    collected_place_v5 = collected_place.get("resolver_v5", {}) if isinstance(collected_place, dict) else {}
+    collected_place_v6 = collected_place.get("resolver_v6", {}) if isinstance(collected_place, dict) else {}
+    collected_combined_claim = collected_combined.get("claim_coverage", {}) if isinstance(collected_combined, dict) else {}
+    collected_combined_stats = collected_combined.get("replay_stats", {}) if isinstance(collected_combined, dict) else {}
+    collected_combined_v5 = collected_combined.get("resolver_v5", {}) if isinstance(collected_combined, dict) else {}
+    collected_combined_v6 = collected_combined.get("resolver_v6", {}) if isinstance(collected_combined, dict) else {}
+    if not isinstance(collected_place_claim, dict):
+        collected_place_claim = {}
+    if not isinstance(collected_place_stats, dict):
+        collected_place_stats = {}
+    if not isinstance(collected_place_v5, dict):
+        collected_place_v5 = {}
+    if not isinstance(collected_place_v6, dict):
+        collected_place_v6 = {}
+    if not isinstance(collected_combined_claim, dict):
+        collected_combined_claim = {}
+    if not isinstance(collected_combined_stats, dict):
+        collected_combined_stats = {}
+    if not isinstance(collected_combined_v5, dict):
+        collected_combined_v5 = {}
+    if not isinstance(collected_combined_v6, dict):
+        collected_combined_v6 = {}
     v5 = data.benchmark_v5 or {}
     v5_resolver = v5.get("resolver_v5", {}) if isinstance(v5, dict) else {}
     v5_comparison = v5.get("comparison", {}) if isinstance(v5, dict) else {}
@@ -1227,6 +1293,11 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
             f"{_num(cross_city_stats.get('episodes_total'))} episodes with {_pct(cross_city_claim.get('coverage'))} claim coverage, "
             f"{_num(cross_city_stats.get('abstention_expected_count'))} explicit abstain cases, and {_num(cross_city_stats.get('identity_drift_count'))} identity-drift cases. "
             f"On that slice, v6 keeps {_pct(cross_city_v6.get('expected_behavior_accuracy'))} expected-behavior accuracy with {_pct(cross_city_v6.get('unsafe_prediction_rate'))} unsafe predictions."
+        ),
+        (
+            "The collected generalization corpus is the first large collected mix: it combines the 100-case place-path website batch with the cross-city slice into "
+            f"{_num(collected_combined_stats.get('episodes_total'))} episodes, keeps {_pct(collected_combined_claim.get('coverage'))} claim coverage, and shows "
+            f"{_pct(collected_combined_v5.get('expected_behavior_accuracy'))} v5 vs {_pct(collected_combined_v6.get('expected_behavior_accuracy'))} v6 expected-behavior accuracy."
         ),
         (
             "The graph-guided v5 planner is the first clear disruption: on the hard-case replay it keeps "
@@ -1335,6 +1406,33 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
         cross_city_stats = {}
     if not isinstance(cross_city_v6, dict):
         cross_city_v6 = {}
+    collected = data.benchmark_collected_generalization or {}
+    collected_place = collected.get("place_path", {}) if isinstance(collected, dict) else {}
+    collected_combined = collected.get("combined", {}) if isinstance(collected, dict) else {}
+    collected_place_claim = collected_place.get("claim_coverage", {}) if isinstance(collected_place, dict) else {}
+    collected_place_stats = collected_place.get("replay_stats", {}) if isinstance(collected_place, dict) else {}
+    collected_place_v5 = collected_place.get("resolver_v5", {}) if isinstance(collected_place, dict) else {}
+    collected_place_v6 = collected_place.get("resolver_v6", {}) if isinstance(collected_place, dict) else {}
+    collected_combined_claim = collected_combined.get("claim_coverage", {}) if isinstance(collected_combined, dict) else {}
+    collected_combined_stats = collected_combined.get("replay_stats", {}) if isinstance(collected_combined, dict) else {}
+    collected_combined_v5 = collected_combined.get("resolver_v5", {}) if isinstance(collected_combined, dict) else {}
+    collected_combined_v6 = collected_combined.get("resolver_v6", {}) if isinstance(collected_combined, dict) else {}
+    if not isinstance(collected_place_claim, dict):
+        collected_place_claim = {}
+    if not isinstance(collected_place_stats, dict):
+        collected_place_stats = {}
+    if not isinstance(collected_place_v5, dict):
+        collected_place_v5 = {}
+    if not isinstance(collected_place_v6, dict):
+        collected_place_v6 = {}
+    if not isinstance(collected_combined_claim, dict):
+        collected_combined_claim = {}
+    if not isinstance(collected_combined_stats, dict):
+        collected_combined_stats = {}
+    if not isinstance(collected_combined_v5, dict):
+        collected_combined_v5 = {}
+    if not isinstance(collected_combined_v6, dict):
+        collected_combined_v6 = {}
     full = data.benchmark_full_replay or {}
     full_benchmark = full.get("benchmark", {}) if isinstance(full, dict) else {}
     if not isinstance(full_benchmark, dict):
@@ -1415,6 +1513,16 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
             "detail": (
                 f"{_num(full_merge.get('input_files'))} replay files merged into {_num(full_merge.get('merged_episodes'))} episodes and {_num(full_merge.get('merged_pages'))} pages; "
                 f"website coverage lifted to {_pct(full_claim_coverage.get('website_coverage'))} with {_num(full_claim_coverage.get('authoritative_claims_per_episode'))} authoritative claims/episode."
+            ),
+        },
+        {
+            "label": "Collected generalization",
+            "value": f"{_pct(collected_combined_v6.get('expected_behavior_accuracy'))} expected / {_pct(collected_combined_v6.get('abstention_rate'))} abstention",
+            "detail": (
+                f"{_num(collected_combined_stats.get('episodes_total'))} episodes combining {_num(collected_place_stats.get('episodes_total'))} place-path website cases and "
+                f"{_num(cross_city_stats.get('episodes_total'))} cross-city mixed cases; claim coverage {_pct(collected_combined_claim.get('coverage'))}, "
+                f"place-path coverage {_pct(collected_place_claim.get('coverage'))}, v5 expected-behavior {_pct(collected_combined_v5.get('expected_behavior_accuracy'))}, "
+                f"v6 expected-behavior {_pct(collected_combined_v6.get('expected_behavior_accuracy'))}, unsafe predictions {_pct(collected_combined_v6.get('unsafe_prediction_rate'))}."
             ),
         },
         {

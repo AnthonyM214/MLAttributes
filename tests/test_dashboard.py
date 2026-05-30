@@ -428,6 +428,37 @@ class DashboardTests(unittest.TestCase):
             self.assertEqual(data.benchmark_cross_city["claim_coverage"]["coverage"], 2 / 3)
             self.assertEqual(data.benchmark_cross_city["replay_stats"]["episodes_total"], 72)
 
+    def test_dashboard_loads_collected_generalization_benchmark(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "reports"
+            collected = root / "harness" / "benchmark_collected_generalization_current.json"
+            collected.parent.mkdir(parents=True)
+            collected.write_text(
+                json.dumps(
+                    {
+                        "place_path": {
+                            "claim_coverage": {"coverage": 1.0},
+                            "replay_stats": {"episodes_total": 100},
+                            "resolver_v5": {"expected_behavior_accuracy": 0.99, "unsafe_prediction_rate": 0.0},
+                            "resolver_v6": {"expected_behavior_accuracy": 0.93, "unsafe_prediction_rate": 0.0},
+                        },
+                        "combined": {
+                            "claim_coverage": {"coverage": 0.8604651162790697},
+                            "replay_stats": {"episodes_total": 172, "abstention_expected_count": 32, "identity_drift_count": 27},
+                            "resolver_v5": {"expected_behavior_accuracy": 0.9767441860465116, "unsafe_prediction_rate": 0.09375},
+                            "resolver_v6": {"expected_behavior_accuracy": 0.9593023255813954, "unsafe_prediction_rate": 0.0},
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            data = build_dashboard_data(root)
+
+            self.assertIsNotNone(data.benchmark_collected_generalization)
+            self.assertEqual(data.benchmark_collected_generalization["place_path"]["replay_stats"]["episodes_total"], 100)
+            self.assertEqual(data.benchmark_collected_generalization["combined"]["replay_stats"]["episodes_total"], 172)
+
 
 if __name__ == "__main__":
     unittest.main()
