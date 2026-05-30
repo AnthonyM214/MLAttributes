@@ -30,6 +30,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `tests/fixtures/authoritative_website_place_path_replay.json`
 - `tests/fixtures/collected_generalization_replay.json`
 - `tests/fixtures/collected_overdata_generalization_replay.json`
+- `tests/fixtures/collected_mixed_generalization_replay.json`
 - `docs/corpus_expansion_strategy.md`
 - `reports/harness/PAC_WORK_LEDGER.md`
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
@@ -43,6 +44,8 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `reports/harness/benchmark_cross_city_current.json`
 - `reports/harness/benchmark_collected_generalization_current.json`
 - `reports/harness/benchmark_collected_overdata_generalization_current.json`
+- `reports/harness/benchmark_collected_mixed_generalization_current.json`
+- `reports/harness/PAC_COLLECTED_MIXED_GENERALIZATION_BENCHMARK.md`
 - `reports/harness/PAC_REPO_COMPARISON.md`
 - `reports/harness/SELECTIVE_BASELINE_NOTE.md`
 
@@ -73,6 +76,7 @@ These files are still part of the repository history and can be useful, but they
 - Run the v3/v4 benchmark family from the installed wheel: `pac-benchmark-v3 --replay ...`, `pac-benchmark-v4 --replay ...`
 - Run the full collected replay benchmark: `pac-benchmark-full-replay --replay-dir reports/replay_collected --include-decisions`
 - Run the pooled router benchmark: `pac-benchmark-pooled --resolvepoi-truth-path ... --resolvepoi-train-parquet ... --resolvepoi-train-labels ...`
+- Run the mixed collected benchmark: `python3 -m places_attr_conflation.benchmark_collected_mixed_generalization --replay tests/fixtures/collected_mixed_generalization_replay.json`
 - Run the Santa Cruz challenge benchmark: `pac-benchmark-v2 --replay tests/fixtures/santa_cruz_challenge_replay.json --include-decisions`
 - Run the selective ResolvePOI benchmark: `pac-resolvepoi-selective --truth ... --train-parquet ... --train-labels ... --limit 400 --include-decisions`
 - Verify the ResolvePOI split: `python3 scripts/run_harness.py resolvepoi-split-verify --truth ... --train-parquet ... --train-labels ...`

@@ -490,6 +490,31 @@ class DashboardTests(unittest.TestCase):
             self.assertEqual(data.benchmark_collected_overdata_generalization["overdata"]["replay_stats"]["episodes_total"], 200)
             self.assertEqual(data.benchmark_collected_overdata_generalization["combined"]["replay_stats"]["episodes_total"], 272)
 
+    def test_dashboard_loads_collected_mixed_generalization_benchmark(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "reports"
+            mixed = root / "harness" / "benchmark_collected_mixed_generalization_current.json"
+            mixed.parent.mkdir(parents=True)
+            mixed.write_text(
+                json.dumps(
+                    {
+                        "combined": {
+                            "claim_coverage": {"coverage": 0.9125874125874126, "website_coverage": 0.9314516129032258},
+                            "replay_stats": {"episodes_total": 286, "abstention_expected_count": 39, "identity_drift_count": 33},
+                            "resolver_v5": {"expected_behavior_accuracy": 0.9230769230769231, "unsafe_prediction_rate": 0.10256410256410256},
+                            "resolver_v6": {"expected_behavior_accuracy": 0.6538461538461539, "unsafe_prediction_rate": 0.0},
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            data = build_dashboard_data(root)
+
+            self.assertIsNotNone(data.benchmark_collected_mixed_generalization)
+            self.assertEqual(data.benchmark_collected_mixed_generalization["combined"]["replay_stats"]["episodes_total"], 286)
+            self.assertAlmostEqual(data.benchmark_collected_mixed_generalization["combined"]["claim_coverage"]["coverage"], 0.9125874125874126)
+
 
 if __name__ == "__main__":
     unittest.main()
