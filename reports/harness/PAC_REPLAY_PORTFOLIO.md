@@ -102,3 +102,17 @@ It is substantially better solved by the portfolio:
 
 That is enough to make the repo credible as a PAC system and still honest about
 the remaining bottleneck.
+
+## Raw Collected Sweep Result
+
+I also re-scanned the raw `reports/replay_collected/` JSON corpora.
+The result is important:
+
+- the remaining raw collected corpora are overwhelmingly website-only
+- they do not materially improve phone or address claim coverage
+- they do not add a better abstention-heavy or wrong-entity signal than the
+  corpora already promoted into the portfolio
+
+So the current replay portfolio is not just a convenient subset.
+It is the useful ceiling of the checked-in replay material for the current
+problem shape.
