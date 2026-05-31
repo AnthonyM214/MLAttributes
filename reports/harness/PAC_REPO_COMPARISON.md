@@ -24,7 +24,7 @@ Current outputs:
 
 | Artifact | Result |
 | --- | --- |
-| Unit tests | `265` tests passed |
+| Unit tests | `271` tests passed |
 | Santa Cruz expanded corpus | `24` episodes; targeted authoritative found rate `1.0`, fallback `0.0`; final accuracy `1.0` |
 | Santa Cruz challenge corpus | `50` curated replay episodes across website, phone, address, category, and name; resolver v2 expected-behavior accuracy `1.0`, raw accuracy `0.9565`, abstention rate `0.1200`, high-confidence-wrong rate `0.0`; v2 adds branch-context phone/address, office-vs-mailing address, official-vs-social website, official-vs-directory category, title-cleaned name, full-name-vs-acronym, place-name-vs-host-building, official-category-vs-tourism tags, government locator website, relay/fax/footer phone rejection, department-location-vs-city-footer address selection, official phone-vs-fax cases, official service-page category conflicts, program-tenant category conflicts, adjacent-facility category conflicts, branch-specific government-locator website extraction, offsite-event address conflict handling, multi-branch commercial location selection, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, social-only website abstention, generic homepage abstention, stale/closed phone abstention, and wrong-entity tenant website abstention without prefilled extraction |
 | Santa Cruz seed batch | `5` episodes; expected-behavior accuracy `1.0`, abstention rate `0.2`, high-confidence-wrong rate `0.0`; first seed batch for the next 50-100 case expansion |
@@ -113,7 +113,7 @@ The imported Sure-style baseline is intentionally kept as a diagnostic comparato
 
 ## Reproducibility Notes
 
-- The local test suite passed on this checkout: `256` tests.
+- The local test suite passed on this checkout: `271` tests.
 - The Santa Cruz replay corpus now includes an expanded `24`-episode slice in addition to the original `12`-episode starter corpus, and both replay cleanly.
 - The Santa Cruz challenge corpus adds `40` cases across all five core attributes for branch ambiguity, branch-context phone/address selection without prefilled extraction, office-vs-mailing address selection, official-vs-social website selection, official-vs-directory category selection, title-cleaned name selection, full-name-vs-acronym selection, place-name-vs-host-building selection, official-category-vs-tourism-tag selection, government-locator website selection, relay/fax/footer phone rejection, department-location-vs-city-footer address selection, official phone-vs-fax selection, stale archive conflict, contact-page vs staff-page conflict, service-page vs category conflict, program-tenant category conflict, adjacent-facility category conflict, branch-specific website extraction from a government locator page, offsite-event address conflict handling, multi-branch commercial phone/address selection, branch-name-vs-parent-organization conflicts, branded-name-vs-generic-alias conflicts, branch-website-vs-social conflicts, and expected-abstain host-page ambiguity.
 - The benchmark outputs above were generated from checked-in fixtures and written to `reports/harness/benchmark_v2_*_current.json`.

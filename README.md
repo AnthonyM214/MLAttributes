@@ -96,6 +96,30 @@ The ResolvePOI selective router is a separate, opt-in benchmark path. It can be 
 
 For a quick map of what is core versus legacy, see [`docs/current_state.md`](docs/current_state.md).
 
+## Presentation Snapshot
+
+### Approach
+
+- Extract claims from replayed evidence instead of scoring rows directly.
+- Group claims into an EvidenceGraph so contradictions and corroboration stay visible.
+- Use `resolver_v2` to decide, abstain, or defer to the optional selective router.
+- Keep the replay harness as the proof layer so every headline can be rerun from checked-in artifacts.
+
+### Data
+
+- Curated hard cases prove the claim-extraction spine on ambiguous evidence.
+- The Santa Cruz challenge adds realistic authority-page ambiguity and explicit abstain labels.
+- The promoted contact slice is the best checked-in phone/address proof.
+- The cross-city and collected generalization corpora broaden the geography and evidence mix.
+- The merged replay corpus is still the bottleneck: it remains low-coverage, so it is useful as a ceiling, not as a production-grade proof.
+
+### OKR
+
+- Raise claim coverage on the merged replay corpus.
+- Add more phone, address, cross-city, stale, wrong-entity, and abstention-heavy examples.
+- Keep the hard-case and selective-router benchmarks reproducible while broadening the replay portfolio.
+- Present MLAttributes as a claim-verification system, not a row-scoring or current-vs-base classifier.
+
 ## Benchmarks
 
 The hard-case replay benchmark is checked into `tests/fixtures/hard_cases_replay.json` and exercises:

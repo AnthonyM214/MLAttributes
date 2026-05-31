@@ -26,7 +26,7 @@ and the public Project Terra repo comparison notes.
 - Santa Cruz starter + expanded + challenge + seed batches now give the repo a visible replay-growth story.
 - Seed batches 1 through 6 add `53` curated replay cases across the expansion path.
 - The expansion is now intentionally abstention-heavy and cross-city, not just a Santa Cruz duplicate set.
-- Current checked-in test count: `251`.
+- Current checked-in test count: `271`.
 
 ## Cold Comparison Against Other Project Terra Repos
 
