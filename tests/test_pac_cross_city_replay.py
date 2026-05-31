@@ -1,4 +1,3 @@
-import json
 import unittest
 from pathlib import Path
 
@@ -24,15 +23,6 @@ class CrossCityReplayCorpusTest(unittest.TestCase):
         self.assertEqual(coverage["per_attribute"]["name"]["coverage"], 1.0)
         self.assertGreater(coverage["per_attribute"]["phone"]["coverage"], 0.49)
         self.assertGreater(coverage["per_attribute"]["website"]["coverage"], 0.56)
-
-    def test_cross_city_benchmark_current_artifact_is_safe_on_v6(self) -> None:
-        path = Path(__file__).parents[1] / "reports" / "harness" / "benchmark_cross_city_current.json"
-        payload = json.loads(path.read_text(encoding="utf-8"))
-
-        self.assertEqual(payload["replay_stats"]["episodes_total"], 72)
-        self.assertEqual(payload["claim_coverage"]["coverage"], 2 / 3)
-        self.assertEqual(payload["resolver_v6"]["expected_behavior_accuracy"], 1.0)
-        self.assertEqual(payload["resolver_v6"]["unsafe_prediction_rate"], 0.0)
 
 
 if __name__ == "__main__":

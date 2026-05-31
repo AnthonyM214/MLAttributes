@@ -12,6 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 class RawMergeInputCeilingTest(unittest.TestCase):
     def test_raw_merge_input_phone_address_corpora_do_not_add_promotable_signal(self) -> None:
         merge_inputs_root = ROOT / "reports" / "replay_collected"
+        if not merge_inputs_root.exists():
+            self.skipTest("raw replay_collected merge-input tree is not checked in")
+
         attr_counts: Counter[str] = Counter()
         pages_with_attr: Counter[str] = Counter()
         claims_with_attr: Counter[str] = Counter()

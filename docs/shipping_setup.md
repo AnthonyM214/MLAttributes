@@ -4,6 +4,10 @@ This repo is ready for reproducible benchmark work when these pieces are enabled
 
 The primary shipped path is the installed entry-point set (`mlattributes-eval`, `pac-benchmark-v2`, `pac-benchmark-v3`, `pac-benchmark-v4`, `pac-benchmark-v5`, `pac-benchmark-v6`, `pac-benchmark-full-replay`, `pac-benchmark-pooled`, `pac-dashboard`, and `pac-resolvepoi-selective`). The `scripts/run_harness.py` flows below remain available for secondary or legacy operational workflows that do not yet have a first-class installed alias.
 
+For day-to-day benchmark work, treat `pac-benchmark-v6` as the default focus,
+`pac-benchmark-v5` as the coverage comparator, and `pac-benchmark-v2` as the
+historical claim-graph baseline.
+
 ## Codex-side settings
 
 - `multi_agent` enabled for parallel repo survey, retrieval, baseline, and resolver work.
@@ -120,7 +124,11 @@ python3 scripts/run_harness.py rerank --input tests/fixtures/retrieval_replay_sa
 ### Claim-level benchmark
 
 ```bash
-pac-benchmark-v2 \
+pac-benchmark-v6 \
+  --replay tests/fixtures/hard_cases_replay.json \
+  --include-decisions
+
+pac-benchmark-v5 \
   --replay tests/fixtures/hard_cases_replay.json \
   --include-decisions
 
@@ -129,7 +137,12 @@ pac-benchmark-v2 \
   --include-decisions
 ```
 
-This compares the existing row-scoring resolver with the claim-level resolver v2 and reports breakthrough, abstention, and failure cases. The `pac_hard_cases_replay.json` corpus also reports expected-behavior metrics for mixed-source, real-world-style ambiguity cases where abstention is sometimes the correct result.
+This benchmark family keeps `v2` as the historical claim-graph baseline, but the
+current default focus is `pac-benchmark-v6` for safety and
+`pac-benchmark-v5` for the coverage comparator. The `pac_hard_cases_replay.json`
+corpus also reports expected-behavior metrics for mixed-source,
+real-world-style ambiguity cases where abstention is sometimes the correct
+result.
 
 ### Raw dataset summary
 

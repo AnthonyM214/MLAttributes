@@ -36,15 +36,19 @@ Run the tests:
 python3 -m unittest discover -s tests -q
 ```
 
-Run the claim-level benchmark:
+Run the safety-first claim-level benchmark:
 
 ```bash
-pac-benchmark-v2 \
+pac-benchmark-v6 \
   --replay tests/fixtures/hard_cases_replay.json \
   --include-decisions
 ```
 
 The installed wheel also exposes `pac-benchmark-v2`, `pac-benchmark-v3`, `pac-benchmark-v4`, `pac-benchmark-v5`, `pac-benchmark-v6`, `pac-benchmark-full-replay`, `pac-benchmark-pooled`, and `pac-dashboard`.
+
+Use `pac-benchmark-v5` as the coverage comparator when you want to compare
+expected-behavior lift against the safer default. Keep `pac-benchmark-v2` as
+the historical claim-graph baseline.
 
 To benchmark the learned selective router inside `resolver_v2`, add:
 
@@ -92,6 +96,10 @@ dataset -> retrieval/dorking -> claim extraction -> evidence graph -> resolver v
 
 That means MLAttributes is not just a current/base selector. It verifies competing claims against replayable evidence and abstains when truth cannot be established.
 
+The current default focus is `resolver_v6`: it is the safest current resolver
+across the shipped replay portfolio. `resolver_v5` remains the coverage
+comparator, and `resolver_v2`/`resolver_v3` remain historical baselines.
+
 The ResolvePOI selective router is a separate, opt-in benchmark path. It can be passed into `resolver_v2` as the learned current/base decision layer, but it is not the default resolver mode.
 
 For a quick map of what is core versus legacy, see [`docs/current_state.md`](docs/current_state.md).
@@ -118,6 +126,7 @@ For a quick map of what is core versus legacy, see [`docs/current_state.md`](doc
 - Raise claim coverage on the merged replay corpus.
 - Add more phone, address, cross-city, stale, wrong-entity, and abstention-heavy examples.
 - Keep the hard-case and selective-router benchmarks reproducible while broadening the replay portfolio.
+- Make `resolver_v6` the default public focus, with `resolver_v5` as the coverage comparator.
 - Present MLAttributes as a claim-verification system, not a row-scoring or current-vs-base classifier.
 
 ## Benchmarks

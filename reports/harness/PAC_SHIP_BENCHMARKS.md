@@ -8,6 +8,7 @@ and the public Project Terra repo comparison notes.
 
 - The repo has a claim-level PAC spine: claim extraction, EvidenceGraph grouping, abstention discipline, and replayable benchmark commands.
 - The most important local proof is the hard-case replay, the Santa Cruz challenge replay, and the ResolvePOI selective router holdout.
+- The default focus should be `resolver_v6` for safety; keep `resolver_v5` as the coverage comparator and `resolver_v2` as the historical baseline.
 - The imported Sure-style repo is preserved only as a negative-result baseline. It does not beat the current baseline.
 
 ## Final Local Benchmarks
@@ -26,7 +27,7 @@ and the public Project Terra repo comparison notes.
 - Santa Cruz starter + expanded + challenge + seed batches now give the repo a visible replay-growth story.
 - Seed batches 1 through 6 add `53` curated replay cases across the expansion path.
 - The expansion is now intentionally abstention-heavy and cross-city, not just a Santa Cruz duplicate set.
-- Current checked-in test count: `271`.
+- Current checked-in test count: `269`.
 
 ## Cold Comparison Against Other Project Terra Repos
 
@@ -49,6 +50,12 @@ The closest published competitor is `Mayhem_Attribute_Conflation`, with phone F1
 ## Shipping Verdict
 
 Ship it as a project milestone, not as a production-accuracy claim.
+
+Default focus:
+
+- `resolver_v6` for the primary PAC-safe story
+- `resolver_v5` for the coverage comparator
+- `resolver_v2`/`resolver_v3` for historical baselines and hard-case regression tracking
 
 What is ready:
 

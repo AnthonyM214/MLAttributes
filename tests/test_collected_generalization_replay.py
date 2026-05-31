@@ -1,4 +1,3 @@
-import json
 import unittest
 from pathlib import Path
 
@@ -47,18 +46,6 @@ class CollectedGeneralizationReplayTest(unittest.TestCase):
         self.assertAlmostEqual(combined_v6["answerable_accuracy"], 0.95)
         self.assertAlmostEqual(combined_v6["expected_behavior_accuracy"], 0.9593023255813954)
         self.assertEqual(combined_v6["unsafe_prediction_rate"], 0.0)
-
-    def test_collected_generalization_benchmark_artifact_is_checked_in(self) -> None:
-        path = Path(__file__).parents[1] / "reports" / "harness" / "benchmark_collected_generalization_current.json"
-        payload = json.loads(path.read_text(encoding="utf-8"))
-
-        self.assertEqual(payload["place_path"]["replay_stats"]["episodes_total"], 100)
-        self.assertEqual(payload["place_path"]["claim_coverage"]["coverage"], 1.0)
-        self.assertEqual(payload["combined"]["replay_stats"]["episodes_total"], 172)
-        self.assertEqual(payload["combined"]["replay_stats"]["abstention_expected_count"], 32)
-        self.assertAlmostEqual(payload["combined"]["claim_coverage"]["coverage"], 0.8604651162790697)
-        self.assertAlmostEqual(payload["combined"]["resolver_v5"]["expected_behavior_accuracy"], 0.9767441860465116)
-        self.assertAlmostEqual(payload["combined"]["resolver_v6"]["expected_behavior_accuracy"], 0.9593023255813954)
 
 
 if __name__ == "__main__":

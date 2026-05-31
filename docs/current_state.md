@@ -80,7 +80,9 @@ These files are still part of the repository history and can be useful, but they
 ## Recommended Entry Points
 
 - Run tests: `python3 -m unittest discover -s tests -q`
-- Run the claim-level benchmark: `pac-benchmark-v2 --replay tests/fixtures/hard_cases_replay.json --include-decisions`
+- Run the safety-first claim-level benchmark: `pac-benchmark-v6 --replay tests/fixtures/hard_cases_replay.json --include-decisions`
+- Run the coverage comparator when needed: `pac-benchmark-v5 --replay ...`
+- Run the historical claim-graph baseline when needed: `pac-benchmark-v2 --replay ...`
 - Run the v3/v4 benchmark family from the installed wheel: `pac-benchmark-v3 --replay ...`, `pac-benchmark-v4 --replay ...`
 - Run the full collected replay benchmark: `pac-benchmark-full-replay --replay-dir reports/replay_collected --include-decisions`
 - Run the pooled router benchmark: `pac-benchmark-pooled --resolvepoi-truth-path ... --resolvepoi-train-parquet ... --resolvepoi-train-labels ...`
@@ -94,3 +96,5 @@ The Santa Cruz challenge fixture currently contains 50 curated replay cases. It 
 Treat the Santa Cruz numbers as a replayable challenge proof, not a production generalization claim. The cross-city replay slice is now the next layer of evidence: it keeps the claim schema intact while showing the repo is not limited to one geography.
 
 The point of this map is visibility: a cold reader should find the core resolver and benchmarks first, then follow the supporting or historical material only if needed.
+
+For the current focus version, see [`reports/harness/PAC_VERSION_FOCUS.md`](../reports/harness/PAC_VERSION_FOCUS.md).
