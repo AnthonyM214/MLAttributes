@@ -80,6 +80,8 @@ Render the current dashboard from the latest report artifacts:
 pac-dashboard --reports-root reports --output-dir reports/dashboard
 ```
 
+The dashboard now includes clickable pipeline, replay-portfolio, and real-example walkthrough panels so the main PAC concepts can be explained visually.
+
 ## Current shape
 
 The current ship path is:
@@ -110,6 +112,10 @@ The hard-case replay benchmark is checked into `tests/fixtures/hard_cases_replay
 
 The mixed-source PAC benchmark is checked into `tests/fixtures/pac_hard_cases_replay.json` and measures expected behavior on official, aggregator, and social evidence with explicit abstention labels. That corpus is the better proxy for real-world readiness because it includes cases where abstaining is the right answer.
 
+The contact replay benchmark is checked into `tests/fixtures/pac_contact_replay.json` and focuses specifically on phone and address cases. It is the strongest checked-in proof surface for the repo's biggest remaining weakness: contact claim coverage with explicit abstains and branch ambiguity.
+
+The exact merged harness bottleneck files are `reports/harness/mlattributes_replay_merged_full.json` at `7.6%` claim coverage and `reports/harness/mlattributes_replay_merged_unique.json` at `2.0%` claim coverage.
+
 The Santa Cruz challenge benchmark is checked into `tests/fixtures/santa_cruz_challenge_replay.json` and focuses on curated authority-page ambiguity: branch directories, government department pages, city footers, staff/direct lines, relay/TTY lines, fax numbers, stale archives, social profiles, suite-level department locations, full names vs acronyms, host-building names, tourism category tags, government locator websites, official museum/library/campus pages, official service-page category conflicts, program-tenant category conflicts, adjacent-facility category conflicts, government locator pages that expose branch-specific websites, offsite-event address conflicts, multi-branch commercial location pages, branch-name-vs-parent-organization conflicts, branch-website-vs-social conflicts, social-only website abstention, generic corporate homepage abstention, stale/closed phone abstention, and wrong-entity tenant website abstention.
 
 The Santa Cruz fixture is a replayable local challenge proof, not a production distribution claim. The next development gate is cross-city validation with the same evidence schema and more negative/distractor evidence.
@@ -120,6 +126,7 @@ See `reports/harness/PAC_ENGINEERING_REPORT.md` for the current benchmark summar
 See `reports/harness/PAC_REPLAY_PORTFOLIO.md` for the replay-corpus portfolio and which corpora address which weaknesses.
 
 For a slide-ready summary of the repo story, see [`docs/presentations/MLAttributes_ProjectTerra_PAC.md`](docs/presentations/MLAttributes_ProjectTerra_PAC.md).
+For reusable diagram-first visuals and a clearer explanation style, see [`docs/presentations/MLAttributes_Visual_Playbook.md`](docs/presentations/MLAttributes_Visual_Playbook.md).
 
 ## Shipping notes
 

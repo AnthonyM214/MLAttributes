@@ -15,6 +15,7 @@ This note records the paper-backed direction for MLAttributes so the repo does n
 ## What our own evaluation says
 
 - The merged replay corpus contains `38,518` loadable episodes and `5,078` unique case-attribute pairs.
+- The exact merged harness bottleneck files are `reports/harness/mlattributes_replay_merged_full.json` at `7.6%` claim coverage and `reports/harness/mlattributes_replay_merged_unique.json` at `2.0%` claim coverage.
 - Claim extraction coverage is still sparse on the merged corpus.
 - When a claim exists, ranking is usually not the bottleneck.
 - The bottleneck is getting the right claim onto the graph in the first place.

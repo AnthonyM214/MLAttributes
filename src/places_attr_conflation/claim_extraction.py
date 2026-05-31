@@ -467,7 +467,13 @@ def _context_addresses(place_context: dict[str, str] | None) -> list[str]:
         return []
     values: list[str] = []
     for key in ("address", "current_address", "base_address", "current_value", "base_value"):
-        normalized = normalize_address(place_context.get(key, ""))
+        raw = str(place_context.get(key, "") or "").strip()
+        if not raw:
+            continue
+        lowered = raw.lower()
+        if "://" in lowered or lowered.startswith("www.") or re.search(r"\b[a-z0-9.-]+\.[a-z]{2,}\b", lowered):
+            continue
+        normalized = normalize_address(raw)
         if normalized and any(token in normalized for token in (" st ", " ave ", " rd ", " blvd ", " dr ", " way ")):
             values.append(normalized)
     output: list[str] = []
@@ -484,7 +490,12 @@ def _context_address_values(place_context: dict[str, str] | None) -> list[tuple[
         return []
     values: list[tuple[str, str, str]] = []
     for key in ("address", "current_address", "address_current", "current_value", "base_address", "address_base", "base_value"):
-        raw = place_context.get(key, "")
+        raw = str(place_context.get(key, "") or "").strip()
+        if not raw:
+            continue
+        lowered = raw.lower()
+        if "://" in lowered or lowered.startswith("www.") or re.search(r"\b[a-z0-9.-]+\.[a-z]{2,}\b", lowered):
+            continue
         normalized = normalize_address(raw)
         if not normalized:
             continue

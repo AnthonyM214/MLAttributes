@@ -205,6 +205,26 @@ class ClaimExtractionTests(unittest.TestCase):
         self.assertEqual([claim.normalized_value for claim in claims], ["224 church st santa cruz ca 95060"])
         self.assertNotIn("831 427 7707", claims[0].normalized_value)
 
+    def test_address_context_does_not_treat_website_url_as_address(self) -> None:
+        claims = extract_claims_from_text(
+            place_id="case-4c-url",
+            attribute="address",
+            page_text="U.S. Bank Branch and ATM\n304 F St Davis, CA 95616\n530-756-7283",
+            source_url="https://www.bridgeinnbrewood.co.uk/",
+            source_type="official_site",
+            page_title="U.S. Bank",
+            place_context={
+                "name": "U.S. Bank Branch",
+                "current_value": "https://www.bridgeinnbrewood.co.uk/",
+                "city": "Davis",
+                "region": "CA",
+            },
+        )
+
+        normalized = {claim.normalized_value for claim in claims}
+        self.assertIn("304 f st davis ca 95616", normalized)
+        self.assertNotIn("https://www.bridgeinnbrewood.co.uk/", normalized)
+
     def test_extracts_campus_building_address_from_official_contact_text(self) -> None:
         claims = extract_claims_from_text(
             place_id="case-4d",

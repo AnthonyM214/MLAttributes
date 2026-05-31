@@ -8,6 +8,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from .claim_extraction import extract_claims_from_text
+
 
 @dataclass(frozen=True)
 class DashboardData:
@@ -33,6 +35,7 @@ class DashboardData:
     benchmark_v6: dict[str, object] | None
     benchmark_full_replay: dict[str, object] | None
     benchmark_promoted: dict[str, object] | None
+    benchmark_contact: dict[str, object] | None
     benchmark_cross_city: dict[str, object] | None
     benchmark_collected_generalization: dict[str, object] | None
     benchmark_collected_overdata_generalization: dict[str, object] | None
@@ -131,6 +134,8 @@ def latest_report_paths(reports_root: str | Path) -> dict[str, str]:
         "benchmark_v6": harness / "benchmark_v6_current.json",
         "benchmark_full_replay": harness / "benchmark_full_replay_current.json",
         "benchmark_promoted": harness / "benchmark_promoted_current.json",
+        "benchmark_contact": harness / "benchmark_contact_current.json",
+        "benchmark_contact_report": harness / "PAC_CONTACT_REPLAY_BENCHMARK.md",
         "benchmark_cross_city": harness / "benchmark_cross_city_current.json",
         "benchmark_collected_generalization": harness / "benchmark_collected_generalization_current.json",
         "benchmark_collected_generalization_report": harness / "PAC_COLLECTED_GENERALIZATION_BENCHMARK.md",
@@ -182,6 +187,7 @@ def build_dashboard_data(reports_root: str | Path) -> DashboardData:
         benchmark_v6=_load_json(_resolve_path(root, paths["benchmark_v6"])) if "benchmark_v6" in paths else None,
         benchmark_full_replay=_load_json(_resolve_path(root, paths["benchmark_full_replay"])) if "benchmark_full_replay" in paths else None,
         benchmark_promoted=_load_json(_resolve_path(root, paths["benchmark_promoted"])) if "benchmark_promoted" in paths else None,
+        benchmark_contact=_load_json(_resolve_path(root, paths["benchmark_contact"])) if "benchmark_contact" in paths else None,
         benchmark_cross_city=_load_json(_resolve_path(root, paths["benchmark_cross_city"])) if "benchmark_cross_city" in paths else None,
         benchmark_collected_generalization=_load_json(_resolve_path(root, paths["benchmark_collected_generalization"])) if "benchmark_collected_generalization" in paths else None,
         benchmark_collected_overdata_generalization=_load_json(_resolve_path(root, paths["benchmark_collected_overdata_generalization"])) if "benchmark_collected_overdata_generalization" in paths else None,
@@ -294,6 +300,278 @@ def _prototype_lane_steps(data: DashboardData) -> list[dict[str, str]]:
             "body": f"Resolver output lives in {data.paths.get('combined', 'missing')} and should be read with its sample-size caveat.",
         },
     ]
+
+
+def _interactive_pipeline_nodes(data: DashboardData) -> list[dict[str, str]]:
+    mixed = data.benchmark_collected_mixed_generalization or {}
+    mixed_combined = mixed.get("combined", {}) if isinstance(mixed, dict) else {}
+    if not isinstance(mixed_combined, dict):
+        mixed_combined = {}
+    pac = data.pac_benchmark or {}
+    resolver = pac.get("resolver", {}) if isinstance(pac, dict) else {}
+    identity = pac.get("identity_drift", {}) if isinstance(pac, dict) else {}
+    if not isinstance(resolver, dict):
+        resolver = {}
+    if not isinstance(identity, dict):
+        identity = {}
+    compare = data.compare or {}
+    targeted = compare.get("targeted", {}) if isinstance(compare, dict) else {}
+    if not isinstance(targeted, dict):
+        targeted = {}
+    selective = data.resolvepoi_selective or {}
+    metrics = selective.get("metrics", {}) if isinstance(selective, dict) else {}
+    if not isinstance(metrics, dict):
+        metrics = {}
+    macro = metrics.get("macro", {}) if isinstance(metrics, dict) else {}
+    core_macro = metrics.get("core_macro", {}) if isinstance(metrics, dict) else {}
+    if not isinstance(macro, dict):
+        macro = {}
+    if not isinstance(core_macro, dict):
+        core_macro = {}
+    return [
+        {
+            "key": "replay",
+            "label": "Replay corpus",
+            "title": "Replay corpus",
+            "detail": "Curated hard cases, Santa Cruz, cross-city, and collected generalization slices feed the evidence trail.",
+            "metric": f"{_num(((mixed_combined.get('replay_stats') or {}).get('episodes_total')) if isinstance(mixed_combined.get('replay_stats'), dict) else None)} episodes / {_pct((mixed_combined.get('claim_coverage') or {}).get('coverage') if isinstance(mixed_combined.get('claim_coverage'), dict) else None)} claim coverage",
+        },
+        {
+            "key": "retrieval",
+            "label": "Retrieval",
+            "title": "Retrieval and dorking",
+            "detail": "Targeted search finds the authoritative page while fallback search is kept as a diagnostic. The current replay still favors targeted authoritative pages.",
+            "metric": f"Targeted authoritative found {_pct(targeted.get('authoritative_found_rate'))} / fallback {_pct((compare.get('fallback') or {}).get('authoritative_found_rate') if isinstance(compare.get('fallback'), dict) else None)}",
+        },
+        {
+            "key": "claims",
+            "label": "Claim extraction",
+            "title": "Claim extraction",
+            "detail": "HTML text, meta tags, JSON-LD, and visible page content become normalized attribute claims before the resolver ever scores them.",
+            "metric": f"Claim coverage {_pct((mixed_combined.get('claim_coverage') or {}).get('coverage') if isinstance(mixed_combined.get('claim_coverage'), dict) else None)} / phone {_pct((mixed_combined.get('claim_coverage') or {}).get('phone_coverage') if isinstance(mixed_combined.get('claim_coverage'), dict) else None)}",
+        },
+        {
+            "key": "graph",
+            "label": "EvidenceGraph",
+            "title": "EvidenceGraph",
+            "detail": "Claims get grouped by normalized value, and contradictions, stale pages, and wrong-entity signals become explicit.",
+            "metric": f"Identity drift precision/recall {_pct(identity.get('identity_drift_precision'))} / {_pct(identity.get('identity_drift_recall'))}",
+        },
+        {
+            "key": "resolver",
+            "label": "Resolver",
+            "title": "Resolver v5 / v6",
+            "detail": "v5 is stronger on expected-behavior accuracy; v6 is stricter and safer with zero unsafe predictions on the mixed corpus.",
+            "metric": f"v5 {_pct(((mixed_combined.get('resolver_v5') or {}).get('expected_behavior_accuracy')) if isinstance(mixed_combined.get('resolver_v5'), dict) else None)} / v6 {_pct(((mixed_combined.get('resolver_v6') or {}).get('expected_behavior_accuracy')) if isinstance(mixed_combined.get('resolver_v6'), dict) else None)}",
+        },
+        {
+            "key": "benchmarks",
+            "label": "Benchmarks",
+            "title": "Benchmarks and dashboard",
+            "detail": "The dashboard turns replay, benchmark, and comparison artifacts into a readable proof surface instead of a buried report pile.",
+            "metric": f"Selective router {_pct((macro.get('full_accuracy') if isinstance(macro, dict) else None))} / core {_pct((core_macro.get('full_accuracy') if isinstance(core_macro, dict) else None))}",
+        },
+    ]
+
+
+def _replay_portfolio_nodes(data: DashboardData) -> list[dict[str, str]]:
+    portfolio: list[dict[str, object]] = []
+    candidates = [
+        ("hard_cases", "PAC hard cases", data.benchmark_v2_pac_hard_cases, "best for noisy abstention-heavy mixed evidence"),
+        ("santa_cruz", "Santa Cruz challenge", data.benchmark_v2_santa_cruz_challenge, "best dense authority-page proof"),
+        ("promoted", "Promoted mixed", data.benchmark_promoted, "best balanced mixed proof surface"),
+        ("contact", "Contact replay", data.benchmark_contact, "best phone/address proof surface"),
+        ("cross_city", "Cross-city replay", data.benchmark_cross_city, "best compact non-Santa-Cruz generalization slice"),
+        ("generalization", "Collected generalization", data.benchmark_collected_generalization, "best early collected generalization surface"),
+        ("overdata", "Collected overdata", data.benchmark_collected_overdata_generalization, "largest collected mix before the final combined slice"),
+        ("mixed", "Collected mixed", data.benchmark_collected_mixed_generalization, "strongest collected proof surface"),
+    ]
+    for key, label, report, best_for in candidates:
+        if not isinstance(report, dict):
+            continue
+        combined = report.get("combined", report if key in {"hard_cases", "santa_cruz", "promoted", "cross_city"} else report.get("combined", {}))
+        if not isinstance(combined, dict):
+            combined = {}
+        claim_coverage = combined.get("claim_coverage", {}) if isinstance(combined, dict) else {}
+        replay_stats = combined.get("replay_stats", {}) if isinstance(combined, dict) else {}
+        resolver_v5 = combined.get("resolver_v5", {}) if isinstance(combined, dict) else {}
+        resolver_v6 = combined.get("resolver_v6", {}) if isinstance(combined, dict) else {}
+        if not isinstance(claim_coverage, dict):
+            claim_coverage = {}
+        if not isinstance(replay_stats, dict):
+            replay_stats = {}
+        if not isinstance(resolver_v5, dict):
+            resolver_v5 = {}
+        if not isinstance(resolver_v6, dict):
+            resolver_v6 = {}
+        portfolio.append(
+            {
+                "key": key,
+                "label": label,
+                "title": label,
+                "detail": best_for,
+                "metric": f"{_num(replay_stats.get('episodes_total'))} episodes / {_pct(claim_coverage.get('coverage'))} claim coverage",
+                "submetric": f"expected abstain {_num(replay_stats.get('abstention_expected_count'))} / identity drift {_num(replay_stats.get('identity_drift_count'))}",
+                "v5": f"{_pct(resolver_v5.get('expected_behavior_accuracy'))} expected-behavior / {_pct(resolver_v5.get('unsafe_prediction_rate'))} unsafe",
+                "v6": f"{_pct(resolver_v6.get('expected_behavior_accuracy'))} expected-behavior / {_pct(resolver_v6.get('unsafe_prediction_rate'))} unsafe",
+            }
+        )
+    return portfolio
+
+
+def _derive_example_claim_values(
+    *,
+    case_id: str,
+    attribute: str,
+    page_text: str,
+    page_url: str,
+    page_title: str,
+    source_type: str,
+    query: str,
+    place_context: dict[str, str] | None,
+) -> list[str]:
+    try:
+        claims = extract_claims_from_text(
+            place_id=case_id,
+            attribute=attribute,
+            page_text=page_text,
+            source_url=page_url,
+            source_type=source_type,
+            page_title=page_title,
+            query=query,
+            place_context=place_context,
+        )
+    except Exception:
+        return []
+    pills: list[str] = []
+    seen: set[str] = set()
+    for claim in claims:
+        label = str(getattr(claim, "normalized_value", "") or "").strip()
+        if not label:
+            continue
+        pill = f"{label} · {str(getattr(claim, 'extraction_method', '') or '').strip()}"
+        pill = pill.rstrip(" ·")
+        if pill not in seen:
+            seen.add(pill)
+            pills.append(pill)
+    return pills
+
+
+def _interactive_example_nodes() -> list[dict[str, object]]:
+    repo_root = Path(__file__).resolve().parents[2]
+    sample_specs = [
+        (
+            "hard-website-1",
+            "Website from homepage",
+            repo_root / "tests" / "fixtures" / "hard_cases_replay.json",
+            "The homepage mentions a contact URL, so claim extraction turns page text into a website claim.",
+        ),
+        (
+            "business-registry-current",
+            "Registry corroboration",
+            repo_root / "tests" / "fixtures" / "pac_cross_city_replay.json",
+            "The business registry directly states the current website, so authority and exact-value matching agree.",
+        ),
+        (
+            "scpl-branch-context-address-no-extracted",
+            "Address from directory context",
+            repo_root / "tests" / "fixtures" / "santa_cruz_challenge_replay.json",
+            "The directory page lists several branch addresses, and place context isolates the Downtown address.",
+        ),
+        (
+            "scpl-branch-ambiguous-phone",
+            "Branch phone abstention",
+            repo_root / "tests" / "fixtures" / "santa_cruz_challenge_replay.json",
+            "The same directory page contains several branch numbers, so the resolver should abstain instead of guessing.",
+        ),
+    ]
+    examples: list[dict[str, object]] = []
+    for case_id, label, path, story in sample_specs:
+        if not path.exists():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        episodes = payload.get("episodes", []) if isinstance(payload, dict) else []
+        if not isinstance(episodes, list) or not episodes:
+            continue
+        episode = None
+        for candidate in episodes:
+            if isinstance(candidate, dict) and str(candidate.get("case_id", "")) == case_id:
+                episode = candidate
+                break
+        if episode is None:
+            episode = next((candidate for candidate in episodes if isinstance(candidate, dict)), None)
+        if not isinstance(episode, dict):
+            continue
+        attempts = episode.get("search_attempts", [])
+        first_attempt = attempts[0] if isinstance(attempts, list) and attempts and isinstance(attempts[0], dict) else {}
+        pages = first_attempt.get("fetched_pages", [])
+        first_page = pages[0] if isinstance(pages, list) and pages and isinstance(pages[0], dict) else {}
+        extracted = first_page.get("extracted_values", {})
+        if not isinstance(extracted, dict):
+            extracted = {}
+        gold = str(episode.get("gold_value", "")).strip()
+        expected = gold if gold else "abstain"
+        expected_abstain = bool(episode.get("expected_abstain"))
+        decision = str(episode.get("expected_decision", "")).strip() or ("abstain" if expected_abstain or not gold else gold)
+        page_text = str(first_page.get("page_text", ""))
+        page_excerpt = " ".join(page_text.split())[:260].strip()
+        place_context: dict[str, str] = {}
+        place = episode.get("place", {})
+        if isinstance(place, dict):
+            for key in ("name", "address", "city", "region", "country", "base_name", "current_value", "base_value"):
+                value = place.get(key, "")
+                if isinstance(value, str) and value.strip():
+                    place_context[key] = value.strip()
+        derived_claim_values = _derive_example_claim_values(
+            case_id=case_id,
+            attribute=str(episode.get("attribute", "")),
+            page_text=page_text,
+            page_url=str(first_page.get("url", "")),
+            page_title=str(first_page.get("title", "")),
+            source_type=str(first_page.get("source_type", "")),
+            query=str(first_attempt.get("query", "")),
+            place_context=place_context or None,
+        )
+        claim_values = derived_claim_values or [f"{key}: {value}" for key, value in extracted.items() if value]
+        examples.append(
+            {
+                "key": case_id,
+                "label": label,
+                "title": f"{case_id} - {str(episode.get('attribute', ''))}",
+                "detail": story,
+                "metric": f"Expected: {expected}",
+                "submetric": f"Layer: {str(first_attempt.get('layer', '-'))} / Query: {str(first_attempt.get('query', '-'))}",
+                "case_id": case_id,
+                "attribute": str(episode.get("attribute", "")),
+                "expected": expected,
+                "expected_abstain": expected_abstain,
+                "expected_decision": decision,
+                "gold_value": gold,
+                "case_type": str(episode.get("case_type", "-")),
+                "truth_source_type": str(episode.get("truth_source_type", "-")),
+                "identity_label": str(episode.get("identity_label", "-")),
+                "label_origin": str(episode.get("label_origin", "-")),
+                "source_type": str(first_page.get("source_type", "-")),
+                "source_family_id": str(first_page.get("source_family_id", "-")),
+                "page_title": str(first_page.get("title", "-")),
+                "page_url": str(first_page.get("url", "-")),
+                "page_text": page_text,
+                "page_excerpt": page_excerpt,
+                "query": str(first_attempt.get("query", "-")),
+                "layer": str(first_attempt.get("layer", "-")),
+                "notes": str(first_page.get("notes", "-")),
+                "recency_days": first_page.get("recency_days"),
+                "zombie_score": first_page.get("zombie_score"),
+                "identity_change_score": first_page.get("identity_change_score"),
+                "extracted_values": extracted,
+                "claim_values": claim_values,
+                "story": story,
+            }
+        )
+    return examples
 
 
 PRIOR_REPO_SCOREBOARD: list[dict[str, str]] = [
@@ -882,6 +1160,19 @@ def _work_ledger(data: DashboardData) -> list[dict[str, str]]:
         promoted_v5 = {}
     if not isinstance(promoted_v6, dict):
         promoted_v6 = {}
+    contact = data.benchmark_contact or {}
+    contact_claim = contact.get("claim_coverage", {}) if isinstance(contact, dict) else {}
+    contact_stats = contact.get("replay_stats", {}) if isinstance(contact, dict) else {}
+    contact_v5 = contact.get("resolver_v5", {}) if isinstance(contact, dict) else {}
+    contact_v6 = contact.get("resolver_v6", {}) if isinstance(contact, dict) else {}
+    if not isinstance(contact_claim, dict):
+        contact_claim = {}
+    if not isinstance(contact_stats, dict):
+        contact_stats = {}
+    if not isinstance(contact_v5, dict):
+        contact_v5 = {}
+    if not isinstance(contact_v6, dict):
+        contact_v6 = {}
     collected = data.benchmark_collected_generalization or {}
     collected_place = collected.get("place_path", {}) if isinstance(collected, dict) else {}
     collected_combined = collected.get("combined", {}) if isinstance(collected, dict) else {}
@@ -1352,6 +1643,7 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
             f"{_pct((data.benchmark_v4 or {}).get('claim_coverage', {}).get('coverage') if isinstance(data.benchmark_v4, dict) else None)} "
             "and v4 does not recover extra cases there, so the next gain is extraction coverage, not more abstention tuning."
         ),
+        "The raw collected replay tree is the ceiling for contact data: phone and address stay at 0-fetch there, so the useful phone/address proof comes from the promoted contact slice rather than any hidden raw corpus. The exact low-coverage merged bottleneck files are reports/harness/mlattributes_replay_merged_full.json (7.6% claim coverage) and reports/harness/mlattributes_replay_merged_unique.json (2.0% claim coverage).",
         (
             "The promoted mixed replay corpus is the useful middle ground: it combines the hard fixtures and Santa Cruz tranches into "
             f"{_num(promoted_stats.get('episodes_total'))} episodes with {_pct(promoted_claim.get('coverage'))} claim coverage, "
@@ -1589,6 +1881,19 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
     pooled_david_pooled = pooled_david.get("pooled", {}) if isinstance(pooled_david, dict) else {}
     pooled_david_cross = pooled_david.get("cross_corpus", {}) if isinstance(pooled_david, dict) else {}
     pooled_hard_cross = pooled_hard.get("cross_corpus", {}) if isinstance(pooled_hard, dict) else {}
+    contact = data.benchmark_contact or {}
+    contact_claim = contact.get("claim_coverage", {}) if isinstance(contact, dict) else {}
+    contact_stats = contact.get("replay_stats", {}) if isinstance(contact, dict) else {}
+    contact_v5 = contact.get("resolver_v5", {}) if isinstance(contact, dict) else {}
+    contact_v6 = contact.get("resolver_v6", {}) if isinstance(contact, dict) else {}
+    if not isinstance(contact_claim, dict):
+        contact_claim = {}
+    if not isinstance(contact_stats, dict):
+        contact_stats = {}
+    if not isinstance(contact_v5, dict):
+        contact_v5 = {}
+    if not isinstance(contact_v6, dict):
+        contact_v6 = {}
     v4 = data.benchmark_v4 or {}
     v4_resolver = v4.get("resolver_v4", {}) if isinstance(v4, dict) else {}
     if not isinstance(v4_resolver, dict):
@@ -1623,6 +1928,16 @@ def _current_stats(data: DashboardData) -> list[dict[str, str]]:
             "detail": (
                 f"{_num(full_merge.get('input_files'))} replay files merged into {_num(full_merge.get('merged_episodes'))} episodes and {_num(full_merge.get('merged_pages'))} pages; "
                 f"website coverage lifted to {_pct(full_claim_coverage.get('website_coverage'))} with {_num(full_claim_coverage.get('authoritative_claims_per_episode'))} authoritative claims/episode."
+            ),
+        },
+        {
+            "label": "Contact replay",
+            "value": f"{_pct(contact_claim.get('coverage'))} claim coverage / {_pct(contact_v6.get('expected_behavior_accuracy'))} v6 expected",
+            "detail": (
+                f"{_num(contact_stats.get('episodes_total'))} phone/address cases with {_num(contact_stats.get('expected_abstain_count'))} expected abstains; "
+                f"phone coverage {_pct(contact_claim.get('per_attribute', {}).get('phone', {}).get('coverage') if isinstance(contact_claim.get('per_attribute'), dict) else None)}, "
+                f"address coverage {_pct(contact_claim.get('per_attribute', {}).get('address', {}).get('coverage') if isinstance(contact_claim.get('per_attribute'), dict) else None)}, "
+                f"v5 expected-behavior {_pct(contact_v5.get('expected_behavior_accuracy'))}, unsafe predictions {_pct(contact_v5.get('unsafe_prediction_rate'))}."
             ),
         },
         {
@@ -2010,12 +2325,19 @@ def render_markdown(data: DashboardData) -> str:
         "",
         *[f"{idx + 1}. {line}" for idx, line in enumerate(demo_steps)],
         "",
+        "## Interactive Graphs",
+        "",
+        "- The HTML dashboard includes clickable flow and portfolio graphs for the PAC pipeline and replay corpus story.",
+        "- The HTML dashboard also includes a real replay walkthrough panel with actual fixture cases, evidence pages, and expected outcomes.",
+        "- Open `reports/dashboard/index.html` to use the interactive version.",
+        "",
         "## At a Glance",
         "",
         f"- Selective router: {_pct((selective_metrics.get('macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('macro'), dict) else None)} all-attribute / {_pct((selective_metrics.get('core_macro') or {}).get('full_accuracy') if isinstance(selective_metrics.get('core_macro'), dict) else None)} core.",
         f"- Claim-level hard cases: {_pct(((hard_cases.get('resolver_v2') or {}).get('accuracy')) if isinstance(hard_cases, dict) else None)} accuracy / {_pct(((hard_cases.get('resolver_v2') or {}).get('abstention_rate')) if isinstance(hard_cases, dict) else None)} abstention.",
         f"- Identity-gated v6: {_pct((((data.benchmark_v6 or {}).get('resolver_v6') or {}).get('answerable_accuracy')) if isinstance(data.benchmark_v6, dict) else None)} answerable / {_pct((((data.benchmark_v6 or {}).get('resolver_v6') or {}).get('expected_behavior_accuracy')) if isinstance(data.benchmark_v6, dict) else None)} expected behavior on the hard fixture.",
         f"- Santa Cruz challenge: {_pct((((santa_cases.get('expected_behavior') or {}).get('resolver_v2') or {}).get('accuracy')) if isinstance(santa_cases, dict) else None)} expected-behavior accuracy on authority-page ambiguity.",
+        f"- Contact replay: {_pct((((data.benchmark_contact or {}).get('resolver_v5') or {}).get('expected_behavior_accuracy')) if isinstance(data.benchmark_contact, dict) else None)} v5 expected behavior / {_pct((((data.benchmark_contact or {}).get('resolver_v6') or {}).get('expected_behavior_accuracy')) if isinstance(data.benchmark_contact, dict) else None)} v6 expected behavior on the phone/address slice.",
         f"- PAC hard benchmark: {_pct(((data.pac_benchmark or {}).get('abstention') or {}).get('correct_abstention_rate') if isinstance(data.pac_benchmark, dict) else None)} correct abstention on the curated abstain set; identity drift precision/recall {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_precision') if isinstance(data.pac_benchmark, dict) else None)} / {_pct(((data.pac_benchmark or {}).get('identity_drift') or {}).get('identity_drift_recall') if isinstance(data.pac_benchmark, dict) else None)}.",
         f"- Retrieval replay: {_pct(((data.compare or {}).get('targeted') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} targeted vs {_pct(((data.compare or {}).get('fallback') or {}).get('authoritative_found_rate') if isinstance(data.compare, dict) else None)} fallback.",
         f"- Test suite: {_num(data.repo_comparison_tests)} tests passed.",
@@ -2156,6 +2478,44 @@ def render_html(data: DashboardData) -> str:
     demo_steps = _demo_steps()
     glossary = _glossary_lines()
     current_path_rows = [[name, path] for name, path in sorted(data.paths.items())]
+    pipeline_nodes = _interactive_pipeline_nodes(data)
+    portfolio_nodes = _replay_portfolio_nodes(data)
+    example_nodes = _interactive_example_nodes()
+    graph_data = {"pipeline": pipeline_nodes, "portfolio": portfolio_nodes, "example": example_nodes}
+    pipeline_buttons = []
+    for idx, node in enumerate(pipeline_nodes):
+        if idx:
+            pipeline_buttons.append("<span class='graph-arrow' aria-hidden='true'>-&gt;</span>")
+        pipeline_buttons.append(
+            "<button class='graph-node"
+            + (" active" if idx == 0 else "")
+            + f"' data-graph='pipeline' data-key='{html.escape(node['key'])}'>"
+            f"<span class='graph-node-label'>{html.escape(node['label'])}</span>"
+            f"<span class='graph-node-metric'>{html.escape(node['metric'])}</span>"
+            "</button>"
+        )
+    portfolio_buttons = []
+    for idx, node in enumerate(portfolio_nodes):
+        portfolio_buttons.append(
+            "<button class='graph-node portfolio-node"
+            + (" active" if idx == 0 else "")
+            + f"' data-graph='portfolio' data-key='{html.escape(node['key'])}'>"
+            f"<span class='graph-node-label'>{html.escape(node['label'])}</span>"
+            f"<span class='graph-node-metric'>{html.escape(node['metric'])}</span>"
+            f"<span class='graph-node-submetric'>{html.escape(node['submetric'])}</span>"
+            "</button>"
+        )
+    example_buttons = []
+    for idx, node in enumerate(example_nodes):
+        example_buttons.append(
+            "<button class='graph-node example-node"
+            + (" active" if idx == 0 else "")
+            + f"' data-graph='example' data-key='{html.escape(node['key'])}'>"
+            f"<span class='graph-node-label'>{html.escape(node['label'])}</span>"
+            f"<span class='graph-node-metric'>{html.escape(node['metric'])}</span>"
+            f"<span class='graph-node-submetric'>{html.escape(node['submetric'])}</span>"
+            "</button>"
+        )
     return "\n".join(
         [
             "<!doctype html>",
@@ -2200,6 +2560,38 @@ def render_html(data: DashboardData) -> str:
             "details.detail-panel > summary::-webkit-details-marker { display:none; }",
             "details.detail-panel[open] > summary { border-bottom: 1px solid var(--line); }",
             "details.detail-panel .panel-body { padding: 0 16px 16px; }",
+            ".graph-shell { display:grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0 20px; }",
+            ".graph-title-row { display:flex; justify-content:space-between; align-items:baseline; gap: 12px; flex-wrap:wrap; }",
+            ".graph-track { display:flex; flex-wrap:wrap; align-items:stretch; gap: 10px; padding: 14px; border:1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, #fff 0%, #faf5ff 100%); box-shadow: var(--shadow); }",
+            ".graph-row { display:flex; flex-wrap:wrap; align-items:stretch; gap: 10px; }",
+            ".graph-arrow { align-self:center; color: var(--accent); font-weight: 800; font-size: 1.1rem; padding: 0 2px; }",
+            ".graph-node { appearance:none; border:1px solid rgba(109,40,217,.20); border-radius: 16px; background: #fff; padding: 12px 14px; min-width: 170px; text-align:left; cursor:pointer; box-shadow: 0 8px 18px rgba(109,40,217,.08); display:flex; flex-direction:column; gap:6px; }",
+            ".graph-node:hover { transform: translateY(-1px); border-color: rgba(109,40,217,.42); }",
+            ".graph-node.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,.12), 0 10px 20px rgba(109,40,217,.12); }",
+            ".graph-node-label { font-weight: 800; color: #4c1d95; }",
+            ".graph-node-metric, .graph-node-submetric { color: var(--muted); font-size: .88rem; line-height: 1.45; }",
+            ".graph-node.portfolio-node { min-width: 210px; flex: 1 1 210px; }",
+            ".graph-node.example-node { min-width: 220px; flex: 1 1 220px; }",
+            ".graph-detail { border:1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, #fff 0%, #fcf9ff 100%); padding: 16px 18px; box-shadow: 0 8px 20px rgba(109,40,217,.08); }",
+            ".graph-detail h3 { margin: 0 0 8px; }",
+            ".graph-detail p { margin: 0 0 8px; color: var(--muted); line-height: 1.5; }",
+            ".graph-detail .graph-tip { margin-top: 10px; border-left: 4px solid var(--accent); background: rgba(124,58,237,.08); padding: 10px 12px; border-radius: 10px; }",
+            ".graph-detail .graph-pill-row { display:flex; flex-wrap:wrap; gap: 8px; margin-top: 10px; }",
+            ".graph-pill { display:inline-flex; align-items:center; gap:6px; padding: 5px 10px; border-radius: 999px; background: #f4ebff; color: #4c1d95; font-size: .82rem; font-weight: 700; }",
+            ".example-shell { margin-top: 12px; }",
+            ".example-panel { border:1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, #fff 0%, #fbf8ff 100%); padding: 16px 18px; box-shadow: 0 8px 20px rgba(109,40,217,.08); }",
+            ".example-steps { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 12px; }",
+            ".example-step { border:1px solid rgba(109,40,217,.16); border-radius: 14px; padding: 12px 14px; background: #fff; }",
+            ".example-step h4 { margin: 0 0 8px; font-size: .98rem; color: #4c1d95; }",
+            ".example-step p { margin: 0; color: var(--muted); line-height: 1.5; }",
+            ".kv-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 12px; }",
+            ".kv-item { border:1px solid rgba(109,40,217,.14); border-radius: 14px; background: #fff; padding: 10px 12px; }",
+            ".kv-label { display:block; text-transform: uppercase; letter-spacing: .08em; font-size: .71rem; font-weight: 800; color: var(--accent); margin-bottom: 5px; }",
+            ".kv-value { color: var(--ink); font-weight: 700; line-height: 1.45; word-break: break-word; }",
+            ".example-claims { margin-top: 12px; }",
+            ".example-claims h4 { margin: 0 0 8px; font-size: .98rem; color: #4c1d95; }",
+            ".example-note { margin-top: 12px; border-left: 4px solid var(--accent); background: rgba(124,58,237,.08); padding: 10px 12px; border-radius: 10px; }",
+            ".graph-pre { white-space: pre-wrap; background: #f8f3ff; border:1px solid rgba(109,40,217,.14); border-radius: 14px; padding: 12px 14px; margin: 10px 0 0; color: #372453; line-height: 1.5; }",
             "table { width:100%; border-collapse: collapse; background:#fff; margin: 10px 0 2px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 8px 18px rgba(109,40,217,.06); }",
             "th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align:left; vertical-align: top; line-height: 1.45; }",
             "th { background: linear-gradient(180deg, #f1e8ff 0%, #e9dcff 100%); color: #4c1d95; font-weight: 800; }",
@@ -2236,6 +2628,30 @@ def render_html(data: DashboardData) -> str:
             f"<div><strong>Tests</strong><div class='muted'>{html.escape(_num(data.repo_comparison_tests))} tests passed in the repo comparison report</div></div>",
             "</div>",
             "</div>",
+            "</section>",
+            "<section>",
+            "<div class='graph-title-row'><h2 class='section-title'>Interactive System Graphs</h2><span class='section-note'>Click a node to inspect the detail panel.</span></div>",
+            "<p class='section-note'>These graphs are designed to make the core story visible in one pass: how evidence moves through the pipeline and which replay corpus proves which weakness.</p>",
+            "<div class='graph-shell'>",
+            "<div class='graph-track' data-graph='pipeline'>",
+            *pipeline_buttons,
+            "</div>",
+            "<div class='graph-detail' id='pipeline-detail'></div>",
+            "</div>",
+            "<div class='graph-shell'>",
+            "<div class='graph-track' data-graph='portfolio'>",
+            *portfolio_buttons,
+            "</div>",
+            "<div class='graph-detail' id='portfolio-detail'></div>",
+            "</div>",
+            "</section>",
+            "<section class='example-shell'>",
+            "<div class='graph-title-row'><h2 class='section-title'>Real Example Walkthrough</h2><span class='section-note'>Use these to explain one replay row from start to finish.</span></div>",
+            "<p class='section-note'>These examples come from the checked-in replay fixtures. They show the input row, the first evidence page, the extracted values, and the expected decision path.</p>",
+            "<div class='graph-track' data-graph='example'>",
+            *example_buttons,
+            "</div>",
+            "<div class='example-panel' id='example-detail'></div>",
             "</section>",
             "<section>",
             "<h2 class='section-title'>Plain-English Summary</h2>",
@@ -2461,6 +2877,67 @@ def render_html(data: DashboardData) -> str:
             "</ul>",
             "</div>",
             "</details>",
+            f"<script>const GRAPH_DATA = {json.dumps(graph_data)};\n"
+            "function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');}\n"
+            "function renderGraphDetail(graph, item){\n"
+            "  const detail = document.getElementById(graph + '-detail');\n"
+            "  if(!detail || !item) return;\n"
+            "  if(graph === 'example'){\n"
+            "    const extracted = Object.entries(item.extracted_values || {}).map(([k, v]) => `<span class='graph-pill'>${escapeHtml(k)}: ${escapeHtml(v)}</span>`).join('');\n"
+            "    const claims = (item.claim_values || []).map((value) => `<span class='graph-pill'>${escapeHtml(value)}</span>`).join('');\n"
+            "    const kv = [\n"
+            "      ['Case', item.case_id || '-'],\n"
+            "      ['Attribute', item.attribute || '-'],\n"
+            "      ['Expected decision', item.expected_decision || item.expected || '-'],\n"
+            "      ['Truth source', item.truth_source_type || '-'],\n"
+            "      ['Identity label', item.identity_label || '-'],\n"
+            "      ['Case type', item.case_type || '-'],\n"
+            "      ['Label origin', item.label_origin || '-'],\n"
+            "      ['Source type', item.source_type || '-'],\n"
+            "      ['Page title', item.page_title || '-'],\n"
+            "      ['Page URL', item.page_url || '-'],\n"
+            "      ['Query', item.query || '-'],\n"
+            "      ['Layer', item.layer || '-'],\n"
+            "    ];\n"
+            "    detail.innerHTML = `<h3>${escapeHtml(item.title || item.label || 'Example')}</h3>` +\n"
+            "      `<p>${escapeHtml(item.story || item.detail || '')}</p>` +\n"
+            "      `<div class='example-note'><strong>Why this example matters:</strong> ${escapeHtml(item.story || item.detail || '')}</div>` +\n"
+            "      `<div class='kv-grid'>` + kv.map(([label, value]) => `<div class='kv-item'><span class='kv-label'>${escapeHtml(label)}</span><span class='kv-value'>${escapeHtml(value)}</span></div>`).join('') + `</div>` +\n"
+            "      `<div class='example-steps'>` +\n"
+            "      `<div class='example-step'><h4>1. Replay row</h4><p>${escapeHtml(item.case_id || '-')} is the row that enters the replay harness. It is an ${escapeHtml(item.attribute || '-')} case with ${escapeHtml(item.expected_abstain ? 'explicit abstention' : 'a direct gold value')}.</p></div>` +\n"
+            "      `<div class='example-step'><h4>2. Evidence page</h4><p><strong>${escapeHtml(item.page_title || '-')}</strong><br>Source type: ${escapeHtml(item.source_type || '-')}<br>Truth source: ${escapeHtml(item.truth_source_type || '-')}</p><div class='graph-pre'>${escapeHtml(item.page_excerpt || '')}</div></div>` +\n"
+            "      `<div class='example-step'><h4>3. Extracted claim</h4><p>${claims || '<span class=\"muted\">No prefilled extracted value on this page; the text itself is the evidence.</span>'}</p><div class='graph-pill-row'>${extracted}</div></div>` +\n"
+            "      `<div class='example-step'><h4>4. Expected outcome</h4><p>${escapeHtml(item.expected_decision || item.expected || 'abstain')}</p><p>${escapeHtml(item.expected_abstain ? 'This is a safe-abstain case: the source page is ambiguous or multi-valued.' : 'This is a supported case: the source directly states the value or corroborates it.')}</p></div>` +\n"
+            "      `</div>` +\n"
+            "      `<div class='graph-pill-row'>` +\n"
+            "      `<span class='graph-pill'>Recency days: ${escapeHtml(item.recency_days ?? '-')}</span>` +\n"
+            "      `<span class='graph-pill'>Zombie score: ${escapeHtml(item.zombie_score ?? '-')}</span>` +\n"
+            "      `<span class='graph-pill'>Identity change: ${escapeHtml(item.identity_change_score ?? '-')}</span>` +\n"
+            "      `<span class='graph-pill'>Expected abstain: ${escapeHtml(item.expected_abstain ? 'yes' : 'no')}</span>` +\n"
+            "      `<span class='graph-pill'>Notes: ${escapeHtml(item.notes || '-')}</span>` +\n"
+            "      `${claims ? claims : ''}</div>`;\n"
+            "    return;\n"
+            "  }\n"
+            "  const pills = [];\n"
+            "  if(item.metric) pills.push(`<span class='graph-pill'>${escapeHtml(item.metric)}</span>`);\n"
+            "  if(item.submetric) pills.push(`<span class='graph-pill'>${escapeHtml(item.submetric)}</span>`);\n"
+            "  if(item.v5) pills.push(`<span class='graph-pill'>v5 ${escapeHtml(item.v5)}</span>`);\n"
+            "  if(item.v6) pills.push(`<span class='graph-pill'>v6 ${escapeHtml(item.v6)}</span>`);\n"
+            "  detail.innerHTML = `<h3>${escapeHtml(item.title || item.label || 'Detail')}</h3>` +\n"
+            "    `<p>${escapeHtml(item.detail || '')}</p>` +\n"
+            "    `<div class='graph-tip'><strong>Why it matters:</strong> ${escapeHtml(item.detail || '')}</div>` +\n"
+            "    `<div class='graph-pill-row'>${pills.join('')}</div>`;\n"
+            "}\n"
+            "function activateGraph(graph, key){\n"
+            "  const items = GRAPH_DATA[graph] || [];\n"
+            "  const item = items.find((x) => x.key === key) || items[0];\n"
+            "  if(!item) return;\n"
+            "  document.querySelectorAll(`[data-graph='${graph}'].graph-node, [data-graph='${graph}'] .graph-node`).forEach((btn) => { btn.classList.toggle('active', btn.dataset.key === item.key); });\n"
+            "  renderGraphDetail(graph, item);\n"
+            "}\n"
+            "document.querySelectorAll('.graph-node').forEach((btn) => { btn.addEventListener('click', () => activateGraph(btn.dataset.graph, btn.dataset.key)); });\n"
+            "['pipeline','portfolio','example'].forEach((graph) => { const items = GRAPH_DATA[graph] || []; if(items.length) activateGraph(graph, items[0].key); });\n"
+            "</script>",
             "</main>",
             "</body>",
             "</html>",

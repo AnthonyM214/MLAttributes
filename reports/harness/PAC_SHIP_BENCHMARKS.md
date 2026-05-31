@@ -63,6 +63,11 @@ What is not yet production-grade:
 - the recovery and router diagnostics are useful, but not the final answer
 - more cross-city replay coverage is still the highest-leverage next step
 
+The exact merged harness bottleneck files are:
+
+- `reports/harness/mlattributes_replay_merged_full.json` at `7.6%` claim coverage
+- `reports/harness/mlattributes_replay_merged_unique.json` at `2.0%` claim coverage
+
 ## Links
 
 - [`PAC_REPO_COMPARISON.md`](PAC_REPO_COMPARISON.md)

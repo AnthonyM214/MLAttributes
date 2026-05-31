@@ -311,6 +311,7 @@ def _evaluate_resolver_v5_on_replay(
                     "gold_total": 0,
                     "answerable_total": 0,
                     "expected_abstain_total": 0,
+                    "correct_abstention_total": 0,
                     "answerable_correct": 0,
                     "expected_correct": 0,
                     "abstained": 0,
@@ -323,6 +324,7 @@ def _evaluate_resolver_v5_on_replay(
             stats["gold_total"] += int(has_gold)
             stats["answerable_total"] += int(answerable)
             stats["expected_abstain_total"] += int(expected_abstain)
+            stats["correct_abstention_total"] += int(expected_abstain)
             stats["abstained"] += 1
             stats["expected_correct"] += int(expected_abstain)
             continue
@@ -477,6 +479,7 @@ def evaluate_benchmark_v5(
         "answerable_accuracy": v4.get("answerable_accuracy", 0.0),
         "expected_behavior_accuracy": v4.get("expected_behavior_accuracy", 0.0),
         "abstention_rate": v4.get("abstention_rate", 0.0),
+        "correct_abstention_rate": v4.get("correct_abstention_rate", v4.get("abstention_accuracy", 0.0)),
         "abstention_accuracy": v4.get("abstention_accuracy", 0.0),
         "unsafe_prediction_rate": v4.get("unsafe_prediction_rate", 0.0),
         "high_confidence_wrong_rate": v4.get("high_confidence_wrong_rate", 0.0),
@@ -488,6 +491,7 @@ def evaluate_benchmark_v5(
         "answerable_accuracy": v5.get("answerable_accuracy", 0.0),
         "expected_behavior_accuracy": v5.get("expected_behavior_accuracy", 0.0),
         "abstention_rate": v5.get("abstention_rate", 0.0),
+        "correct_abstention_rate": v5.get("correct_abstention_rate", v5.get("abstention_accuracy", 0.0)),
         "abstention_accuracy": v5.get("abstention_accuracy", 0.0),
         "unsafe_prediction_rate": v5.get("unsafe_prediction_rate", 0.0),
         "high_confidence_wrong_rate": v5.get("high_confidence_wrong_rate", 0.0),

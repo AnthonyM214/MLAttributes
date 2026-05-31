@@ -26,6 +26,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `tests/fixtures/santa_cruz_seed_batch_5.json`
 - `tests/fixtures/santa_cruz_seed_batch_6.json`
 - `tests/fixtures/pac_promoted_replay.json`
+- `tests/fixtures/pac_contact_replay.json` (the strongest checked-in phone/address slice)
 - `tests/fixtures/pac_cross_city_replay.json`
 - `tests/fixtures/authoritative_website_place_path_replay.json`
 - `tests/fixtures/collected_generalization_replay.json`
@@ -36,12 +37,17 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
 - `reports/harness/PAC_SHIP_BENCHMARKS.md`
 - `reports/harness/PAC_REPLAY_CORPUS_DIAGNOSTIC.md`
-- `reports/harness/PAC_REPLAY_PORTFOLIO.md`
+- `reports/harness/PAC_REPLAY_PORTFOLIO.md` (records the raw replay-tree ceiling; phone/address remain 0-fetch in the raw collected tree)
+- `reports/harness/mlattributes_replay_merged_full.json` (the exact low-coverage merged replay bottleneck; 7.6% claim coverage)
+- `reports/harness/mlattributes_replay_merged_unique.json` (the deduped merged replay bottleneck; 2.0% claim coverage)
 - `reports/harness/PAC_PROMOTED_REPLAY_BENCHMARK.md`
+- `reports/harness/PAC_CONTACT_REPLAY_BENCHMARK.md`
 - `reports/harness/PAC_CROSS_CITY_REPLAY_BENCHMARK.md`
 - `reports/harness/PAC_COLLECTED_GENERALIZATION_BENCHMARK.md`
 - `reports/harness/PAC_COLLECTED_OVERDATA_GENERALIZATION_BENCHMARK.md`
+- `docs/presentations/MLAttributes_Visual_Playbook.md`
 - `reports/harness/benchmark_promoted_current.json`
+- `reports/harness/benchmark_contact_current.json`
 - `reports/harness/benchmark_cross_city_current.json`
 - `reports/harness/benchmark_collected_generalization_current.json`
 - `reports/harness/benchmark_collected_overdata_generalization_current.json`
@@ -53,6 +59,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 ## Useful Supporting Modules
 
 - `src/places_attr_conflation/benchmark_common.py`
+  - shared benchmark accounting now exposes `correct_abstention_rate`; `abstention_accuracy` remains only as a backward-compatible alias
 - `src/places_attr_conflation/retrieval.py`
 - `src/places_attr_conflation/dorking.py`
 - `src/places_attr_conflation/freshness.py`

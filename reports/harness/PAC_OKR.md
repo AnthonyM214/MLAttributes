@@ -15,6 +15,7 @@ The current resolver improvements proved an important point:
 - The new graph-guided `v5` planner on the hard-case replay keeps `100.0%` accuracy while reducing abstention from `27.8%` to `16.7%`, so it is a real coverage gain rather than another abstention pass.
 - The new identity-gated `v6` planner on the same hard-case replay keeps `100.0%` answerable accuracy, reaches `100.0%` expected-behavior accuracy, and drives unsafe predictions to `0.0%`, so safe abstention is now a first-class baseline rather than an afterthought.
 - The full collected replay benchmark merges `151` replay files into `5,078` episodes and `402` pages, with `7.6%` overall claim coverage and `47.8%` website coverage. That is about `4.3x` overall and `4.6x` website coverage versus the narrower reference replay.
+- The exact merged harness bottleneck files are `reports/harness/mlattributes_replay_merged_full.json` at `7.6%` claim coverage and `reports/harness/mlattributes_replay_merged_unique.json` at `2.0%` claim coverage.
 - But on the merged replay corpus, the bottleneck is no longer the resolver.
 - The bottleneck is claim construction coverage.
 

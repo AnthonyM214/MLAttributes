@@ -17,6 +17,7 @@ ATTRIBUTE_STAT_KEYS = (
     "gold_total",
     "answerable_total",
     "expected_abstain_total",
+    "correct_abstention_total",
     "answerable_correct",
     "expected_correct",
     "abstained",
@@ -55,6 +56,7 @@ def accumulate_attribute_stats(
     stats["gold_total"] += int(has_gold)
     stats["answerable_total"] += int(answerable)
     stats["expected_abstain_total"] += int(expected_abstain)
+    stats["correct_abstention_total"] += int(expected_abstain and abstained)
     stats["answerable_correct"] += int(answerable_correct)
     stats["expected_correct"] += int(expected_correct)
     stats["abstained"] += int(abstained)
@@ -66,14 +68,19 @@ def accumulate_attribute_stats(
 def summarize_attribute_stats(stats: Mapping[str, int], *, include_f1_proxy: bool = True) -> dict[str, object]:
     answerable_total = int(stats["answerable_total"])
     expected_abstain_total = int(stats["expected_abstain_total"])
+    correct_abstention_total = int(stats.get("correct_abstention_total", 0))
     total_attr = int(stats["total"])
+    correct_abstention_rate = correct_abstention_total / expected_abstain_total if expected_abstain_total else 0.0
     summary = {
         **dict(stats),
         "accuracy": stats["answerable_correct"] / answerable_total if answerable_total else 0.0,
         "answerable_accuracy": stats["answerable_correct"] / answerable_total if answerable_total else 0.0,
         "expected_behavior_accuracy": stats["expected_correct"] / total_attr if total_attr else 0.0,
         "abstention_rate": stats["abstained"] / total_attr if total_attr else 0.0,
-        "abstention_accuracy": stats["abstained"] / expected_abstain_total if expected_abstain_total else 0.0,
+        "correct_abstention_rate": correct_abstention_rate,
+        # Backward-compatible alias. Retained so existing reports keep loading,
+        # but the value now measures only correct abstentions on expected-abstain cases.
+        "abstention_accuracy": correct_abstention_rate,
         "unsafe_prediction_rate": stats["unsafe_prediction"] / expected_abstain_total if expected_abstain_total else 0.0,
         "high_confidence_wrong_rate": stats["high_confidence_wrong"] / answerable_total if answerable_total else 0.0,
         "high_confidence_unsafe_rate": stats["high_confidence_unsafe"] / expected_abstain_total if expected_abstain_total else 0.0,
@@ -97,6 +104,7 @@ def summarize_benchmark_counts(
     total_answerable_correct = 0
     total_expected_correct = 0
     total_abstained = 0
+    total_correct_abstention = 0
     total_unsafe_prediction = 0
     total_hc_wrong = 0
     total_hc_unsafe = 0
@@ -108,6 +116,7 @@ def summarize_benchmark_counts(
         total_answerable_correct += int(stats["answerable_correct"])
         total_expected_correct += int(stats["expected_correct"])
         total_abstained += int(stats["abstained"])
+        total_correct_abstention += int(stats.get("correct_abstention_total", 0))
         total_unsafe_prediction += int(stats["unsafe_prediction"])
         total_hc_wrong += int(stats["high_confidence_wrong"])
         total_hc_unsafe += int(stats["high_confidence_unsafe"])
@@ -124,7 +133,9 @@ def summarize_benchmark_counts(
         "answerable_accuracy": answerable_accuracy,
         "expected_behavior_accuracy": total_expected_correct / episodes_total if episodes_total else 0.0,
         "abstention_rate": total_abstained / episodes_total if episodes_total else 0.0,
-        "abstention_accuracy": total_abstained / total_expected_abstain if total_expected_abstain else 0.0,
+        "correct_abstention_rate": total_correct_abstention / total_expected_abstain if total_expected_abstain else 0.0,
+        # Backward-compatible alias; now reflects correct abstentions only.
+        "abstention_accuracy": total_correct_abstention / total_expected_abstain if total_expected_abstain else 0.0,
         "unsafe_prediction_rate": total_unsafe_prediction / total_expected_abstain if total_expected_abstain else 0.0,
         "high_confidence_wrong_rate": total_hc_wrong / total_answerable if total_answerable else 0.0,
         "high_confidence_unsafe_rate": total_hc_unsafe / total_expected_abstain if total_expected_abstain else 0.0,

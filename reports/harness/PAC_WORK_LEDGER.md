@@ -34,6 +34,7 @@ This ledger is the forward-facing record of the MLAttributes workstream. It exis
 - The collected overdata benchmark is now materialized as `reports/harness/benchmark_collected_overdata_generalization_current.json` so the dashboard can surface the largest collected proof surface next to the curated challenge corpora.
 - The collected mixed replay corpus is now checked in at `tests/fixtures/collected_mixed_generalization_replay.json`; it combines the overdata website batches, the place-specific website cycle, the cross-city slice, and the hard-case replay into a 386-episode collected surface with 93.5% claim coverage and 39 explicit abstain cases.
 - The collected mixed benchmark is now materialized as `reports/harness/benchmark_collected_mixed_generalization_current.json` so the dashboard can surface the strongest collected proof surface next to the curated challenge corpora.
+- Shared benchmark accounting now exposes `correct_abstention_rate` explicitly; the older `abstention_accuracy` field is retained only as a backward-compatible alias and now means correct abstention on expected-abstain cases rather than all abstentions.
 - The new OKR and research alignment notes capture the claim-coverage pivot and the supporting graph/noise-control rationale.
 - Seed batch 4 extends the replay expansion into a cross-city, abstention-heavy California tranche.
 - Seed batch 5 extends the replay expansion into a cross-city national tranche while keeping the answerable/abstain balance visible.

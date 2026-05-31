@@ -1,0 +1,3188 @@
+{
+  "episodes": [
+    {
+      "attribute": "phone",
+      "case_id": "abbott-square-host-phone-ambiguous",
+      "case_type": "HOST_PAGE_PHONE_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "831-429-1964",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v9",
+      "place": {
+        "base_phone": "831-429-1954",
+        "city": "Santa Cruz",
+        "current_phone": "831-429-1964",
+        "name": "Abbott Square Market",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.2,
+              "notes": "Host museum page lists MAH contact and fax numbers; it does not clearly prove an Abbott Square Market primary phone.",
+              "page_text": "Abbott Square\nThe MAH's outdoor public plaza is home to Abbott Square Market which boasts seven restaurants and two bars.\nAbbott Square Market\n705 Front St. Downtown Santa Cruz, CA 95060\nTax ID 94-2718861\n(831) 429-1964\n(831) 429-1954 (Fax)\ninfo@santacruzmah.org",
+              "recency_days": 1,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Abbott Square | MAH",
+              "url": "https://www.santacruzmah.org/abbott-square",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzmah.org/abbott-square \"Abbott Square Market\" phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "bookshop-address-vs-offsite-event-location",
+      "case_type": "OFFICIAL_ADDRESS_VS_OFFSITE_EVENT",
+      "expected_abstain": false,
+      "expected_decision": "1520 Pacific Ave, Santa Cruz, CA 95060",
+      "gold_value": "1520 Pacific Ave, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v8",
+      "place": {
+        "base_address": "1205 Soquel Avenue, Santa Cruz, CA 95062",
+        "city": "Santa Cruz",
+        "current_address": "1520 Pacific Ave, Santa Cruz, CA 95060",
+        "name": "Bookshop Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official home page includes offsite event venues; Connect footer contains the bookstore address.",
+              "page_text": "Bookshop Santa Cruz\nUpcoming Events\nOFFSITE EVENT: George Saunders, Vigil\nThe Rio Theatre\n1205 Soquel Avenue\nSanta Cruz, CA 95060\nTICKETS\nConnect\nBookshop Santa Cruz\n1520 Pacific Ave\nSanta Cruz, CA 95060-3903\n(831) 423-0900",
+              "recency_days": 90,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Home Page | Bookshop Santa Cruz",
+              "url": "https://bookshopsantacruz.com/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:bookshopsantacruz.com \"Bookshop Santa Cruz\" \"1520 Pacific Ave\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "ca-seed3-address-registry",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "211 Alvarado St, Monterey, CA 93940",
+      "gold_value": "211 Alvarado St, Monterey, CA 93940",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "name": "Monterey Arts Annex",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "211 Alvarado St, Monterey, CA 93940"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address.",
+              "page_text": "211 Alvarado St, Monterey, CA 93940",
+              "recency_days": 10,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://monterey.example.gov/business/arts-annex",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Monterey Arts Annex address registry"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed3-branch-ambiguity-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "current_phone": "8315557700",
+        "name": "Monterey Bay Library Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branch phones on the same page; branch selection should abstain without stronger context.",
+              "page_text": "Downtown branch\nSeaside branch\nDel Rey Oaks branch",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Monterey Bay Library",
+              "url": "https://www.montereylibrary.example.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Monterey Bay Library branch phones"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed3-phone-direct",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "8315554400",
+      "gold_value": "8315554400",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Carmel-by-the-Sea",
+        "current_phone": "8315554400",
+        "name": "Carmel Coffee Co.",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "8315554400"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line.",
+              "page_text": "Call us at (831) 555-4400.",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Carmel Coffee Co.",
+              "url": "https://www.carmelcoffee.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Carmel Coffee Co phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed3-wrong-entity-phone-abstain",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v3",
+      "place": {
+        "city": "Monterey",
+        "current_phone": "8315558800",
+        "name": "Monterey Harbor Office",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.8,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone.",
+              "page_text": "Harbor Office, wrong tenant, suite B only.",
+              "recency_days": 12,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Tenant Directory",
+              "url": "https://www.montereyharbor.example.com/tenant-directory",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Monterey Harbor Office wrong tenant phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "ca-seed4-address-registry",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "400 Capitol Mall, Sacramento, CA 95814",
+      "gold_value": "400 Capitol Mall, Sacramento, CA 95814",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Sacramento",
+        "name": "Capitol Theater Sacramento",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "400 Capitol Mall, Sacramento, CA 95814"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the venue address.",
+              "page_text": "400 Capitol Mall, Sacramento, CA 95814",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://sacramento.example.gov/business/capitol-theater",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Capitol Theater Sacramento address registry"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed4-branch-ambiguity-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Los Angeles",
+        "current_phone": "2135557700",
+        "name": "Los Angeles Downtown Library Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branches without exposing a unique phone in the text.",
+              "page_text": "Downtown branch\nWestwood branch\nHollywood branch",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Los Angeles Library",
+              "url": "https://www.lalibrary.example.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Los Angeles Downtown Library branch phones"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed4-phone-direct",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "6195551234",
+      "gold_value": "6195551234",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "San Diego",
+        "current_phone": "6195551234",
+        "name": "Mission Coffee Roasters",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "6195551234"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line.",
+              "page_text": "Call us at (619) 555-1234.",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Mission Coffee Roasters",
+              "url": "https://www.missioncoffee.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Mission Coffee Roasters phone San Diego"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "ca-seed4-wrong-entity-phone-abstain",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "california_seed_batch_v4",
+      "place": {
+        "city": "Anaheim",
+        "current_phone": "7145556600",
+        "name": "Anaheim Harbor Office",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.8,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone.",
+              "page_text": "Harbor Office, wrong tenant, suite B only.",
+              "recency_days": 12,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Tenant Directory",
+              "url": "https://www.anaheimharbor.example.com/tenant-directory",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Anaheim Harbor Office wrong tenant phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "cat-cloud-abbott-address-vs-swift",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "725 Front St, Santa Cruz, CA 95060",
+      "gold_value": "725 Front St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_address": "1101 Swift St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "725 Front St, Santa Cruz, CA 95060",
+        "name": "Cat & Cloud Coffee Abbott Square",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several cafes; Abbott Square address must be selected by branch context.",
+              "page_text": "Locations\nSwift Street\n1101 Swift St\nSanta Cruz, CA 95060\nPortola\n3600 Portola Dr\nSanta Cruz, CA 95062\nAbbott Square\n725 Front St\nSanta Cruz, CA 95060",
+              "recency_days": 6,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Locations - Cat & Cloud Coffee",
+              "url": "https://catandcloud.com/pages/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:catandcloud.com \"Abbott Square\" \"725 Front\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "cat-cloud-swift-address-vs-portola",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "1101 Swift St, Santa Cruz, CA 95060",
+      "gold_value": "1101 Swift St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_address": "3600 Portola Dr, Santa Cruz, CA 95062",
+        "city": "Santa Cruz",
+        "current_address": "1101 Swift St, Santa Cruz, CA 95060",
+        "name": "Cat & Cloud Coffee Swift Street",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several Santa Cruz cafes; Swift Street address must be selected by branch context.",
+              "page_text": "Locations\nSwift Street\n1101 Swift St\nSanta Cruz, CA 95060\nPortola\n3600 Portola Dr\nSanta Cruz, CA 95062\nAbbott Square\n725 Front St\nSanta Cruz, CA 95060",
+              "recency_days": 6,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Locations - Cat & Cloud Coffee",
+              "url": "https://catandcloud.com/pages/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:catandcloud.com \"Swift Street\" \"1101 Swift\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "city-clerk-primary-phone-vs-direct-and-fax",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_DIRECT",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5030",
+      "gold_value": "831-420-5030",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v4",
+      "place": {
+        "base_phone": "831-420-5035",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5030",
+        "name": "Santa Cruz City Clerk",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government department page includes a named clerk direct line, main phone, fax, and city footer phone; the primary Phone label should win without prefilled extraction.",
+              "page_text": "City Clerk\nContact Information\nBonnie Bush, CMC\nCity Clerk\n831-420-5035\nbbush@santacruzca.gov\nPhone\n831-420-5030\nFax\n831-420-5031\nLocation\n809 Center Street, Room 8\nSanta Cruz, CA 95060\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 4,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "City Clerk - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/City-Clerk \"Phone\" \"831-420-5030\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "city-manager-primary-phone-vs-relay-fax-footer",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_RELAY_FAX_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5010",
+      "gold_value": "831-420-5010",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_phone": "831-420-5040",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5010",
+        "name": "Santa Cruz City Manager",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government department page includes primary phone, TTY/relay instructions, fax, and the generic city footer phone; the department primary phone should win without prefilled extraction.",
+              "page_text": "City Manager\nContact Us\nPhone\n831-420-5010\nTYY\nHearing-impaired individuals should contact California Relay Service at 1-800-735-2929, then 831-420-5040.\nFax\n831-420-5011\nLocation\n809 Center Street, Room 10\nSanta Cruz, CA 95060\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "City Manager - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/government/city-departments/city-manager",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/government/city-departments/city-manager \"Phone\" \"831-420-5010\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "address",
+      "case_id": "hard-address-1",
+      "gold_value": "123 Main St, Santa Cruz, CA 95060",
+      "place": {
+        "address": "99 Old Rd, Santa Cruz, CA",
+        "base_value": "88 Base Rd, Santa Cruz, CA",
+        "current_value": "99 Old Rd, Santa Cruz, CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Registry page lists the new address.",
+              "page_text": "123 Main St, Santa Cruz, CA 95060",
+              "recency_days": 20,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://city.example.gov/business/shop-example",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Shop Example address"
+        }
+      ]
+    },
+    {
+      "attribute": "phone",
+      "case_id": "hard-branch-ambiguity",
+      "expected_abstain": true,
+      "gold_value": "",
+      "place": {
+        "base_value": "510-555-3434",
+        "current_value": "510-555-1212",
+        "phone": "510-555-1212"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Berkeley branch contact page.",
+              "page_text": "Berkeley branch: (510) 555-3434",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Berkeley Shop Example",
+              "url": "https://chain.example/berkeley/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example Berkeley branch phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Oakland branch contact page.",
+              "page_text": "Oakland branch: (510) 555-1212",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Oakland Shop Example",
+              "url": "https://chain.example/oakland/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example Oakland branch phone"
+        }
+      ]
+    },
+    {
+      "attribute": "phone",
+      "case_id": "hard-branch-ambiguity-phone",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "place": {
+        "base_value": "510-555-3434",
+        "current_value": "510-555-1212",
+        "phone": "510-555-1212"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Berkeley branch contact page.",
+              "page_text": "Berkeley branch: (510) 555-3434",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Berkeley Shop Example",
+              "url": "https://chain.example/berkeley/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example Berkeley branch phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Oakland branch contact page.",
+              "page_text": "Oakland branch: (510) 555-1212",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Oakland Shop Example",
+              "url": "https://chain.example/oakland/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example Oakland branch phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "hard-osm-address",
+      "gold_value": "120 Main St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "place": {
+        "address": "120 Main St",
+        "base_value": "118 Main St",
+        "current_value": "120 Main St"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "120 Main St, Santa Cruz, CA 95060"
+              },
+              "identity_change_score": 0.0,
+              "notes": "OSM corroborates the street address.",
+              "page_text": "OpenStreetMap lists 120 Main St, Santa Cruz, CA 95060.",
+              "recency_days": 12,
+              "source_family_id": "",
+              "source_type": "osm",
+              "title": "OpenStreetMap Shop Example",
+              "url": "https://www.openstreetmap.org/node/123",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example OSM address"
+        }
+      ],
+      "truth_source_type": "osm"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "hard-phone-1",
+      "gold_value": "+1 (415) 555-1212",
+      "place": {
+        "base_value": "415-555-8888",
+        "current_value": "415-555-9999",
+        "phone": "415-555-9999"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Contact page lists phone in text.",
+              "page_text": "Call us at (415) 555-1212.",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Shop Example",
+              "url": "https://shop.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example phone"
+        }
+      ]
+    },
+    {
+      "attribute": "phone",
+      "case_id": "hard-phone-ambiguous",
+      "gold_value": "4155551212",
+      "place": {
+        "base_value": "415-555-6666",
+        "current_value": "415-555-7777",
+        "phone": "415-555-7777"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Branch page conflicts with contact page.",
+              "page_text": "Branch line: (415) 555-3434",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Shop Example Branch",
+              "url": "https://shop.example.com/branch",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example branch phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official contact page lists one phone.",
+              "page_text": "Call us at (415) 555-1212.",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Shop Example",
+              "url": "https://shop.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Shop Example phone"
+        }
+      ]
+    },
+    {
+      "attribute": "phone",
+      "case_id": "mah-primary-phone-vs-fax",
+      "case_type": "OFFICIAL_PHONE_VS_FAX",
+      "expected_abstain": false,
+      "expected_decision": "831-429-1964",
+      "gold_value": "831-429-1964",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v4",
+      "place": {
+        "base_phone": "831-429-1954",
+        "city": "Santa Cruz",
+        "current_phone": "831-429-1964",
+        "name": "Santa Cruz Museum of Art & History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official MAH visit page lists public phone and fax; public phone should win without prefilled extraction.",
+              "page_text": "Visit the MAH\nThe MAH\n705 Front St. Downtown Santa Cruz, CA 95060\nOpen\nMon 9AM-1PM\nThu-Fri 12-8pm\nSat-Sun 12-6PM\nTax ID 94-2718861\n(831) 429-1964\n(831) 429-1954 (Fax)\ninfo@santacruzmah.org",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Visit the MAH",
+              "url": "https://www.santacruzmah.org/visit",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzmah.org/visit \"831-429-1964\" \"Fax\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "norris-center-vs-staff-phone",
+      "case_type": "OFFICIAL_PAGE_VS_STAFF_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "831-459-4763",
+      "gold_value": "831-459-4763",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-459-5017",
+        "city": "Santa Cruz",
+        "current_phone": "831-459-4763",
+        "name": "UC Santa Cruz Norris Center for Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.25,
+              "notes": "Staff profile page has a different staff phone and should not override the center contact page.",
+              "page_text": "Staff & Affiliates\nPhone: 831-459-5017\nRoom: Natural Sciences 2, Room 239\nStaff profile and affiliate contact details.",
+              "recency_days": 18,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Staff & Affiliates - Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/staff-affiliates/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:norriscenter.ucsc.edu staff affiliates phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-459-4763"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official Norris Center contact page.",
+              "page_text": "Contact Us\nVisit Us\nNatural Sciences Building\nRoom 239\n1156 High St\nSanta Cruz, CA 95064\nContact Info\nEmail: norriscenter@ucsc.edu\nPhone: (831) 459-4763",
+              "recency_days": 6,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us - Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:norriscenter.ucsc.edu contact phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "osm-corroborated-address",
+      "case_type": "OSM_CORROBORATION",
+      "expected_abstain": false,
+      "expected_decision": "123 Main St, Oakland, CA 94607",
+      "gold_value": "123 Main St, Oakland, CA 94607",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "hard PAC fixture",
+      "place": {
+        "city": "Oakland",
+        "name": "PAC osm-corroborated-address",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "truth",
+              "extracted_values": {
+                "address": "123 Main St, Oakland, CA 94607"
+              },
+              "identity_change_score": 0.0,
+              "notes": "",
+              "page_text": "OpenStreetMap lists 123 Main St, Oakland, CA 94607.",
+              "recency_days": 14,
+              "source_family_id": "osm:openstreetmap.org",
+              "source_type": "osm",
+              "title": "osm address",
+              "url": "https://www.openstreetmap.org/node/42",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"PAC osm-corroborated-address\" osm address"
+        }
+      ],
+      "truth_source_type": "osm"
+    },
+    {
+      "attribute": "address",
+      "case_id": "parks-recreation-address-vs-city-footer",
+      "case_type": "GOVERNMENT_DEPARTMENT_ADDRESS_VS_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "323 Church Street, Santa Cruz, CA 95060",
+      "gold_value": "323 Church Street, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_address": "809 Center St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "323 Church Street, Santa Cruz, CA 95060",
+        "name": "Santa Cruz Parks and Recreation Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government parks page has department location and city-wide footer location on the same page; department location should win.",
+              "page_text": "Parks & Recreation\nPhone\n831-420-5270\nFax\n831-420-5271\nEmail\nparksandrec@santacruzca.gov\nLocation\n323 Church Street\nSanta Cruz, CA 95060\nHours\nMonday - Friday\n8 a.m. - Noon\n1 p.m. - 5 p.m.\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Parks & Recreation - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation \"323 Church Street\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "parks-recreation-primary-phone-vs-fax-footer",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_FAX_SOCIAL_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5270",
+      "gold_value": "831-420-5270",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_phone": "831-420-5271",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5270",
+        "name": "Santa Cruz Parks and Recreation Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government parks page lists director/staff names, department phone, fax, social handles, location, and generic footer phone; the labeled department phone should win.",
+              "page_text": "Parks & Recreation\nStaff\nTony Elliot\nDirector of Parks & Recreation\nMike Godsy\nSuperintendent of Parks\nPhone\n831-420-5270\nFax\n831-420-5271\nEmail\nparksandrec@santacruzca.gov\nLocation\n323 Church Street\nSanta Cruz, CA 95060\nFollow Us!\nFacebook\n@CityofSantaCruzParksandRecreation\nInstagram\n@SantaCruzParksRec\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Parks & Recreation - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Parks-Recreation",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Parks-Recreation \"Phone\" \"831-420-5270\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "address",
+      "case_id": "penny-downtown-address-vs-pleasure-point",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "913 Cedar St, Santa Cruz, CA 95060",
+      "gold_value": "913 Cedar St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_address": "820 41st Ave, Santa Cruz, CA 95062",
+        "city": "Santa Cruz",
+        "current_address": "913 Cedar St, Santa Cruz, CA 95060",
+        "name": "The Penny Ice Creamery Downtown Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several branches; Downtown Santa Cruz address must be selected by branch context.",
+              "page_text": "Locations\nDowntown Santa Cruz\n913 Cedar St\nSanta Cruz, CA 95060\n(831) 204-2523\nPleasure Point\n820 41st Ave\nSanta Cruz, CA 95062\nCapitola\n1441 41st Ave\nCapitola, CA 95010",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Locations - The Penny Ice Creamery",
+              "url": "https://www.thepennyicecreamery.com/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:thepennyicecreamery.com \"Downtown Santa Cruz\" \"913 Cedar\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "penny-pleasure-point-address-vs-downtown",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "820 41st Ave, Santa Cruz, CA 95062",
+      "gold_value": "820 41st Ave, Santa Cruz, CA 95062",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_address": "913 Cedar St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "820 41st Ave, Santa Cruz, CA 95062",
+        "name": "The Penny Ice Creamery Pleasure Point",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several branches; Pleasure Point address must be selected by branch context.",
+              "page_text": "Locations\nDowntown Santa Cruz\n913 Cedar St\nSanta Cruz, CA 95060\n(831) 204-2523\nPleasure Point\n820 41st Ave\nSanta Cruz, CA 95062\nCapitola\n1441 41st Ave\nCapitola, CA 95010",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Locations - The Penny Ice Creamery",
+              "url": "https://www.thepennyicecreamery.com/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:thepennyicecreamery.com \"Pleasure Point\" \"820 41st Ave\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "police-primary-phone-vs-emergency-service-lines",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_SERVICE_LINES",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5800",
+      "gold_value": "831-420-5800",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v4",
+      "place": {
+        "base_phone": "831-471-1131",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5800",
+        "name": "Santa Cruz Police Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government police page lists primary phone, emergency, non-emergency, tip, records, property, and city footer numbers; primary contact phone should win.",
+              "page_text": "Police\nWelcome to the Santa Cruz Police Department's web page.\nContact Us\nPhone\n831-420-5800\nEmergency\n911\nNon-Emergency\n831-471-1131\nAnonymous Tip Line\n831-420-5995\nLocation\n155 Center Street\nSanta Cruz, CA 95060\nRecords Section\n831-420-5870\nProperty Section\n831-420-5900\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 4,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Police - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Police",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Police \"Phone\" \"831-420-5800\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "address",
+      "case_id": "public-works-room-address-vs-city-footer",
+      "case_type": "GOVERNMENT_ROOM_ADDRESS_VS_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "809 Center Street, Room 201, Santa Cruz, CA 95060",
+      "gold_value": "809 Center Street, Room 201, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v4",
+      "place": {
+        "base_address": "809 Center St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "809 Center Street, Room 201, Santa Cruz, CA 95060",
+        "name": "Santa Cruz Public Works",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government department page has a department-specific room address and a generic city footer address; room-specific address should win.",
+              "page_text": "Public Works\nAbout\nPublic Works provides the City of Santa Cruz with engineering design, traffic engineering, street maintenance, resource recovery, wastewater, flood control, and parking control.\nContact Public Works\nPhone\n831-420-5160\nEmail\ncitypw@santacruzca.gov\nFax\n831-420-5161\nLocation\n809 Center Street, Room 201\nSanta Cruz, CA 95060\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 4,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Public Works - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Public-Works",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Public-Works \"809 Center Street, Room 201\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "registrar-archive-stale-phone",
+      "case_type": "OFFICIAL_CURRENT_ARCHIVE_STALE",
+      "expected_abstain": false,
+      "expected_decision": "831-459-4412",
+      "gold_value": "831-459-4412",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-459-2868",
+        "city": "Santa Cruz",
+        "current_phone": "831-459-4412",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.2,
+              "notes": "Archived registrar catalog page; stale source for live contact phone.",
+              "page_text": "Archived catalog page. For further information, call (831) 459-2868, visit the web site mep.soe.ucsc.edu, or drop by. Applications for undergraduates are available from the Office of the Registrar, 190 Hahn Student Services. For more information, call (831) 459-4412 or e-mail registrar@ucsc.edu.",
+              "recency_days": 4000,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Search Registrar archive",
+              "url": "https://registrar.ucsc.edu/catalog/archive/09-10/2009-10updates.pdf",
+              "zombie_score": 0.9
+            }
+          ],
+          "layer": "freshness",
+          "query": "site:registrar.ucsc.edu archive registrar 2009 phone"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-459-4412"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Current official registrar contact page.",
+              "page_text": "Contact Information Office of the Registrar\nPhone 831-459-4412\nFax 831-459-5051\nOffice Address\nOffice of the Registrar\n190 Hahn Student Services\nUniversity of California, Santa Cruz\nSanta Cruz, CA 95064",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Information - Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu contact registrar phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "registrar-office-vs-mailing-address",
+      "case_type": "OFFICIAL_LOCATION_VS_MAILING_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "190 Hahn Student Services Building",
+      "gold_value": "190 Hahn Student Services Building",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v2",
+      "place": {
+        "base_address": "188 Unknown Road, Santa Cruz, CA",
+        "city": "Santa Cruz",
+        "current_address": "190 Hahn Student Services Building",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official registrar page contains both office location and mailing address; office location should win for the POI address.",
+              "page_text": "Contact Information\nOffice of the Registrar\nGeneral Inquiries\n831-459-4412\nOffice Location & Open Hours\nLocation\n190 Hahn Student Services Building\nMailing Address\nOffice of the Registrar\nUniversity of California, Santa Cruz\n1156 High Street\nSanta Cruz, CA 95064\nFax\n831-459-5051",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Information - Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-information/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu/about/contact-information \"190 Hahn Student Services\" \"1156 High Street\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "registrar-phone-with-fax",
+      "case_type": "OFFICIAL_CONTACT_WITH_NON_PRIMARY_PHONE",
+      "expected_abstain": false,
+      "expected_decision": "831-459-4412",
+      "gold_value": "831-459-4412",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-459-5051",
+        "city": "Santa Cruz",
+        "current_phone": "831-459-4412",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-459-4412"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official registrar contact page includes both phone and fax; extracted primary phone must win.",
+              "page_text": "Contact Information Office of the Registrar\nPhone 831-459-4412\nFax 831-459-5051\nOffice Address\nOffice of the Registrar\n190 Hahn Student Services\nUniversity of California, Santa Cruz\nSanta Cruz, CA 95064\nMailing Address\nOffice of the Registrar\nUniversity of California, Santa Cruz\n1156 High Street\nSanta Cruz, CA 95064",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Information - Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu contact registrar phone fax"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "saturn-cafe-closed-phone-abstain",
+      "case_type": "CLOSED_STATUS_PHONE_ABSTAIN",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "CLOSED_OR_STALE",
+      "label_origin": "authoritative_santa_cruz_challenge_v10",
+      "place": {
+        "base_phone": "831-555-0102",
+        "city": "Santa Cruz",
+        "current_phone": "831-555-0101",
+        "name": "Saturn Cafe Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.6,
+              "notes": "Aggregator closed-listing evidence should not produce a confident current phone decision.",
+              "page_text": "Saturn Cafe\nSanta Cruz, CA\nThis listing is closed or no longer active.\nFormer business listing phone: 831-555-0101",
+              "recency_days": 900,
+              "source_family_id": "",
+              "source_type": "aggregator",
+              "title": "Saturn Cafe - Santa Cruz, CA",
+              "url": "https://www.mapquest.com/us/california/saturn-cafe-12038812",
+              "zombie_score": 0.9
+            }
+          ],
+          "layer": "freshness",
+          "query": "\"Saturn Cafe\" \"Santa Cruz\" permanently closed phone"
+        }
+      ],
+      "truth_source_type": "aggregator"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-city-clerk-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "809 Center Street, Room 8, Santa Cruz, CA 95060",
+        "reason": "Official contact page exposes the direct address; the fallback page is broader and does not provide the target address.",
+        "selected_source_type": "government",
+        "selected_url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk"
+      },
+      "gold_value": "809 Center Street, Room 8, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "City Clerk",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader city department page without city clerk contact details.",
+              "page_text": "Location and contact information for planning and community development, including a different room number and department phone numbers.",
+              "recency_days": 30,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "About & Contact Us | City of Santa Cruz",
+              "url": "https://www.cityofsantacruz.com/government/city-departments/planning-and-community-development/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:cityofsantacruz.com Santa Cruz department contact"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "809 Center Street, Room 8, Santa Cruz, CA 95060"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official city clerk contact page.",
+              "page_text": "Contact information for the City Clerk. Bonnie Bush, CMC. Phone 831-420-5030. Location 809 Center Street, Room 8, Santa Cruz, CA 95060.",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "City Clerk | City of Santa Cruz, CA",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"City Clerk\" \"809 Center Street\" \"Santa Cruz\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-city-clerk-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-420-5030",
+        "reason": "Official contact page exposes the direct phone number; the fallback page is broader and does not provide the target phone.",
+        "selected_source_type": "government",
+        "selected_url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk"
+      },
+      "gold_value": "831-420-5030",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "City Clerk",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader city department page without city clerk contact details.",
+              "page_text": "Location and contact information for planning and community development, including a different room number and department phone numbers.",
+              "recency_days": 30,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "About & Contact Us | City of Santa Cruz",
+              "url": "https://www.cityofsantacruz.com/government/city-departments/planning-and-community-development/about",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:cityofsantacruz.com Santa Cruz department contact"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-420-5030"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official city clerk contact page.",
+              "page_text": "Contact information for the City Clerk. Bonnie Bush, CMC. Phone 831-420-5030. Location 809 Center Street, Room 8, Santa Cruz, CA 95060.",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "City Clerk | City of Santa Cruz, CA",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/City-Clerk",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"City Clerk\" \"831-420-5030\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-history-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "1156 High Street, Santa Cruz, CA 95064",
+        "reason": "Official department contact page exposes the mailing address; the broader about page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://history.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "1156 High Street, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz History Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader department overview without mailing details.",
+              "page_text": "Department overview without the mailing address.",
+              "recency_days": 35,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "About the Department \u2013 History",
+              "url": "https://history.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:history.ucsc.edu history department overview"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "1156 High Street, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official department contact page.",
+              "page_text": "Mailing Address UC Santa Cruz Department of History 1156 High Street Santa Cruz, CA 95064.",
+              "recency_days": 21,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 History",
+              "url": "https://history.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:history.ucsc.edu \"1156 High Street\" history department"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-history-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-3701",
+        "reason": "Official department contact page exposes the direct phone number; the broader about page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://history.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "831-459-3701",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz History Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader department overview without direct phone.",
+              "page_text": "About the Department. The department overview page lists academic information but not the direct phone number.",
+              "recency_days": 35,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "About the Department \u2013 History",
+              "url": "https://history.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:history.ucsc.edu faculty history department"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-459-3701"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official department contact page.",
+              "page_text": "Telephone (831) 459-3701. Mailing address UC Santa Cruz Department of History 1156 High Street Santa Cruz, CA 95064.",
+              "recency_days": 21,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 History",
+              "url": "https://history.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:history.ucsc.edu \"History Department\" phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-lss-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "221 Academic Resource Center (ARCenter), University of California, Santa Cruz, 1156 High Street, Santa Cruz, CA 95064",
+        "reason": "Official LSS contact page exposes the mailing address; the overview page does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://lss.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "221 Academic Resource Center (ARCenter), University of California, Santa Cruz, 1156 High Street, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Learning Support Services",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader LSS overview without the mailing address.",
+              "page_text": "Program overview and values.",
+              "recency_days": 29,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Learning Support Services - UCSC's Undergraduate Tutoring and Learning Center",
+              "url": "https://lss.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:lss.ucsc.edu about tutoring"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "221 Academic Resource Center (ARCenter), University of California, Santa Cruz, 1156 High Street, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official LSS contact page.",
+              "page_text": "Office Location Academic Resource Center ARCenter Room 221. Mailing address 221 Academic Resource Center ARCenter University of California, Santa Cruz 1156 High Street Santa Cruz, CA 95064.",
+              "recency_days": 11,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Come Visit & Contact Us",
+              "url": "https://lss.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:lss.ucsc.edu ARCenter address"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-lss-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-4333",
+        "reason": "Official LSS contact page exposes the direct phone number; the overview page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://lss.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "831-459-4333",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Learning Support Services",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader LSS overview without direct phone.",
+              "page_text": "Program overview and support philosophy.",
+              "recency_days": 29,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Learning Support Services - UCSC's Undergraduate Tutoring and Learning Center",
+              "url": "https://lss.ucsc.edu/about/index.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:lss.ucsc.edu tutoring center overview"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831.459.4333"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official LSS contact page.",
+              "page_text": "Front Desk Phone 831.459.4333. General email lss@ucsc.edu.",
+              "recency_days": 11,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Come Visit & Contact Us",
+              "url": "https://lss.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:lss.ucsc.edu front desk phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-museum-natural-history-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "1305 E Cliff Dr, Santa Cruz, CA 95062",
+        "reason": "Official contact page exposes the direct address; the fallback page is broader and does not provide the target address.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://santacruzmuseum.org/contact-us/"
+      },
+      "gold_value": "1305 E Cliff Dr, Santa Cruz, CA 95062",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Historical overview page without current contact details.",
+              "page_text": "Museum history page describing the first public museum in Santa Cruz and the museum's evolution over time.",
+              "recency_days": 21,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Museum History - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/about/museum-history/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzmuseum.org museum history"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "1305 E Cliff Dr, Santa Cruz, CA 95062"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official museum contact page.",
+              "page_text": "General museum info. (831) 420-6115. 1305 E Cliff Dr, Santa Cruz, CA 95062.",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Santa Cruz Museum of Natural History\" \"1305 E Cliff Dr\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-museum-natural-history-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-420-6115",
+        "reason": "Official contact page exposes the direct phone number; the fallback page is broader and does not provide the target phone.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://santacruzmuseum.org/contact-us/"
+      },
+      "gold_value": "831-420-6115",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Museum of Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Historical overview page without current contact details.",
+              "page_text": "Museum history page describing the first public museum in Santa Cruz and the museum's evolution over time.",
+              "recency_days": 21,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Museum History - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/about/museum-history/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzmuseum.org museum history"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-420-6115"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official museum contact page.",
+              "page_text": "General museum info. (831) 420-6115. 1305 E Cliff Dr, Santa Cruz, CA 95062.",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Museum of Natural History",
+              "url": "https://santacruzmuseum.org/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Santa Cruz Museum of Natural History\" \"420-6115\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-norris-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "Room 239, Natural Sciences 2 Building, University of California, Santa Cruz, 1156 High St, Santa Cruz, CA 95064",
+        "reason": "Official Norris Center contact page exposes the location; the staff page does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://norriscenter.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "Room 239, Natural Sciences 2 Building, University of California, Santa Cruz, 1156 High St, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Norris Center for Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader staff page without the address.",
+              "page_text": "Staff and affiliates overview with bios and email contacts.",
+              "recency_days": 18,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Staff & Affiliates \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/staff-affiliates/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:norriscenter.ucsc.edu history"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "Room 239, Natural Sciences 2 Building, University of California, Santa Cruz, 1156 High St, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official Norris Center contact page.",
+              "page_text": "Location Room 239 in the Natural Sciences 2 building at UC Santa Cruz. Phone (831) 459-4763.",
+              "recency_days": 6,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:norriscenter.ucsc.edu location room 239"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-norris-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-4763",
+        "reason": "Official Norris Center contact page exposes the direct phone number; the staff page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://norriscenter.ucsc.edu/about/contact-us/"
+      },
+      "gold_value": "831-459-4763",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Norris Center for Natural History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader staff page without the phone number.",
+              "page_text": "Staff and affiliates overview with bios and email contacts.",
+              "recency_days": 18,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Staff & Affiliates \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/staff-affiliates/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:norriscenter.ucsc.edu about staff affiliates"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-459-4763"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official Norris Center contact page.",
+              "page_text": "Phone (831) 459-4763. Location Room 239 in the Natural Sciences 2 building at UC Santa Cruz.",
+              "recency_days": 6,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us \u2013 Kenneth S. Norris Center for Natural History",
+              "url": "https://norriscenter.ucsc.edu/about/contact-us/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:norriscenter.ucsc.edu phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-registrar-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "190 Hahn Student Services, University of California, Santa Cruz, Santa Cruz, CA 95064",
+        "reason": "Official registrar contact page exposes the office address; the staff directory does not override it.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://registrar.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "190 Hahn Student Services, University of California, Santa Cruz, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader staff directory without the office address.",
+              "page_text": "Staff directory listing with email contacts and roles.",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Staff Directory \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/staff-directory/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:registrar.ucsc.edu staff directory"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "190 Hahn Student Services, University of California, Santa Cruz, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official registrar contact page.",
+              "page_text": "Office address 190 Hahn Student Services University of California, Santa Cruz Santa Cruz, CA 95064.",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Information \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu \"190 Hahn Student Services\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-registrar-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-4412",
+        "reason": "Official registrar contact page exposes the direct phone number; the mission page does not.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://registrar.ucsc.edu/about/contact-us.html"
+      },
+      "gold_value": "831-459-4412",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "UC Santa Cruz Office of the Registrar",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Broader mission page without direct phone.",
+              "page_text": "Mission statement and support goals.",
+              "recency_days": 28,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Our Mission \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/our-mission/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:registrar.ucsc.edu about registrar"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-459-4412"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official registrar contact page.",
+              "page_text": "Phone 831-459-4412. Office address 190 Hahn Student Services University of California, Santa Cruz Santa Cruz, CA 95064.",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Information \u2013 Office of the Registrar",
+              "url": "https://registrar.ucsc.edu/about/contact-us.html",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:registrar.ucsc.edu registrar phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-scipp-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "1156 High Street, Santa Cruz, CA 95064",
+        "reason": "Official contact page exposes the direct address; the fallback page is broader and does not provide the target address.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://scipp.ucsc.edu/about/contact-visitor-information/"
+      },
+      "gold_value": "1156 High Street, Santa Cruz, CA 95064",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Institute for Particle Physics",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "About page without the contact snippet.",
+              "page_text": "SCIPP about page describing the institute's research mission and the work of its scientific and technical staff.",
+              "recency_days": 18,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "ABOUT \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:scipp.ucsc.edu about"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "1156 High Street, Santa Cruz, CA 95064"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official SCIPP contact and visitor information page.",
+              "page_text": "Contact us. Telephone (831) 459-4842. Physical address: Natural Sciences 2, Room #337, 1156 High Street, Santa Cruz, CA 95064.",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact & Visitor Information \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/contact-visitor-information/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"SCIPP\" \"1156 High Street\" \"Santa Cruz\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-scipp-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-459-4842",
+        "reason": "Official contact page exposes the direct phone number; the fallback page is broader and does not provide the target phone.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://scipp.ucsc.edu/about/contact-visitor-information/"
+      },
+      "gold_value": "831-459-4842",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Institute for Particle Physics",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "About page without the contact snippet.",
+              "page_text": "SCIPP about page describing the institute's research mission and the work of its scientific and technical staff.",
+              "recency_days": 18,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "ABOUT \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:scipp.ucsc.edu about"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-459-4842"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Official SCIPP contact and visitor information page.",
+              "page_text": "Contact us. Telephone (831) 459-4842. Physical address: Natural Sciences 2, Room #337, 1156 High Street, Santa Cruz, CA 95064.",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact & Visitor Information \u2013 Santa Cruz Institute for Particle Physics",
+              "url": "https://scipp.ucsc.edu/about/contact-visitor-information/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"SCIPP\" \"459-4842\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-scpl-downtown-address",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "address",
+        "confidence": 0.97,
+        "decision": "224 Church Street, Santa Cruz, CA 95060",
+        "reason": "Official contact page exposes the direct address; the fallback page is broader and does not provide the target address.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://www.santacruzpl.org/contact/phonelist/"
+      },
+      "gold_value": "224 Church Street, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "System-level planning page without Downtown Branch contact details.",
+              "page_text": "Strategic plan describing mission, vision, values and countywide services for the library system.",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Strategic Plan - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/strategic-plan/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzpl.org strategic plan"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "224 Church Street, Santa Cruz, CA 95060"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Downtown branch contact directory.",
+              "page_text": "Phone & Email Directory. Downtown 831-427-7707. 224 Church Street, Santa Cruz, CA 95060.",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/contact/phonelist/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Downtown\" \"224 Church Street\" \"Santa Cruz\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-scpl-downtown-phone",
+      "final_decision": {
+        "abstained": false,
+        "attribute": "phone",
+        "confidence": 0.97,
+        "decision": "831-427-7707",
+        "reason": "Official contact page exposes the direct phone number; the fallback page is broader and does not provide the target phone.",
+        "selected_source_type": "official_site",
+        "selected_url": "https://www.santacruzpl.org/contact/phonelist/"
+      },
+      "gold_value": "831-427-7707",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "System-level planning page without Downtown Branch contact details.",
+              "page_text": "Strategic plan describing mission, vision, values and countywide services for the library system.",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Strategic Plan - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/strategic-plan/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "fallback",
+          "query": "site:santacruzpl.org strategic plan"
+        },
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-427-7707"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Downtown branch contact directory.",
+              "page_text": "Phone & Email Directory. Downtown 831-427-7707. 224 Church Street, Santa Cruz, CA 95060.",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/contact/phonelist/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "\"Downtown\" \"Santa Cruz Public Libraries\" \"831-427-7707\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-seed-address-registry",
+      "case_type": "registry_page",
+      "expected_abstain": false,
+      "expected_decision": "100 Pacific Ave, Santa Cruz, CA 95060",
+      "gold_value": "100 Pacific Ave, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v1",
+      "place": {
+        "address": "100 Pacific Ave, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "name": "Example Cafe Santa Cruz",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "100 Pacific Ave, Santa Cruz, CA 95060"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address.",
+              "page_text": "100 Pacific Ave, Santa Cruz, CA 95060",
+              "recency_days": 11,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://cityofsantacruz.example.gov/business/example-cafe",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Example Cafe Santa Cruz registry"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-seed-phone-direct",
+      "case_type": "contact_page",
+      "expected_abstain": false,
+      "expected_decision": "8315551212",
+      "gold_value": "8315551212",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v1",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Example Cafe Santa Cruz",
+        "phone": "8315551212",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "8315551212"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line.",
+              "page_text": "Call us at (831) 555-1212.",
+              "recency_days": 4,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Example Cafe",
+              "url": "https://www.examplecafe.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Example Cafe Santa Cruz phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-seed2-branch-ambiguity-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "831-427-7707",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "address": "224 Church Street, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.35,
+              "notes": "Official branch directory lists several branches and phone numbers on the same page; abstention is correct without stronger context.",
+              "page_text": "Library Branches Downtown 224 Church Street Santa Cruz, CA 95060 831-427-7707 Felton 6121 Gushee St. Santa Cruz, CA 95018 831-427-7708 Garfield Park 705 Woodrow Avenue Santa Cruz, CA 95060 831-427-7709",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Santa Cruz Public Libraries Downtown Branch phone ambiguity"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "sc-seed2-libs-branch-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "831-427-7707",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "address": "224 Church Street, Santa Cruz, CA 95060",
+        "base_phone": "831-427-7708",
+        "city": "Santa Cruz",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Branch directory lists multiple phones; abstain until stronger branch-specific context removes the ambiguity.",
+              "page_text": "Library Branches Downtown 224 Church Street Santa Cruz, CA 95060 831-427-7707 Felton 6121 Gushee St. Santa Cruz, CA 95018 831-427-7708 Garfield Park 705 Woodrow Avenue Santa Cruz, CA 95060 831-427-7709",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzpl.org branches Downtown 224 Church Street phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "sc-seed2-museum-address",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "705 Front St, Santa Cruz, CA 95060",
+      "gold_value": "705 Front St, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "santa_cruz_seed_batch_v2",
+      "place": {
+        "city": "Santa Cruz",
+        "name": "Santa Cruz Museum of Art & History",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "705 Front St, Santa Cruz, CA 95060"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Government registry confirms the museum address.",
+              "page_text": "705 Front St, Santa Cruz, CA 95060",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "City Business Registry",
+              "url": "https://cityofsantacruz.example.gov/museum/mah",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Santa Cruz Museum of Art & History address"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "scpl-branch-ambiguous-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "831-427-7707",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-427-7708",
+        "city": "Santa Cruz",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.35,
+              "notes": "Official branch directory lists several branches and phone numbers on the same page; branch-specific selection should abstain without stronger context.",
+              "page_text": "Library Branches\nDowntown\n224 Church Street\nSanta Cruz, CA 95060\n831-427-7707\nFelton\n6121 Gushee St.\nFelton, CA 95018\n831-427-7708\nGarfield Park\n705 Woodrow Avenue\nSanta Cruz, CA 95060\n831-427-7709",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzpl.org branches Downtown Felton Garfield phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "scpl-branch-context-address-no-extracted",
+      "case_type": "BRANCH_CONTEXT_CORROBORATED",
+      "expected_abstain": false,
+      "expected_decision": "224 Church Street, Santa Cruz, CA 95060",
+      "gold_value": "224 Church Street, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v2",
+      "place": {
+        "address": "224 Church Street, Santa Cruz, CA 95060",
+        "base_address": "117 Union Street, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "224 Church Street, Santa Cruz, CA 95060",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official SCPL directory lists several branch addresses; Downtown address in place context corroborates the correct row without prefilled extraction.",
+              "page_text": "Phone & Email Directory\nDowntown\n831-427-7707\n224 Church Street\nSanta Cruz, CA 95060\nFelton\n831-427-7708\n6121 Gushee St.\nFelton, CA 95018\nGarfield Park\n831-427-7709\n705 Woodrow Avenue\nSanta Cruz, CA 95060",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Us - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/contact/phonelist/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzpl.org/contact/phonelist Downtown 224 Church Street Santa Cruz"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "scpl-branch-context-phone-no-extracted",
+      "case_type": "BRANCH_CONTEXT_CORROBORATED",
+      "expected_abstain": false,
+      "expected_decision": "831-427-7707",
+      "gold_value": "831-427-7707",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v2",
+      "place": {
+        "address": "224 Church Street, Santa Cruz, CA 95060",
+        "base_phone": "831-427-7708",
+        "city": "Santa Cruz",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official branch directory lists multiple branch phones; known branch address corroborates the Downtown row without using a prefilled phone extraction.",
+              "page_text": "Library Branches\nDowntown\n224 Church Street\nSanta Cruz, CA 95060\n831-427-7707\nFelton\n6121 Gushee St.\nFelton, CA 95018\n831-427-7708\nGarfield Park\n705 Woodrow Avenue\nSanta Cruz, CA 95060\n831-427-7709",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzpl.org branches Downtown 224 Church Street phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "scpl-branch-specific-phone",
+      "case_type": "OFFICIAL_BRANCH_SPECIFIC",
+      "expected_abstain": false,
+      "expected_decision": "831-427-7707",
+      "gold_value": "831-427-7707",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v1",
+      "place": {
+        "base_phone": "831-427-7708",
+        "city": "Santa Cruz",
+        "current_phone": "831-427-7707",
+        "name": "Santa Cruz Public Libraries Downtown Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "831-427-7707"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Downtown-specific extracted value from the official branch directory.",
+              "page_text": "Library Branches\nDowntown\n224 Church Street\nSanta Cruz, CA 95060\n831-427-7707\nFelton\n6121 Gushee St.\nFelton, CA 95018\n831-427-7708\nGarfield Park\n705 Woodrow Avenue\nSanta Cruz, CA 95060\n831-427-7709",
+              "recency_days": 14,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Santa Cruz Public Libraries",
+              "url": "https://www.santacruzpl.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzpl.org \"Downtown\" \"831-427-7707\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "us-seed5-address-registry",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "1414 Market St, Denver, CO 80202",
+      "gold_value": "1414 Market St, Denver, CO 80202",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Denver",
+        "name": "Civic Glass Denver",
+        "region": "CO"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "1414 Market St, Denver, CO 80202"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address.",
+              "page_text": "1414 Market St, Denver, CO 80202",
+              "recency_days": 8,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://denver.example.gov/business/civic-glass",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Civic Glass Denver address registry"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed5-branch-ambiguity-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Sacramento",
+        "current_phone": "9165557700",
+        "name": "Sacramento Library Branch",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branches without exposing a unique phone in the text.",
+              "page_text": "North branch\nSouth branch\nCentral branch",
+              "recency_days": 9,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Sacramento Library",
+              "url": "https://www.saclibrary.example.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Sacramento Library branch phones"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed5-phone-direct",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "2065558123",
+      "gold_value": "2065558123",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "Seattle",
+        "current_phone": "2065558123",
+        "name": "Rainline Coffee Seattle",
+        "region": "WA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "2065558123"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line.",
+              "page_text": "Call us at (206) 555-8123.",
+              "recency_days": 3,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Rainline Coffee Seattle",
+              "url": "https://www.rainlinecoffee.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Rainline Coffee Seattle phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed5-wrong-entity-phone-abstain",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v5",
+      "place": {
+        "city": "San Francisco",
+        "current_phone": "4155556600",
+        "name": "Bay Harbor Office",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.84,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone.",
+              "page_text": "Bay Harbor Office, wrong tenant, suite B only.",
+              "recency_days": 11,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Tenant Directory",
+              "url": "https://www.bayharbor.example.com/tenant-directory",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Bay Harbor Office wrong tenant phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "us-seed6-address-registry",
+      "case_type": "GOVERNMENT_REGISTRY",
+      "expected_abstain": false,
+      "expected_decision": "88 Elm St, Houston, TX 77002",
+      "gold_value": "88 Elm St, Houston, TX 77002",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Houston",
+        "name": "Bayside Print Houston",
+        "region": "TX"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "address": "88 Elm St, Houston, TX 77002"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Registry page confirms the storefront address.",
+              "page_text": "88 Elm St, Houston, TX 77002",
+              "recency_days": 11,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Business Registry",
+              "url": "https://houston.example.gov/business/bayside-print",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "government",
+          "query": "Bayside Print Houston address registry"
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed6-branch-ambiguity-phone",
+      "case_type": "BRANCH_AMBIGUITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Charlotte",
+        "current_phone": "7045557700",
+        "name": "Charlotte Library Branch",
+        "region": "NC"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.3,
+              "notes": "Branch directory lists multiple branches without exposing a unique phone in the text.",
+              "page_text": "North branch\nSouth branch\nEast branch",
+              "recency_days": 8,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Branch Libraries - Charlotte Library",
+              "url": "https://www.charlottelibrary.example.org/branches/",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Charlotte Library branch phones"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed6-phone-direct",
+      "case_type": "CONTACT_PAGE",
+      "expected_abstain": false,
+      "expected_decision": "4045550188",
+      "gold_value": "4045550188",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Atlanta",
+        "current_phone": "4045550188",
+        "name": "Pine Row Caf\u00e9 Atlanta",
+        "region": "GA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {
+                "phone": "4045550188"
+              },
+              "identity_change_score": 0.0,
+              "notes": "Direct contact page lists the current line.",
+              "page_text": "Call us at (404) 555-0188.",
+              "recency_days": 5,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Contact Pine Row Caf\u00e9 Atlanta",
+              "url": "https://www.pinerowcafe.example.com/contact",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Pine Row Caf\u00e9 Atlanta phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "us-seed6-wrong-entity-phone-abstain",
+      "case_type": "WRONG_ENTITY",
+      "expected_abstain": true,
+      "gold_value": "",
+      "identity_label": "BRANCH_AMBIGUITY",
+      "label_origin": "cross_city_seed_batch_v6",
+      "place": {
+        "city": "Orlando",
+        "current_phone": "4075556600",
+        "name": "Lakeview Office",
+        "region": "FL"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.86,
+              "notes": "Directory page clearly points to a different tenant and should not prove the phone.",
+              "page_text": "Lakeview Office, wrong tenant, suite B only.",
+              "recency_days": 10,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "Tenant Directory",
+              "url": "https://www.lakeview.example.com/tenant-directory",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "Lakeview Office wrong tenant phone"
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "address",
+      "case_id": "verve-pacific-address-vs-other-branches",
+      "case_type": "OFFICIAL_MULTI_BRANCH_ADDRESS",
+      "expected_abstain": false,
+      "expected_decision": "1540 Pacific Ave, Santa Cruz, CA 95060",
+      "gold_value": "1540 Pacific Ave, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v8",
+      "place": {
+        "base_address": "816 41st Ave, Santa Cruz, CA 95062",
+        "city": "Santa Cruz",
+        "current_address": "1540 Pacific Ave, Santa Cruz, CA 95060",
+        "name": "Verve Coffee Roasters Pacific Avenue",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several branches; Pacific Avenue address must be selected by branch context.",
+              "page_text": "santa cruz\nPacific Avenue\n1540 Pacific Ave\nSanta Cruz, CA 95060\nEveryday: 7am - 6pm\n831-471-7726\nMap\norder ahead\n41st Avenue\n816 41st Ave\nSanta Cruz, CA 95062\n831-706-2369\nSeabright\n104 Bronson St Suite 19\nSanta Cruz, CA 95062\n831-216-4448\n1010 Fair\n1010 Fair Ave.\nSanta Cruz, CA 95060\n831-425-5648",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "All Locations | Verve Coffee",
+              "url": "https://www.vervecoffee.com/pages/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:vervecoffee.com/pages/locations \"Pacific Avenue\" \"1540 Pacific Ave\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "verve-pacific-phone-vs-other-branches",
+      "case_type": "OFFICIAL_MULTI_BRANCH_PHONE",
+      "expected_abstain": false,
+      "expected_decision": "8314717726",
+      "gold_value": "831-471-7726",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v8",
+      "place": {
+        "base_phone": "831-706-2369",
+        "city": "Santa Cruz",
+        "current_address": "1540 Pacific Ave, Santa Cruz, CA 95060",
+        "current_phone": "831-471-7726",
+        "name": "Verve Coffee Roasters Pacific Avenue",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Official locations page lists several Santa Cruz branches; Pacific Avenue phone must be selected by branch/address context.",
+              "page_text": "santa cruz\nPacific Avenue\n1540 Pacific Ave\nSanta Cruz, CA 95060\nEveryday: 7am - 6pm\n831-471-7726\nMap\norder ahead\n41st Avenue\n816 41st Ave\nSanta Cruz, CA 95062\n831-706-2369\nSeabright\n104 Bronson St Suite 19\nSanta Cruz, CA 95062\n831-216-4448\n1010 Fair\n1010 Fair Ave.\nSanta Cruz, CA 95060\n831-425-5648",
+              "recency_days": 2,
+              "source_family_id": "",
+              "source_type": "official_site",
+              "title": "All Locations | Verve Coffee",
+              "url": "https://www.vervecoffee.com/pages/locations",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:vervecoffee.com/pages/locations \"Pacific Avenue\" \"831-471-7726\""
+        }
+      ],
+      "truth_source_type": "official_site"
+    },
+    {
+      "attribute": "phone",
+      "case_id": "water-department-primary-phone-vs-fax-footer",
+      "case_type": "GOVERNMENT_PRIMARY_PHONE_VS_FAX_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "831-420-5200",
+      "gold_value": "831-420-5200",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_phone": "831-420-5201",
+        "city": "Santa Cruz",
+        "current_phone": "831-420-5200",
+        "name": "Santa Cruz Water Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government water department page lists department phone, fax, administrative hours, and generic city footer phone; the primary Phone label should win.",
+              "page_text": "Water Department\nContact Information\nE-mail\nwateradmin@santacruzca.gov\nPhone\n831-420-5200\nFax\n831-420-5201\nLocation\n212 Locust Street, Suite A\nSanta Cruz, CA 95060\nWater Administration Phone Hours\nMonday - Friday\n9:00 a.m. - 5:00 p.m.\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Water Department - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Water-Department",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Water-Department \"Phone\" \"831-420-5200\""
+        }
+      ],
+      "truth_source_type": "government"
+    },
+    {
+      "attribute": "address",
+      "case_id": "water-department-suite-address-vs-city-footer",
+      "case_type": "GOVERNMENT_SUITE_ADDRESS_VS_FOOTER",
+      "expected_abstain": false,
+      "expected_decision": "212 Locust Street, Suite A, Santa Cruz, CA 95060",
+      "gold_value": "212 Locust Street, Suite A, Santa Cruz, CA 95060",
+      "identity_label": "SAME_ENTITY",
+      "label_origin": "authoritative_santa_cruz_challenge_v5",
+      "place": {
+        "base_address": "809 Center St, Santa Cruz, CA 95060",
+        "city": "Santa Cruz",
+        "current_address": "212 Locust Street, Suite A, Santa Cruz, CA 95060",
+        "name": "Santa Cruz Water Department",
+        "region": "CA"
+      },
+      "search_attempts": [
+        {
+          "fetched_pages": [
+            {
+              "evidence_role": "",
+              "extracted_values": {},
+              "identity_change_score": 0.0,
+              "notes": "Government water department page has a department-specific suite address and a generic city footer address; suite address should win.",
+              "page_text": "Water Department\nContact Information\nPhone\n831-420-5200\nFax\n831-420-5201\nLocation\n212 Locust Street, Suite A\nSanta Cruz, CA 95060\nCustomer Service and Engineering Counter Lobby Hours\nMonday - Friday\n1:00 p.m. to 3:00 p.m.\nCity of Santa Cruz\n809 Center St.\nSanta Cruz, CA 95060\nP (831) 420-5030",
+              "recency_days": 7,
+              "source_family_id": "",
+              "source_type": "government",
+              "title": "Water Department - City of Santa Cruz",
+              "url": "https://www.santacruzca.gov/Government/City-Departments/Water-Department",
+              "zombie_score": 0.0
+            }
+          ],
+          "layer": "official",
+          "query": "site:santacruzca.gov/Government/City-Departments/Water-Department \"212 Locust Street, Suite A\""
+        }
+      ],
+      "truth_source_type": "government"
+    }
+  ],
+  "generated_at": "2026-05-30T07:15:01.152937+00:00",
+  "schema_version": 1
+}

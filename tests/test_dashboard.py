@@ -270,6 +270,9 @@ class DashboardTests(unittest.TestCase):
             self.assertIn("## Current Read", markdown)
             self.assertIn("treat 100% values as fixture-local signals", markdown)
             self.assertIn("Resolver metrics are based on 4 labeled cases", markdown)
+            self.assertIn("The raw collected replay tree is the ceiling for contact data", markdown)
+            self.assertIn("mlattributes_replay_merged_full.json", markdown)
+            self.assertIn("mlattributes_replay_merged_unique.json", markdown)
             self.assertIn("ResolvePOI Baseline", markdown)
             self.assertIn("Retrieval Arms", markdown)
             self.assertIn("Website Authority", markdown)
@@ -285,7 +288,23 @@ class DashboardTests(unittest.TestCase):
             self.assertIn("Working Prototype", html)
             self.assertIn("Current Verdict", html)
             self.assertIn("Hard PAC Readiness", html)
+            self.assertIn("The raw collected replay tree is the ceiling for contact data", html)
+            self.assertIn("mlattributes_replay_merged_full.json", html)
+            self.assertIn("mlattributes_replay_merged_unique.json", html)
             self.assertIn("Cross-city replay", html)
+            self.assertIn("Interactive System Graphs", html)
+            self.assertIn("Real Example Walkthrough", html)
+            self.assertIn("Contact replay", html)
+            self.assertIn("graph-node", html)
+            self.assertIn("pipeline-detail", html)
+            self.assertIn("portfolio-detail", html)
+            self.assertIn("example-detail", html)
+            self.assertIn("hard-website-1", html)
+            self.assertIn("business-registry-current", html)
+            self.assertIn("scpl-branch-context-address-no-extracted", html)
+            self.assertIn("scpl-branch-ambiguous-phone", html)
+            self.assertIn("Expected decision", html)
+            self.assertIn("Truth source", html)
             self.assertIn("data-view='pac'", html)
             self.assertIn("data-view='baseline'", html)
             self.assertIn("--paper:#faf7ff", html)
@@ -299,6 +318,9 @@ class DashboardTests(unittest.TestCase):
             html = render_html(data)
 
             self.assertIn("Benchmark Viewer", html)
+            self.assertIn("Interactive System Graphs", html)
+            self.assertIn("Real Example Walkthrough", html)
+            self.assertIn("Expected decision", html)
             self.assertIn("<td>missing</td>", html)
 
     def test_dashboard_omits_missing_query_only_packet_section(self):
@@ -405,6 +427,29 @@ class DashboardTests(unittest.TestCase):
             self.assertIsNotNone(data.benchmark_promoted)
             self.assertEqual(data.benchmark_promoted["claim_coverage"]["coverage"], 0.83)
             self.assertEqual(data.benchmark_promoted["replay_stats"]["episodes_total"], 159)
+
+    def test_dashboard_loads_contact_replay_benchmark(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "reports"
+            contact = root / "harness" / "benchmark_contact_current.json"
+            contact.parent.mkdir(parents=True)
+            contact.write_text(
+                json.dumps(
+                    {
+                        "claim_coverage": {"coverage": 0.8857142857142857, "per_attribute": {"phone": {"coverage": 0.8095238095238095}, "address": {"coverage": 1.0}}},
+                        "replay_stats": {"episodes_total": 70, "expected_abstain_count": 15, "identity_drift_count": 11},
+                        "resolver_v5": {"expected_behavior_accuracy": 0.9714285714285714, "unsafe_prediction_rate": 0.13333333333333333},
+                        "resolver_v6": {"expected_behavior_accuracy": 0.9285714285714286, "unsafe_prediction_rate": 0.0},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            data = build_dashboard_data(root)
+
+            self.assertIsNotNone(data.benchmark_contact)
+            self.assertEqual(data.benchmark_contact["replay_stats"]["episodes_total"], 70)
+            self.assertAlmostEqual(data.benchmark_contact["claim_coverage"]["coverage"], 0.8857142857142857)
 
     def test_dashboard_loads_cross_city_replay_benchmark(self):
         with tempfile.TemporaryDirectory() as tmpdir:

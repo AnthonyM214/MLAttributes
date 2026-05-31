@@ -219,6 +219,7 @@ def evaluate_benchmark_v6(
             "answerable_accuracy": v5.get("answerable_accuracy", 0.0),
             "expected_behavior_accuracy": v5.get("expected_behavior_accuracy", 0.0),
             "abstention_rate": v5.get("abstention_rate", 0.0),
+            "correct_abstention_rate": v5.get("correct_abstention_rate", v5.get("abstention_accuracy", 0.0)),
             "abstention_accuracy": v5.get("abstention_accuracy", 0.0),
             "unsafe_prediction_rate": v5.get("unsafe_prediction_rate", 0.0),
             "high_confidence_wrong_rate": v5.get("high_confidence_wrong_rate", 0.0),

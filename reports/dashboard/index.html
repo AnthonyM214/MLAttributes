@@ -40,6 +40,38 @@ details.detail-panel > summary { cursor: pointer; list-style: none; padding: 14p
 details.detail-panel > summary::-webkit-details-marker { display:none; }
 details.detail-panel[open] > summary { border-bottom: 1px solid var(--line); }
 details.detail-panel .panel-body { padding: 0 16px 16px; }
+.graph-shell { display:grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0 20px; }
+.graph-title-row { display:flex; justify-content:space-between; align-items:baseline; gap: 12px; flex-wrap:wrap; }
+.graph-track { display:flex; flex-wrap:wrap; align-items:stretch; gap: 10px; padding: 14px; border:1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, #fff 0%, #faf5ff 100%); box-shadow: var(--shadow); }
+.graph-row { display:flex; flex-wrap:wrap; align-items:stretch; gap: 10px; }
+.graph-arrow { align-self:center; color: var(--accent); font-weight: 800; font-size: 1.1rem; padding: 0 2px; }
+.graph-node { appearance:none; border:1px solid rgba(109,40,217,.20); border-radius: 16px; background: #fff; padding: 12px 14px; min-width: 170px; text-align:left; cursor:pointer; box-shadow: 0 8px 18px rgba(109,40,217,.08); display:flex; flex-direction:column; gap:6px; }
+.graph-node:hover { transform: translateY(-1px); border-color: rgba(109,40,217,.42); }
+.graph-node.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,.12), 0 10px 20px rgba(109,40,217,.12); }
+.graph-node-label { font-weight: 800; color: #4c1d95; }
+.graph-node-metric, .graph-node-submetric { color: var(--muted); font-size: .88rem; line-height: 1.45; }
+.graph-node.portfolio-node { min-width: 210px; flex: 1 1 210px; }
+.graph-node.example-node { min-width: 220px; flex: 1 1 220px; }
+.graph-detail { border:1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, #fff 0%, #fcf9ff 100%); padding: 16px 18px; box-shadow: 0 8px 20px rgba(109,40,217,.08); }
+.graph-detail h3 { margin: 0 0 8px; }
+.graph-detail p { margin: 0 0 8px; color: var(--muted); line-height: 1.5; }
+.graph-detail .graph-tip { margin-top: 10px; border-left: 4px solid var(--accent); background: rgba(124,58,237,.08); padding: 10px 12px; border-radius: 10px; }
+.graph-detail .graph-pill-row { display:flex; flex-wrap:wrap; gap: 8px; margin-top: 10px; }
+.graph-pill { display:inline-flex; align-items:center; gap:6px; padding: 5px 10px; border-radius: 999px; background: #f4ebff; color: #4c1d95; font-size: .82rem; font-weight: 700; }
+.example-shell { margin-top: 12px; }
+.example-panel { border:1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, #fff 0%, #fbf8ff 100%); padding: 16px 18px; box-shadow: 0 8px 20px rgba(109,40,217,.08); }
+.example-steps { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 12px; }
+.example-step { border:1px solid rgba(109,40,217,.16); border-radius: 14px; padding: 12px 14px; background: #fff; }
+.example-step h4 { margin: 0 0 8px; font-size: .98rem; color: #4c1d95; }
+.example-step p { margin: 0; color: var(--muted); line-height: 1.5; }
+.kv-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 12px; }
+.kv-item { border:1px solid rgba(109,40,217,.14); border-radius: 14px; background: #fff; padding: 10px 12px; }
+.kv-label { display:block; text-transform: uppercase; letter-spacing: .08em; font-size: .71rem; font-weight: 800; color: var(--accent); margin-bottom: 5px; }
+.kv-value { color: var(--ink); font-weight: 700; line-height: 1.45; word-break: break-word; }
+.example-claims { margin-top: 12px; }
+.example-claims h4 { margin: 0 0 8px; font-size: .98rem; color: #4c1d95; }
+.example-note { margin-top: 12px; border-left: 4px solid var(--accent); background: rgba(124,58,237,.08); padding: 10px 12px; border-radius: 10px; }
+.graph-pre { white-space: pre-wrap; background: #f8f3ff; border:1px solid rgba(109,40,217,.14); border-radius: 14px; padding: 12px 14px; margin: 10px 0 0; color: #372453; line-height: 1.5; }
 table { width:100%; border-collapse: collapse; background:#fff; margin: 10px 0 2px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 8px 18px rgba(109,40,217,.06); }
 th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align:left; vertical-align: top; line-height: 1.45; }
 th { background: linear-gradient(180deg, #f1e8ff 0%, #e9dcff 100%); color: #4c1d95; font-weight: 800; }
@@ -78,6 +110,50 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 </div>
 </section>
 <section>
+<div class='graph-title-row'><h2 class='section-title'>Interactive System Graphs</h2><span class='section-note'>Click a node to inspect the detail panel.</span></div>
+<p class='section-note'>These graphs are designed to make the core story visible in one pass: how evidence moves through the pipeline and which replay corpus proves which weakness.</p>
+<div class='graph-shell'>
+<div class='graph-track' data-graph='pipeline'>
+<button class='graph-node active' data-graph='pipeline' data-key='replay'><span class='graph-node-label'>Replay corpus</span><span class='graph-node-metric'>386 episodes / 93.5% claim coverage</span></button>
+<span class='graph-arrow' aria-hidden='true'>-&gt;</span>
+<button class='graph-node' data-graph='pipeline' data-key='retrieval'><span class='graph-node-label'>Retrieval</span><span class='graph-node-metric'>Targeted authoritative found 100.0% / fallback 0.0%</span></button>
+<span class='graph-arrow' aria-hidden='true'>-&gt;</span>
+<button class='graph-node' data-graph='pipeline' data-key='claims'><span class='graph-node-label'>Claim extraction</span><span class='graph-node-metric'>Claim coverage 93.5% / phone -</span></button>
+<span class='graph-arrow' aria-hidden='true'>-&gt;</span>
+<button class='graph-node' data-graph='pipeline' data-key='graph'><span class='graph-node-label'>EvidenceGraph</span><span class='graph-node-metric'>Identity drift precision/recall 100.0% / 100.0%</span></button>
+<span class='graph-arrow' aria-hidden='true'>-&gt;</span>
+<button class='graph-node' data-graph='pipeline' data-key='resolver'><span class='graph-node-label'>Resolver</span><span class='graph-node-metric'>v5 94.0% / v6 72.5%</span></button>
+<span class='graph-arrow' aria-hidden='true'>-&gt;</span>
+<button class='graph-node' data-graph='pipeline' data-key='benchmarks'><span class='graph-node-label'>Benchmarks</span><span class='graph-node-metric'>Selective router 97.7% / core 97.1%</span></button>
+</div>
+<div class='graph-detail' id='pipeline-detail'></div>
+</div>
+<div class='graph-shell'>
+<div class='graph-track' data-graph='portfolio'>
+<button class='graph-node portfolio-node active' data-graph='portfolio' data-key='hard_cases'><span class='graph-node-label'>PAC hard cases</span><span class='graph-node-metric'>10 episodes / - claim coverage</span><span class='graph-node-submetric'>expected abstain - / identity drift -</span></button>
+<button class='graph-node portfolio-node' data-graph='portfolio' data-key='santa_cruz'><span class='graph-node-label'>Santa Cruz challenge</span><span class='graph-node-metric'>50 episodes / - claim coverage</span><span class='graph-node-submetric'>expected abstain - / identity drift -</span></button>
+<button class='graph-node portfolio-node' data-graph='portfolio' data-key='promoted'><span class='graph-node-label'>Promoted mixed</span><span class='graph-node-metric'>159 episodes / 83.0% claim coverage</span><span class='graph-node-submetric'>expected abstain 43 / identity drift 32</span></button>
+<button class='graph-node portfolio-node' data-graph='portfolio' data-key='contact'><span class='graph-node-label'>Contact replay</span><span class='graph-node-metric'>- episodes / - claim coverage</span><span class='graph-node-submetric'>expected abstain - / identity drift -</span></button>
+<button class='graph-node portfolio-node' data-graph='portfolio' data-key='cross_city'><span class='graph-node-label'>Cross-city replay</span><span class='graph-node-metric'>72 episodes / 66.7% claim coverage</span><span class='graph-node-submetric'>expected abstain 32 / identity drift 27</span></button>
+<button class='graph-node portfolio-node' data-graph='portfolio' data-key='generalization'><span class='graph-node-label'>Collected generalization</span><span class='graph-node-metric'>172 episodes / 86.0% claim coverage</span><span class='graph-node-submetric'>expected abstain 32 / identity drift 27</span></button>
+<button class='graph-node portfolio-node' data-graph='portfolio' data-key='overdata'><span class='graph-node-label'>Collected overdata</span><span class='graph-node-metric'>272 episodes / 91.2% claim coverage</span><span class='graph-node-submetric'>expected abstain 32 / identity drift 27</span></button>
+<button class='graph-node portfolio-node' data-graph='portfolio' data-key='mixed'><span class='graph-node-label'>Collected mixed</span><span class='graph-node-metric'>386 episodes / 93.5% claim coverage</span><span class='graph-node-submetric'>expected abstain 39 / identity drift 33</span></button>
+</div>
+<div class='graph-detail' id='portfolio-detail'></div>
+</div>
+</section>
+<section class='example-shell'>
+<div class='graph-title-row'><h2 class='section-title'>Real Example Walkthrough</h2><span class='section-note'>Use these to explain one replay row from start to finish.</span></div>
+<p class='section-note'>These examples come from the checked-in replay fixtures. They show the input row, the first evidence page, the extracted values, and the expected decision path.</p>
+<div class='graph-track' data-graph='example'>
+<button class='graph-node example-node active' data-graph='example' data-key='hard-website-1'><span class='graph-node-label'>Website from homepage</span><span class='graph-node-metric'>Expected: https://shop.example.com/contact</span><span class='graph-node-submetric'>Layer: official / Query: Shop Example contact</span></button>
+<button class='graph-node example-node' data-graph='example' data-key='business-registry-current'><span class='graph-node-label'>Registry corroboration</span><span class='graph-node-metric'>Expected: https://registry.example/current</span><span class='graph-node-submetric'>Layer: official / Query: &quot;PAC business-registry-current&quot; business registry website</span></button>
+<button class='graph-node example-node' data-graph='example' data-key='scpl-branch-context-address-no-extracted'><span class='graph-node-label'>Address from directory context</span><span class='graph-node-metric'>Expected: 224 Church Street, Santa Cruz, CA 95060</span><span class='graph-node-submetric'>Layer: official / Query: site:santacruzpl.org/contact/phonelist Downtown 224 Church Street Santa Cruz</span></button>
+<button class='graph-node example-node' data-graph='example' data-key='scpl-branch-ambiguous-phone'><span class='graph-node-label'>Branch phone abstention</span><span class='graph-node-metric'>Expected: 831-427-7707</span><span class='graph-node-submetric'>Layer: official / Query: site:santacruzpl.org branches Downtown Felton Garfield phone</span></button>
+</div>
+<div class='example-panel' id='example-detail'></div>
+</section>
+<section>
 <h2 class='section-title'>Plain-English Summary</h2>
 <p class='section-note'>Use this section when explaining the repo to someone who does not live inside the codebase.</p>
 <div class='summary-grid'>
@@ -85,17 +161,18 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>Takeaway 2</div><div class='detail'>The repo now has a real PAC spine: it extracts evidence claims, checks place identity, groups competing values, and abstains when proof is weak.</div></article>
 <article class='stat-card'><div class='label'>Takeaway 3</div><div class='detail'>The Santa Cruz fixture is the clearest local demo: 50 replay cases, 100.0% expected behavior, 12.0% expected abstention, and 0.0% high-confidence wrong.</div></article>
 <article class='stat-card'><div class='label'>Takeaway 4</div><div class='detail'>The merged replay is the reality check: claim coverage is still only 100.0% and v4 does not recover extra cases there, so the next gain is extraction coverage, not more abstention tuning.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 5</div><div class='detail'>The promoted mixed replay corpus is the useful middle ground: it combines the hard fixtures and Santa Cruz tranches into 159 episodes with 83.0% claim coverage, 43 explicit abstain cases, and enough phone/address evidence to be more representative than the curated hard cases alone. On that promoted set, v5 reaches 100.0% answerable accuracy and v6 keeps 96.9% expected-behavior accuracy with 0.0% unsafe predictions.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 6</div><div class='detail'>The cross-city replay slice is the stronger non-Santa-Cruz check: 72 episodes with 66.7% claim coverage, 32 explicit abstain cases, and 27 identity-drift cases. On that slice, v6 keeps 100.0% expected-behavior accuracy with 0.0% unsafe predictions.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 7</div><div class='detail'>The collected generalization corpus is the first large collected mix: it combines the 100-case place-path website batch with the cross-city slice into 172 episodes, keeps 86.0% claim coverage, and shows 97.7% v5 vs 95.9% v6 expected-behavior accuracy.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 8</div><div class='detail'>The overdata collected generalization corpus is the larger collected mix: it combines the 200-episode authoritative website batch with the cross-city slice into 272 episodes, keeps 91.2% claim coverage, and shows 92.3% v5 vs 63.6% v6 expected-behavior accuracy.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 9</div><div class='detail'>The mixed collected generalization corpus is the strongest collected proof surface: it combines the overdata website batch, the place-specific website cycle, the cross-city slice, and the hard cases into 386 episodes, keeps 93.5% claim coverage, and shows 94.0% v5 vs 72.5% v6 expected-behavior accuracy.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 10</div><div class='detail'>The graph-guided v5 planner is the first clear disruption: on the hard-case replay it keeps 100.0% answerable accuracy and 88.9% expected behavior while keeping unsafe predictions to 40.0% and reducing abstention by -11.1 pts vs v4, with a 11.1 pts coverage gain.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 11</div><div class='detail'>The identity-gated v6 planner is the safer headline: it keeps answerable accuracy at 100.0% and lifts expected-behavior accuracy to 100.0% with 0.0% unsafe predictions.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 12</div><div class='detail'>The broader collected replay is the disruptive baseline: 7.6% claim coverage and 47.8% website coverage across 151 replay files merged into 5078 episodes and 402 pages, which is several times richer than the narrow canonical replay.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 13</div><div class='detail'>The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 14</div><div class='detail'>The pooled three-corpus router is a useful negative result: it only nudges ResolvePOI holdout (75.3% vs 75.0%), does not beat cross-corpus on David, and leaves hard cases tied at 84.6% accuracy.</div></article>
-<article class='stat-card'><div class='label'>Takeaway 15</div><div class='detail'>The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 5</div><div class='detail'>The raw collected replay tree is the ceiling for contact data: phone and address stay at 0-fetch there, so the useful phone/address proof comes from the promoted contact slice rather than any hidden raw corpus. The exact low-coverage merged bottleneck files are reports/harness/mlattributes_replay_merged_full.json (7.6% claim coverage) and reports/harness/mlattributes_replay_merged_unique.json (2.0% claim coverage).</div></article>
+<article class='stat-card'><div class='label'>Takeaway 6</div><div class='detail'>The promoted mixed replay corpus is the useful middle ground: it combines the hard fixtures and Santa Cruz tranches into 159 episodes with 83.0% claim coverage, 43 explicit abstain cases, and enough phone/address evidence to be more representative than the curated hard cases alone. On that promoted set, v5 reaches 100.0% answerable accuracy and v6 keeps 96.9% expected-behavior accuracy with 0.0% unsafe predictions.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 7</div><div class='detail'>The cross-city replay slice is the stronger non-Santa-Cruz check: 72 episodes with 66.7% claim coverage, 32 explicit abstain cases, and 27 identity-drift cases. On that slice, v6 keeps 100.0% expected-behavior accuracy with 0.0% unsafe predictions.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 8</div><div class='detail'>The collected generalization corpus is the first large collected mix: it combines the 100-case place-path website batch with the cross-city slice into 172 episodes, keeps 86.0% claim coverage, and shows 97.7% v5 vs 95.9% v6 expected-behavior accuracy.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 9</div><div class='detail'>The overdata collected generalization corpus is the larger collected mix: it combines the 200-episode authoritative website batch with the cross-city slice into 272 episodes, keeps 91.2% claim coverage, and shows 92.3% v5 vs 63.6% v6 expected-behavior accuracy.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 10</div><div class='detail'>The mixed collected generalization corpus is the strongest collected proof surface: it combines the overdata website batch, the place-specific website cycle, the cross-city slice, and the hard cases into 386 episodes, keeps 93.5% claim coverage, and shows 94.0% v5 vs 72.5% v6 expected-behavior accuracy.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 11</div><div class='detail'>The graph-guided v5 planner is the first clear disruption: on the hard-case replay it keeps 100.0% answerable accuracy and 88.9% expected behavior while keeping unsafe predictions to 40.0% and reducing abstention by -11.1 pts vs v4, with a 11.1 pts coverage gain.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 12</div><div class='detail'>The identity-gated v6 planner is the safer headline: it keeps answerable accuracy at 100.0% and lifts expected-behavior accuracy to 100.0% with 0.0% unsafe predictions.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 13</div><div class='detail'>The broader collected replay is the disruptive baseline: 7.6% claim coverage and 47.8% website coverage across 200 replay files merged into 5078 episodes and 402 pages, which is several times richer than the narrow canonical replay.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 14</div><div class='detail'>The ResolvePOI selective router is the strongest numeric benchmark, but it is not yet unified with the EvidenceGraph resolver.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 15</div><div class='detail'>The pooled three-corpus router is a useful negative result: it only nudges ResolvePOI holdout (75.3% vs 75.0%), does not beat cross-corpus on David, and leaves hard cases tied at 84.6% accuracy.</div></article>
+<article class='stat-card'><div class='label'>Takeaway 16</div><div class='detail'>The honest next step is broader replay data, not more dashboard polish: more cities, more noisy pages, more stale/wrong-entity cases, and more non-official authoritative sources.</div></article>
 </div>
 </section>
 <section>
@@ -117,9 +194,9 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>Santa Cruz seed batch 4</div><div class='detail'>The fourth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, so the California expansion now shows cross-city generalization instead of only Santa Cruz-shaped evidence.</div></article>
 <article class='stat-card'><div class='label'>Santa Cruz seed batch 5</div><div class='detail'>The fifth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, so the replay corpus now shows a cross-city national tranche without losing the safe-abstain balance.</div></article>
 <article class='stat-card'><div class='label'>Santa Cruz seed batch 6</div><div class='detail'>The sixth seed tranche is now checked in as 10 episodes: 5 answerable and 5 explicit abstain, so the corpus growth now clears the +50-case target with another cross-city national tranche.</div></article>
-<article class='stat-card'><div class='label'>Merged corpus OKR</div><div class='detail'>The collected replay tree now loads from 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage. The new OKR (reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.</div></article>
+<article class='stat-card'><div class='label'>Merged corpus OKR</div><div class='detail'>The collected replay tree now loads from 200 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage. The new OKR (/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md) says the next disruptive gain is claim coverage, not more resolver tuning.</div></article>
 <article class='stat-card'><div class='label'>Promoted mixed replay</div><div class='detail'>The useful replay surface is now explicit: the promoted mixed corpus combines the hard fixtures and Santa Cruz tranches into a 159-episode claim-rich benchmark with abstention-heavy cases, wrong-branch cases, and cross-attribute phone/address coverage.</div></article>
-<article class='stat-card'><div class='label'>Research alignment</div><div class='detail'>The research note (reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.</div></article>
+<article class='stat-card'><div class='label'>Research alignment</div><div class='detail'>The research note (/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md) maps GraphFC, MultiKE-GAT, simplified subgraph retrieval, and learning-to-defer onto the repo’s claim-construction-first direction.</div></article>
 </div>
 </section>
 <section>
@@ -127,7 +204,7 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <p class='section-note'>The repo’s current direction matches recent fact-verification and selective-decision research: claim graphs, simpler retrieval, noise control, and explicit abstention.</p>
 <ul class='detail-list panel pad'>
 <li>Paper-backed direction: claim graphs, graph-guided retrieval planning, noise suppression, and calibrated abstention.</li>
-<li>Research note: reports/harness/PAC_RESEARCH_ALIGNMENT.md</li>
+<li>Research note: /home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md</li>
 <li>Why it matters: the merged corpus shows claim coverage is the bottleneck, so the next gain comes from better evidence construction rather than another scorer.</li>
 </ul>
 </section>
@@ -161,10 +238,10 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>Already done: hard-case abstention proof</div><div class='detail'>The hard-case benchmark records 84.6% accuracy, 27.8% abstention, and 0.0% high-confidence wrong.</div></article>
 <article class='stat-card'><div class='label'>Already done: PAC benchmark expected behavior</div><div class='detail'>The PAC hard benchmark now includes explicit expected-abstain labels and mixed authoritative sources instead of only positive examples.</div></article>
 <article class='stat-card'><div class='label'>Already done: graph-guided v5 planner</div><div class='detail'>The new v5 planner keeps 100.0% answerable accuracy and 88.9% expected behavior on the hard replay, keeps unsafe predictions to 40.0%, and adds 11.1 pts coverage vs v4.</div></article>
-<article class='stat-card'><div class='label'>Already done: full collected replay benchmark</div><div class='detail'>The collected replay benchmark merges 151 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage.</div></article>
+<article class='stat-card'><div class='label'>Already done: full collected replay benchmark</div><div class='detail'>The collected replay benchmark merges 200 files into 5078 episodes and 402 pages, with 7.6% overall claim coverage and 47.8% website coverage.</div></article>
 <article class='stat-card'><div class='label'>Already done: cross-city replay validation</div><div class='detail'>The cross-city replay slice covers 72 episodes with 66.7% claim coverage, 32 explicit abstain cases, and 27 identity-drift cases. On that slice, v6 keeps 100.0% expected-behavior accuracy with 0.0% unsafe predictions.</div></article>
 <article class='stat-card'><div class='label'>Already done: collected generalization benchmark</div><div class='detail'>The collected generalization corpus combines the 100-episode place-path website batch with the cross-city slice into 172 episodes, 86.0% claim coverage, and 32 explicit abstain cases. That makes it the current best collected proof surface, with v5 at 97.7% expected behavior and v6 at 95.9% expected behavior.</div></article>
-<article class='stat-card'><div class='label'>Already done: collected overdata generalization</div><div class='detail'>The overdata collected benchmark combines the 200-episode authoritative website batch with the cross-city slice into 272 episodes, 91.2% claim coverage, and 93.2% website coverage. It is the largest collected proof surface, and it makes the coverage gap between collected data and the merged replay harder to ignore.</div></article>
+<article class='stat-card'><div class='label'>Already done: collected overdata generalization</div><div class='detail'>The overdata collected benchmark combines the 200-episode authoritative website batch with the cross-city slice into 272 episodes, 91.2% claim coverage, and - website coverage. It is the largest collected proof surface, and it makes the coverage gap between collected data and the merged replay harder to ignore.</div></article>
 <article class='stat-card'><div class='label'>Already done: pooled three-corpus diagnostic</div><div class='detail'>James CSV labels now load correctly, but the pooled router only nudges ResolvePOI holdout, does not beat cross-corpus on David, and leaves hard cases tied at 84.6% accuracy / 27.8% abstention.</div></article>
 <article class='stat-card'><div class='label'>Already done: repo comparison and dashboard cleanup</div><div class='detail'>The public PAC repo comparison is documented against 12 org repos and the dashboard now centers the current artifacts, with 265 passing tests as the reproducibility proof.</div></article>
 <article class='stat-card'><div class='label'>Do not duplicate</div><div class='detail'>Do not spend time on another pure current-vs-base classifier, a fixture-only one-off proof, or dashboard polish that does not add replay coverage, abstention quality, or evidence structure.</div></article>
@@ -179,9 +256,10 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <article class='stat-card'><div class='label'>Claim-level v2 hard cases</div><div class='value'>84.6% accuracy / 27.8% abstention</div><div class='detail'>High-confidence wrong: 0.0%; breakthrough cases captured in benchmark_v2_hard_cases_current.json</div></article>
 <article class='stat-card'><div class='label'>Claim-level v3 hard cases</div><div class='value'>100.0% accuracy / 27.8% abstention</div><div class='detail'>Corroboration-aware graph scoring; high-confidence wrong: 0.0%</div></article>
 <article class='stat-card'><div class='label'>Merged replay coverage</div><div class='value'>100.0% episodes with claims</div><div class='detail'>2.640 claims/episode and 2.460 authoritative claims/episode on the 5,078-case merged replay.</div></article>
-<article class='stat-card'><div class='label'>Full collected replay</div><div class='value'>7.6% episodes with claims</div><div class='detail'>151 replay files merged into 5078 episodes and 402 pages; website coverage lifted to 47.8% with 0.134 authoritative claims/episode.</div></article>
+<article class='stat-card'><div class='label'>Full collected replay</div><div class='value'>7.6% episodes with claims</div><div class='detail'>200 replay files merged into 5078 episodes and 402 pages; website coverage lifted to 47.8% with 0.134 authoritative claims/episode.</div></article>
+<article class='stat-card'><div class='label'>Contact replay</div><div class='value'>88.6% claim coverage / 92.9% v6 expected</div><div class='detail'>70 phone/address cases with - expected abstains; phone coverage 81.0%, address coverage 100.0%, v5 expected-behavior 97.1%, unsafe predictions 13.3%.</div></article>
 <article class='stat-card'><div class='label'>Collected generalization</div><div class='value'>95.9% expected / 22.7% abstention</div><div class='detail'>172 episodes combining 100 place-path website cases and 72 cross-city mixed cases; claim coverage 86.0%, place-path coverage 100.0%, v5 expected-behavior 97.7%, v6 expected-behavior 95.9%, unsafe predictions 0.0%.</div></article>
-<article class='stat-card'><div class='label'>Collected overdata generalization</div><div class='value'>92.3% v5 / 63.6% v6</div><div class='detail'>272 episodes combining the 200-episode overdata website slice with the cross-city mixed cases; claim coverage 91.2%, website coverage 93.2%, v5 expected-behavior 92.3%, v6 expected-behavior 63.6%, unsafe predictions 0.0%.</div></article>
+<article class='stat-card'><div class='label'>Collected overdata generalization</div><div class='value'>92.3% v5 / 63.6% v6</div><div class='detail'>272 episodes combining the 200-episode overdata website slice with the cross-city mixed cases; claim coverage 91.2%, website coverage -, v5 expected-behavior 92.3%, v6 expected-behavior 63.6%, unsafe predictions 0.0%.</div></article>
 <article class='stat-card'><div class='label'>Collected mixed generalization</div><div class='value'>94.0% v5 / 72.5% v6</div><div class='detail'>386 episodes combining the overdata website slice, place-specific website cycle, cross-city slice, and hard cases; claim coverage 93.5%, website coverage 95.1%, v5 expected-behavior 94.0%, v6 expected-behavior 72.5%, unsafe predictions 0.0%.</div></article>
 <article class='stat-card'><div class='label'>Santa Cruz challenge</div><div class='value'>100.0% expected / 12.0% abstention</div><div class='detail'>Raw resolver accuracy: 95.7%; high-confidence wrong: 0.0%; 50 curated cases covering branch ambiguity, websites, stale/closed signals, social-only evidence, generic homepages, and wrong-entity tenant pages.</div></article>
 <article class='stat-card'><div class='label'>PAC hard benchmark</div><div class='value'>100.0% correct abstention / passed</div><div class='detail'>Identity drift precision/recall: 100.0% / 100.0%</div></article>
@@ -316,14 +394,14 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <summary>Identity-gated v6</summary>
 <div class='panel-body'>
 <ul class='detail-list'>
-<li>Graph-guided v5 answerable accuracy: -</li>
+<li>Graph-guided v5 answerable accuracy: 100.0%</li>
 <li>Identity-gated v6 answerable accuracy: 100.0%</li>
 <li>Identity-gated v6 expected behavior: 100.0%</li>
 <li>Identity-gated v6 unsafe predictions: 0.0%</li>
 <li>Identity-gated v6 abstention: 27.8%</li>
 <li>Expected behavior lift vs v5: 11.1 pts</li>
 <li>Claim coverage on this replay: 83.3%</li>
-<li>Breakthrough cases: 18</li>
+<li>Breakthrough cases: 2</li>
 <li>Abstention cases: hard-branch-ambiguity; hard-social-only-abstain; hard-generic-homepage-abstain; hard-wrong-tenant-abstain; hard-branch-ambiguity-phone</li>
 </ul>
 </div>
@@ -356,13 +434,15 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <summary>Full collected replay</summary>
 <div class='panel-body'>
 <ul class='detail-list'>
-<li>Replay inputs: 151 files -&gt; 5078 merged episodes</li>
+<li>Replay inputs: 200 files -&gt; 5078 merged episodes</li>
 <li>Pages merged: 402; pages with claims: 386/5078</li>
 <li>Claim coverage: 7.6%</li>
 <li>Website claim coverage: 47.8%</li>
 <li>Authoritative claims/episode: 0.134</li>
 <li>Resolver v4 on full replay: 7.1% accuracy / 92.8% abstention</li>
 <li>Resolver v3 on full replay: 7.1% accuracy / 92.8% abstention</li>
+<li>Reference narrow corpus: 100.0% claim coverage; 100.0% website coverage</li>
+<li>Coverage lift vs reference: 0.076x overall / 0.478x website</li>
 </ul>
 </div>
 </details>
@@ -417,7 +497,7 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <li>Attempts: 1</li>
 <li>Pages: 1</li>
 <li>Authoritative pages rate: 100.0%</li>
-<li>Last merged replay: reports/replay/merged_current.json</li>
+<li>Last merged replay: /home/anthony/Overture/MLAttributes/reports/replay/merged_current.json</li>
 </ul>
 </div>
 </details>
@@ -449,49 +529,112 @@ code { background: #f2e8ff; border-radius: 4px; padding: 2px 5px; }
 <summary>Report files</summary>
 <div class='panel-body'>
 <ul class='path-list'>
-<li><strong>baseline</strong>: <code>reports/baseline_metrics/resolvepoi_current.json</code></li>
-<li><strong>benchmark_collected_generalization</strong>: <code>reports/harness/benchmark_collected_generalization_current.json</code></li>
-<li><strong>benchmark_collected_generalization_report</strong>: <code>reports/harness/PAC_COLLECTED_GENERALIZATION_BENCHMARK.md</code></li>
-<li><strong>benchmark_collected_mixed_generalization</strong>: <code>reports/harness/benchmark_collected_mixed_generalization_current.json</code></li>
-<li><strong>benchmark_collected_mixed_generalization_report</strong>: <code>reports/harness/PAC_COLLECTED_MIXED_GENERALIZATION_BENCHMARK.md</code></li>
-<li><strong>benchmark_collected_overdata_generalization</strong>: <code>reports/harness/benchmark_collected_overdata_generalization_current.json</code></li>
-<li><strong>benchmark_collected_overdata_generalization_report</strong>: <code>reports/harness/PAC_COLLECTED_OVERDATA_GENERALIZATION_BENCHMARK.md</code></li>
-<li><strong>benchmark_cross_city</strong>: <code>reports/harness/benchmark_cross_city_current.json</code></li>
-<li><strong>benchmark_full_replay</strong>: <code>reports/harness/benchmark_full_replay_current.json</code></li>
-<li><strong>benchmark_pooled</strong>: <code>reports/harness/benchmark_pooled_current.json</code></li>
-<li><strong>benchmark_promoted</strong>: <code>reports/harness/benchmark_promoted_current.json</code></li>
-<li><strong>benchmark_v2_hard_cases</strong>: <code>reports/harness/benchmark_v2_hard_cases_current.json</code></li>
-<li><strong>benchmark_v2_pac_hard_cases</strong>: <code>reports/harness/benchmark_v2_pac_hard_cases_current.json</code></li>
-<li><strong>benchmark_v2_santa_cruz_challenge</strong>: <code>reports/harness/benchmark_v2_santa_cruz_challenge_current.json</code></li>
-<li><strong>benchmark_v3_hard_cases</strong>: <code>reports/harness/benchmark_v3_hard_cases_current.json</code></li>
-<li><strong>benchmark_v4</strong>: <code>reports/harness/benchmark_v4_current.json</code></li>
-<li><strong>benchmark_v5</strong>: <code>reports/harness/benchmark_v5_current.json</code></li>
-<li><strong>benchmark_v6</strong>: <code>reports/harness/benchmark_v6_current.json</code></li>
-<li><strong>combined</strong>: <code>reports/harness/all_current.json</code></li>
-<li><strong>compare</strong>: <code>reports/retrieval_compare/compare_current.json</code></li>
-<li><strong>conflict_dorks</strong>: <code>reports/ranker/conflict_dorks_current.csv</code></li>
-<li><strong>dataset</strong>: <code>reports/data/project_a_summary.json</code></li>
-<li><strong>engineering_report</strong>: <code>reports/harness/PAC_ENGINEERING_REPORT.md</code></li>
-<li><strong>evidence</strong>: <code>reports/evidence/evidence-eval_current.json</code></li>
-<li><strong>golden</strong>: <code>reports/golden/project_a_golden_current.json</code></li>
-<li><strong>merged_replay</strong>: <code>reports/replay/merged_current.json</code></li>
-<li><strong>okr</strong>: <code>reports/harness/PAC_OKR.md</code></li>
-<li><strong>pac_benchmark</strong>: <code>reports/pac_benchmark/pac_benchmark_current.json</code></li>
-<li><strong>replay_stats</strong>: <code>reports/replay_stats/replay_stats_current.json</code></li>
-<li><strong>repo_comparison</strong>: <code>reports/harness/PAC_REPO_COMPARISON.md</code></li>
-<li><strong>rerank</strong>: <code>reports/harness/rerank_current.json</code></li>
-<li><strong>research_alignment</strong>: <code>reports/harness/PAC_RESEARCH_ALIGNMENT.md</code></li>
-<li><strong>resolvepoi_selective</strong>: <code>reports/resolvepoi_selective/resolvepoi_selective_current.json</code></li>
-<li><strong>resolver_replay</strong>: <code>reports/resolver_replay/resolver_on_replay_current.json</code></li>
+<li><strong>baseline</strong>: <code>/home/anthony/Overture/MLAttributes/reports/baseline_metrics/resolvepoi_current.json</code></li>
+<li><strong>benchmark_collected_generalization</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_collected_generalization_current.json</code></li>
+<li><strong>benchmark_collected_generalization_report</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_COLLECTED_GENERALIZATION_BENCHMARK.md</code></li>
+<li><strong>benchmark_collected_mixed_generalization</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_collected_mixed_generalization_current.json</code></li>
+<li><strong>benchmark_collected_mixed_generalization_report</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_COLLECTED_MIXED_GENERALIZATION_BENCHMARK.md</code></li>
+<li><strong>benchmark_collected_overdata_generalization</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_collected_overdata_generalization_current.json</code></li>
+<li><strong>benchmark_collected_overdata_generalization_report</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_COLLECTED_OVERDATA_GENERALIZATION_BENCHMARK.md</code></li>
+<li><strong>benchmark_contact</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_contact_current.json</code></li>
+<li><strong>benchmark_contact_report</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_CONTACT_REPLAY_BENCHMARK.md</code></li>
+<li><strong>benchmark_cross_city</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_cross_city_current.json</code></li>
+<li><strong>benchmark_full_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_full_replay_current.json</code></li>
+<li><strong>benchmark_pooled</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_pooled_current.json</code></li>
+<li><strong>benchmark_promoted</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_promoted_current.json</code></li>
+<li><strong>benchmark_v2_hard_cases</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_hard_cases_current.json</code></li>
+<li><strong>benchmark_v2_pac_hard_cases</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_pac_hard_cases_current.json</code></li>
+<li><strong>benchmark_v2_santa_cruz_challenge</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v2_santa_cruz_challenge_current.json</code></li>
+<li><strong>benchmark_v3_hard_cases</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v3_hard_cases_current.json</code></li>
+<li><strong>benchmark_v4</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v4_current.json</code></li>
+<li><strong>benchmark_v5</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v5_current.json</code></li>
+<li><strong>benchmark_v6</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/benchmark_v6_current.json</code></li>
+<li><strong>combined</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/all_current.json</code></li>
+<li><strong>compare</strong>: <code>/home/anthony/Overture/MLAttributes/reports/retrieval_compare/compare_current.json</code></li>
+<li><strong>conflict_dorks</strong>: <code>/home/anthony/Overture/MLAttributes/reports/ranker/conflict_dorks_current.csv</code></li>
+<li><strong>dataset</strong>: <code>/home/anthony/Overture/MLAttributes/reports/data/project_a_summary.json</code></li>
+<li><strong>engineering_report</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_ENGINEERING_REPORT.md</code></li>
+<li><strong>evidence</strong>: <code>/home/anthony/Overture/MLAttributes/reports/evidence/evidence-eval_current.json</code></li>
+<li><strong>golden</strong>: <code>/home/anthony/Overture/MLAttributes/reports/golden/project_a_golden_current.json</code></li>
+<li><strong>merged_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/replay/merged_current.json</code></li>
+<li><strong>okr</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_OKR.md</code></li>
+<li><strong>pac_benchmark</strong>: <code>/home/anthony/Overture/MLAttributes/reports/pac_benchmark/pac_benchmark_current.json</code></li>
+<li><strong>replay_stats</strong>: <code>/home/anthony/Overture/MLAttributes/reports/replay_stats/replay_stats_current.json</code></li>
+<li><strong>repo_comparison</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_REPO_COMPARISON.md</code></li>
+<li><strong>rerank</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/rerank_current.json</code></li>
+<li><strong>research_alignment</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_RESEARCH_ALIGNMENT.md</code></li>
+<li><strong>resolvepoi_selective</strong>: <code>/home/anthony/Overture/MLAttributes/reports/resolvepoi_selective/resolvepoi_selective_current.json</code></li>
+<li><strong>resolver_replay</strong>: <code>/home/anthony/Overture/MLAttributes/reports/resolver_replay/resolver_on_replay_current.json</code></li>
 <li><strong>santa_cruz_challenge_corpus</strong>: <code>/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_challenge_replay.json</code></li>
 <li><strong>santa_cruz_expanded_corpus</strong>: <code>/home/anthony/Overture/MLAttributes/tests/fixtures/santa_cruz_replay_corpus_expanded.json</code></li>
-<li><strong>smoke</strong>: <code>reports/harness/smoke_current.json</code></li>
-<li><strong>technical_summary</strong>: <code>reports/harness/technical_summary.md</code></li>
-<li><strong>website_authority</strong>: <code>reports/website_authority/website_authority_current.json</code></li>
-<li><strong>work_ledger</strong>: <code>reports/harness/PAC_WORK_LEDGER.md</code></li>
+<li><strong>smoke</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/smoke_current.json</code></li>
+<li><strong>technical_summary</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/technical_summary.md</code></li>
+<li><strong>website_authority</strong>: <code>/home/anthony/Overture/MLAttributes/reports/website_authority/website_authority_current.json</code></li>
+<li><strong>work_ledger</strong>: <code>/home/anthony/Overture/MLAttributes/reports/harness/PAC_WORK_LEDGER.md</code></li>
 </ul>
 </div>
 </details>
+<script>const GRAPH_DATA = {"pipeline": [{"key": "replay", "label": "Replay corpus", "title": "Replay corpus", "detail": "Curated hard cases, Santa Cruz, cross-city, and collected generalization slices feed the evidence trail.", "metric": "386 episodes / 93.5% claim coverage"}, {"key": "retrieval", "label": "Retrieval", "title": "Retrieval and dorking", "detail": "Targeted search finds the authoritative page while fallback search is kept as a diagnostic. The current replay still favors targeted authoritative pages.", "metric": "Targeted authoritative found 100.0% / fallback 0.0%"}, {"key": "claims", "label": "Claim extraction", "title": "Claim extraction", "detail": "HTML text, meta tags, JSON-LD, and visible page content become normalized attribute claims before the resolver ever scores them.", "metric": "Claim coverage 93.5% / phone -"}, {"key": "graph", "label": "EvidenceGraph", "title": "EvidenceGraph", "detail": "Claims get grouped by normalized value, and contradictions, stale pages, and wrong-entity signals become explicit.", "metric": "Identity drift precision/recall 100.0% / 100.0%"}, {"key": "resolver", "label": "Resolver", "title": "Resolver v5 / v6", "detail": "v5 is stronger on expected-behavior accuracy; v6 is stricter and safer with zero unsafe predictions on the mixed corpus.", "metric": "v5 94.0% / v6 72.5%"}, {"key": "benchmarks", "label": "Benchmarks", "title": "Benchmarks and dashboard", "detail": "The dashboard turns replay, benchmark, and comparison artifacts into a readable proof surface instead of a buried report pile.", "metric": "Selective router 97.7% / core 97.1%"}], "portfolio": [{"key": "hard_cases", "label": "PAC hard cases", "title": "PAC hard cases", "detail": "best for noisy abstention-heavy mixed evidence", "metric": "10 episodes / - claim coverage", "submetric": "expected abstain - / identity drift -", "v5": "- expected-behavior / - unsafe", "v6": "- expected-behavior / - unsafe"}, {"key": "santa_cruz", "label": "Santa Cruz challenge", "title": "Santa Cruz challenge", "detail": "best dense authority-page proof", "metric": "50 episodes / - claim coverage", "submetric": "expected abstain - / identity drift -", "v5": "- expected-behavior / - unsafe", "v6": "- expected-behavior / - unsafe"}, {"key": "promoted", "label": "Promoted mixed", "title": "Promoted mixed", "detail": "best balanced mixed proof surface", "metric": "159 episodes / 83.0% claim coverage", "submetric": "expected abstain 43 / identity drift 32", "v5": "97.5% expected-behavior / 9.3% unsafe", "v6": "96.9% expected-behavior / 0.0% unsafe"}, {"key": "contact", "label": "Contact replay", "title": "Contact replay", "detail": "best phone/address proof surface", "metric": "- episodes / - claim coverage", "submetric": "expected abstain - / identity drift -", "v5": "- expected-behavior / - unsafe", "v6": "- expected-behavior / - unsafe"}, {"key": "cross_city", "label": "Cross-city replay", "title": "Cross-city replay", "detail": "best compact non-Santa-Cruz generalization slice", "metric": "72 episodes / 66.7% claim coverage", "submetric": "expected abstain 32 / identity drift 27", "v5": "95.8% expected-behavior / 9.4% unsafe", "v6": "100.0% expected-behavior / 0.0% unsafe"}, {"key": "generalization", "label": "Collected generalization", "title": "Collected generalization", "detail": "best early collected generalization surface", "metric": "172 episodes / 86.0% claim coverage", "submetric": "expected abstain 32 / identity drift 27", "v5": "97.7% expected-behavior / 9.4% unsafe", "v6": "95.9% expected-behavior / 0.0% unsafe"}, {"key": "overdata", "label": "Collected overdata", "title": "Collected overdata", "detail": "largest collected mix before the final combined slice", "metric": "272 episodes / 91.2% claim coverage", "submetric": "expected abstain 32 / identity drift 27", "v5": "92.3% expected-behavior / 9.4% unsafe", "v6": "63.6% expected-behavior / 0.0% unsafe"}, {"key": "mixed", "label": "Collected mixed", "title": "Collected mixed", "detail": "strongest collected proof surface", "metric": "386 episodes / 93.5% claim coverage", "submetric": "expected abstain 39 / identity drift 33", "v5": "94.0% expected-behavior / 10.3% unsafe", "v6": "72.5% expected-behavior / 0.0% unsafe"}], "example": [{"key": "hard-website-1", "label": "Website from homepage", "title": "hard-website-1 - website", "detail": "The homepage mentions a contact URL, so claim extraction turns page text into a website claim.", "metric": "Expected: https://shop.example.com/contact", "submetric": "Layer: official / Query: Shop Example contact", "case_id": "hard-website-1", "attribute": "website", "expected": "https://shop.example.com/contact", "expected_abstain": false, "expected_decision": "https://shop.example.com/contact", "gold_value": "https://shop.example.com/contact", "case_type": "-", "truth_source_type": "-", "identity_label": "-", "label_origin": "-", "source_type": "official_site", "source_family_id": "-", "page_title": "Shop Example", "page_url": "https://shop.example.com", "page_text": "Contact us at https://shop.example.com/contact for store hours.", "page_excerpt": "Contact us at https://shop.example.com/contact for store hours.", "query": "Shop Example contact", "layer": "official", "notes": "Official homepage mentions contact page.", "recency_days": 5, "zombie_score": 0.0, "identity_change_score": 0.0, "extracted_values": {}, "claim_values": ["shop.example.com/contact \u00b7 text_url"], "story": "The homepage mentions a contact URL, so claim extraction turns page text into a website claim."}, {"key": "business-registry-current", "label": "Registry corroboration", "title": "business-registry-current - website", "detail": "The business registry directly states the current website, so authority and exact-value matching agree.", "metric": "Expected: https://registry.example/current", "submetric": "Layer: official / Query: \"PAC business-registry-current\" business registry website", "case_id": "business-registry-current", "attribute": "website", "expected": "https://registry.example/current", "expected_abstain": false, "expected_decision": "https://registry.example/current", "gold_value": "https://registry.example/current", "case_type": "BUSINESS_REGISTRY_CORROBORATION", "truth_source_type": "business_registry", "identity_label": "SAME_ENTITY", "label_origin": "hard PAC fixture", "source_type": "business_registry", "source_family_id": "business_registry:registry.example", "page_title": "registry current", "page_url": "https://registry.example/current", "page_text": "Business registry current website.", "page_excerpt": "Business registry current website.", "query": "\"PAC business-registry-current\" business registry website", "layer": "official", "notes": "", "recency_days": 20, "zombie_score": 0.0, "identity_change_score": 0.0, "extracted_values": {"website": "https://registry.example/current"}, "claim_values": ["website: https://registry.example/current"], "story": "The business registry directly states the current website, so authority and exact-value matching agree."}, {"key": "scpl-branch-context-address-no-extracted", "label": "Address from directory context", "title": "scpl-branch-context-address-no-extracted - address", "detail": "The directory page lists several branch addresses, and place context isolates the Downtown address.", "metric": "Expected: 224 Church Street, Santa Cruz, CA 95060", "submetric": "Layer: official / Query: site:santacruzpl.org/contact/phonelist Downtown 224 Church Street Santa Cruz", "case_id": "scpl-branch-context-address-no-extracted", "attribute": "address", "expected": "224 Church Street, Santa Cruz, CA 95060", "expected_abstain": false, "expected_decision": "224 Church Street, Santa Cruz, CA 95060", "gold_value": "224 Church Street, Santa Cruz, CA 95060", "case_type": "BRANCH_CONTEXT_CORROBORATED", "truth_source_type": "official_site", "identity_label": "SAME_ENTITY", "label_origin": "authoritative_santa_cruz_challenge_v2", "source_type": "official_site", "source_family_id": "-", "page_title": "Contact Us - Santa Cruz Public Libraries", "page_url": "https://www.santacruzpl.org/contact/phonelist/", "page_text": "Phone & Email Directory\nDowntown\n831-427-7707\n224 Church Street\nSanta Cruz, CA 95060\nFelton\n831-427-7708\n6121 Gushee St.\nFelton, CA 95018\nGarfield Park\n831-427-7709\n705 Woodrow Avenue\nSanta Cruz, CA 95060", "page_excerpt": "Phone & Email Directory Downtown 831-427-7707 224 Church Street Santa Cruz, CA 95060 Felton 831-427-7708 6121 Gushee St. Felton, CA 95018 Garfield Park 831-427-7709 705 Woodrow Avenue Santa Cruz, CA 95060", "query": "site:santacruzpl.org/contact/phonelist Downtown 224 Church Street Santa Cruz", "layer": "official", "notes": "Official SCPL directory lists several branch addresses; Downtown address in place context corroborates the correct row without prefilled extraction.", "recency_days": 3, "zombie_score": 0.0, "identity_change_score": 0.0, "extracted_values": {}, "claim_values": ["224 church st santa cruz ca 95060 \u00b7 context_address_in_text", "224 church st \u00b7 address_regex", "6121 gushee st \u00b7 address_regex", "705 woodrow ave \u00b7 address_regex"], "story": "The directory page lists several branch addresses, and place context isolates the Downtown address."}, {"key": "scpl-branch-ambiguous-phone", "label": "Branch phone abstention", "title": "scpl-branch-ambiguous-phone - phone", "detail": "The same directory page contains several branch numbers, so the resolver should abstain instead of guessing.", "metric": "Expected: 831-427-7707", "submetric": "Layer: official / Query: site:santacruzpl.org branches Downtown Felton Garfield phone", "case_id": "scpl-branch-ambiguous-phone", "attribute": "phone", "expected": "831-427-7707", "expected_abstain": true, "expected_decision": "abstain", "gold_value": "831-427-7707", "case_type": "BRANCH_AMBIGUITY", "truth_source_type": "official_site", "identity_label": "BRANCH_AMBIGUITY", "label_origin": "authoritative_santa_cruz_challenge_v1", "source_type": "official_site", "source_family_id": "-", "page_title": "Branch Libraries - Santa Cruz Public Libraries", "page_url": "https://www.santacruzpl.org/branches/", "page_text": "Library Branches\nDowntown\n224 Church Street\nSanta Cruz, CA 95060\n831-427-7707\nFelton\n6121 Gushee St.\nFelton, CA 95018\n831-427-7708\nGarfield Park\n705 Woodrow Avenue\nSanta Cruz, CA 95060\n831-427-7709", "page_excerpt": "Library Branches Downtown 224 Church Street Santa Cruz, CA 95060 831-427-7707 Felton 6121 Gushee St. Felton, CA 95018 831-427-7708 Garfield Park 705 Woodrow Avenue Santa Cruz, CA 95060 831-427-7709", "query": "site:santacruzpl.org branches Downtown Felton Garfield phone", "layer": "official", "notes": "Official branch directory lists several branches and phone numbers on the same page; branch-specific selection should abstain without stronger context.", "recency_days": 14, "zombie_score": 0.0, "identity_change_score": 0.35, "extracted_values": {}, "claim_values": ["8314277707 \u00b7 phone_regex_secondary", "8314277708 \u00b7 phone_regex_secondary", "8314277709 \u00b7 phone_regex_secondary"], "story": "The same directory page contains several branch numbers, so the resolver should abstain instead of guessing."}]};
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function renderGraphDetail(graph, item){
+  const detail = document.getElementById(graph + '-detail');
+  if(!detail || !item) return;
+  if(graph === 'example'){
+    const extracted = Object.entries(item.extracted_values || {}).map(([k, v]) => `<span class='graph-pill'>${escapeHtml(k)}: ${escapeHtml(v)}</span>`).join('');
+    const claims = (item.claim_values || []).map((value) => `<span class='graph-pill'>${escapeHtml(value)}</span>`).join('');
+    const kv = [
+      ['Case', item.case_id || '-'],
+      ['Attribute', item.attribute || '-'],
+      ['Expected decision', item.expected_decision || item.expected || '-'],
+      ['Truth source', item.truth_source_type || '-'],
+      ['Identity label', item.identity_label || '-'],
+      ['Case type', item.case_type || '-'],
+      ['Label origin', item.label_origin || '-'],
+      ['Source type', item.source_type || '-'],
+      ['Page title', item.page_title || '-'],
+      ['Page URL', item.page_url || '-'],
+      ['Query', item.query || '-'],
+      ['Layer', item.layer || '-'],
+    ];
+    detail.innerHTML = `<h3>${escapeHtml(item.title || item.label || 'Example')}</h3>` +
+      `<p>${escapeHtml(item.story || item.detail || '')}</p>` +
+      `<div class='example-note'><strong>Why this example matters:</strong> ${escapeHtml(item.story || item.detail || '')}</div>` +
+      `<div class='kv-grid'>` + kv.map(([label, value]) => `<div class='kv-item'><span class='kv-label'>${escapeHtml(label)}</span><span class='kv-value'>${escapeHtml(value)}</span></div>`).join('') + `</div>` +
+      `<div class='example-steps'>` +
+      `<div class='example-step'><h4>1. Replay row</h4><p>${escapeHtml(item.case_id || '-')} is the row that enters the replay harness. It is an ${escapeHtml(item.attribute || '-')} case with ${escapeHtml(item.expected_abstain ? 'explicit abstention' : 'a direct gold value')}.</p></div>` +
+      `<div class='example-step'><h4>2. Evidence page</h4><p><strong>${escapeHtml(item.page_title || '-')}</strong><br>Source type: ${escapeHtml(item.source_type || '-')}<br>Truth source: ${escapeHtml(item.truth_source_type || '-')}</p><div class='graph-pre'>${escapeHtml(item.page_excerpt || '')}</div></div>` +
+      `<div class='example-step'><h4>3. Extracted claim</h4><p>${claims || '<span class="muted">No prefilled extracted value on this page; the text itself is the evidence.</span>'}</p><div class='graph-pill-row'>${extracted}</div></div>` +
+      `<div class='example-step'><h4>4. Expected outcome</h4><p>${escapeHtml(item.expected_decision || item.expected || 'abstain')}</p><p>${escapeHtml(item.expected_abstain ? 'This is a safe-abstain case: the source page is ambiguous or multi-valued.' : 'This is a supported case: the source directly states the value or corroborates it.')}</p></div>` +
+      `</div>` +
+      `<div class='graph-pill-row'>` +
+      `<span class='graph-pill'>Recency days: ${escapeHtml(item.recency_days ?? '-')}</span>` +
+      `<span class='graph-pill'>Zombie score: ${escapeHtml(item.zombie_score ?? '-')}</span>` +
+      `<span class='graph-pill'>Identity change: ${escapeHtml(item.identity_change_score ?? '-')}</span>` +
+      `<span class='graph-pill'>Expected abstain: ${escapeHtml(item.expected_abstain ? 'yes' : 'no')}</span>` +
+      `<span class='graph-pill'>Notes: ${escapeHtml(item.notes || '-')}</span>` +
+      `${claims ? claims : ''}</div>`;
+    return;
+  }
+  const pills = [];
+  if(item.metric) pills.push(`<span class='graph-pill'>${escapeHtml(item.metric)}</span>`);
+  if(item.submetric) pills.push(`<span class='graph-pill'>${escapeHtml(item.submetric)}</span>`);
+  if(item.v5) pills.push(`<span class='graph-pill'>v5 ${escapeHtml(item.v5)}</span>`);
+  if(item.v6) pills.push(`<span class='graph-pill'>v6 ${escapeHtml(item.v6)}</span>`);
+  detail.innerHTML = `<h3>${escapeHtml(item.title || item.label || 'Detail')}</h3>` +
+    `<p>${escapeHtml(item.detail || '')}</p>` +
+    `<div class='graph-tip'><strong>Why it matters:</strong> ${escapeHtml(item.detail || '')}</div>` +
+    `<div class='graph-pill-row'>${pills.join('')}</div>`;
+}
+function activateGraph(graph, key){
+  const items = GRAPH_DATA[graph] || [];
+  const item = items.find((x) => x.key === key) || items[0];
+  if(!item) return;
+  document.querySelectorAll(`[data-graph='${graph}'].graph-node, [data-graph='${graph}'] .graph-node`).forEach((btn) => { btn.classList.toggle('active', btn.dataset.key === item.key); });
+  renderGraphDetail(graph, item);
+}
+document.querySelectorAll('.graph-node').forEach((btn) => { btn.addEventListener('click', () => activateGraph(btn.dataset.graph, btn.dataset.key)); });
+['pipeline','portfolio','example'].forEach((graph) => { const items = GRAPH_DATA[graph] || []; if(items.length) activateGraph(graph, items[0].key); });
+</script>
 </main>
 </body>
 </html>
