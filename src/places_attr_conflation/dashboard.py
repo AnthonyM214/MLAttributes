@@ -1639,7 +1639,7 @@ def _plain_english_takeaways(data: DashboardData) -> list[str]:
             f"and {_pct(santa_v2.get('high_confidence_wrong_rate'))} high-confidence wrong."
         ),
         (
-            "The merged replay is the reality check: claim coverage is still only "
+            "The v4 hard-case replay is the reality check: claim coverage is still only "
             f"{_pct((data.benchmark_v4 or {}).get('claim_coverage', {}).get('coverage') if isinstance(data.benchmark_v4, dict) else None)} "
             "and v4 does not recover extra cases there, so the next gain is extraction coverage, not more abstention tuning."
         ),
