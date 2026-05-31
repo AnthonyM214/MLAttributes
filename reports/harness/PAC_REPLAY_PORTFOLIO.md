@@ -122,6 +122,10 @@ The result is important:
 - phone and address remain the hard ceiling:
   - phone: `0 / 7,231` episodes with pages
   - address: `0 / 6,664` episodes with pages
+- the raw merge-input copies that do contain phone/address episodes are still
+  not promotable:
+  - they also have `0` fetched pages for phone/address episodes
+  - they also yield `0` extracted claims for phone/address episodes
 - the remaining raw collected corpora therefore do not materially improve
   phone/address claim coverage
 - they also do not add a better abstention-heavy or wrong-entity signal than
