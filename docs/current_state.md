@@ -46,6 +46,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `reports/harness/PAC_COLLECTED_GENERALIZATION_BENCHMARK.md`
 - `reports/harness/PAC_COLLECTED_OVERDATA_GENERALIZATION_BENCHMARK.md`
 - `docs/presentations/MLAttributes_Visual_Playbook.md`
+- `docs/presentations/CANVA_EXPORT_FLOW.md`
 - `reports/harness/benchmark_promoted_current.json`
 - `reports/harness/benchmark_contact_current.json`
 - `reports/harness/benchmark_cross_city_current.json`

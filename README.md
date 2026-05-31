@@ -160,6 +160,7 @@ See `reports/harness/PAC_REPLAY_PORTFOLIO.md` for the replay-corpus portfolio an
 
 For a slide-ready summary of the repo story, see [`docs/presentations/MLAttributes_ProjectTerra_PAC.md`](docs/presentations/MLAttributes_ProjectTerra_PAC.md).
 For reusable diagram-first visuals and a clearer explanation style, see [`docs/presentations/MLAttributes_Visual_Playbook.md`](docs/presentations/MLAttributes_Visual_Playbook.md).
+For a Canva handoff path with a PPTX copy, speaker-notes outline, and import checklist, see [`docs/presentations/CANVA_EXPORT_FLOW.md`](docs/presentations/CANVA_EXPORT_FLOW.md).
 
 ## Shipping notes
 
