@@ -4,4 +4,4 @@ __pycache__/
 .coverage
 reports/**/*.json
 reports/**/*.csv
-
+reports/release/canva_handoff/

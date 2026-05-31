@@ -11,138 +11,123 @@ theme: default
 
 CRWN102 - Innovation Lab
 Project Terra
+MLAttributes is Anthony Martinez's repo
+Srithija and Will sections are placeholders for their separate repos
+
 Presented by:
-Srithija Sure
 Anthony Martinez
-William Z
 
 <!--
-Open with the core claim: this is a replayable PAC system, not just a score table.
-The deck is organized by speaker and by workflow so the audience can follow the data → results → approach loop.
+Open with the ownership story: MLAttributes is Anthony's repo, and the other two speaker sections are reserved as placeholders for their own separate repos.
+The deck keeps the same three-part structure so the audience can follow the data → results → approach loop without conflating ownership.
 -->
 
 ---
 
 # Today's Agenda
 
-01. Srithija — Dataset
-02. Srithija — Results
-03. Srithija — Approach
-04. Will — Dataset
-05. Will — Results
-06. Will — Approach
-07. Anthony — Dataset
-08. Anthony — Results
-09. Anthony — Approach
-10. What we learned
+01. Srithija — Dataset (placeholder)
+02. Srithija — Results (placeholder)
+03. Srithija — Approach (placeholder)
+04. Will — Dataset (placeholder)
+05. Will — Results (placeholder)
+06. Will — Approach (placeholder)
+07. Anthony — MLAttributes dataset
+08. Anthony — MLAttributes results
+09. Anthony — MLAttributes approach
+10. What we learned about MLAttributes
 
 <!--
-Walk the room through the three speakers in order and explain that each section repeats dataset, results, and approach.
-That structure keeps the presentation coherent and makes it easy to compare the work across contributors.
+Walk the room through the three speaker blocks in order and explain that the first two are placeholders for separate repos while MLAttributes is the fully developed Anthony-owned repo.
+That structure keeps the presentation coherent and makes it easy to compare the work without mixing ownership.
 -->
 
 ---
 
 # Srithija | Dataset
 
-- Replay portfolio: hard cases, contact slice, cross-city slice, collected generalization
-- The corpus portfolio tells us where the merged replay is still weak and where it is strong
+- Placeholder section for Srithija's repo
+- Use this slot for her dataset framing, corpus, and evidence story
+- Keep the same dataset/results/approach structure as the other sections
 
 <!--
-Introduce the replay portfolio: hard cases, contact slice, cross-city slice, and collected generalization.
-Call out the important limitation up front: the merged replay is still weak on phone/address claims, so the corpus has to be judged by failure mode.
+This section is intentionally left as a placeholder so Srithija's repo can be inserted without changing the presentation structure.
+Keep the slide short and let notes carry the details.
 -->
 
 ---
 
 # Srithija | Results
 
-- What improved
-- What stayed hard
-- What we learned
-- Hard cases: `92.9%` claim coverage
-- Contact slice: `80.95%` phone / `100%` address
-- Merged replay still bottleneck
+- Placeholder section for Srithija's results
+- Insert her actual benchmark numbers and takeaways here
+- Keep the visual structure consistent with the rest of the deck
 
 <!--
-Use this slide to explain what the data taught us, not just what we measured.
-The contact slice is the strongest phone/address proof, but the merged replay still acts as the ceiling for the broader story.
+Leave room here for Srithija's repo-specific numbers.
+The shared structure is the important part; the content should be slotted in later.
 -->
 
 ---
 
 # Srithija | Approach
 
-- PAC spine
-- Claim extraction
-- EvidenceGraph
-- Replay row → claim → decision
-- Contradiction + abstention
-- Benchmarks
+- Placeholder section for Srithija's approach
+- Use this slot for her methods, heuristics, or model design
+- Keep the same three-part structure in the final deck
 
 <!--
-Explain the PAC spine in plain language: extract claims, group them into evidence, and abstain when evidence conflicts or is weak.
-This is the main architectural difference from the older current-vs-base style repos.
+Keep this slide reserved for her repo story.
+MLAttributes stays separate as Anthony's repo and should not absorb placeholder content here.
 -->
 
 ---
 
 # Will | Dataset
 
-01. Cross-city replay
-    Cross-city drift and wrong-entity cases
-
-02. Contact-heavy replay
-    Phone and address ambiguity
-
-03. Authority pages
-    Official and government evidence
-
-04. Collected generalization
-    Broader mixed replay corpus / each slice targets a failure mode
+- Placeholder section for Will's repo
+- Use this slot for his dataset and evidence framing
+- Keep the slide structure aligned with the rest of the deck
+- Leave room for his own corpus or benchmark story
 
 <!--
-The point of the slices is to separate failure modes so we can see what really changed.
-Cross-city, contact-heavy, authority pages, and collected generalization each answer a different question about the resolver.
+This section is intentionally reserved for Will's separate repo.
+The goal is to preserve structure, not merge ownership.
 -->
 
 ---
 
 # Will | Results
 
-- `v5` vs `v6`
-- `v5`: `94.0%` expected-behavior
-- `v6`: `72.5%` expected-behavior
-- `v6`: `0.0%` unsafe predictions
-- Use `v5` for coverage comparison
-- Use `v6` as the default focus
+- Placeholder section for Will's results
+- Insert his repo's benchmark numbers and takeaways here
+- Keep the same concise layout
+- Reserve the content for later replacement
 
 <!--
-Present the v5/v6 tradeoff honestly: v5 is the better coverage comparator, v6 is the safer default.
-The correct framing is not that v6 "wins" on raw expected-behavior score, but that it reduces unsafe confident errors.
+This slide is a placeholder for Will's own numbers.
+The structure stays fixed so the repos can be compared side by side later.
 -->
 
 ---
 
 # Will | Approach
 
-- CI-safe metrics
-- Removed file-assumption failures
-- Shared benchmark accounting
-- Dashboard regeneration
-- Artifact discipline
-- `v6`-first, `v5` as comparator
-- Presentation-safe defaults
+- Placeholder section for Will's approach
+- Use this slot for his method or system design
+- Keep the presentation structure the same
+- Let the notes carry the specifics
 
 <!--
-Explain the engineering work that made the repo ship-worthy: the CI assumptions were removed and the shared benchmark accounting was centralized.
-That keeps the benchmark outputs and the dashboard in sync with the code.
+This slide is reserved for Will's repo and should not be rewritten into MLAttributes content.
+The shared structure is the point.
 -->
 
 ---
 
 # Anthony | Dataset
 
+- MLAttributes is Anthony Martinez's repo
 - Dashboard and reports
 - Ship brief and repo comparison
 - Version focus note
@@ -151,7 +136,7 @@ That keeps the benchmark outputs and the dashboard in sync with the code.
 - Everything needed to explain the repo
 
 <!--
-These artifacts are the reason the repo is explainable to a first-time reviewer.
+These artifacts are the reason MLAttributes is explainable to a first-time reviewer.
 Point people to the dashboard, ship brief, and version-focus note instead of expecting them to reverse-engineer the repo.
 -->
 
@@ -159,13 +144,13 @@ Point people to the dashboard, ship brief, and version-focus note instead of exp
 
 # Anthony | Results
 
-- The strongest proof surface is the contact slice; the merged replay still sets the ceiling
+- MLAttributes has the strongest proof surface in the contact slice; the merged replay still sets the ceiling
 - `271` tests
 - `v6`: `0.0%` unsafe predictions
 - Merged replay remains low coverage
 
 <!--
-The key message is that the repo’s proof surface is reproducible, but it is still bounded by the current replay corpus.
+The key message is that Anthony's repo is reproducible, but it is still bounded by the current replay corpus.
 The contact slice is the best proof of practical improvement; the merged replay is the honest bottleneck.
 -->
 
@@ -180,10 +165,10 @@ The contact slice is the best proof of practical improvement; the merged replay 
 - Historical baseline
 - Coverage comparator
 - Safety-first resolver
-- Ship the reproducible path
+- Ship the reproducible path for MLAttributes
 
 <!--
-Use the timeline to show the evolution from baseline to claim graph to benchmarked v5/v6 focus.
+Use the timeline to show the evolution from baseline to claim graph to benchmarked v5/v6 focus inside Anthony's repo.
 The current state is a safer, reproducible path that keeps v5 as comparator and v6 as the default focus.
 -->
 
@@ -191,7 +176,7 @@ The current state is a safer, reproducible path that keeps v5 as comparator and 
 
 # What We Learned
 
-- The replay portfolio, not a single score, tells the honest story
+- The replay portfolio, not a single score, tells the honest story for MLAttributes
 - Claim coverage is still the bottleneck
 - Phone/address matters
 - `v6` is safer; `v5` is broader
@@ -214,7 +199,7 @@ The raw collected tree is the ceiling for the current checkout; if we want broad
 - Abstention-heavy samples
 - Keep `v6` default
 - Keep `v5` comparator
-- Ship the dashboard
+- Keep the MLAttributes dashboard current
 
 <!--
 The next work should target the weak spots directly: cross-city drift, stale pages, wrong-entity cases, and more phone/address data.
@@ -227,7 +212,7 @@ Keep the dashboard and version focus aligned while those new data come in.
 
 Project Terra
 Presented by:
-Srithija Sure • Anthony Martinez • William Z
+Anthony Martinez
 
 for your time and attention
 MLAttributes dashboard
@@ -237,5 +222,5 @@ MLAttributes
 
 <!--
 Close by pointing people to the dashboard and the repo so they can inspect the evidence trail themselves.
-Keep the tone practical: the project is reproducible, honest about its limits, and ready for the next corpus expansion.
+Keep the tone practical: MLAttributes is Anthony's repo, the other two speaker blocks are placeholders, and the project is reproducible, honest about its limits, and ready for the next corpus expansion.
 -->

@@ -1,6 +1,7 @@
 # Canva export flow for the PAC deck
 
 Use this when you want to edit the presentation in Canva but keep the MLAttributes deck structure and talk track intact.
+MLAttributes is Anthony Martinez's repo; the Srithija and Will sections are placeholders for their separate repos.
 
 ## Primary source
 
@@ -56,7 +57,7 @@ This is the slide-outline source that mirrors the PPTX structure and keeps the s
 
 - Srithija first: dataset, results, approach
 - Will second: dataset, results, approach
-- Anthony last: dataset, results, approach
+- Anthony last: dataset, results, approach for MLAttributes
 
 That structure is already reflected in:
 

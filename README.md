@@ -158,7 +158,7 @@ Corpus expansion should follow [`docs/corpus_expansion_strategy.md`](docs/corpus
 See `reports/harness/PAC_ENGINEERING_REPORT.md` for the current benchmark summary.
 See `reports/harness/PAC_REPLAY_PORTFOLIO.md` for the replay-corpus portfolio and which corpora address which weaknesses.
 
-For a slide-ready summary of the repo story, see [`docs/presentations/MLAttributes_ProjectTerra_PAC.md`](docs/presentations/MLAttributes_ProjectTerra_PAC.md).
+For a slide-ready summary of the repo story, see [`docs/presentations/MLAttributes_ProjectTerra_PAC.md`](docs/presentations/MLAttributes_ProjectTerra_PAC.md). The deck keeps Srithija and Will as placeholder sections and presents MLAttributes as Anthony Martinez's repo.
 For reusable diagram-first visuals and a clearer explanation style, see [`docs/presentations/MLAttributes_Visual_Playbook.md`](docs/presentations/MLAttributes_Visual_Playbook.md).
 For a Canva handoff path with a PPTX copy, speaker-notes outline, and import checklist, see [`docs/presentations/CANVA_EXPORT_FLOW.md`](docs/presentations/CANVA_EXPORT_FLOW.md).
 
