@@ -36,6 +36,7 @@ This repo is intentionally layered. The goal is to keep the evidence-backed PAC 
 - `reports/harness/PAC_ENGINEERING_REPORT.md`
 - `reports/harness/PAC_SHIP_BENCHMARKS.md`
 - `reports/harness/PAC_REPLAY_CORPUS_DIAGNOSTIC.md`
+- `reports/harness/PAC_REPLAY_PORTFOLIO.md`
 - `reports/harness/PAC_PROMOTED_REPLAY_BENCHMARK.md`
 - `reports/harness/PAC_CROSS_CITY_REPLAY_BENCHMARK.md`
 - `reports/harness/PAC_COLLECTED_GENERALIZATION_BENCHMARK.md`

@@ -117,6 +117,9 @@ The Santa Cruz fixture is a replayable local challenge proof, not a production d
 Corpus expansion should follow [`docs/corpus_expansion_strategy.md`](docs/corpus_expansion_strategy.md): prior ProjectTerra corpora and Overture rows are seed queues, but benchmark truth requires replayable authoritative evidence.
 
 See `reports/harness/PAC_ENGINEERING_REPORT.md` for the current benchmark summary.
+See `reports/harness/PAC_REPLAY_PORTFOLIO.md` for the replay-corpus portfolio and which corpora address which weaknesses.
+
+For a slide-ready summary of the repo story, see [`docs/presentations/MLAttributes_ProjectTerra_PAC.md`](docs/presentations/MLAttributes_ProjectTerra_PAC.md).
 
 ## Shipping notes
 
