@@ -108,22 +108,14 @@ from places_attr_conflation.resolvepoi_selective import (
     evaluate_resolvepoi_selective,
     train_resolvepoi_selective_router,
 )
-from places_attr_conflation.resolvepoi_evidence_manifest import (
-    DEFAULT_RESULTS_DIR as DEFAULT_RESOLVEPOI_RESULTS_DIR,
-    DEFAULT_SUBSET_PREDICTION as DEFAULT_RESOLVEPOI_SUBSET_PREDICTION,
-    build_resolvepoi_evidence_manifest_report,
-)
-from places_attr_conflation.sure_hybrid import (
-    DEFAULT_SURE_ROOT,
-    evaluate_sure_hybrid,
-    write_sure_hybrid_markdown,
-)
-
 
 DEFAULT_SMOKE_URLS = [
     "https://example.com/",
     "https://www.usa.gov/",
 ]
+DEFAULT_RESOLVEPOI_RESULTS_DIR = Path("/home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results")
+DEFAULT_RESOLVEPOI_SUBSET_PREDICTION = DEFAULT_RESOLVEPOI_RESULTS_DIR / "predictions_baseline_most_recent_200_real_website.json"
+DEFAULT_SURE_ROOT = Path("/home/anthony/Overture/Sure-AttributeConflation")
 
 
 def _timestamp() -> str:
@@ -771,6 +763,8 @@ def main() -> int:
         if not args.include_decisions:
             report.pop("decisions", None)
     elif args.command == "resolvepoi-evidence-manifest":
+        from places_attr_conflation.resolvepoi_evidence_manifest import build_resolvepoi_evidence_manifest_report
+
         report = build_resolvepoi_evidence_manifest_report(
             truth_path=args.truth,
             train_parquet=args.train_parquet,
@@ -935,6 +929,8 @@ def main() -> int:
             "hard_replay": str(args.hard_replay),
         }
     elif args.command == "sure-hybrid":
+        from places_attr_conflation.sure_hybrid import evaluate_sure_hybrid, write_sure_hybrid_markdown
+
         report = evaluate_sure_hybrid(
             sure_root=args.sure_root,
             test_size=args.test_size,

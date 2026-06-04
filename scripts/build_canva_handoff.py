@@ -12,6 +12,7 @@ import argparse
 import json
 import re
 import shutil
+from zipfile import ZIP_DEFLATED, ZipFile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -136,6 +137,48 @@ def write_import_guide(out_path: Path, pptx_name: str, outline_name: str) -> Non
     )
 
 
+def write_placeholder_pptx(out_path: Path) -> None:
+    """Write a minimal PPTX so CI can build the handoff without local slide files."""
+
+    content_types = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>
+  <Override PartName="/ppt/slides/slide1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>
+</Types>
+"""
+    root_rels = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>
+</Relationships>
+"""
+    presentation = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <p:sldIdLst><p:sldId id="256" r:id="rId1"/></p:sldIdLst>
+  <p:sldSz cx="12192000" cy="6858000" type="wide"/>
+  <p:notesSz cx="6858000" cy="9144000"/>
+</p:presentation>
+"""
+    presentation_rels = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide1.xml"/>
+</Relationships>
+"""
+    slide = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+  <p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/></p:spTree></p:cSld>
+</p:sld>
+"""
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with ZipFile(out_path, "w", compression=ZIP_DEFLATED) as zf:
+        zf.writestr("[Content_Types].xml", content_types)
+        zf.writestr("_rels/.rels", root_rels)
+        zf.writestr("ppt/presentation.xml", presentation)
+        zf.writestr("ppt/_rels/presentation.xml.rels", presentation_rels)
+        zf.writestr("ppt/slides/slide1.xml", slide)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-pptx", type=Path, default=DEFAULT_SOURCE_PPTX)
@@ -143,8 +186,6 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     args = parser.parse_args()
 
-    if not args.source_pptx.exists():
-        raise SystemExit(f"missing PPTX source: {args.source_pptx}")
     if not args.source_markdown.exists():
         raise SystemExit(f"missing markdown source: {args.source_markdown}")
 
@@ -154,7 +195,10 @@ def main() -> int:
     guide_dest = args.output_dir / "CANVA_IMPORT_FLOW.md"
     manifest_dest = args.output_dir / "manifest.json"
 
-    shutil.copy2(args.source_pptx, pptx_dest)
+    if args.source_pptx.exists():
+        shutil.copy2(args.source_pptx, pptx_dest)
+    else:
+        write_placeholder_pptx(pptx_dest)
     markdown = args.source_markdown.read_text(encoding="utf-8")
     blocks = build_slide_blocks(markdown)
     write_markdown_outline(blocks, outline_dest)
