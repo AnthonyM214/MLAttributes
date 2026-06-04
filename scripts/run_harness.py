@@ -108,6 +108,16 @@ from places_attr_conflation.resolvepoi_selective import (
     evaluate_resolvepoi_selective,
     train_resolvepoi_selective_router,
 )
+from places_attr_conflation.resolvepoi_evidence_manifest import (
+    DEFAULT_RESULTS_DIR as DEFAULT_RESOLVEPOI_RESULTS_DIR,
+    DEFAULT_SUBSET_PREDICTION as DEFAULT_RESOLVEPOI_SUBSET_PREDICTION,
+    build_resolvepoi_evidence_manifest_report,
+)
+from places_attr_conflation.sure_hybrid import (
+    DEFAULT_SURE_ROOT,
+    evaluate_sure_hybrid,
+    write_sure_hybrid_markdown,
+)
 
 
 DEFAULT_SMOKE_URLS = [
@@ -155,8 +165,12 @@ def _default_output_path(command: str) -> Path:
         return ROOT / "reports" / "resolvepoi_v2" / f"resolvepoi_v2_{_timestamp()}.json"
     if command == "resolvepoi-selective":
         return ROOT / "reports" / "resolvepoi_selective" / f"resolvepoi_selective_{_timestamp()}.json"
+    if command == "resolvepoi-evidence-manifest":
+        return ROOT / "reports" / "resolvepoi_selective" / f"resolvepoi_evidence_manifest_{_timestamp()}.json"
     if command == "resolvepoi-split-verify":
         return ROOT / "reports" / "resolvepoi_selective" / f"resolvepoi_split_verify_{_timestamp()}.json"
+    if command == "sure-hybrid":
+        return ROOT / "reports" / "sure_hybrid" / f"sure_hybrid_{_timestamp()}.json"
     if command == "resolver-on-replay":
         return ROOT / "reports" / "resolver_replay" / f"resolver_on_replay_{_timestamp()}.json"
     if command == "replay-seed":
@@ -383,6 +397,20 @@ def main() -> int:
     resolvepoi_selective.add_argument("--include-decisions", action="store_true", help="Include per-row decisions in the JSON report.")
     resolvepoi_selective.add_argument("--output", help="Optional JSON report output path.")
 
+    resolvepoi_evidence = subparsers.add_parser(
+        "resolvepoi-evidence-manifest",
+        help="Evaluate the evidence-manifest resolver on the same 200-row ResolvePOI set as reproduced baselines.",
+    )
+    resolvepoi_evidence.add_argument("--truth", default=str(DEFAULT_RESOLVEPOI_TRUTH_PATH))
+    resolvepoi_evidence.add_argument("--train-parquet", default=str(DEFAULT_RESOLVEPOI_TRAIN_PARQUET))
+    resolvepoi_evidence.add_argument("--train-labels", default=str(DEFAULT_RESOLVEPOI_TRAIN_LABELS))
+    resolvepoi_evidence.add_argument("--results-dir", default=str(DEFAULT_RESOLVEPOI_RESULTS_DIR))
+    resolvepoi_evidence.add_argument("--subset-prediction-path", default=str(DEFAULT_RESOLVEPOI_SUBSET_PREDICTION))
+    resolvepoi_evidence.add_argument("--limit", type=int, default=200)
+    resolvepoi_evidence.add_argument("--target-coverage", type=float, default=0.99)
+    resolvepoi_evidence.add_argument("--include-decisions", action="store_true")
+    resolvepoi_evidence.add_argument("--output", help="Optional JSON report output path.")
+
     resolvepoi_split = subparsers.add_parser(
         "resolvepoi-split-verify",
         help="Verify ResolvePOI train/holdout separation and emit a split manifest.",
@@ -495,6 +523,19 @@ def main() -> int:
     benchmark_pooled.add_argument("--target-coverage", type=float, default=0.99)
     benchmark_pooled.add_argument("--include-decisions", action="store_true")
     benchmark_pooled.add_argument("--output")
+
+    sure_hybrid = subparsers.add_parser(
+        "sure-hybrid",
+        help="Evaluate Sure's name model wrapped by the MLAttributes selective resolver policy.",
+    )
+    sure_hybrid.add_argument("--sure-root", default=str(DEFAULT_SURE_ROOT))
+    sure_hybrid.add_argument("--target-precision", type=float, default=0.99)
+    sure_hybrid.add_argument("--test-size", type=float, default=0.20)
+    sure_hybrid.add_argument("--calibration-size", type=float, default=0.25)
+    sure_hybrid.add_argument("--random-state", type=int, default=42)
+    sure_hybrid.add_argument("--include-decisions", action="store_true")
+    sure_hybrid.add_argument("--markdown-output", default=str(ROOT / "reports" / "sure_hybrid" / "SURE_HYBRID_EVALUATION.md"))
+    sure_hybrid.add_argument("--output")
 
     smoke = subparsers.add_parser("smoke", help="Run a small live retrieval smoke check with replay fallback.")
     smoke.add_argument("--url", action="append", dest="urls", help="Allowlisted URL to fetch. May be repeated.")
@@ -729,6 +770,17 @@ def main() -> int:
         }
         if not args.include_decisions:
             report.pop("decisions", None)
+    elif args.command == "resolvepoi-evidence-manifest":
+        report = build_resolvepoi_evidence_manifest_report(
+            truth_path=args.truth,
+            train_parquet=args.train_parquet,
+            train_labels=args.train_labels,
+            results_dir=args.results_dir,
+            subset_prediction_path=args.subset_prediction_path,
+            limit=args.limit,
+            target_coverage=args.target_coverage,
+            include_decisions=args.include_decisions,
+        )
     elif args.command == "resolvepoi-split-verify":
         report = build_resolvepoi_split_manifest(
             truth_path=args.truth,
@@ -882,6 +934,17 @@ def main() -> int:
             "james_csv": str(args.james_csv),
             "hard_replay": str(args.hard_replay),
         }
+    elif args.command == "sure-hybrid":
+        report = evaluate_sure_hybrid(
+            sure_root=args.sure_root,
+            test_size=args.test_size,
+            calibration_size=args.calibration_size,
+            random_state=args.random_state,
+            target_precision=args.target_precision,
+            include_decisions=args.include_decisions,
+        )
+        markdown_path = write_sure_hybrid_markdown(report, args.markdown_output)
+        report["markdown_report"] = str(markdown_path)
     elif args.command == "smoke":
         urls = args.urls or DEFAULT_SMOKE_URLS
         report = _run_smoke(urls, args.timeout, args.replay_input)

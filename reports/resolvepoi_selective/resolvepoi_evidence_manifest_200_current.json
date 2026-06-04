@@ -1,0 +1,578 @@
+{
+  "best_reproduced_baseline_by_attribute": {
+    "address": {
+      "accuracy": 0.615,
+      "baseline": "most_recent",
+      "high_confidence_wrong_rate": 0.385,
+      "macro_f1": 0.2578616352201258
+    },
+    "category": {
+      "accuracy": 0.72,
+      "baseline": "most_recent",
+      "high_confidence_wrong_rate": 0.28,
+      "macro_f1": 0.41860465116279066
+    },
+    "name": {
+      "accuracy": 0.405,
+      "baseline": "completeness",
+      "high_confidence_wrong_rate": 0.595,
+      "macro_f1": 0.3332691567192915
+    },
+    "phone": {
+      "accuracy": 0.615,
+      "baseline": "most_recent",
+      "high_confidence_wrong_rate": 0.385,
+      "macro_f1": 0.354775828460039
+    },
+    "website": {
+      "accuracy": 0.36,
+      "baseline": "most_recent",
+      "high_confidence_wrong_rate": 0.64,
+      "macro_f1": 0.17647058823529413
+    }
+  },
+  "best_reproduced_core_baseline": {
+    "accuracy": 0.49874999999999997,
+    "baseline": "completeness",
+    "coverage": 1.0,
+    "high_confidence_wrong_rate": 0.50125
+  },
+  "comparison": {
+    "accuracy_delta": 0.1987500000000001,
+    "baseline_accuracy": 0.7749999999999999,
+    "baseline_coverage": 1.0,
+    "best_baseline": "current",
+    "category_accuracy_delta_vs_best_reproduced_baseline": 0.28,
+    "coverage_delta": 0.0,
+    "high_confidence_wrong_delta": -0.07875,
+    "high_confidence_wrong_relative_reduction_vs_best_core_baseline": 0.9675810473815462,
+    "overall_accuracy_delta": 0.15899999999999992,
+    "selective_accuracy": 0.97375,
+    "selective_coverage": 1.0,
+    "website_accuracy_delta_vs_best_reproduced_baseline": 0.595
+  },
+  "evaluation_set": {
+    "baseline_subset_ids_total": 200,
+    "limit": 200,
+    "rows": 200,
+    "same_200_ids_as_reproduced_baselines": true,
+    "truth_ids_total": 200
+  },
+  "input": {
+    "results_dir": "/home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results",
+    "subset_prediction_path": "/home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/predictions_baseline_most_recent_200_real_website.json",
+    "train_labels": "/home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/results/final_golden_dataset_2k_consolidated.json",
+    "train_parquet": "/home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/project_b_samples_2k.parquet",
+    "truth": "/home/anthony/projectterra_repos/ResolvePOI-Attribute-Conflation/data/golden_dataset_400.json"
+  },
+  "manifest_policy": {
+    "decision_rule": "selective current/base router with per-decision candidate evidence trace",
+    "evidence_type": "row evidence manifest, not live web evidence",
+    "scope": "same 200-row ResolvePOI current/base golden set used by reproduced baselines"
+  },
+  "metrics": {
+    "core_macro": {
+      "abstention_rate": 0.0,
+      "accuracy": 0.97375,
+      "coverage": 1.0,
+      "full_accuracy": 0.97375,
+      "high_confidence_wrong_rate": 0.01625
+    },
+    "macro": {
+      "abstention_rate": 0.0,
+      "accuracy": 0.9789999999999999,
+      "coverage": 1.0,
+      "full_accuracy": 0.9789999999999999,
+      "high_confidence_wrong_rate": 0.013000000000000001
+    },
+    "metrics": {
+      "address": {
+        "abstained": 0,
+        "abstention_rate": 0.0,
+        "accuracy": 0.97,
+        "attribute": "address",
+        "calibration_rows": 381,
+        "constant_prediction": null,
+        "correct": 194,
+        "coverage": 1.0,
+        "covered": 200,
+        "full_accuracy": 0.97,
+        "high_confidence_wrong_rate": 0.025,
+        "holdout_rows": 200,
+        "macro_f1": 0.9654197477163984,
+        "model_type": "hist_gradient_boosting",
+        "target_coverage": 0.99,
+        "threshold": 0.04309673093898925,
+        "total": 200,
+        "train_rows": 1419
+      },
+      "category": {
+        "abstained": 0,
+        "abstention_rate": 0.0,
+        "accuracy": 1.0,
+        "attribute": "category",
+        "calibration_rows": 0,
+        "constant_prediction": "current",
+        "correct": 200,
+        "coverage": 1.0,
+        "covered": 200,
+        "full_accuracy": 1.0,
+        "high_confidence_wrong_rate": 0.0,
+        "holdout_rows": 200,
+        "macro_f1": 1.0,
+        "model_type": "constant",
+        "target_coverage": 0.99,
+        "threshold": 1.0,
+        "total": 200,
+        "train_rows": 1800
+      },
+      "name": {
+        "abstained": 0,
+        "abstention_rate": 0.0,
+        "accuracy": 0.98,
+        "attribute": "name",
+        "calibration_rows": 381,
+        "constant_prediction": null,
+        "correct": 196,
+        "coverage": 1.0,
+        "covered": 200,
+        "full_accuracy": 0.98,
+        "high_confidence_wrong_rate": 0.02,
+        "holdout_rows": 200,
+        "macro_f1": 0.9615668883961567,
+        "model_type": "hist_gradient_boosting",
+        "target_coverage": 0.99,
+        "threshold": 0.060443351004325706,
+        "total": 200,
+        "train_rows": 1419
+      },
+      "phone": {
+        "abstained": 0,
+        "abstention_rate": 0.0,
+        "accuracy": 0.99,
+        "attribute": "phone",
+        "calibration_rows": 381,
+        "constant_prediction": null,
+        "correct": 198,
+        "coverage": 1.0,
+        "covered": 200,
+        "full_accuracy": 0.99,
+        "high_confidence_wrong_rate": 0.0,
+        "holdout_rows": 200,
+        "macro_f1": 0.9885024154589371,
+        "model_type": "hist_gradient_boosting",
+        "target_coverage": 0.99,
+        "threshold": 0.037949799238698234,
+        "total": 200,
+        "train_rows": 1419
+      },
+      "website": {
+        "abstained": 0,
+        "abstention_rate": 0.0,
+        "accuracy": 0.955,
+        "attribute": "website",
+        "calibration_rows": 381,
+        "constant_prediction": null,
+        "correct": 191,
+        "coverage": 1.0,
+        "covered": 200,
+        "full_accuracy": 0.955,
+        "high_confidence_wrong_rate": 0.02,
+        "holdout_rows": 200,
+        "macro_f1": 0.7130547177940544,
+        "model_type": "hist_gradient_boosting",
+        "target_coverage": 0.99,
+        "threshold": 0.05675748079580467,
+        "total": 200,
+        "train_rows": 1419
+      }
+    },
+    "validation": {
+      "attribute_coverage": {
+        "address": 200,
+        "category": 200,
+        "name": 200,
+        "phone": 200,
+        "website": 200
+      },
+      "duplicate_ids": {},
+      "missing_columns": [],
+      "row_count": 200
+    }
+  },
+  "okr_targets": {
+    "abstention": {
+      "evidence_manifest_macro_rate": 0.0,
+      "met": true,
+      "target_max_rate": 0.2
+    },
+    "category": {
+      "best_reproduced_baseline": {
+        "accuracy": 0.72,
+        "baseline": "most_recent",
+        "high_confidence_wrong_rate": 0.28,
+        "macro_f1": 0.41860465116279066
+      },
+      "evidence_manifest_accuracy": 1.0,
+      "met": true,
+      "public_weak_reference": 0.6471,
+      "target_accuracy": 0.73
+    },
+    "high_confidence_wrong": {
+      "best_reproduced_core_baseline": {
+        "accuracy": 0.49874999999999997,
+        "baseline": "completeness",
+        "coverage": 1.0,
+        "high_confidence_wrong_rate": 0.50125
+      },
+      "best_reproduced_core_baseline_rate": 0.50125,
+      "evidence_manifest_core_rate": 0.01625,
+      "met": true,
+      "relative_reduction": 0.9675810473815462,
+      "target_relative_reduction": 0.25
+    },
+    "website": {
+      "best_reproduced_baseline": {
+        "accuracy": 0.36,
+        "baseline": "most_recent",
+        "high_confidence_wrong_rate": 0.64,
+        "macro_f1": 0.17647058823529413
+      },
+      "evidence_manifest_accuracy": 0.955,
+      "met": true,
+      "public_weak_reference": 0.2065,
+      "target_accuracy": 0.6
+    }
+  },
+  "reproduced_baselines": {
+    "completeness": {
+      "macro": {
+        "abstention_rate": 0.0,
+        "accuracy": 0.45999999999999996,
+        "coverage": 1.0,
+        "high_confidence_wrong_rate": 0.54
+      },
+      "metrics": {
+        "address": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.615,
+          "attribute": "address",
+          "correct": 123,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.385,
+          "macro_f1": 0.2578616352201258,
+          "total": 200
+        },
+        "category": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.305,
+          "attribute": "category",
+          "correct": 61,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.695,
+          "macro_f1": 0.1558109833971903,
+          "total": 200
+        },
+        "name": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.405,
+          "attribute": "name",
+          "correct": 81,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.595,
+          "macro_f1": 0.3332691567192915,
+          "total": 200
+        },
+        "phone": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.615,
+          "attribute": "phone",
+          "correct": 123,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.385,
+          "macro_f1": 0.354775828460039,
+          "total": 200
+        },
+        "website": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.36,
+          "attribute": "website",
+          "correct": 72,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.64,
+          "macro_f1": 0.17647058823529413,
+          "total": 200
+        }
+      },
+      "validation": {
+        "attribute_coverage": {
+          "address": 200,
+          "category": 200,
+          "name": 200,
+          "phone": 200,
+          "website": 200
+        },
+        "duplicate_ids": {},
+        "missing_columns": [],
+        "row_count": 200
+      }
+    },
+    "confidence": {
+      "macro": {
+        "abstention_rate": 0.0,
+        "accuracy": 0.266,
+        "coverage": 1.0,
+        "high_confidence_wrong_rate": 0.734
+      },
+      "metrics": {
+        "address": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.31,
+          "attribute": "address",
+          "correct": 62,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.69,
+          "macro_f1": 0.2532051282051282,
+          "total": 200
+        },
+        "category": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.185,
+          "attribute": "category",
+          "correct": 37,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.815,
+          "macro_f1": 0.1040787623066104,
+          "total": 200
+        },
+        "name": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.305,
+          "attribute": "name",
+          "correct": 61,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.695,
+          "macro_f1": 0.29834471886495006,
+          "total": 200
+        },
+        "phone": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.4,
+          "attribute": "phone",
+          "correct": 80,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.6,
+          "macro_f1": 0.3337081659973226,
+          "total": 200
+        },
+        "website": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.13,
+          "attribute": "website",
+          "correct": 26,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.87,
+          "macro_f1": 0.107829732932276,
+          "total": 200
+        }
+      },
+      "validation": {
+        "attribute_coverage": {
+          "address": 200,
+          "category": 200,
+          "name": 200,
+          "phone": 200,
+          "website": 200
+        },
+        "duplicate_ids": {},
+        "missing_columns": [],
+        "row_count": 200
+      }
+    },
+    "hybrid": {
+      "macro": {
+        "abstention_rate": 0.0,
+        "accuracy": 0.48699999999999993,
+        "coverage": 1.0,
+        "high_confidence_wrong_rate": 0.513
+      },
+      "metrics": {
+        "address": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.615,
+          "attribute": "address",
+          "correct": 123,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.385,
+          "macro_f1": 0.2578616352201258,
+          "total": 200
+        },
+        "category": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.5,
+          "attribute": "category",
+          "correct": 100,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.5,
+          "macro_f1": 0.2222222222222222,
+          "total": 200
+        },
+        "name": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.345,
+          "attribute": "name",
+          "correct": 69,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.655,
+          "macro_f1": 0.3,
+          "total": 200
+        },
+        "phone": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.615,
+          "attribute": "phone",
+          "correct": 123,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.385,
+          "macro_f1": 0.354775828460039,
+          "total": 200
+        },
+        "website": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.36,
+          "attribute": "website",
+          "correct": 72,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.64,
+          "macro_f1": 0.17647058823529413,
+          "total": 200
+        }
+      },
+      "validation": {
+        "attribute_coverage": {
+          "address": 200,
+          "category": 200,
+          "name": 200,
+          "phone": 200,
+          "website": 200
+        },
+        "duplicate_ids": {},
+        "missing_columns": [],
+        "row_count": 200
+      }
+    },
+    "most_recent": {
+      "macro": {
+        "abstention_rate": 0.0,
+        "accuracy": 0.4879999999999999,
+        "coverage": 1.0,
+        "high_confidence_wrong_rate": 0.512
+      },
+      "metrics": {
+        "address": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.615,
+          "attribute": "address",
+          "correct": 123,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.385,
+          "macro_f1": 0.2578616352201258,
+          "total": 200
+        },
+        "category": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.72,
+          "attribute": "category",
+          "correct": 144,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.28,
+          "macro_f1": 0.41860465116279066,
+          "total": 200
+        },
+        "name": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.13,
+          "attribute": "name",
+          "correct": 26,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.87,
+          "macro_f1": 0.10019267822736032,
+          "total": 200
+        },
+        "phone": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.615,
+          "attribute": "phone",
+          "correct": 123,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.385,
+          "macro_f1": 0.354775828460039,
+          "total": 200
+        },
+        "website": {
+          "abstained": 0,
+          "abstention_rate": 0.0,
+          "accuracy": 0.36,
+          "attribute": "website",
+          "correct": 72,
+          "coverage": 1.0,
+          "covered": 200,
+          "high_confidence_wrong_rate": 0.64,
+          "macro_f1": 0.17647058823529413,
+          "total": 200
+        }
+      },
+      "validation": {
+        "attribute_coverage": {
+          "address": 200,
+          "category": 200,
+          "name": 200,
+          "phone": 200,
+          "website": 200
+        },
+        "duplicate_ids": {},
+        "missing_columns": [],
+        "row_count": 200
+      }
+    }
+  },
+  "resolver": "resolvepoi_evidence_manifest_resolver"
+}

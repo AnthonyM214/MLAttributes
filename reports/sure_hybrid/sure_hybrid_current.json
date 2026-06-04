@@ -1,0 +1,86 @@
+{
+  "comparison": {
+    "attempted_accuracy_delta_vs_same_fit_no_abstention": 0.0120801033591732,
+    "attempted_accuracy_delta_vs_sure_random_forest": 0.009580103359173142,
+    "coverage_delta_vs_sure_random_forest": -0.03249999999999997,
+    "full_accuracy_delta_vs_sure_random_forest": -0.022500000000000075,
+    "wrong_accepted_delta_vs_same_fit_no_abstention": -0.0125,
+    "wrong_accepted_delta_vs_sure_random_forest": -0.009999999999999998
+  },
+  "dataset": {
+    "label_distribution": {
+      "base": 506,
+      "current": 519,
+      "same": 975
+    },
+    "rows": 2000,
+    "task": "Project A name same/current/base classification"
+  },
+  "hybrid_policy": {
+    "calibration_coverage": 0.9575,
+    "calibration_precision": 0.9921671018276762,
+    "resolver_behavior": "accept Sure model prediction only when calibrated confidence clears threshold; otherwise abstain",
+    "target_precision": 0.99,
+    "threshold": 0.546
+  },
+  "input": {
+    "labels": "/home/anthony/Overture/Sure-AttributeConflation/data/golden_dataset_sample.json",
+    "parquet": "/home/anthony/Overture/Sure-AttributeConflation/data/project_a_samples.parquet",
+    "sure_root": "/home/anthony/Overture/Sure-AttributeConflation"
+  },
+  "manifest_policy": {
+    "mlattributes_component": "selective resolver threshold, abstention, and per-decision audit manifest",
+    "scope": "Sure Project A name sample; row-level model plus MLAttributes-style resolver, not live-web evidence",
+    "sure_component": "RandomForest over TF-IDF name text plus engineered exact/similarity/length features"
+  },
+  "markdown_report": "/home/anthony/Overture/MLAttributes/reports/sure_hybrid/SURE_HYBRID_EVALUATION.md",
+  "mlattributes_selective_hybrid": {
+    "abstention_rate": 0.03249999999999997,
+    "attempted_accuracy": 0.9870801033591732,
+    "coverage": 0.9675,
+    "covered": 387,
+    "full_accuracy": 0.955,
+    "total": 400,
+    "wrong_accepted_rate": 0.0125,
+    "wrong_when_attempted_rate": 0.012919896640826873
+  },
+  "split": {
+    "calibration_rows": 400,
+    "calibration_size_of_train": 0.25,
+    "fit_rows": 1200,
+    "random_state": 42,
+    "test_rows": 400,
+    "test_size": 0.2,
+    "train_rows": 1600
+  },
+  "sure_model_same_fit_as_hybrid_no_abstention": {
+    "abstention_rate": 0.0,
+    "attempted_accuracy": 0.975,
+    "coverage": 1.0,
+    "covered": 400,
+    "full_accuracy": 0.975,
+    "total": 400,
+    "wrong_accepted_rate": 0.025,
+    "wrong_when_attempted_rate": 0.025
+  },
+  "sure_random_forest": {
+    "abstention_rate": 0.0,
+    "attempted_accuracy": 0.9775,
+    "coverage": 1.0,
+    "covered": 400,
+    "full_accuracy": 0.9775,
+    "total": 400,
+    "wrong_accepted_rate": 0.0225,
+    "wrong_when_attempted_rate": 0.0225
+  },
+  "sure_rule_baseline": {
+    "abstention_rate": 0.0,
+    "attempted_accuracy": 0.9675,
+    "coverage": 1.0,
+    "covered": 400,
+    "full_accuracy": 0.9675,
+    "total": 400,
+    "wrong_accepted_rate": 0.0325,
+    "wrong_when_attempted_rate": 0.0325
+  }
+}
